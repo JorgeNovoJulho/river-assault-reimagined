@@ -24,16 +24,16 @@ test('relógio limita atualizações em travamentos',()=>{
  assert.equal(count,4);
  assert.equal(clock.droppedFrames,1);
 });
-test('cada aeronave tem cinco armas válidas e propriedades distintas',()=>{
+test('cinco aeronaves têm cinco armas válidas e atributos próprios',()=>{
  const {PLANES,WEAPONS}=load('src/game/aircraft.js','RiverAircraft');
- assert.equal(Object.keys(PLANES).length,3);
- assert.equal(new Set(Object.values(PLANES).map(p=>p.scroll)).size,3);
+ assert.equal(Object.keys(PLANES).length,5);
+ assert.equal(new Set(Object.values(PLANES).map(p=>p.scroll)).size,5);
  for(const plane of Object.values(PLANES)){
   assert.equal(plane.weapons.length,5);
   plane.weapons.forEach(w=>assert.ok(WEAPONS[w]));
  }
 });
-test('todas as quinze armas produzem projéteis',()=>{
+test('todos os padrões de armas produzem projéteis',()=>{
  const {PLANES,shoot}=load('src/game/aircraft.js','RiverAircraft');
  for(const plane of Object.values(PLANES))for(const weapon of plane.weapons){
   const bullets=[];
