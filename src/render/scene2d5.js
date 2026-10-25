@@ -98,7 +98,23 @@ function enemy(c,e,time){
  c.restore();
  if(e.maxHp>1){c.fillStyle='#122535';c.fillRect(e.x-e.width/2,e.y-e.height/2-9,e.width,5);c.fillStyle='#7cf0ca';c.fillRect(e.x-e.width/2,e.y-e.height/2-9,e.width*Math.max(0,e.hp/e.maxHp),5)}
 }
-function islands(c,items,t){for(let p of items){c.fillStyle='rgba(2,12,20,.32)';c.beginPath();c.ellipse(p.x+4,p.y+5,p.width*.57,p.height*.5,0,0,7);c.fill();c.fillStyle=t.ground[1];c.beginPath();c.ellipse(p.x,p.y,p.width*.5,p.height*.45,0,0,7);c.fill();tree(c,p.x,p.y,.65,t,t.time==='night')}}
+function islands(c,items,t){
+ for(let p of items){
+  c.save();c.translate(p.x,p.y);
+  const n=p.shape||0,rx=p.width*.5,ry=p.height*.45;
+  c.fillStyle='rgba(2,12,20,.4)';c.beginPath();c.ellipse(5,8,rx*1.2,ry*1.2,0,0,Math.PI*2);c.fill();
+  c.fillStyle=t.ground[1];c.strokeStyle=t.accent;c.lineWidth=2;c.beginPath();
+  const count=[9,5,7,12,6][n%5];
+  for(let i=0;i<count;i++){
+    const angle=i/count*Math.PI*2,irreg=1+(Math.sin(i*21.7+n*3)*.12);
+    const x=Math.cos(angle)*rx*irreg,y=Math.sin(angle)*ry*irreg;
+    if(i===0)c.moveTo(x,y);else c.lineTo(x,y);
+  }
+  c.closePath();c.fill();c.stroke();
+  if(p.width>42)tree(c,-p.width*.13,-3,.6,t,t.time==='night');
+  c.restore();
+ }
+}
 function draw(c,d){const t=THEMES[((d.sector-1)%THEMES.length+THEMES.length)%THEMES.length];landscape(c,d,t);islands(c,d.islands,t);for(let e of d.enemies)enemy(c,e,t.time);if(!d.invulnerable||Math.floor(Date.now()/110)%2)plane(c,d.player.x,d.player.y,d.aircraft,1);}
 root.RiverVisuals={draw,plane,enemy,THEMES};
 })(window);
