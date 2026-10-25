@@ -80,7 +80,7 @@
         <div>RECORDE: <span id="hi-score-text" class="text-yellow-400">000000</span></div>
         <div class="flex items-center gap-3">
             <button id="crt-toggle" class="bg-slate-800 hover:bg-slate-700 text-xs px-2 py-1 rounded border border-slate-600 transition">CRT: LIG</button>
-            <button id="controller-settings-btn" class="bg-slate-800 hover:bg-slate-700 text-xs px-2 py-1 rounded border border-slate-600">CONTROLE</button>
+            <button id="controller-settings-btn" class="bg-slate-800 hover:bg-slate-700 text-xs px-2 py-1 rounded border border-slate-600">CONFIGURAÇÕES</button>
             <button id="track-next" class="bg-slate-800 hover:bg-slate-700 text-xs px-2 py-1 rounded border border-slate-600">PRÓXIMA</button>
             <button id="music-library" class="bg-slate-800 hover:bg-slate-700 text-xs px-2 py-1 rounded border border-slate-600">MÚSICAS</button>
             <input id="music-upload" class="hidden" type="file" accept=".mp3,.ogg,.wav,.m4a,audio/*" multiple>
@@ -1763,7 +1763,11 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
                     { type: 'SPREAD', color: '#f59e0b', label: '3X' },
                     { type: 'LASER', color: '#06b6d4', label: 'L' },
                     { type: 'MISSILE', color: '#f97316', label: 'M' },
-                    { type: 'SHIELD', color: '#22d3ee', label: 'S+' }
+                    { type: 'SHIELD', color: '#22d3ee', label: 'S+' },
+                    { type: 'HYBRID', color: '#e879f9', label: 'H+' },
+                    { type: 'CIRCLE', color: '#a78bfa', label: '360' },
+                    { type: 'TRACKER', color: '#fb7185', label: 'TG' },
+                    { type: 'MULTI', color: '#fbbf24', label: 'MX' }
                 ];
                 const selected = types[Math.floor(Math.random() * types.length)];
                 powerups.push({ x: x, y: y, ...selected });
