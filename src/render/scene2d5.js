@@ -34,8 +34,23 @@ function building(c,x,y,s,night){c.save();c.translate(x,y);c.scale(s,s);c.fillSt
 function landscape(c,data,t){
  let {w,h,riverPoints:points,distance=0,quality='balanced'}=data;
  ground(c,w,h,t);
+ // Volume e profundidade simulados com sombras nas margens; pulso leve no ritmo da ação.
+ const beat=(Math.sin(Date.now()/215)+1)*.5;
  const water=c.createLinearGradient(0,0,0,h);water.addColorStop(0,t.water[0]);water.addColorStop(1,t.water[1]);
- if(riverPath(c,points)){c.fillStyle=water;c.fill();c.strokeStyle='rgba(165,240,232,.27)';c.lineWidth=3;c.stroke()}
+ if(riverPath(c,points)){
+   c.shadowColor='rgba(0,11,26,.75)';c.shadowBlur=quality==='eco'?6:15;
+   c.fillStyle=water;c.fill();c.shadowBlur=0;
+   c.strokeStyle='rgba(165,240,232,'+(.3+beat*.15)+')';c.lineWidth=3;c.stroke();
+ }
+ if(quality!=='eco'){
+   for(let y=24;y<h;y+=54){
+     const b=bankAt(points,y,w);
+     for(const edge of [b[0],b[1]]){
+       c.strokeStyle='rgba(6,15,24,.24)';c.lineWidth=10;c.beginPath();c.moveTo(edge-3,y-17);c.lineTo(edge+2,y+18);c.stroke();
+       c.strokeStyle='rgba(255,249,208,.18)';c.lineWidth=2;c.beginPath();c.moveTo(edge-7,y-15);c.lineTo(edge-2,y+15);c.stroke();
+     }
+   }
+ }
  const tile=quality==='eco'?70:42, phase=(distance*.17)%tile;
  for(let y=-tile+phase;y<h+tile;y+=tile){
    let banks=bankAt(points,y,w);
@@ -55,7 +70,7 @@ function landscape(c,data,t){
  }
  c.save();if(riverPath(c,points)){c.clip();c.strokeStyle='rgba(205,249,244,.12)';c.lineWidth=1;for(let y=(distance*.26)%35;y<h;y+=35){let b=bankAt(points,y,w);let x=lerp(b[0],b[1],.17+hash(y|0)*.66);c.beginPath();c.ellipse(x,y,12,2,-.2,0,Math.PI);c.stroke()}}c.restore();
  // Vinheta leve preservando visibilidade dos alvos noturnos.
- if(t.time==='night'){c.fillStyle='rgba(5,10,30,.16)';c.fillRect(0,0,w,h);c.fillStyle='rgba(255,220,143,.1)';for(let y=26;y<h;y+=130){let b=bankAt(points,y,w);c.beginPath();c.arc(b[0]-6,y,10,0,Math.PI*2);c.fill();c.beginPath();c.arc(b[1]+6,y,10,0,Math.PI*2);c.fill()}}
+ if(t.time==='night'){c.fillStyle='rgba(5,10,30,.16)';c.fillRect(0,0,w,h);c.fillStyle='rgba(255,220,143,'+(.1+beat*.09)+')';for(let y=26;y<h;y+=130){let b=bankAt(points,y,w);c.beginPath();c.arc(b[0]-6,y,10,0,Math.PI*2);c.fill();c.beginPath();c.arc(b[1]+6,y,10,0,Math.PI*2);c.fill()}}
 }
 function plane(c,x,y,style='falcao',size=1){
  const colors={falcao:['#c7e2ec','#df4a42','#263e59'],vespa:['#e8be57','#f79430','#453b49'],cometa:['#7bdcf7','#3782df','#25386e']};
