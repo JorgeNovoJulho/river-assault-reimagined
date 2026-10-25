@@ -1403,7 +1403,16 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
                 eb.x += eb.vx;
                 eb.y += eb.vy;
 
-                if (player.invulnerable <= 0 && Math.hypot(eb.x - player.x, eb.y - player.y) < 12) {
+                const hitWingman=wingmen.find(w=>Math.hypot(eb.x-(player.x+w.side*36),eb.y-(player.y+10))<14);
+                if(hitWingman){
+                    enemyBullets.splice(index,1);
+                    hitWingman.hp-=25;
+                    addExplosion(player.x+hitWingman.side*36,player.y+10,'#67e8f9',5);
+                    if(hitWingman.hp<=0){
+                        wingmen=wingmen.filter(w=>w!==hitWingman);
+                        createFloatingText(player.x,player.y,'DRONE DESTRUIDO','#fb7185');
+                    }
+                }else if (player.invulnerable <= 0 && Math.hypot(eb.x - player.x, eb.y - player.y) < 12) {
                     enemyBullets.splice(index, 1);
                     applyDamage(25, 'ABATIDO POR TIRO INIMIGO!');
                 } else if (eb.y > VIRTUAL_HEIGHT + 10) {
@@ -1610,7 +1619,7 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
 
         function applyDamage(amount, reason) {
             if (player.invulnerable > 0) return;
-            for(let i=wingmen.length-1;i>=0;i--){const w=wingmen[i];if(Math.random()<.35){w.hp-=amount;if(w.hp<=0)wingmen.splice(i,1)}}
+            // Naves auxiliares têm escudo independente e só sofrem dano quando atingidas.
 
             player.shield -= Math.round(amount*(bossActive||reason.includes('BOSS')?1.15:.7));
             player.invulnerable = 40;
@@ -1716,7 +1725,7 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
                     // Disparo número 50 ainda utiliza a arma especial.
                     try{window.RiverSFX?.weapon(player.weapon)}catch(e){}
                     aircraftCatalog.shoot(player.weapon,player,bullets);
-                    player.weapon=baseWeapon;return;
+                    fireWingmen();player.weapon=baseWeapon;return;
                 }
             }
             try{window.RiverSFX?.weapon(player.weapon)}catch(e){}
@@ -1726,7 +1735,12 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
 
         function fireWingmen(){
             for(const w of wingmen){
-                for(const angle of [-2.5,0,2.5])bullets.push({x:player.x+w.side*36,y:player.y+10,vx:angle,speed:8,type:player.weapon==='TRACKER'||player.weapon==='MISSILE'?'MISSILE':'LASER',color:'#67e8f9'});
+                const guided=['TRACKER','MISSILE','ROCKET','PRECISION','MULTI'].includes(player.weapon);
+                const turbo=['BEAM','LASER','PULSE'].includes(player.weapon);
+                for(const angle of [-2.8,0,2.8]){
+                    bullets.push({x:player.x+w.side*36,y:player.y+10,vx:angle,speed:turbo?11:8,
+                        type:guided?'MISSILE':turbo?'LASER':'SINGLE',color:guided?'#fbbf24':turbo?'#67e8f9':'#a7f3d0'});
+                }
             }
         }
         function triggerBomb() {
