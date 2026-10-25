@@ -5,7 +5,7 @@ class RiverMusic {
  start(){if(this.running||!this.enabled)return;try{
  const Audio=window.AudioContext||window.webkitAudioContext;if(!Audio)return;
  if(!this.ctx)this.ctx=new Audio();this.ctx.resume();
- this.master=this.ctx.createGain();this.master.gain.value=.085;this.master.connect(this.ctx.destination);
+ this.master=this.ctx.createGain();this.master.gain.value=this.volume??.064;this.master.connect(this.ctx.destination);
  this.running=true;this.next=this.ctx.currentTime+.05;this.schedule();
  }catch(e){this.running=false}}
  tone(midi,time,duration,type='square',gain=.16){
