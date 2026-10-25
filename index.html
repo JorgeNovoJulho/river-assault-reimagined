@@ -369,6 +369,7 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
         document.getElementById('hi-score-text').innerText = String(hiScore).padStart(6, '0');
 
         let distance = 0;
+        let missionStartDistance = 0;
         let sector = 1;
         let kills = 0;
         let crtEnabled = true;
@@ -544,7 +545,7 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
 
             distance += segmentHeight;
 
-            if (distance > (campaign.at(sector).bossDistance + (sector - 1)*2150)) {
+            if (distance - missionStartDistance > campaign.at(sector).bossDistance) {
                 spawnBoss(y);
                 return;
             }
@@ -1242,7 +1243,7 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
 
                             if (e.type === 'BOSS') {
                                 bossActive = false;
-                                if(sector===20) {gameState='VICTORY';playlist.pause();document.getElementById('victory-screen').classList.remove('hidden')} else {sector++;createFloatingText(e.x,e.y,'MISSÃO CONCLUÍDA!','#22c55e');document.getElementById('mission-banner').textContent=campaign.at(sector).name}
+                                if(sector===20) {gameState='VICTORY';playlist.pause();document.getElementById('victory-screen').classList.remove('hidden')} else {sector++;missionStartDistance=distance;createFloatingText(e.x,e.y,'MISSÃO CONCLUÍDA!','#22c55e');document.getElementById('mission-banner').textContent=campaign.at(sector).name}
                             } else {
                                 createFloatingText(e.x, e.y, `+${e.score}`, '#facc15');
                             }
@@ -1387,6 +1388,7 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
         function resetGame() {
             score = 0;
             distance = 0;
+            missionStartDistance = 0;
             sector = Math.max(1,Math.min(20,Number(levelSelector.value)||1));
             kills = 0;
             bossActive = false;
