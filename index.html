@@ -607,7 +607,7 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
             const rightBank = center + width / 2;
 
             // Ilhas no meio do canal
-            if (Math.random() < campaign.at(sector).obstacleRate) {
+            if (islands.length < 3 && !structures.some(o=>Math.abs(o.y-y)<120) && Math.random() < campaign.at(sector).obstacleRate*.6) {
                 islands.push({
                     x: center + (Math.random() - 0.5) * (width * 0.4),
                     y: y,
@@ -618,13 +618,13 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
             }
 
             // Botes civis com soldados: voar perto realiza resgate, sem disparar.
-            if (rescueBoats.length < 3 && Math.random() < .032) {
+            if (rescueBoats.length < 2 && !islands.some(o=>Math.abs(o.y-y)<115) && !structures.some(o=>Math.abs(o.y-y)<115) && Math.random() < .028) {
                 rescueBoats.push({x:leftBank+30+Math.random()*(width-60),y,soldiers:2+Math.floor(Math.random()*4),phase:Math.random()*6.28});
             }
 
             // Pontos estratégicos de combustível; resgates e armas não são bloqueados.
             if (distance - fuelSpawnAt >= 650 && Math.random() < .2) trySpawnFuel(center,y,width,false);
-            if(structures.length<1 && distance-structureLastDistance>1100 && missionTicks>180 && Math.random()<.07){
+            if(structures.length<1 && distance-structureLastDistance>1400 && missionTicks>240 && !islands.some(o=>Math.abs(o.y-y)<140) && !rescueBoats.some(o=>Math.abs(o.y-y)<140) && Math.random()<.065){
                 // Conectada exatamente às margens do rio, com os pilares em terra firme.
                 const type=Math.random()<.7?'BRIDGE':'DAM';
                 structures.push({type,x:center,y,width:width+28,height:type==='BRIDGE'?21:31,hp:type==='BRIDGE'?17:30,maxHp:type==='BRIDGE'?17:30});
@@ -1522,7 +1522,7 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
             container.classList.add('damage-flash');
             setTimeout(() => container.classList.remove('damage-flash'), 200);
 
-            sound.playExplosion(true);
+            try{window.RiverSFX?.shield()}catch(e){}
 
             if (player.shield <= 0) loseLife(reason);
         }
@@ -1616,7 +1616,6 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
                 }
             }
             try{window.RiverSFX?.weapon(player.weapon)}catch(e){}
-            sound.playShoot();
             aircraftCatalog.shoot(player.weapon,player,bullets);
         }
 
@@ -1627,7 +1626,6 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
             bombProjectiles.push({x:player.x,y:player.y-16,vy:-9,life:52});
         }
         function explodeBomb(b){
-            sound.playExplosion(true);
             try{window.RiverSFX?.impact()}catch(e){}
             screenShake=15;bombFlash=13;
             enemyBullets=[];
