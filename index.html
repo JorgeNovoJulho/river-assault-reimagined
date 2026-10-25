@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>River Raid - Edição Retro Reimaginada</title>
+    <title>River Assault — Teste Mobile</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body {
@@ -71,6 +71,42 @@
             100% { background-color: transparent; }
         }
     </style>
+<style id="mobile-responsive-v2">
+:root{color-scheme:dark}
+*{box-sizing:border-box}
+html,body{margin:0;width:100%;min-height:100%;overscroll-behavior:none}
+body{height:100dvh!important;min-height:0!important;padding:env(safe-area-inset-top) max(6px,env(safe-area-inset-right)) env(safe-area-inset-bottom) max(6px,env(safe-area-inset-left))!important;display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:flex-start!important;gap:4px;overflow:hidden!important}
+body>div:first-of-type{flex:0 0 auto;width:100%;max-width:660px;min-height:34px;gap:6px;flex-wrap:wrap;margin:0!important;padding:2px 4px!important;font-size:clamp(9px,2.6vw,12px)}
+body>div:first-of-type>div{gap:4px;flex-wrap:wrap;justify-content:flex-end}
+body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
+#game-container{position:relative;flex:1 1 auto!important;min-height:120px!important;max-height:none!important;width:min(100%,560px);border:2px solid #326483!important;border-radius:16px!important;overflow:hidden;isolation:isolate}
+#gameCanvas{display:block;width:100%;height:100%;object-fit:fill}
+#touch-controls{flex:0 0 auto;width:min(100%,560px);max-width:100%;min-height:0!important;height:clamp(104px,21dvh,158px);padding:4px 10px!important;gap:12px;display:flex;justify-content:space-between;align-items:center;background:linear-gradient(165deg,rgba(35,59,80,.93),rgba(10,19,35,.94));border:1px solid #466e87;border-radius:20px;margin:0 0 3px;box-shadow:0 6px 24px rgba(0,0,0,.38)}
+#virtual-joystick{width:clamp(86px,27vw,132px);height:100%;min-width:0;touch-action:none}
+.joystick-base{width:min(100%,clamp(86px,25vw,126px));height:auto;aspect-ratio:1;border:2px solid #5b829a;background:radial-gradient(circle at 35% 25%,#375d72,#14283c 56%,#0b1425);box-shadow:inset 0 6px 13px #07121f,0 0 0 5px #132638}
+.joystick-knob{width:45%;height:45%;background:radial-gradient(circle at 30% 20%,#b5f8ff,#3b9ec6 50%,#173450);border:2px solid #c0f2ff}
+.action-cluster{grid-template-columns:minmax(60px,82px) minmax(68px,92px);grid-template-rows:repeat(2,minmax(42px,58px));gap:clamp(4px,1.5vw,9px);height:100%;align-content:center}
+.touch-action{border-radius:15px;width:100%;height:100%;min-height:42px;color:#f8fafc;font-family:system-ui,sans-serif;font-size:clamp(10px,2.8vw,13px);letter-spacing:.4px;font-weight:900;border:1px solid #ffffff80;box-shadow:inset 0 2px 0 #ffffff38,0 4px 0 #080f1d,0 7px 12px #0008;touch-action:none}
+.touch-action:active{transform:translateY(3px);box-shadow:inset 0 2px 8px #0007}
+.fire-action{height:clamp(74px,17dvh,106px);border-radius:50%;background:radial-gradient(circle at 30% 20%,#ff8f85,#e73542 55%,#96212f);border:3px solid #ffc6c1}
+.bomb-action{background:linear-gradient(#f2bd54,#ab630d);color:#fff}
+.pause-action{background:linear-gradient(#638bac,#264563)}
+#start-screen,#pause-screen,#game-over-screen,#controller-settings{overflow-x:hidden!important;overflow-y:auto!important;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;display:flex;flex-direction:column;align-items:center;justify-content:flex-start!important;gap:8px;padding:clamp(12px,3vw,24px)!important;min-height:0;max-height:100%;scrollbar-width:thin}
+#start-screen.hidden,#pause-screen.hidden,#game-over-screen.hidden,#controller-settings.hidden{display:none!important}
+#start-screen>*,#pause-screen>*,#game-over-screen>*{flex-shrink:0;max-width:100%;margin-top:0!important;margin-bottom:4px!important}
+#start-screen>h1{font-size:clamp(22px,6vw,38px)!important;line-height:1.15}
+#start-screen>div{width:100%!important;max-width:440px!important}
+#start-screen .space-y-2{max-height:none!important}
+#start-btn,#resume-btn,#restart-btn,#pad-close{min-height:48px;width:min(100%,340px);flex-shrink:0;margin-bottom:12px!important}
+#controller-settings{align-items:stretch!important;gap:8px;z-index:60!important}
+#controller-settings>*,#controller-settings button{flex-shrink:0}
+#controller-settings input[type=range]{min-height:36px}
+#game-over-screen .w-72{width:min(100%,288px)}
+#emp-warning{max-width:94%;white-space:normal;text-align:center}
+@media (max-height:610px){#touch-controls{height:96px;padding:2px 8px!important}#virtual-joystick{width:90px}.joystick-base{width:88px}.action-cluster{grid-template-rows:42px 42px}.fire-action{height:77px}body>div:first-of-type{min-height:30px}}
+@media (max-width:350px){#touch-controls{height:100px;padding:2px 5px!important;gap:4px}.action-cluster{grid-template-columns:57px 65px;grid-template-rows:42px 42px}.fire-action{height:76px}#virtual-joystick{width:90px}.joystick-base{width:86px}body>div:first-of-type button{font-size:9px;padding:3px}}
+@media (pointer:fine) and (min-width:768px){#touch-controls{display:none!important}#game-container{max-width:660px}}
+</style>
 </head>
 <body class="h-screen w-screen flex flex-col items-center justify-center p-2 sm:p-4">
 
@@ -194,6 +230,7 @@
     <script src="./src/input/gamepad.js"></script>
     <script src="./src/game/aircraft.js"></script>
     <script src="./src/game/clock.js"></script>
+    <script src="./src/render/scene2d5.js"></script>
     <script>
         // --- SINTETIZADOR DE ÁUDIO CHIPTUNE RETRO (Web Audio API) ---
         class SoundEngine {
