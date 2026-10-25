@@ -3,6 +3,9 @@
   {
     "id": 1,
     "name": "Selva da Aurora",
+    "biome": "jungle",
+    "bossVisual": "heli",
+    "hazardSet": 0,
     "difficulty": 1,
     "boss": "PONTE FORTIFICADA",
     "bossPattern": 0,
@@ -15,6 +18,9 @@
   {
     "id": 2,
     "name": "Porto das Sombras",
+    "biome": "industrial",
+    "bossVisual": "ship",
+    "hazardSet": 1,
     "difficulty": 3,
     "boss": "ENCOURAÇADO ABISSAL",
     "bossPattern": 1,
@@ -27,6 +33,9 @@
   {
     "id": 3,
     "name": "Cânion de Areia",
+    "biome": "desert",
+    "bossVisual": "heli",
+    "hazardSet": 2,
     "difficulty": 2,
     "boss": "APACHE ESCORPIÃO",
     "bossPattern": 2,
@@ -39,6 +48,9 @@
   {
     "id": 4,
     "name": "Águas do Pântano",
+    "biome": "swamp",
+    "bossVisual": "sub",
+    "hazardSet": 3,
     "difficulty": 1,
     "boss": "SUBMARINO FANTASMA",
     "bossPattern": 3,
@@ -51,6 +63,9 @@
   {
     "id": 5,
     "name": "Arquipélago Rubro",
+    "biome": "islands",
+    "bossVisual": "jet",
+    "hazardSet": 0,
     "difficulty": 2,
     "boss": "CAÇA TEMPESTADE",
     "bossPattern": 0,
@@ -63,6 +78,9 @@
   {
     "id": 6,
     "name": "Fiordes Glaciais",
+    "biome": "arctic",
+    "bossVisual": "ship",
+    "hazardSet": 1,
     "difficulty": 3,
     "boss": "QUEBRA-GELO TITÃ",
     "bossPattern": 1,
@@ -75,6 +93,9 @@
   {
     "id": 7,
     "name": "Coração da Selva",
+    "biome": "jungle",
+    "bossVisual": "insect",
+    "hazardSet": 2,
     "difficulty": 1,
     "boss": "RAINHA DOS DRONES",
     "bossPattern": 2,
@@ -87,6 +108,9 @@
   {
     "id": 8,
     "name": "Cidade Neon",
+    "biome": "city",
+    "bossVisual": "mech",
+    "hazardSet": 3,
     "difficulty": 2,
     "boss": "ARANHA MECÂNICA",
     "bossPattern": 3,
@@ -99,6 +123,9 @@
   {
     "id": 9,
     "name": "Abismo Vulcânico",
+    "biome": "volcanic",
+    "bossVisual": "mech",
+    "hazardSet": 0,
     "difficulty": 3,
     "boss": "FORTALEZA VULCÂNICA",
     "bossPattern": 0,
@@ -111,6 +138,9 @@
   {
     "id": 10,
     "name": "Vale Alpino",
+    "biome": "alpine",
+    "bossVisual": "heli",
+    "hazardSet": 1,
     "difficulty": 2,
     "boss": "HELICÓPTERO CERBERUS",
     "bossPattern": 1,
@@ -123,6 +153,9 @@
   {
     "id": 11,
     "name": "Rio Dourado",
+    "biome": "valley",
+    "bossVisual": "ship",
+    "hazardSet": 2,
     "difficulty": 1,
     "boss": "CRUZADOR DOURADO",
     "bossPattern": 2,
@@ -135,6 +168,9 @@
   {
     "id": 12,
     "name": "Metrópole Noturna",
+    "biome": "neon",
+    "bossVisual": "mech",
+    "hazardSet": 3,
     "difficulty": 3,
     "boss": "ANDROIDE NOTURNO",
     "bossPattern": 3,
@@ -147,6 +183,9 @@
   {
     "id": 13,
     "name": "Delta Selvagem",
+    "biome": "delta",
+    "bossVisual": "sub",
+    "hazardSet": 0,
     "difficulty": 2,
     "boss": "PORTA-HELICÓPTEROS",
     "bossPattern": 0,
@@ -159,6 +198,9 @@
   {
     "id": 14,
     "name": "Tempestade Polar",
+    "biome": "glacial",
+    "bossVisual": "insect",
+    "hazardSet": 1,
     "difficulty": 3,
     "boss": "BORBOLETA AÇO",
     "bossPattern": 1,
@@ -171,6 +213,9 @@
   {
     "id": 15,
     "name": "Oásis Perdido",
+    "biome": "oasis",
+    "bossVisual": "sub",
+    "hazardSet": 2,
     "difficulty": 1,
     "boss": "SUBMARINO INVISÍVEL",
     "bossPattern": 2,
@@ -183,6 +228,9 @@
   {
     "id": 16,
     "name": "Floresta de Cristal",
+    "biome": "bioluminescent",
+    "bossVisual": "insect",
+    "hazardSet": 3,
     "difficulty": 2,
     "boss": "ABELHA IMPERIAL",
     "bossPattern": 3,
@@ -195,6 +243,9 @@
   {
     "id": 17,
     "name": "Estaleiro Vermelho",
+    "biome": "shipyard",
+    "bossVisual": "ship",
+    "hazardSet": 0,
     "difficulty": 3,
     "boss": "DESTRÓIER OMEGA",
     "bossPattern": 0,
@@ -207,6 +258,9 @@
   {
     "id": 18,
     "name": "Ilhas de Gelo",
+    "biome": "arctic",
+    "bossVisual": "sub",
+    "hazardSet": 1,
     "difficulty": 2,
     "boss": "COLOSSO SUBMERSO",
     "bossPattern": 1,
@@ -219,6 +273,9 @@
   {
     "id": 19,
     "name": "Ruínas Elétricas",
+    "biome": "electric",
+    "bossVisual": "mech",
+    "hazardSet": 2,
     "difficulty": 3,
     "boss": "SENTINELA ELÉTRICA",
     "bossPattern": 2,
@@ -231,6 +288,9 @@
   {
     "id": 20,
     "name": "Confluência Final",
+    "biome": "final",
+    "bossVisual": "jet",
+    "hazardSet": 3,
     "difficulty": 2,
     "boss": "TRIARCA CELESTIAL",
     "bossPattern": 3,
