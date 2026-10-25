@@ -20,6 +20,7 @@ const {chromium}=require('playwright');const {spawn}=require('node:child_process
   }
   const crtBefore=await page.locator('#crt-toggle').innerText();
   await page.locator('#crt-toggle').click();
+  console.log('CRT status:',JSON.stringify({before:crtBefore,after:await page.locator('#crt-toggle').innerText(),errors,notice:await page.locator('#runtime-error').count(),scripts:await page.evaluate(()=>({gameState:typeof gameState==='undefined'?'undefined':gameState,settings:!!document.getElementById('settings-plane')}))}));
   if (await page.locator('#crt-toggle').innerText()===crtBefore) throw Error('Botão CRT falhou');
   const soundBefore=await page.locator('#sound-toggle').innerText();
   await page.locator('#sound-toggle').click();
