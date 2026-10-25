@@ -12,8 +12,8 @@ const {chromium}=require('playwright');const {spawn}=require('node:child_process
   browser=await chromium.launch({headless:true});
   const page=await browser.newPage({viewport:{width:390,height:700},isMobile:true,hasTouch:true});
   const errors=[];page.on('pageerror',e=>errors.push(e.message));
-  await page.goto('http://127.0.0.1:5173/',{waitUntil:'networkidle'});
-  await page.locator('#start-btn').click();
+  await page.goto('http://127.0.0.1:5173/',{waitUntil:'domcontentloaded',timeout:20000});
+  await page.locator('#start-btn').click({timeout:12000});
   await page.waitForTimeout(1500);
   const result=await page.evaluate(()=>({state:gameState,hidden:document.getElementById('start-screen').classList.contains('hidden'),error:document.getElementById('runtime-error')?.textContent,canvas:!!document.getElementById('gameCanvas')}));
   console.log(JSON.stringify({result,errors},null,2));
