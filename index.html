@@ -125,6 +125,15 @@
                 <p>• Cuidado com as <span class="text-red-400 font-bold">TORRETAS COSTEIRAS</span> instaladas nas paredes!</p>
             </div>
 
+            <div class="w-full max-w-sm mb-4 text-left">
+                <label for="plane-select" class="text-amber-400 block text-xs mb-2 font-bold">ESCOLHA SEU AVIÃO</label>
+                <select id="plane-select" class="w-full p-3 bg-slate-800 text-white rounded border border-cyan-500">
+                    <option value="falcao">FALCÃO — Normal / equilibrado</option>
+                    <option value="vespa">VESPA — Médio / ágil</option>
+                    <option value="cometa">COMETA — Rápido / maior consumo</option>
+                </select>
+                <p id="plane-weapons" class="text-cyan-300 text-xs mt-2"></p>
+            </div>
             <button id="start-btn" class="arcade-btn bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-lg px-8 py-3 rounded-lg uppercase tracking-wider cursor-pointer">
                 INICIAR JOGO
             </button>
@@ -182,6 +191,7 @@
     </style>
 
     <script src="./src/input/gamepad.js"></script>
+    <script src="./src/game/aircraft.js"></script>
     <script>
         // --- SINTETIZADOR DE ÁUDIO CHIPTUNE RETRO (Web Audio API) ---
         class SoundEngine {
@@ -351,6 +361,18 @@
             { name: 'DESFILADEIRO DE LAVA', bank: '#334155', bankDark: '#1e293b', water: '#b91c1c', island: '#475569' }
         ];
 
+        const aircraftCatalog = window.RiverAircraft;
+        let selectedPlane = 'falcao';
+        const planeSelect = document.getElementById('plane-select');
+        function refreshPlaneChoice() {
+            selectedPlane = planeSelect.value;
+            const config = aircraftCatalog.PLANES[selectedPlane];
+            document.getElementById('plane-weapons').textContent = 'ARMAS: '+config.weapons.map(w=>aircraftCatalog.WEAPONS[w]).join(' · ');
+            try{localStorage.setItem('river_selected_plane',selectedPlane)}catch(e){}
+        }
+        try{const remembered=localStorage.getItem('river_selected_plane');if(aircraftCatalog.PLANES[remembered])planeSelect.value=remembered}catch(e){}
+        planeSelect.addEventListener('change',refreshPlaneChoice);
+        refreshPlaneChoice();
         const WEAPON_NAMES = {
             'SINGLE': 'TIRO SIMPLES',
             'DOUBLE': 'TIRO DUPLO',
@@ -781,7 +803,7 @@
             ctx.fillRect(-3, -15, 6, 29);
 
             // Bico
-            ctx.fillStyle = '#ef4444';
+            ctx.fillStyle = aircraftCatalog.PLANES[selectedPlane].color;
             ctx.beginPath();
             ctx.moveTo(-3, -15);
             ctx.lineTo(3, -15);
@@ -793,7 +815,7 @@
             ctx.fillRect(-2, -9, 4, 8);
 
             // Asas Principais
-            ctx.fillStyle = '#dc2626';
+            ctx.fillStyle = aircraftCatalog.PLANES[selectedPlane].wing;
             ctx.beginPath();
             ctx.moveTo(-14, 4);
             ctx.lineTo(-3, -6);
@@ -1043,7 +1065,7 @@
 
             if (player.weaponTimer > 0) {
                 player.weaponTimer--;
-                if (player.weaponTimer <= 0) player.weapon = 'SINGLE';
+                if (player.weaponTimer <= 0) player.weapon = aircraftCatalog.PLANES[selectedPlane].weapons[0];
             }
 
             updateRiver();
@@ -1192,10 +1214,12 @@
             powerups.forEach((p, pIndex) => {
                 p.y += player.currentScrollSpeed;
                 if (Math.hypot(p.x - player.x, p.y - player.y) < 20) {
-                    player.weapon = p.type;
+                    const config = aircraftCatalog.PLANES[selectedPlane];
+                    const index = ['SINGLE','DOUBLE','SPREAD','LASER','MISSILE'].indexOf(p.type);
+                    player.weapon = config.weapons[Math.max(0,index)];
                     player.weaponTimer = 600;
                     sound.playPowerupSound();
-                    createFloatingText(player.x, player.y, `ARMA: ${WEAPON_NAMES[p.type]}!`, p.color);
+                    createFloatingText(player.x, player.y, `ARMA: ${aircraftCatalog.WEAPONS[player.weapon]}!`, p.color);
                     powerups.splice(pIndex, 1);
                 } else if (p.y > VIRTUAL_HEIGHT + 30) {
                     powerups.splice(pIndex, 1);
@@ -1313,7 +1337,12 @@
             player.fuel = 100;
             player.shield = 150;
             player.bombs = 3;
-            player.weapon = 'SINGLE';
+            const config = aircraftCatalog.PLANES[selectedPlane];
+            player.speed = config.speed;
+            player.baseScrollSpeed = config.scroll;
+            player.currentScrollSpeed = config.scroll;
+            player.fuelDepletionRate = config.fuel;
+            player.weapon = config.weapons[0];
             player.weaponTimer = 0;
             player.invulnerable = 0;
             player.disabledTimer = 0;
@@ -1339,25 +1368,8 @@
 
         function fireWeapon() {
             if (gameState !== 'PLAYING' || player.disabledTimer > 0) return;
-
             sound.playShoot();
-
-            if (player.weapon === 'SINGLE') {
-                bullets.push({ x: player.x, y: player.y - 14, speed: 7, type: 'SINGLE' });
-            } else if (player.weapon === 'DOUBLE') {
-                bullets.push({ x: player.x - 6, y: player.y - 12, speed: 7, type: 'SINGLE' });
-                bullets.push({ x: player.x + 6, y: player.y - 12, speed: 7, type: 'SINGLE' });
-            } else if (player.weapon === 'SPREAD') {
-                bullets.push({ x: player.x, y: player.y - 12, speed: 7, vx: 0, type: 'SINGLE' });
-                bullets.push({ x: player.x - 4, y: player.y - 12, speed: 6.5, vx: -1.8, type: 'SINGLE' });
-                bullets.push({ x: player.x + 4, y: player.y - 12, speed: 6.5, vx: 1.8, type: 'SINGLE' });
-            } else if (player.weapon === 'LASER') {
-                sound.playLaser();
-                bullets.push({ x: player.x, y: player.y - 16, speed: 10, color: '#06b6d4', type: 'LASER' });
-            } else if (player.weapon === 'MISSILE') {
-                bullets.push({ x: player.x - 8, y: player.y - 10, speed: 6, color: '#f97316', type: 'MISSILE' });
-                bullets.push({ x: player.x + 8, y: player.y - 10, speed: 6, color: '#f97316', type: 'MISSILE' });
-            }
+            aircraftCatalog.shoot(player.weapon,player,bullets);
         }
 
         function triggerBomb() {
