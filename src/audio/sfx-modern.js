@@ -7,7 +7,7 @@ function tone(freq=330,duration=.16,type='sawtooth',end=120,gain=.09,delay=0){
  const t=c.currentTime+delay,o=c.createOscillator(),v=c.createGain(),lp=c.createBiquadFilter();
  o.type=type;o.frequency.setValueAtTime(Math.max(36,freq),t);o.frequency.exponentialRampToValueAtTime(Math.max(35,end),t+duration);
  lp.type='lowpass';lp.frequency.value=2100;
- v.gain.setValueAtTime(.0001,t);v.gain.exponentialRampToValueAtTime(Math.max(.0002,gain),t+.013);v.gain.exponentialRampToValueAtTime(.0001,t+duration);
+ v.gain.setValueAtTime(.0001,t);v.gain.exponentialRampToValueAtTime(Math.max(.0002,gain*(w.RiverSFX?.volume??.65)),t+.013);v.gain.exponentialRampToValueAtTime(.0001,t+duration);
  o.connect(lp);lp.connect(v);v.connect(c.destination);o.start(t);o.stop(t+duration+.02);
  }catch(e){}
 }
@@ -22,7 +22,7 @@ function noise(duration=.19,gain=.1,low=600,high=5000,delay=0){
  src.connect(band);band.connect(amp);amp.connect(c.destination);src.start(t);src.stop(t+duration+.02);
  }catch(e){}
 }
-w.RiverSFX={
+w.RiverSFX={volume:.65,
  weapon(name){
   const t=Date.now();if(t-last<70)return;last=t;
   if(/LASER|BEAM|PULSE/.test(name)){tone(1320,.19,'sawtooth',300,.047);tone(1100,.12,'sine',520,.025,.012)}
