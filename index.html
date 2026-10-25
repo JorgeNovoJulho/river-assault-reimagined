@@ -91,6 +91,7 @@
 
     <!-- Moldura Principal do Jogo -->
     <div id="game-container" class="relative crt-effect rounded-lg overflow-hidden border-4 border-slate-700 bg-black max-w-xl w-full flex-1 max-h-[800px]">
+        <div id="boss-dialogue-strip" aria-live="polite" class="hidden absolute top-0 left-0 right-0 z-20 pointer-events-none bg-slate-950/90 border-b-2 border-amber-500 px-3 py-2 text-center text-xs sm:text-sm" style="min-height:48px;max-height:64px;overflow:hidden"><b id="boss-dialogue-name" class="text-amber-400"></b> <span id="boss-dialogue-text" class="text-white"></span></div>
         <canvas id="gameCanvas" class="w-full h-full block"></canvas>
 
         <div id="controller-settings" class="hidden absolute inset-0 bg-slate-950/95 z-50 p-4 overflow-auto text-sm" role="dialog" aria-modal="true" aria-label="Configuração do controle">
@@ -106,6 +107,19 @@
                 <button id="pad-reset" class="rounded bg-slate-700 p-3">RESTAURAR</button>
             </div>
             <p id="map-help" aria-live="polite" class="text-yellow-300 min-h-8 mb-2">Ajustes salvos automaticamente neste dispositivo.</p>
+            <div class="grid grid-cols-1 gap-2 rounded-xl bg-slate-900 p-3 border border-slate-700">
+              <label for="music-volume">Volume das músicas: <span id="music-volume-value">40%</span></label>
+              <input id="music-volume" type="range" min="0" max="100" value="40">
+              <label for="sfx-volume">Volume dos efeitos: <span id="sfx-volume-value">65%</span></label>
+              <input id="sfx-volume" type="range" min="0" max="100" value="65">
+              <label for="sarcasm-level">Sarcasmo dos chefes: <span id="sarcasm-level-value">2</span>/5</label>
+              <input id="sarcasm-level" type="range" min="0" max="5" value="2">
+              <p class="text-xs text-slate-400">0 = silencioso, 5 = provocações frequentes</p>
+              <label for="settings-plane">Hangar — comprar aeronave com pontos</label>
+              <select id="settings-plane" class="rounded-lg p-2 bg-slate-800 text-white"></select>
+              <button id="settings-buy-plane" class="rounded-lg bg-emerald-700 p-3 font-bold">DESBLOQUEAR COM PONTOS</button>
+              <span id="settings-wallet" class="text-xs text-amber-300"></span>
+            </div>
             <button id="pad-close" class="bg-green-700 p-3 rounded font-bold w-full">VOLTAR AO JOGO</button>
         </div>
         <div id="controller-indicator" class="absolute top-1 right-1 text-[10px] px-2 py-1 bg-slate-900/80 rounded z-10 pointer-events-none" aria-live="polite">Controle: aguardando</div>
@@ -378,6 +392,7 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
         let bombProjectiles = [];
         let screenShake = 0;
         let bossTaunt = null;
+        let bossDropPhase=0;
         let bombFlash = 0;
         let sector = 1;
         let kills = 0;
@@ -618,7 +633,7 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
             }
 
             // Botes civis com soldados: voar perto realiza resgate, sem disparar.
-            if (rescueBoats.length < 2 && !islands.some(o=>Math.abs(o.y-y)<115) && !structures.some(o=>Math.abs(o.y-y)<115) && Math.random() < .028) {
+            if (rescueBoats.length < 3 && !islands.some(o=>Math.abs(o.y-y)<105) && !structures.some(o=>Math.abs(o.y-y)<105) && Math.random() < .075) {
                 rescueBoats.push({x:leftBank+30+Math.random()*(width-60),y,soldiers:2+Math.floor(Math.random()*4),phase:Math.random()*6.28});
             }
 
@@ -630,14 +645,20 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
                 structures.push({type,x:center,y,width:width+28,height:type==='BRIDGE'?21:31,hp:type==='BRIDGE'?17:30,maxHp:type==='BRIDGE'?17:30});
                 structureLastDistance=distance;
             }
-            if(bombsPickedThisMission < 5 && Math.random()<.009 && !powerups.some(p=>p.type==='BOMB')){
+            if(bombsPickedThisMission < 5 && Math.random()<.028 && !powerups.some(p=>p.type==='BOMB')){
                 powerups.push({x:center+(Math.random()-.5)*(width-65),y,type:'BOMB',label:'B+',color:'#f59e0b'});
             }
 
+            if(player.shield<player.maxShield*.55 && !powerups.some(p=>p.type==='SHIELD') && Math.random()<.045 && !structures.some(o=>Math.abs(o.y-y)<95)){
+                powerups.push({x:center+(Math.random()-.5)*Math.max(25,width-85),y,type:'SHIELD',color:'#22d3ee',label:'S+'});
+            }
+            if(missionTicks%270===0 && powerups.filter(p=>p.type!=='BOMB').length<2 && Math.random()<.55){
+                powerups.push({x:center+(Math.random()-.5)*Math.max(25,width-95),y,type:'SPREAD',color:'#fbbf24',label:'3X'});
+            }
             // Inimigos com Spawn Constante
             const hazards=[...enemies,...structures,...islands,...rescueBoats,...fuelDepots];
             const clearLane=hazards.every(e=>Math.abs(e.y-y)>115);
-            if (clearLane && distance-lastEnemyDistance>105 && enemies.filter(e=>e.type!=='BOSS').length<4 && Math.random()<.48) {
+            if (clearLane && distance-lastEnemyDistance>90 && enemies.filter(e=>e.type!=='BOSS').length<5 && Math.random()<.68) {
                 lastEnemyDistance=distance;
                 const rand = Math.random();
                 const spawnX = leftBank + 34 + Math.random() * (width - 68);
@@ -678,19 +699,33 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
             }
         }
 
-        const bossLines=['VOCÊ NÃO PASSARÁ!', 'MEU RIO, MINHAS REGRAS!', 'SEUS MÍSSEIS NÃO BASTAM!', 'VAMOS DANÇAR, PILOTO!', 'PREPARE-SE PARA CAIR!', 'A NOITE É MINHA!', 'VOCÊ CHEGOU LONGE DEMAIS!', 'DESVIE DISTO!'];
+        const bossLines=[
+          ['Alô, piloto. Seu GPS aponta para o fracasso.','Seu avião veio com garantia? Vai precisar.'],
+          ['Que coragem! Ou foi falta de combustível mental?','Ha! Esse disparo foi uma cócega.'],
+          ['HÁ-HÁ-HÁ! O céu aqui cobra pedágio!','Que gracinha: um mosquito com mísseis!'],
+          ['Seu plano era voar reto? Fascinante.','Ri melhor quem aterrissa. HA-HA!'],
+          ['Você chama isso de ataque?','Minha armadura já viu chuva mais agressiva!'],
+          ['Ho-ho! Errou de novo!','Vou avisar seu mecânico!'],
+          ['Sua pontaria está de férias?','Essa vitória não está no seu mapa!'],
+          ['HÁ-HÁ! Até meus drones estão rindo!','Vai precisar de mais do que sorte, piloto!']
+        ];
+        let sarcasmLevel=2;
         function showBossTaunt(name){
-            bossTaunt={name,line:bossLines[(sector*7+Math.floor(missionTicks/60))%bossLines.length],ticks:240};
+            if(sarcasmLevel===0)return;
+            const bucket=bossLines[(sector+Math.floor(missionTicks/250))%bossLines.length];
+            const line=bucket[Math.floor(missionTicks/310)%bucket.length];
+            bossTaunt={name,line,ticks:Math.max(125,245-sarcasmLevel*18)};
             try{window.RiverVoice?.chirp()}catch(e){}
         }
         function drawBossTaunt(){
-            if(!bossTaunt||bossTaunt.ticks--<=0)return;
-            const w=262,x=(VIRTUAL_WIDTH-w)/2,y=75;
-            ctx.save();ctx.fillStyle='rgba(8,21,39,.92)';ctx.strokeStyle='#fbbf24';ctx.lineWidth=2;
-            ctx.beginPath();ctx.roundRect(x,y,w,63,13);ctx.fill();ctx.stroke();
-            ctx.beginPath();ctx.moveTo(x+w/2-10,y+63);ctx.lineTo(x+w/2,y+75);ctx.lineTo(x+w/2+10,y+63);ctx.closePath();ctx.fill();ctx.stroke();
-            ctx.fillStyle='#fbbf24';ctx.font='bold 12px system-ui';ctx.textAlign='center';ctx.fillText(bossTaunt.name.slice(0,32),VIRTUAL_WIDTH/2,y+20);
-            ctx.fillStyle='white';ctx.font='bold 13px system-ui';ctx.fillText(bossTaunt.line,VIRTUAL_WIDTH/2,y+44);ctx.restore();
+            const strip=document.getElementById('boss-dialogue-strip');
+            if(!bossTaunt||bossTaunt.ticks--<=0){strip.classList.add('hidden');return}
+            if(strip.dataset.line!==bossTaunt.line){
+                document.getElementById('boss-dialogue-name').textContent=bossTaunt.name+':';
+                document.getElementById('boss-dialogue-text').textContent=bossTaunt.line;
+                strip.dataset.line=bossTaunt.line;
+            }
+            strip.classList.remove('hidden');
         }
         function spawnBoss(y) {
             bossActive = true;
@@ -734,7 +769,7 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
             // Cada missão tem assinatura própria de projéteis, ciclos e velocidade.
             // As primeiras quatro mantêm o legado como camada adicional.
             const missionId=Math.max(1,Math.min(20,sector));
-            if(e.attackTimer%310===0)showBossTaunt(e.name);
+            if(sarcasmLevel>0 && e.attackTimer%(560-sarcasmLevel*70)===0)showBossTaunt(e.name);
             const patterns=[
               [35,3,2.8,.5],[44,5,3,.75],[27,2,4,1.25],[53,7,2.4,.65],
               [21,3,4.4,1.8],[58,6,3.4,.4],[18,2,4.8,2.1],[39,8,2.7,1.2],
@@ -1415,14 +1450,18 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
                 if (Math.hypot(p.x - player.x, p.y - player.y) < 20) {
                     const config = aircraftCatalog.PLANES[selectedPlane];
                     const index = ['SINGLE','DOUBLE','SPREAD','LASER','MISSILE'].indexOf(p.type);
-                    if(p.type==='BOMB'){
+                    if(p.type==='SHIELD'){
+                        player.shield=Math.min(player.maxShield,player.shield+60);
+                        try{window.RiverSFX?.collect()}catch(e){}
+                        createFloatingText(player.x,player.y,'ESCUDO +60','#67e8f9');
+                    }else if(p.type==='BOMB'){
                         if(player.bombs<5 && bombsPickedThisMission<5){player.bombs++;bombsPickedThisMission++;document.getElementById('bomb-count-touch').innerText='('+player.bombs+')'}
                     } else {
                         player.weapon = config.weapons[Math.max(0,index)];
                         player.specialShots = 50;
                     }
                     sound.playPowerupSound();
-                    createFloatingText(player.x, player.y, `ARMA: ${aircraftCatalog.WEAPONS[player.weapon]}!`, p.color);
+                    if(p.type!=='SHIELD'&&p.type!=='BOMB')createFloatingText(player.x, player.y, `ARMA: ${aircraftCatalog.WEAPONS[player.weapon]}!`, p.color);
                     powerups.splice(pIndex, 1);
                 } else if (p.y > VIRTUAL_HEIGHT + 30) {
                     powerups.splice(pIndex, 1);
@@ -1515,7 +1554,7 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
         function applyDamage(amount, reason) {
             if (player.invulnerable > 0) return;
 
-            player.shield -= amount;
+            player.shield -= Math.round(amount*(reason.includes('BOSS')?1.15:.7));
             player.invulnerable = 40;
 
             const container = document.getElementById('game-container');
@@ -1552,6 +1591,7 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
             bombProjectiles = [];
             screenShake = 0;
             bossTaunt = null;
+            bossDropPhase=0;
             bombFlash = 0;
             sector = Math.max(1,Math.min(20,Number(levelSelector.value)||1));
             kills = 0;
@@ -1630,6 +1670,7 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
             screenShake=15;bombFlash=13;
             enemyBullets=[];
             enemies.forEach(e=>{
+                if(e.type==='BOSS')dropBossReward(e,16);
                 e.hp-=e.type==='BOSS'?16:999;
                 addExplosion(e.x,e.y,'#ffb347',20);
             });
@@ -1659,13 +1700,24 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
             }
         }
 
+        function dropBossReward(e,damage){
+            if(!e||e.type!=='BOSS')return;
+            const previous=e.rewardMark??Math.ceil(e.hp/Math.max(1,e.maxHp)*5);
+            const next=Math.floor(Math.max(0,e.hp-damage)/Math.max(1,e.maxHp)*5);
+            if(next>=previous)return;
+            e.rewardMark=next;
+            const kind=next%2===0?'SHIELD':'LASER';
+            powerups.push({x:e.x+(Math.random()-.5)*75,y:e.y+32,type:kind,color:kind==='SHIELD'?'#22d3ee':'#a78bfa',label:kind==='SHIELD'?'S+':'W+'});
+            createFloatingText(e.x,e.y,'ITEM LIBERADO!','#67e8f9');
+        }
         function spawnPowerupCheck(x, y) {
-            if (Math.random() < 0.22) {
+            if (Math.random() < 0.37) {
                 const types = [
                     { type: 'DOUBLE', color: '#60a5fa', label: '2X' },
                     { type: 'SPREAD', color: '#f59e0b', label: '3X' },
                     { type: 'LASER', color: '#06b6d4', label: 'L' },
-                    { type: 'MISSILE', color: '#f97316', label: 'M' }
+                    { type: 'MISSILE', color: '#f97316', label: 'M' },
+                    { type: 'SHIELD', color: '#22d3ee', label: 'S+' }
                 ];
                 const selected = types[Math.floor(Math.random() * types.length)];
                 powerups.push({ x: x, y: y, ...selected });
