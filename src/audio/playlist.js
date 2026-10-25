@@ -15,11 +15,11 @@ class RiverPlaylist{
  constructor(opts={}){this.audio=new Audio();this.audio.preload='auto';this.audio.loop=false;this.audio.volume=.38;this.tracks=[];this.order=[];this.current=-1;this.enabled=true;this.loading=false;this.onStatus=opts.onStatus||(()=>{});this.objectURL=null;this.audio.addEventListener('ended',()=>this.next());this.audio.addEventListener('error',()=>{this.onStatus('Faixa indisponível; passando para próxima');this.next(true)});}
  async load(){try{const db=await openDB();const rows=await transaction(db,'readonly',s=>s.getAll());this.tracks=rows.map(x=>({id:x.id,name:x.name,blob:x.blob}));}catch(e){this.onStatus('Armazenamento local indisponível: '+e.message)}return this.tracks.length}
  async importFiles(files){const accepted=Array.from(files||[]).filter(f=>/^audio\//.test(f.type)||/\.(mp3|ogg|m4a|wav)$/i.test(f.name));if(!accepted.length)return 0;
- const db=await openDB();let saved=0;
+ let saved=0;
  for(let i=0;i<accepted.length;i++){const f=accepted[i];if(f.size>45*1024*1024)continue;const id='local-'+f.name+'-'+f.size;await transactionKeepOpenWorkaround(id,f);saved++}
  async function transactionKeepOpenWorkaround(id,f){const d=await openDB();await transaction(d,'readwrite',s=>s.put({id,name:f.name,blob:f}))}
- db.close();await this.load();this.onStatus(saved+' faixa(s) importada(s)');return saved}
- async startNewGame(){await this.load();this.order=shuffle(this.tracks);this.current=-1;if(this.order.length){this.next();}else{this.onStatus('Adicione MP3 em MÚSICAS para tocar durante a partida')}}
+ await this.load();this.onStatus(saved+' faixa(s) importada(s)');return saved}
+ startNewGame(){this.order=shuffle(this.tracks);this.current=-1;if(this.order.length){this.next();}else{this.onStatus('Toque em MÚSICAS e selecione seus MP3 para iniciar a trilha')}}
  next(recover=false){if(!this.enabled||!this.order.length)return; if(recover&&this.current>=this.order.length-1){this.stop();return;}this.current=(this.current+1)%this.order.length;const item=this.order[this.current];this.playItem(item)}
  playItem(item){if(this.objectURL){URL.revokeObjectURL(this.objectURL);this.objectURL=null}this.audio.pause();this.objectURL=URL.createObjectURL(item.blob);this.audio.src=this.objectURL;this.onStatus('Tocando: '+item.name);this.audio.play().catch(e=>this.onStatus('Toque em reproduzir para ativar o áudio: '+e.message))}
  pause(){this.audio.pause()}
