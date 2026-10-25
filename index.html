@@ -242,6 +242,7 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
     <script src="./src/game/campaign.js"></script>
     <script src="./src/render/scene2d5.js"></script>
     <script src="./src/audio/music.js"></script>
+    <script src="./src/audio/sfx-modern.js"></script>
     <script src="./src/audio/playlist.js"></script>
     <script>
         // --- SINTETIZADOR DE ÁUDIO CHIPTUNE RETRO (Web Audio API) ---
@@ -1218,6 +1219,7 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
                 if(Math.hypot(player.x-boat.x,player.y-boat.y)<31){
                     const earned=boat.soldiers*150;
                     rescuedSoldiers+=boat.soldiers;score+=earned;
+                    try{window.RiverSFX?.collect()}catch(e){}
                     createFloatingText(boat.x,boat.y,'RESGATE +'+earned,'#a7f3d0');
                     rescueBoats.splice(i,1);
                 }else if(boat.y>VIRTUAL_HEIGHT+40)rescueBoats.splice(i,1);
@@ -1232,6 +1234,7 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
                     player.fuel = Math.min(player.maxFuel, player.fuel + 35);
                     player.shield = Math.min(player.maxShield, player.shield + 25);
                     sound.playFuelSound();
+                    try{window.RiverSFX?.collect()}catch(e){}
                     createFloatingText(f.x, f.y, '+35% GAS / +25% ESCUDO', '#22c55e');
                     addExplosion(f.x, f.y, '#22c55e', 12);
                     fuelDepots.splice(fIndex, 1);
