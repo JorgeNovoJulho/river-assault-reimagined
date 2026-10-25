@@ -21,9 +21,16 @@
 
 **Observação:** nomes e posições de botões dependem do controle e do mapeamento oferecido pelo sistema. Pareamento é feito nas configurações Bluetooth do Windows ou Android, não pelo jogo. Alguns controles genéricos, modelos antigos, Android WebViews e navegadores podem não expor os eventos como esperado. Ainda faltam testes em controles reais e nos pacotes APK e EXE.
 
+## Implementado (ainda sem homologação em hardware real)
+- Botão **CONTROLE** no topo do jogo abre painel de ajustes.
+- Nome/status do gamepad conectado visível.
+- Remapeamento dos botões de tiro, bomba e pausa: clicar em remapear e pressionar botão físico.
+- Controle de zona morta do analógico, de 8% a 55%.
+- Preferências armazenadas localmente neste navegador.
+- Navegação do painel por direcional vertical; botão de tiro confirma a opção selecionada e Start fecha.
+
 ## Próximas melhorias
-- Tela de configuração para remapear teclas e botões.
-- Indicador de controle conectado e opção de ocultar controles virtuais quando gamepad estiver ativo.
-- Perfil de sensibilidade/deadzone e calibração.
-- Menu navegável inteiramente por controle.
-- Testes de múltiplos gamepads e reconexão.
+- Personalização de teclado/mouse e controle de múltiplos jogadores.
+- Menu inicial completo navegável por gamepad, além do painel de configuração.
+- Ocultação dos controles virtuais quando um gamepad está ativo (opcional).
+- Testes com gamepads reais, reconexão e compatibilidade Android APK / Windows EXE.
