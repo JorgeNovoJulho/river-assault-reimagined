@@ -139,6 +139,8 @@
                     <option value="vespa">VESPA — Médio / ágil</option>
                     <option value="cometa">COMETA — Rápido / maior consumo</option>
                 </select>
+                <div class="flex items-center gap-2 mt-2"><button id="buy-plane" type="button" class="bg-emerald-700 rounded-lg p-2 text-xs font-bold">DESBLOQUEAR AVIÃO</button><span id="plane-wallet" class="text-yellow-300 text-xs"></span></div>
+                <p id="plane-status" class="text-amber-200 text-xs"></p>
                 <p id="playlist-status" class="text-emerald-300 text-xs mt-2" aria-live="polite">Músicas: carregando biblioteca local...</p>
                 <p id="plane-weapons" class="text-cyan-300 text-xs mt-2"></p>
             </div>
@@ -432,9 +434,29 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
         const aircraftCatalog = window.RiverAircraft;
         let selectedPlane = 'falcao';
         const planeSelect = document.getElementById('plane-select');
+        const earnedKey='river_aircraft_credits_v1';
+        const unlockedKey='river_aircraft_unlocked_v1';
+        let bank=0,unlocked=['falcao','vespa','cometa'];
+        try{bank=Number(localStorage.getItem(earnedKey)||0);const data=JSON.parse(localStorage.getItem(unlockedKey)||'null');if(Array.isArray(data))unlocked=[...new Set([...unlocked,...data.filter(p=>aircraftCatalog.PLANES[p])])]}catch(e){}
+        for(const [key,plane] of Object.entries(aircraftCatalog.PLANES)){
+            if(!plane.price)continue;
+            const opt=document.createElement('option');opt.value=key;opt.textContent=plane.name+' — '+plane.price+' pontos';planeSelect.appendChild(opt);
+        }
+        function refreshWallet(){document.getElementById('plane-wallet').textContent='SALDO: '+bank+' pontos'}
+        refreshWallet();
+        document.getElementById('buy-plane').addEventListener('click',()=>{
+            const plane=aircraftCatalog.PLANES[planeSelect.value];
+            if(!plane?.price){document.getElementById('plane-status').textContent='Aeronave inicial gratuita';return}
+            if(unlocked.includes(planeSelect.value)){document.getElementById('plane-status').textContent='Já desbloqueada';return}
+            if(bank<plane.price){document.getElementById('plane-status').textContent='Faltam '+(plane.price-bank)+' pontos';return}
+            bank-=plane.price;unlocked.push(planeSelect.value);
+            localStorage.setItem(earnedKey,String(bank));localStorage.setItem(unlockedKey,JSON.stringify(unlocked));
+            refreshWallet();document.getElementById('plane-status').textContent='Aeronave desbloqueada!';
+        });
         function refreshPlaneChoice() {
             selectedPlane = planeSelect.value;
             const config = aircraftCatalog.PLANES[selectedPlane];
+            document.getElementById('plane-status').textContent=unlocked.includes(selectedPlane)?'PRONTO PARA VOAR':'BLOQUEADO — CUSTO: '+config.price+' pontos';
             document.getElementById('plane-weapons').textContent = 'ARMAS: '+config.weapons.map(w=>aircraftCatalog.WEAPONS[w]).join(' · ');
             try{localStorage.setItem('river_selected_plane',selectedPlane)}catch(e){}
         }
@@ -1298,7 +1320,7 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
                     if (nearest) b.x += (nearest.x - b.x) * 0.09;
                 }
 
-                if (b.y < -20 || b.x < 0 || b.x > VIRTUAL_WIDTH) bullets.splice(index, 1);
+                if (b.y < -25 || b.y > VIRTUAL_HEIGHT+25 || b.x < -25 || b.x > VIRTUAL_WIDTH+25) bullets.splice(index, 1);
             });
 
             // Tiros Inimigos
@@ -1506,6 +1528,7 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
         }
 
         function enterGameplay() {
+            if(!unlocked.includes(selectedPlane)){document.getElementById('plane-status').textContent='Desbloqueie esta aeronave antes de iniciar';return}
             // A entrada no jogo não pode depender de permissão de áudio ou do MP3.
             try { resetGame(); } catch (error) { showGameError(error); console.error('START:',error); return; }
             for (const id of ['start-screen','pause-screen','game-over-screen','victory-screen']) {
@@ -1522,6 +1545,7 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
         }
         function resetGame() {
             score = 0;
+            earnedPoints=0;
             distance = 0;
             missionStartDistance = 0;
             missionTicks = 0;
@@ -1694,6 +1718,7 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
         function gameOver(reason) {
             gameState = 'GAMEOVER';
             playlist.pause();soundtrack.stop();
+            if(score>earnedPoints){bank+=score-earnedPoints;earnedPoints=score;try{localStorage.setItem(earnedKey,String(bank))}catch(e){}refreshWallet()}
             if (score > hiScore) {
                 hiScore = score;
                 localStorage.setItem('rr_hiscore_ptbr', hiScore);
