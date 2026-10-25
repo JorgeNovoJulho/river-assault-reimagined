@@ -1996,9 +1996,14 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
         for(const id of ['music-volume','sfx-volume','sarcasm-level','pad-deadzone']){
             const el=document.getElementById(id);el.style.width='100%';el.style.minHeight='40px';el.style.touchAction='pan-x';
         }
-        document.getElementById('pad-close').style.position='sticky';
-        document.getElementById('pad-close').style.bottom='4px';
-        document.getElementById('pad-close').style.zIndex='1';
+        // Botão de fechar no topo: sem rolagem obrigatória nem sobreposição ao Hangar.
+        const closeSettings=document.getElementById('pad-close');
+        controllerDialog.insertBefore(closeSettings,controllerDialog.firstChild);
+        closeSettings.textContent='✕ FECHAR CONFIGURAÇÕES';
+        closeSettings.style.position='relative';
+        closeSettings.style.width='min(100%,460px)';
+        closeSettings.style.minHeight='46px';
+        closeSettings.style.zIndex='2';
 
         const indicator = document.getElementById('controller-indicator');
         const settingsStatus = document.getElementById('gamepad-status');
