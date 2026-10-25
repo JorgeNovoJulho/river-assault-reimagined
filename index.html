@@ -1119,7 +1119,7 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
                 const down=!!(keys.ArrowDown||keys.KeyS||gamepadState.down||mouseInput.down);
                 const horizontal=(keys.ArrowRight||keys.KeyD||gamepadState.right?1:0)-(keys.ArrowLeft||keys.KeyA||gamepadState.left?1:0);
                 const vertical=(down?1:0)-(up?1:0);
-                player.currentScrollSpeed=player.baseScrollSpeed*(up?1.5:down?.72:1);
+                player.currentScrollSpeed=player.baseScrollSpeed*(up?1.5:down?0.72:1);
                 const normalization=Math.hypot(horizontal,vertical)||1;
                 player.x+=horizontal*player.speed/normalization;
                 player.y+=vertical*player.speed/normalization;
