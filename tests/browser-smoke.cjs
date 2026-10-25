@@ -3,7 +3,12 @@ const {chromium}=require('playwright');const {spawn}=require('node:child_process
  const server=spawn('npm',['run','dev','--','--host','127.0.0.1'],{stdio:'pipe'});
  let browser;
  try{
-  await new Promise((ok,fail)=>{let buf='';let timer=setTimeout(()=>fail(new Error('Vite indisponível')),25000);server.stdout.on('data',d=>{buf+=d.toString();if(buf.includes('127.0.0.1:5173')){clearTimeout(timer);ok()}});server.on('exit',code=>fail(new Error('Vite saiu: '+code)))});
+  let serverReady=false;
+  for(let attempt=0;attempt<75;attempt++){
+    try{const resp=await fetch('http://127.0.0.1:5173/');if(resp.ok){serverReady=true;break}}catch(e){}
+    await new Promise(resolve=>setTimeout(resolve,400));
+  }
+  if(!serverReady)throw new Error('Servidor Vite não respondeu em 30 segundos');
   browser=await chromium.launch({headless:true});
   const page=await browser.newPage({viewport:{width:390,height:700},isMobile:true,hasTouch:true});
   const errors=[];page.on('pageerror',e=>errors.push(e.message));
