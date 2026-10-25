@@ -1,6 +1,6 @@
 const {chromium}=require('playwright');const {spawn}=require('node:child_process');
 (async()=>{
- const server=spawn('npm',['run','dev','--','--host','127.0.0.1'],{stdio:'pipe'});
+ const server=spawn(process.execPath,['node_modules/vite/bin/vite.js','--host','127.0.0.1'],{stdio:'pipe'});
  let browser;
  try{
   let serverReady=false;
@@ -18,5 +18,5 @@ const {chromium}=require('playwright');const {spawn}=require('node:child_process
   const result=await page.evaluate(()=>({state:gameState,hidden:document.getElementById('start-screen').classList.contains('hidden'),error:document.getElementById('runtime-error')?.textContent,canvas:!!document.getElementById('gameCanvas')}));
   console.log(JSON.stringify({result,errors},null,2));
   if(result.state!=='PLAYING'||!result.hidden||result.error||errors.length)throw Error('O jogo não iniciou corretamente!');
- }finally{await browser?.close();server.kill();}
+ }finally{await browser?.close();server.kill('SIGKILL');}
 })().catch(e=>{console.error(e);process.exit(1)});
