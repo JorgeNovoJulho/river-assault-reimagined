@@ -391,6 +391,7 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
         let screenShake = 0;
         let bossTaunt = null;
         let bossFinalDialogue=false;
+        let wingmen=[];
         let bossDropPhase=0;
         let previousPlayerPosition=null;
         let hazardWaveCooldown=0;
@@ -463,6 +464,7 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
         document.getElementById('buy-plane').addEventListener('click',()=>{
             const plane=aircraftCatalog.PLANES[planeSelect.value];
             if(!plane?.price){document.getElementById('plane-status').textContent='Aeronave inicial gratuita';return}
+            if(plane.requiredJourney && journey<plane.requiredJourney){document.getElementById('plane-status').textContent='Requer Jornada 6';return}
             if(unlocked.includes(planeSelect.value)){document.getElementById('plane-status').textContent='Já desbloqueada';return}
             if(bank<plane.price){document.getElementById('plane-status').textContent='Faltam '+(plane.price-bank)+' pontos';return}
             bank-=plane.price;unlocked.push(planeSelect.value);
@@ -1218,6 +1220,9 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
                 ctx.restore();
             }
         }
+        function drawWingmen(){
+            for(const w of wingmen){ctx.save();ctx.translate(player.x+w.side*36,player.y+10);ctx.fillStyle='#18425e';ctx.strokeStyle='#67e8f9';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(0,-14);ctx.lineTo(-13,9);ctx.lineTo(0,3);ctx.lineTo(13,9);ctx.closePath();ctx.fill();ctx.stroke();ctx.fillStyle='#67e8f9';ctx.fillRect(-12,14,24*w.hp/w.maxHp,3);ctx.restore()}
+        }
         function drawRescueBoats(){
             for(const b of rescueBoats){
                 ctx.save();ctx.translate(b.x,b.y);
@@ -1305,6 +1310,11 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
 
             // Consumo de Gasolina
             player.fuel -= player.fuelDepletionRate * (player.currentScrollSpeed / player.baseScrollSpeed);
+            if(player.fuel<27 && !fuelDepots.some(f=>f.y>60&&f.y<VIRTUAL_HEIGHT-50)){
+                const bank=getRiverBoundariesAt(Math.max(85,player.y-120));
+                fuelDepots.push({x:bank.center,y:Math.max(85,player.y-120),width:24,height:32,indestructible:true});
+            }
+            player.fuel=Math.max(8,player.fuel);
             if (player.fuel <= 0) {
                 applyDamage(150, 'SEM COMBUSTÍVEL!');
                 return;
@@ -1482,7 +1492,12 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
                 if (Math.hypot(p.x - player.x, p.y - player.y) < 20) {
                     const config = aircraftCatalog.PLANES[selectedPlane];
                     const index = ['SINGLE','DOUBLE','SPREAD','LASER','MISSILE'].indexOf(p.type);
-                    if(p.type==='SHIELD'){
+                    if(p.type==='DRONES'){
+                        for(const side of [-1,1])if(!wingmen.some(w=>w.side===side))wingmen.push({side,hp:75,maxHp:75});
+                    }else if(p.type==='REPAIR'){
+                        if(!wingmen.length)wingmen=[-1,1].map(side=>({side,hp:75,maxHp:75}));
+                        else wingmen.forEach(w=>w.hp=w.maxHp);
+                    }else if(p.type==='SHIELD'){
                         player.shield=Math.min(player.maxShield,player.shield+60);
                         try{window.RiverSFX?.collect()}catch(e){}
                         createFloatingText(player.x,player.y,'ESCUDO +60','#67e8f9');
@@ -1595,6 +1610,7 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
 
         function applyDamage(amount, reason) {
             if (player.invulnerable > 0) return;
+            for(let i=wingmen.length-1;i>=0;i--){const w=wingmen[i];if(Math.random()<.35){w.hp-=amount;if(w.hp<=0)wingmen.splice(i,1)}}
 
             player.shield -= Math.round(amount*(bossActive||reason.includes('BOSS')?1.15:.7));
             player.invulnerable = 40;
@@ -1634,6 +1650,7 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
             screenShake = 0;
             bossTaunt = null;
             bossFinalDialogue=false;
+            wingmen=[];
             bossDropPhase=0;
             previousPlayerPosition=null;
             hazardWaveCooldown=0;
@@ -1662,6 +1679,8 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
             player.fuelDepletionRate = config.fuel*.8;
             player.weapon = config.weapons[0];
             player.weaponTimer = 0;
+            player.maxShield=150*(config.shieldMultiplier||1);
+            player.shield=player.maxShield;
             player.specialShots = 0;
             player.invulnerable = 0;
             player.disabledTimer = 0;
@@ -1702,8 +1721,14 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
             }
             try{window.RiverSFX?.weapon(player.weapon)}catch(e){}
             aircraftCatalog.shoot(player.weapon,player,bullets);
+            fireWingmen();
         }
 
+        function fireWingmen(){
+            for(const w of wingmen){
+                for(const angle of [-2.5,0,2.5])bullets.push({x:player.x+w.side*36,y:player.y+10,vx:angle,speed:8,type:player.weapon==='TRACKER'||player.weapon==='MISSILE'?'MISSILE':'LASER',color:'#67e8f9'});
+            }
+        }
         function triggerBomb() {
             if(gameState!=='PLAYING'||player.bombs<=0||player.disabledTimer>0)return;
             player.bombs--;
@@ -1767,7 +1792,9 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
                     { type: 'HYBRID', color: '#e879f9', label: 'H+' },
                     { type: 'CIRCLE', color: '#a78bfa', label: '360' },
                     { type: 'TRACKER', color: '#fb7185', label: 'TG' },
-                    { type: 'MULTI', color: '#fbbf24', label: 'MX' }
+                    { type: 'MULTI', color: '#fbbf24', label: 'MX' },
+                { type: 'DRONES', color:'#67e8f9',label:'2A' },
+                { type: 'REPAIR', color:'#a7f3d0',label:'R+' }
                 ];
                 // Disparo circular é raro: 1 em aproximadamente 45 coletas.
                 const selected = Math.random()<.022?types.find(t=>t.type==='CIRCLE'):types.filter(t=>t.type!=='CIRCLE')[Math.floor(Math.random()*(types.length-1))];
@@ -1850,6 +1877,7 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
             drawStructures();
             drawBombs();
             drawRescueBoats();
+            drawWingmen();
             drawPowerups();
             drawBullets();
             drawParticles();
