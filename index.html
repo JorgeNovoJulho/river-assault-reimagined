@@ -1417,6 +1417,7 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
                 bullets.forEach((b, bIndex) => {
                     if (Math.abs(b.x - e.x) < e.width / 2 + 2 && Math.abs(b.y - e.y) < e.height / 2 + 2) {
                         bullets.splice(bIndex, 1);
+                        if(e.type==='BOSS')dropBossReward(e,1);
                         e.hp--;
                         addExplosion(b.x, b.y, '#fba518', 4);
 
