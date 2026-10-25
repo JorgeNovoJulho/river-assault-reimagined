@@ -91,7 +91,7 @@
 
     <!-- Moldura Principal do Jogo -->
     <div id="game-container" class="relative crt-effect rounded-lg overflow-hidden border-4 border-slate-700 bg-black max-w-xl w-full flex-1 max-h-[800px]">
-        <div id="boss-dialogue-strip" aria-live="polite" class="hidden absolute top-0 left-0 right-0 z-20 pointer-events-none bg-slate-950/90 border-b-2 border-amber-500 px-3 py-2 text-center text-xs sm:text-sm" style="min-height:48px;max-height:64px;overflow:hidden"><b id="boss-dialogue-name" class="text-amber-400"></b> <span id="boss-dialogue-text" class="text-white"></span></div>
+        <div id="boss-dialogue-strip" aria-live="polite" class="hidden absolute top-0 left-0 right-0 z-20 pointer-events-none bg-slate-950/90 border-b-2 border-amber-500 px-3 py-2 text-center text-xs sm:text-sm" style="min-height:88px;max-height:114px;overflow:hidden;display:flex;flex-direction:column;justify-content:center;gap:7px;font-size:clamp(13px,2.8vw,18px);line-height:1.35"><b id="boss-dialogue-name" class="text-amber-400"></b> <span id="boss-dialogue-text" class="text-white"></span></div>
         <canvas id="gameCanvas" class="w-full h-full block"></canvas>
 
         <div id="controller-settings" class="hidden absolute inset-0 bg-slate-950/95 z-50 p-4 overflow-auto text-sm" role="dialog" aria-modal="true" aria-label="Configuração do controle">
@@ -394,6 +394,8 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
         let screenShake = 0;
         let bossTaunt = null;
         let bossDropPhase=0;
+        let previousPlayerPosition=null;
+        let hazardWaveCooldown=0;
         let bombFlash = 0;
         let sector = 1;
         let kills = 0;
@@ -665,7 +667,8 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
             // Inimigos com Spawn Constante
             const hazards=[...enemies,...structures,...islands,...rescueBoats,...fuelDepots];
             const clearLane=hazards.every(e=>Math.abs(e.y-y)>115);
-            if (clearLane && distance-lastEnemyDistance>75 && enemies.filter(e=>e.type!=='BOSS').length<6 && Math.random()<.75) {
+            const activeThreats=enemies.filter(e=>e.type!=='BOSS').length;
+            if (distance-lastEnemyDistance>60 && activeThreats<6 && (clearLane||activeThreats<2) && Math.random()<(activeThreats<2?.94:.7)) {
                 lastEnemyDistance=distance;
                 const rand = Math.random();
                 const spawnX = leftBank + 34 + Math.random() * (width - 68);
@@ -721,7 +724,7 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
             if(sarcasmLevel===0)return;
             const bucket=bossLines[(sector+Math.floor(missionTicks/250))%bossLines.length];
             const line=bucket[Math.floor(missionTicks/310)%bucket.length];
-            bossTaunt={name,line,ticks:Math.max(125,245-sarcasmLevel*18)};
+            bossTaunt={name,line,ticks:Math.max(250,390-sarcasmLevel*18)};
             try{window.RiverVoice?.chirp()}catch(e){}
         }
         function drawBossTaunt(){
@@ -768,6 +771,7 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
         function updateBossAttacks(e) {
             e.attackTimer++;
             e.shootTimer++;
+            if(e.rewardCooldown>0)e.rewardCooldown--;
 
             // Troca de Padrão Principal a cada 150 frames (~2.5s)
             if (e.attackTimer % 150 === 0) {
@@ -777,7 +781,7 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
             // Cada missão tem assinatura própria de projéteis, ciclos e velocidade.
             // As primeiras quatro mantêm o legado como camada adicional.
             const missionId=Math.max(1,Math.min(20,sector));
-            if(sarcasmLevel>0 && e.attackTimer%(560-sarcasmLevel*70)===0)showBossTaunt(e.name);
+            if(sarcasmLevel>0 && e.attackTimer%(940-sarcasmLevel*65)===0)showBossTaunt(e.name);
             const patterns=[
               [35,3,2.8,.5],[44,5,3,.75],[27,2,4,1.25],[53,7,2.4,.65],
               [21,3,4.4,1.8],[58,6,3.4,.4],[18,2,4.8,2.1],[39,8,2.7,1.2],
@@ -1259,6 +1263,7 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
             if (gameState !== 'PLAYING') return;
             missionTicks++;
             if(screenShake>0)screenShake*=.83;
+            if(hazardWaveCooldown>0)hazardWaveCooldown--;
             if(bombFlash>0)bombFlash--;
             // Timer de Desativação por EMP
             if (player.disabledTimer > 0) {
@@ -1310,7 +1315,13 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
 
             // Encostar na margem limita o avanço lateral, sem dano.
             const bounds = getRiverBoundariesAt(player.y);
-            player.x=Math.max(bounds.leftBank+player.width/2+2,Math.min(bounds.rightBank-player.width/2-2,player.x));
+            const safeLeft=Math.min(bounds.leftBank+player.width/2+2,bounds.center);
+            const safeRight=Math.max(bounds.rightBank-player.width/2-2,bounds.center);
+            player.x=Math.max(safeLeft,Math.min(safeRight,player.x));
+            // Se uma ilha ou margem móvel encurralar a nave, reposicionar no corredor seguro.
+            if(!Number.isFinite(player.x)||!Number.isFinite(player.y)){
+                player.x=bounds.center;player.y=VIRTUAL_HEIGHT-100;mouseInput.active=false;
+            }
 
             // Colisão com Ilhas
             islands.forEach(is => {
@@ -1602,6 +1613,8 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
             screenShake = 0;
             bossTaunt = null;
             bossDropPhase=0;
+            previousPlayerPosition=null;
+            hazardWaveCooldown=0;
             bombFlash = 0;
             sector = Math.max(1,Math.min(20,Number(levelSelector.value)||1));
             kills = 0;
@@ -1714,10 +1727,11 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
             if(!e||e.type!=='BOSS')return;
             const previous=e.rewardMark??Math.ceil(e.hp/Math.max(1,e.maxHp)*5);
             const next=Math.floor(Math.max(0,e.hp-damage)/Math.max(1,e.maxHp)*5);
-            if(next>=previous)return;
+            if(next>=previous || e.rewardCooldown>0)return;
             e.rewardMark=next;
-            const kind=next%2===0?'SHIELD':'LASER';
-            powerups.push({x:e.x+(Math.random()-.5)*75,y:e.y+32,type:kind,color:kind==='SHIELD'?'#22d3ee':'#a78bfa',label:kind==='SHIELD'?'S+':'W+'});
+            e.rewardCooldown=210+Math.floor(Math.random()*190);
+            const kind=Math.random()<.55?'SHIELD':['LASER','MISSILE','SPREAD'][Math.floor(Math.random()*3)];
+            powerups.push({x:e.x+(Math.random()-.5)*75,y:e.y+45,type:kind,color:kind==='SHIELD'?'#22d3ee':'#a78bfa',label:kind==='SHIELD'?'S+':'W+'});
             createFloatingText(e.x,e.y,'ITEM LIBERADO!','#67e8f9');
         }
         function spawnPowerupCheck(x, y) {
