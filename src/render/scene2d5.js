@@ -2,12 +2,26 @@
 (function(root){
 'use strict';
 const THEMES=[
- {name:'SELVA',ground:['#122d28','#285344'],water:['#0a3650','#0d7890'],accent:'#6dd4a0',foliage:'#2d795b',time:'day'},
- {name:'DESERTO',ground:['#745037','#c79a55'],water:['#06415d','#158aaa'],accent:'#eac57c',foliage:'#6f8554',time:'sunset'},
- {name:'ÁRTICO',ground:['#728e9f','#dfebef'],water:['#103c56','#4d9ab9'],accent:'#d3f3ff',foliage:'#9cbbc7',time:'day'},
- {name:'VULCÂNICO',ground:['#221e30','#584653'],water:['#3e1628','#a23832'],accent:'#ff8e5b',foliage:'#6f575c',time:'night'},
- {name:'CIDADE',ground:['#202c45','#485c6f'],water:['#142c4b','#376a8a'],accent:'#e4b96e',foliage:'#416d78',time:'night'},
- {name:'MONTANHAS',ground:['#2b4b55','#8da6a2'],water:['#17415e','#38869c'],accent:'#b6eadf',foliage:'#547e72',time:'sunset'}
+ {name:"FLORESTA TROPICAL",ground:['#122d28','#285344'],water:['#0a3650','#0d7890'],accent:'#6dd4a0',foliage:'#2d795b',time:'day'},
+ {name:"COSTA INDUSTRIAL",ground:['#182838','#46576b'],water:['#092b47','#21658b'],accent:'#ffc46c',foliage:'#446a72',time:'night'},
+ {name:"DESERTO QUENTE",ground:['#745037','#c79a55'],water:['#06415d','#158aaa'],accent:'#eac57c',foliage:'#6f8554',time:'sunset'},
+ {name:"PÂNTANO",ground:['#19342b','#456e4e'],water:['#1b4b45','#448577'],accent:'#b7e884',foliage:'#4b875f',time:'day'},
+ {name:"ARQUIPÉLAGO",ground:['#245054','#5b937e'],water:['#0b4d70','#2ea0bd'],accent:'#f5b76e',foliage:'#388874',time:'sunset'},
+ {name:"FIORDE ÁRTICO",ground:['#728e9f','#dfebef'],water:['#103c56','#4d9ab9'],accent:'#d3f3ff',foliage:'#9cbbc7',time:'night'},
+ {name:"SELVA DENSA",ground:['#102e28','#366b45'],water:['#0a434c','#167d88'],accent:'#95f4a5',foliage:'#24764e',time:'day'},
+ {name:"MEGACIDADE",ground:['#202c45','#485c6f'],water:['#142c4b','#376a8a'],accent:'#e4b96e',foliage:'#416d78',time:'night'},
+ {name:"CÂNION VULCÂNICO",ground:['#221e30','#584653'],water:['#3e1628','#a23832'],accent:'#ff8e5b',foliage:'#6f575c',time:'sunset'},
+ {name:"VALE ALPINO",ground:['#2b4b55','#8da6a2'],water:['#17415e','#38869c'],accent:'#b6eadf',foliage:'#547e72',time:'day'},
+ {name:"RIO DOURADO",ground:['#375b3f','#97a76a'],water:['#1a5064','#55a9a0'],accent:'#f6e394',foliage:'#4b976b',time:'sunset'},
+ {name:"CIDADE NEON",ground:['#151e3e','#3d426e'],water:['#101e4e','#326cc2'],accent:'#fa78d4',foliage:'#4658a0',time:'night'},
+ {name:"DELTA SELVAGEM",ground:['#18423b','#628f58'],water:['#124c65','#2a93a4'],accent:'#b4f29b',foliage:'#3a8964',time:'day'},
+ {name:"TEMPESTADE GLACIAL",ground:['#53667e','#d1e0e9'],water:['#174768','#69a7ba'],accent:'#e4fcff',foliage:'#92b3bc',time:'night'},
+ {name:"OÁSIS DESÉRTICO",ground:['#8b6041','#dcc17a'],water:['#145977','#48bbba'],accent:'#fce6a1',foliage:'#6da479',time:'day'},
+ {name:"FLORESTA LUMINOSA",ground:['#162d39','#2d636a'],water:['#12425f','#308d97'],accent:'#8bffdf',foliage:'#369b8a',time:'night'},
+ {name:"ESTALEIRO MILITAR",ground:['#26323f','#627077'],water:['#103e5a','#37718a'],accent:'#fcb983',foliage:'#6d7b81',time:'sunset'},
+ {name:"ILHAS GLACIAIS",ground:['#80939e','#e5f5f9'],water:['#1a4a71','#75bdd0'],accent:'#defaff',foliage:'#accad3',time:'day'},
+ {name:"RUÍNAS ELÉTRICAS",ground:['#202d45','#53687b'],water:['#143553','#507d9e'],accent:'#91ebff',foliage:'#517e85',time:'night'},
+ {name:"CONFLUÊNCIA DOS REINOS",ground:['#344b55','#9d9c75'],water:['#1b5678','#4eb3bd'],accent:'#f8e49b',foliage:'#5a8d73',time:'sunset'}
 ];
 function hash(n){const t=Math.sin(n*127.1+78.233)*43758.5453;return t-Math.floor(t)}
 function poly(c,coords,fill){c.fillStyle=fill;c.beginPath();c.moveTo(coords[0],coords[1]);for(let i=2;i<coords.length;i+=2)c.lineTo(coords[i],coords[i+1]);c.closePath();c.fill()}
@@ -32,9 +46,9 @@ function landscape(c,data,t){
        const x=side===0?span*(col+.35)/2:w-span*(col+.35)/2;
        const jitter=(hash(seed)-.5)*Math.min(20,span*.25);
        if(span<22)continue;
-       if(t.name==='CIDADE')building(c,x+jitter,y,0.65+hash(seed+1)*.5,t.time==='night');
-       else if(t.name==='DESERTO'){poly(c,[x-13,y+10,x-2,y-7,x+13,y+10],hash(seed)>.5?'#bf8f57':'#9e7648');if(hash(seed+3)>.68)tree(c,x,y,0.55,t,false)}
-       else if(t.name==='ÁRTICO'||t.name==='MONTANHAS'){poly(c,[x-17,y+13,x,y-15,x+20,y+13],hash(seed)>.5?'#a9c1c3':'#607d83');poly(c,[x-8,y,x,y-15,x+8,y],'#e3eff1')}
+       if(/CIDADE|INDUSTRIAL|ESTALEIRO|MEGACIDADE|RUÍNAS/.test(t.name))building(c,x+jitter,y,0.65+hash(seed+1)*.5,t.time==='night');
+       else if(/DESERTO|OÁSIS/.test(t.name)){poly(c,[x-13,y+10,x-2,y-7,x+13,y+10],hash(seed)>.5?'#bf8f57':'#9e7648');if(hash(seed+3)>.68)tree(c,x,y,0.55,t,false)}
+       else if(/ÁRTICO|GLACIAL|ALPINO|FIORDE/.test(t.name)){poly(c,[x-17,y+13,x,y-15,x+20,y+13],hash(seed)>.5?'#a9c1c3':'#607d83');poly(c,[x-8,y,x,y-15,x+8,y],'#e3eff1')}
        else tree(c,x+jitter,y,.75+hash(seed+2)*.45,t,t.time==='night');
      }
    }
