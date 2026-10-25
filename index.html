@@ -192,6 +192,7 @@
 
     <script src="./src/input/gamepad.js"></script>
     <script src="./src/game/aircraft.js"></script>
+    <script src="./src/game/clock.js"></script>
     <script>
         // --- SINTETIZADOR DE ÁUDIO CHIPTUNE RETRO (Web Audio API) ---
         class SoundEngine {
@@ -1364,6 +1365,7 @@
             document.getElementById('pause-screen').classList.add('hidden');
 
             gameState = 'PLAYING';
+            simulationClock.reset();
         }
 
         function fireWeapon() {
@@ -1509,6 +1511,7 @@
         window.addEventListener('gamepaddisconnected',()=>{lastControllerStatus='';});
         const mouseInput = {active:false,x:VIRTUAL_WIDTH/2,up:false,down:false,fire:false};
         let lastMouseShot = 0;
+        const simulationClock = new window.RiverClock();
         function gameLoop(timestamp = 0) {
             gamepadState = physicalGamepad.poll();
             const status = gamepadState.connected ? 'Controle: '+physicalGamepad.name.slice(0,35) : 'Controle: não conectado';
@@ -1559,7 +1562,8 @@
             if (gameState === 'PLAYING' && mouseInput.fire && timestamp - lastMouseShot > 145) {
                 sound.init(); fireWeapon(); lastMouseShot = timestamp;
             }
-            update();
+            if(gameState === "PLAYING") simulationClock.advance(timestamp, update);
+            else simulationClock.reset();
             render();
             requestAnimationFrame(gameLoop);
         }
