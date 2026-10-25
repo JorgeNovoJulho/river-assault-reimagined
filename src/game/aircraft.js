@@ -6,6 +6,8 @@ const PLANES={
  vespa:{name:'VESPA',speed:7.3,scroll:3.9,fuel:0.065,color:'#fbbf24',wing:'#d97706',weapons:['BURST','ALTERNATE','NEEDLE','PULSE','ROCKET']},
  cometa:{name:'COMETA',speed:8.2,scroll:4.6,fuel:0.082,color:'#38bdf8',wing:'#2563eb',weapons:['RAPID','DIAGONAL','TRIDENT','BEAM','PRECISION']},
  fenix:{name:'FÊNIX',speed:7.4,scroll:4.1,fuel:0.065,color:'#f472b6',wing:'#be185d',price:3500,weapons:['HYBRID','CIRCLE','TRACKER','TRIDENT','MISSILE']},
+ helicoptero:{name:'ÁGUIA VTOL',speed:6.6,scroll:3.5,fuel:0.052,color:'#60a5fa',wing:'#1e40af',price:8500,weapons:['HYBRID','SPREAD','TRACKER','MULTI','LASER']},
+ disco:{name:'DISCO AURORA',speed:7.2,scroll:3.8,fuel:0.048,color:'#c4b5fd',wing:'#7c3aed',price:15000,requiredJourney:6,shieldMultiplier:1.5,weapons:['PULSE','CIRCLE','BEAM','TRACKER','MULTI']},
  titan:{name:'TITÃ',speed:5.8,scroll:3.1,fuel:0.043,color:'#a3e635',wing:'#4d7c0f',price:6000,weapons:['MULTI','TRACKER','BEAM','CIRCLE','ROCKET']}
 };
 const WEAPONS={
