@@ -79,6 +79,7 @@
         <div>RECORDE: <span id="hi-score-text" class="text-yellow-400">000000</span></div>
         <div class="flex items-center gap-3">
             <button id="crt-toggle" class="bg-slate-800 hover:bg-slate-700 text-xs px-2 py-1 rounded border border-slate-600 transition">CRT: LIG</button>
+            <button id="controller-settings-btn" class="bg-slate-800 hover:bg-slate-700 text-xs px-2 py-1 rounded border border-slate-600">CONTROLE</button>
             <button id="sound-toggle" class="bg-slate-800 hover:bg-slate-700 text-xs px-2 py-1 rounded border border-slate-600 transition">SOM: LIG</button>
         </div>
     </div>
@@ -87,6 +88,22 @@
     <div id="game-container" class="relative crt-effect rounded-lg overflow-hidden border-4 border-slate-700 bg-black max-w-xl w-full flex-1 max-h-[800px]">
         <canvas id="gameCanvas" class="w-full h-full block"></canvas>
 
+        <div id="controller-settings" class="hidden absolute inset-0 bg-slate-950/95 z-50 p-4 overflow-auto text-sm" role="dialog" aria-modal="true" aria-label="Configuração do controle">
+            <h2 class="text-xl font-bold text-cyan-300 mb-2">CONFIGURAR CONTROLE</h2>
+            <p id="gamepad-status" class="text-slate-300 mb-3">Procurando controle...</p>
+            <p class="text-xs text-slate-400 mb-3">Conecte seu controle via Bluetooth ou USB nas configurações do dispositivo. Pressione qualquer botão para ativá-lo.</p>
+            <label for="pad-deadzone" class="block mb-1">Zona morta do analógico: <span id="pad-deadzone-value">22%</span></label>
+            <input id="pad-deadzone" type="range" min="8" max="55" value="22" class="w-full mb-3">
+            <div class="grid grid-cols-2 gap-2 mb-3">
+                <button id="map-fire" class="rounded bg-blue-700 p-3">Remapear TIRO</button>
+                <button id="map-bomb" class="rounded bg-amber-700 p-3">Remapear BOMBA</button>
+                <button id="map-pause" class="rounded bg-indigo-700 p-3">Remapear PAUSA</button>
+                <button id="pad-reset" class="rounded bg-slate-700 p-3">RESTAURAR</button>
+            </div>
+            <p id="map-help" aria-live="polite" class="text-yellow-300 min-h-8 mb-2">Ajustes salvos automaticamente neste dispositivo.</p>
+            <button id="pad-close" class="bg-green-700 p-3 rounded font-bold w-full">VOLTAR AO JOGO</button>
+        </div>
+        <div id="controller-indicator" class="absolute top-1 right-1 text-[10px] px-2 py-1 bg-slate-900/80 rounded z-10 pointer-events-none" aria-live="polite">Controle: aguardando</div>
         <!-- Indicador de Bloqueio EMP -->
         <div id="emp-warning" class="hidden absolute top-16 left-1/2 -translate-x-1/2 bg-red-600/90 text-white font-black px-4 py-2 rounded border-2 border-yellow-400 text-xs tracking-widest animate-pulse z-20">
             ⚠ SISTEMAS DESATIVADOS POR EMP! ⚠
@@ -1440,10 +1457,77 @@
         const physicalGamepad = new window.RiverGamepadInput();
         let gamepadState = physicalGamepad.poll();
         let lastGamepadShot = 0;
+        let controllerMenuOpen = false, pendingRemap = null, remapPreviousButtons = [];
+        let lastControllerStatus = '', controllerMenuIndex = 0, previousMenuDirection = false;
+        const controllerDialog = document.getElementById('controller-settings');
+        const indicator = document.getElementById('controller-indicator');
+        const settingsStatus = document.getElementById('gamepad-status');
+        const sensitivity = document.getElementById('pad-deadzone');
+        const mapHelp = document.getElementById('map-help');
+        const actions = ['fire','bomb','pause'];
+        function updateSensitivityUI() {
+            sensitivity.value = Math.round(physicalGamepad.settings.deadzone * 100);
+            document.getElementById('pad-deadzone-value').textContent = sensitivity.value + '%';
+            for (const name of actions) document.getElementById('map-'+name).textContent =
+                ({fire:'TIRO',bomb:'BOMBA',pause:'PAUSA'})[name] + ': BOTÃO ' + physicalGamepad.settings[name];
+        }
+        function showControllerSettings(open) {
+            controllerMenuOpen = open;pendingRemap=null;controllerMenuIndex=0;
+            controllerDialog.classList.toggle('hidden',!open);
+            updateSensitivityUI();
+            if(open) {remapPreviousButtons=[...physicalGamepad.lastButtons];document.getElementById('pad-close').focus();}
+        }
+        document.getElementById('controller-settings-btn').addEventListener('click',()=>showControllerSettings(true));
+        document.getElementById('pad-close').addEventListener('click',()=>showControllerSettings(false));
+        sensitivity.addEventListener('input',()=>{
+            physicalGamepad.configure({deadzone:Number(sensitivity.value)/100});updateSensitivityUI();
+        });
+        for(const action of actions) document.getElementById('map-'+action).addEventListener('click',()=>{
+            pendingRemap=action;remapPreviousButtons=[...physicalGamepad.lastButtons];
+            mapHelp.textContent='Pressione o botão desejado no controle para '+action.toUpperCase()+' (Esc cancela).';
+        });
+        document.getElementById('pad-reset').addEventListener('click',()=>{
+            physicalGamepad.reset();updateSensitivityUI();mapHelp.textContent='Padrão restaurado.';
+        });
+        window.addEventListener('keydown',e=>{
+            if(!controllerMenuOpen)return;
+            if(e.code==='Escape'){e.preventDefault();if(pendingRemap){pendingRemap=null;mapHelp.textContent='Remapeamento cancelado.'}else showControllerSettings(false)}
+        });
+        window.addEventListener('gamepadconnected',()=>{lastControllerStatus='';});
+        window.addEventListener('gamepaddisconnected',()=>{lastControllerStatus='';});
         const mouseInput = {active:false,x:VIRTUAL_WIDTH/2,up:false,down:false,fire:false};
         let lastMouseShot = 0;
         function gameLoop(timestamp = 0) {
             gamepadState = physicalGamepad.poll();
+            const status = gamepadState.connected ? 'Controle: '+physicalGamepad.name.slice(0,35) : 'Controle: não conectado';
+            if (status !== lastControllerStatus) {
+                lastControllerStatus=status;indicator.textContent=status;settingsStatus.textContent=status;
+            }
+            if(controllerMenuOpen){
+                if(pendingRemap){
+                    const next=physicalGamepad.lastButtons;
+                    const pressedIndex=next.findIndex((pressed,i)=>pressed&&!remapPreviousButtons[i]);
+                    if(pressedIndex>=0){
+                        physicalGamepad.configure({[pendingRemap]:pressedIndex});
+                        mapHelp.textContent='Botão '+pressedIndex+' atribuído com sucesso.';
+                        pendingRemap=null;updateSensitivityUI();
+                    }
+                    remapPreviousButtons=[...next];
+                } else if(gamepadState.connected) {
+                    // Permite navegar no diálogo com direcional e confirmar com o botão principal.
+                    const elements=[sensitivity,...actions.map(a=>document.getElementById('map-'+a)),document.getElementById('pad-reset'),document.getElementById('pad-close')];
+                    const direction=gamepadState.up||gamepadState.down;
+                    if(direction&&!previousMenuDirection){
+                        controllerMenuIndex=(controllerMenuIndex+(gamepadState.down?1:-1)+elements.length)%elements.length;
+                        elements[controllerMenuIndex].focus();
+                    }
+                    previousMenuDirection=direction;
+                    if(gamepadState.justPause)showControllerSettings(false);
+                }
+                // Configurações nunca causam tiros, bombas, início ou pausa no jogo.
+                draw();requestAnimationFrame(gameLoop);return;
+            }
+            previousMenuDirection=false;
             if (gamepadState.justPause) {
                 if (gameState === 'START' || gameState === 'GAMEOVER') { sound.init(); resetGame(); }
                 else togglePause();
