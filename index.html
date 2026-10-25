@@ -90,8 +90,8 @@
     </div>
 
     <!-- Moldura Principal do Jogo -->
+    <div id="boss-dialogue-strip" aria-live="polite" class="hidden" style="box-sizing:border-box;flex:0 0 auto;width:min(100%,960px);min-height:80px;max-height:94px;overflow:hidden;background:#0d1c34;border:2px solid #d69e34;border-radius:12px;padding:12px 16px;text-align:center;line-height:1.4;font-size:clamp(14px,2.9vw,18px);box-shadow:0 3px 14px #0007"><b id="boss-dialogue-name" style="display:block;color:#fbbf24"></b><span id="boss-dialogue-text" style="color:#fff"></span></div>
     <div id="game-container" class="relative crt-effect rounded-lg overflow-hidden border-4 border-slate-700 bg-black max-w-xl w-full flex-1 max-h-[800px]">
-        <div id="boss-dialogue-strip" aria-live="polite" class="hidden absolute top-0 left-0 right-0 z-20 pointer-events-none bg-slate-950/90 border-b-2 border-amber-500 px-3 py-2 text-center text-xs sm:text-sm" style="min-height:88px;max-height:114px;overflow:hidden;display:flex;flex-direction:column;justify-content:center;gap:7px;font-size:clamp(13px,2.8vw,18px);line-height:1.35"><b id="boss-dialogue-name" class="text-amber-400"></b> <span id="boss-dialogue-text" class="text-white"></span></div>
         <canvas id="gameCanvas" class="w-full h-full block"></canvas>
 
         <div id="controller-settings" class="hidden absolute inset-0 bg-slate-950/95 z-50 p-4 overflow-auto text-sm" role="dialog" aria-modal="true" aria-label="Configuração do controle">
@@ -393,6 +393,7 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
         let bombProjectiles = [];
         let screenShake = 0;
         let bossTaunt = null;
+        let bossFinalDialogue=false;
         let bossDropPhase=0;
         let previousPlayerPosition=null;
         let hazardWaveCooldown=0;
@@ -1462,6 +1463,7 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
 
                             if (e.type === 'BOSS') {
                                 bossActive = false;
+                                bossTaunt={name:e.name,line:['NÃO! MEUS SISTEMAS!','ISSO NÃO ACABOU, PILOTO!','IMPOSSÍVEL! VOCÊ VENCEU?!','RETIRADA! HA... HA...'][sector%4],ticks:360};
                                 if(sector===20) {gameState='VICTORY';playlist.pause();journey++;try{localStorage.setItem('river_journey_v1',String(journey))}catch(error){}document.getElementById('rank-award').textContent='JORNADA '+journey+' · '+rankName()+' · MULTIPLICADOR x'+scoreMultiplier().toFixed(2);document.getElementById('victory-screen').classList.remove('hidden')} else {sector++;missionTicks=0;missionStartDistance=distance;createFloatingText(e.x,e.y,'MISSÃO CONCLUÍDA!','#22c55e');document.getElementById('mission-banner').textContent=campaign.at(sector).name}
                             } else {
                                 createFloatingText(e.x, e.y, `+${e.score}`, '#facc15');
@@ -1541,13 +1543,6 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
 
         function drawHUD() {
             const fuelPercent = Math.max(0, player.fuel / player.maxFuel);
-            // Patente próxima ao indicador de escudo: painel independente e legível.
-            ctx.save();ctx.fillStyle='rgba(10,25,43,.88)';ctx.fillRect(160,VIRTUAL_HEIGHT-73,Math.min(VIRTUAL_WIDTH-172,238),40);
-            ctx.strokeStyle='#eab308';ctx.lineWidth=1.5;ctx.strokeRect(160,VIRTUAL_HEIGHT-73,Math.min(VIRTUAL_WIDTH-172,238),40);
-            ctx.font='bold 11px system-ui';ctx.fillStyle='#fde68a';ctx.textAlign='left';
-            ctx.fillText('PATENTE · JORNADA '+journey,169,VIRTUAL_HEIGHT-57);
-            ctx.fillStyle='#f8fafc';ctx.fillText(rankName().slice(0,27),169,VIRTUAL_HEIGHT-42);ctx.restore();
-
             ctx.fillStyle='#fef08a';ctx.font='bold 12px system-ui';ctx.textAlign='left';ctx.fillText('BOMBAS: '+player.bombs+'/5',12,37);
             ctx.fillStyle='#bbf7d0';ctx.font='bold 11px system-ui';ctx.textAlign='right';ctx.fillText('RESGATADOS: '+rescuedSoldiers+' · VIDAS: '+lives,VIRTUAL_WIDTH-15,54);ctx.textAlign='left';
             ctx.fillStyle = 'rgba(15, 23, 42, 0.85)';
@@ -1576,6 +1571,12 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
             ctx.fillStyle = '#ffffff';
             ctx.font = 'bold 10px monospace';
             ctx.fillText(`ESCUDO: ${Math.ceil(player.shield)}`, 168, VIRTUAL_HEIGHT - 17);
+            // Mesma linha: escudo à esquerda, patente compacta à direita.
+            ctx.fillStyle='rgba(9,26,45,.93)';ctx.fillRect(286,VIRTUAL_HEIGHT-32,104,22);
+            ctx.strokeStyle='#eab308';ctx.strokeRect(286,VIRTUAL_HEIGHT-32,104,22);
+            ctx.font='bold 9px system-ui';ctx.fillStyle='#fde68a';
+            ctx.fillText('J'+journey+' '+rankName().slice(0,15),291,VIRTUAL_HEIGHT-18);
+
 
             ctx.fillStyle = 'rgba(15, 23, 42, 0.85)';
             ctx.fillRect(10, 10, VIRTUAL_WIDTH - 20, 26);
@@ -1632,6 +1633,7 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
             bombProjectiles = [];
             screenShake = 0;
             bossTaunt = null;
+            bossFinalDialogue=false;
             bossDropPhase=0;
             previousPlayerPosition=null;
             hazardWaveCooldown=0;
