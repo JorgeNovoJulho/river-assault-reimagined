@@ -130,8 +130,8 @@ function enemy(c,e,time){
  else if(type==='SHIP'){poly(c,[-12,-17,0,-22,12,-17,13,12,5,20,-5,20,-13,12],'#3b556d');poly(c,[-8,-13,0,-17,8,-13,8,13,-8,13],'#849cac');c.fillStyle='#d8e9ee';c.fillRect(-5,-8,10,14);c.fillStyle='#293d50';c.fillRect(-2,-16,4,9);c.fillRect(-3,9,6,5);c.fillStyle='#fbbf24';c.fillRect(-1,-18,2,2)}
  else if(type==='TURRET'){c.fillStyle='#6a778b';c.beginPath();c.arc(0,0,11,0,Math.PI*2);c.fill();c.fillStyle='#efbe7b';c.fillRect(-3,-16,6,16)}
  else if(type==='BOSS'){
-  const id=((e.bossId||1)-1)%20,mode=id%5,variant=Math.floor(id/5),w=Math.min(175,e.width||110),h=Math.min(85,e.height||60);
-  const palette=[['#667f98','#cbd5e1','#38bdf8'],['#7c516c','#f9a8d4','#f59e0b'],['#516e55','#bef264','#f87171'],['#625781','#c4b5fd','#67e8f9']][variant];
+  const id=((e.bossId||1)-1)%20,mode=({ship:0,heli:1,sub:2,mech:3,insect:4,jet:4}[e.bossVisual]??id%5),variant=Math.floor(id/5),w=Math.min(175,e.width||110),h=Math.min(85,e.height||60);
+  const biomePalettes={jungle:['#47785d','#b1e49a','#facc15'],industrial:['#536878','#bfdbfe','#fbbf24'],desert:['#a87948','#f9de97','#ef4444'],arctic:['#799db8','#e0f7ff','#38bdf8'],volcanic:['#713c44','#f87171','#fbbf24'],city:['#485b89','#c4b5fd','#67e8f9'],neon:['#5943a4','#f5a9fd','#22d3ee'],glacial:['#7e9db9','#e5f8ff','#7dd3fc']};const palette=biomePalettes[e.biome]||[['#667f98','#cbd5e1','#38bdf8'],['#7c516c','#f9a8d4','#f59e0b'],['#516e55','#bef264','#f87171'],['#625781','#c4b5fd','#67e8f9']][variant];
   c.fillStyle='rgba(1,9,22,.5)';c.beginPath();c.ellipse(5,12,w*.52,h*.42,0,0,7);c.fill();
   if(mode===0){ // cruzador / fortaleza aérea
     poly(c,[-w*.42,10,-w*.34,-h*.3,0,-h*.45,w*.34,-h*.3,w*.42,10,w*.2,h*.37,-w*.2,h*.37],palette[0]);
