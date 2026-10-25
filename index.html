@@ -2145,7 +2145,8 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
                     if(gamepadState.justPause)showControllerSettings(false);
                 }
                 // Configurações nunca causam tiros, bombas, início ou pausa no jogo.
-                render();requestAnimationFrame(gameLoop);return;
+                // Congelar desenho pesado do Canvas enquanto ajusta configurações.
+                requestAnimationFrame(gameLoop);return;
             }
             previousMenuDirection=false;previousMenuConfirm=false;
             if (gamepadState.justPause) {
