@@ -81,6 +81,7 @@
         <div class="flex items-center gap-3">
             <button id="crt-toggle" class="bg-slate-800 hover:bg-slate-700 text-xs px-2 py-1 rounded border border-slate-600 transition">CRT: LIG</button>
             <button id="controller-settings-btn" class="bg-slate-800 hover:bg-slate-700 text-xs px-2 py-1 rounded border border-slate-600">CONTROLE</button>
+            <button id="music-toggle" class="bg-slate-800 hover:bg-slate-700 text-xs px-2 py-1 rounded border border-slate-600">MÚSICA: LIG</button>
             <button id="sound-toggle" class="bg-slate-800 hover:bg-slate-700 text-xs px-2 py-1 rounded border border-slate-600 transition">SOM: LIG</button>
         </div>
     </div>
@@ -232,6 +233,7 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
     <script src="./src/game/aircraft.js"></script>
     <script src="./src/game/clock.js"></script>
     <script src="./src/render/scene2d5.js"></script>
+    <script src="./src/audio/music.js"></script>
     <script>
         // --- SINTETIZADOR DE ÁUDIO CHIPTUNE RETRO (Web Audio API) ---
         class SoundEngine {
@@ -1408,6 +1410,7 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
 
             gameState = 'PLAYING';
             simulationClock.reset();
+            soundtrack.start();
         }
 
         function fireWeapon() {
@@ -1535,8 +1538,26 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
         window.addEventListener('gamepaddisconnected',()=>{lastControllerStatus='';});
         const mouseInput = {active:false,x:VIRTUAL_WIDTH/2,up:false,down:false,fire:false};
         let lastMouseShot = 0;
+        const soundtrack=new window.RiverMusic();
+        document.getElementById('music-toggle').addEventListener('click',()=>{
+            const on=soundtrack.toggle();document.getElementById('music-toggle').textContent='MÚSICA: '+(on?'LIG':'DES');
+        });
+        let lastGameError='';
+        function showGameError(error){
+            const message=String(error&&error.message||error);
+            if(message===lastGameError)return;
+            lastGameError=message;
+            let notice=document.getElementById('runtime-error');
+            if(!notice){notice=document.createElement('div');notice.id='runtime-error';
+                notice.style.cssText='position:absolute;top:8px;left:8px;right:8px;z-index:90;background:#711b25;color:white;padding:12px;border-radius:8px;max-height:40%;overflow:auto;font:12px system-ui;';
+                document.getElementById('game-container').appendChild(notice);}
+            notice.textContent='Falha no jogo: '+message+'. Envie esta mensagem ao desenvolvedor.';
+        }
+        window.addEventListener('error',e=>showGameError(e.error||e.message));
+        window.addEventListener('unhandledrejection',e=>showGameError(e.reason||'Falha de recurso'));
         const simulationClock = new window.RiverClock();
         function gameLoop(timestamp = 0) {
+            try {
             gamepadState = physicalGamepad.poll();
             const status = gamepadState.connected ? 'Controle: '+physicalGamepad.name.slice(0,35) : 'Controle: não conectado';
             if (status !== lastControllerStatus) {
@@ -1589,7 +1610,12 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
             if(gameState === "PLAYING") simulationClock.advance(timestamp, update);
             else simulationClock.reset();
             render();
-            requestAnimationFrame(gameLoop);
+            } catch(error) {
+                console.error('River Assault runtime:',error);
+                showGameError(error);
+            } finally {
+                requestAnimationFrame(gameLoop);
+            }
         }
 
         function resizeCanvas() {
@@ -1733,10 +1759,10 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
             document.getElementById('sound-toggle').innerText = `SOM: ${sound.enabled ? 'LIG' : 'DES'}`;
         });
 
-        window.onload = () => {
-            initRiver();
-            requestAnimationFrame(gameLoop);
-        };
+        window.addEventListener('load',()=>{
+            try{initRiver();requestAnimationFrame(gameLoop);}
+            catch(error){showGameError(error);console.error(error)}
+        });
     </script>
 </body>
 </html>
