@@ -185,7 +185,7 @@
       </div>
     </div>
     <style>
-      .touch-layout { width:100%;max-width:560px;display:flex;justify-content:space-between;align-items:center;gap:8px;padding:6px 12px;touch-action:none;user-select:none;min-height:142px; }
+      .touch-layout { width:100%;max-width:920px;display:flex;justify-content:space-between;align-items:center;gap:8px;padding:6px 12px;touch-action:none;user-select:none;min-height:142px; }
       .joystick-zone {width:136px;height:132px;display:flex;align-items:center;justify-content:center;touch-action:none;flex-shrink:0;}
       .joystick-base {position:relative;border:3px solid #7286ad;border-radius:50%;width:120px;height:120px;background:radial-gradient(circle,#344967,#101726);box-shadow:inset 0 2px 14px #000,0 3px 12px #0008;}
       .joystick-knob {position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);height:55px;width:55px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#b7d3ee,#3277bc 55%,#16243e);border:3px solid #9ac9ed;box-shadow:0 4px 7px #0008;pointer-events:none;}
@@ -205,12 +205,12 @@
 *{box-sizing:border-box}
 html,body{margin:0;width:100%;min-height:100%;overscroll-behavior:none}
 body{height:100dvh!important;min-height:0!important;padding:env(safe-area-inset-top) max(6px,env(safe-area-inset-right)) env(safe-area-inset-bottom) max(6px,env(safe-area-inset-left))!important;display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:flex-start!important;gap:4px;overflow:hidden!important}
-body>div:first-of-type{flex:0 0 auto;width:100%;max-width:660px;min-height:34px;gap:6px;flex-wrap:wrap;margin:0!important;padding:2px 4px!important;font-size:clamp(9px,2.6vw,12px)}
+body>div:first-of-type{flex:0 0 auto;width:100%;max-width:960px;min-height:34px;gap:6px;flex-wrap:wrap;margin:0!important;padding:2px 4px!important;font-size:clamp(9px,2.6vw,12px)}
 body>div:first-of-type>div{gap:4px;flex-wrap:wrap;justify-content:flex-end}
 body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
-#game-container{position:relative;flex:1 1 auto!important;min-height:120px!important;max-height:none!important;width:min(100%,560px);border:2px solid #326483!important;border-radius:16px!important;overflow:hidden;isolation:isolate}
+#game-container{position:relative;flex:1 1 auto!important;min-height:120px!important;max-height:none!important;width:min(100%,920px);border:2px solid #326483!important;border-radius:16px!important;overflow:hidden;isolation:isolate}
 #gameCanvas{display:block;width:100%;height:100%;object-fit:fill}
-#touch-controls{flex:0 0 auto;width:min(100%,560px);max-width:100%;min-height:0!important;height:clamp(104px,21dvh,158px);padding:4px 10px!important;gap:12px;display:flex;justify-content:space-between;align-items:center;background:linear-gradient(165deg,rgba(35,59,80,.93),rgba(10,19,35,.94));border:1px solid #466e87;border-radius:20px;margin:0 0 3px;box-shadow:0 6px 24px rgba(0,0,0,.38)}
+#touch-controls{flex:0 0 auto;width:min(100%,920px);max-width:100%;min-height:0!important;height:clamp(104px,21dvh,158px);padding:4px 10px!important;gap:12px;display:flex;justify-content:space-between;align-items:center;background:linear-gradient(165deg,rgba(35,59,80,.93),rgba(10,19,35,.94));border:1px solid #466e87;border-radius:20px;margin:0 0 3px;box-shadow:0 6px 24px rgba(0,0,0,.38)}
 #virtual-joystick{width:clamp(86px,27vw,132px);height:100%;min-width:0;touch-action:none}
 .joystick-base{width:min(100%,clamp(86px,25vw,126px));height:auto;aspect-ratio:1;border:2px solid #5b829a;background:radial-gradient(circle at 35% 25%,#375d72,#14283c 56%,#0b1425);box-shadow:inset 0 6px 13px #07121f,0 0 0 5px #132638}
 .joystick-knob{width:45%;height:45%;background:radial-gradient(circle at 30% 20%,#b5f8ff,#3b9ec6 50%,#173450);border:2px solid #c0f2ff}
@@ -234,7 +234,7 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
 #emp-warning{max-width:94%;white-space:normal;text-align:center}
 @media (max-height:610px){#touch-controls{height:96px;padding:2px 8px!important}#virtual-joystick{width:90px}.joystick-base{width:88px}.action-cluster{grid-template-rows:42px 42px}.fire-action{height:77px}body>div:first-of-type{min-height:30px}}
 @media (max-width:350px){#touch-controls{height:100px;padding:2px 5px!important;gap:4px}.action-cluster{grid-template-columns:57px 65px;grid-template-rows:42px 42px}.fire-action{height:76px}#virtual-joystick{width:90px}.joystick-base{width:86px}body>div:first-of-type button{font-size:9px;padding:3px}}
-@media (pointer:fine) and (min-width:768px){#touch-controls{display:none!important}#game-container{max-width:660px}}
+@media (pointer:fine) and (min-width:768px){#touch-controls{display:none!important}#game-container{max-width:960px}}
 </style>
     <script src="./src/input/gamepad.js"></script>
     <script src="./src/game/aircraft.js"></script>
@@ -373,6 +373,7 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
         let missionTicks = 0;
         let bombProjectiles = [];
         let screenShake = 0;
+        let bossTaunt = null;
         let bombFlash = 0;
         let sector = 1;
         let kills = 0;
@@ -625,9 +626,24 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
             }
         }
 
+        const bossLines=['VOCÊ NÃO PASSARÁ!', 'MEU RIO, MINHAS REGRAS!', 'SEUS MÍSSEIS NÃO BASTAM!', 'VAMOS DANÇAR, PILOTO!', 'PREPARE-SE PARA CAIR!', 'A NOITE É MINHA!', 'VOCÊ CHEGOU LONGE DEMAIS!', 'DESVIE DISTO!'];
+        function showBossTaunt(name){
+            bossTaunt={name,line:bossLines[(sector*7+Math.floor(missionTicks/60))%bossLines.length],ticks:240};
+            try{window.RiverVoice?.chirp()}catch(e){}
+        }
+        function drawBossTaunt(){
+            if(!bossTaunt||bossTaunt.ticks--<=0)return;
+            const w=262,x=(VIRTUAL_WIDTH-w)/2,y=75;
+            ctx.save();ctx.fillStyle='rgba(8,21,39,.92)';ctx.strokeStyle='#fbbf24';ctx.lineWidth=2;
+            ctx.beginPath();ctx.roundRect(x,y,w,63,13);ctx.fill();ctx.stroke();
+            ctx.beginPath();ctx.moveTo(x+w/2-10,y+63);ctx.lineTo(x+w/2,y+75);ctx.lineTo(x+w/2+10,y+63);ctx.closePath();ctx.fill();ctx.stroke();
+            ctx.fillStyle='#fbbf24';ctx.font='bold 12px system-ui';ctx.textAlign='center';ctx.fillText(bossTaunt.name.slice(0,32),VIRTUAL_WIDTH/2,y+20);
+            ctx.fillStyle='white';ctx.font='bold 13px system-ui';ctx.fillText(bossTaunt.line,VIRTUAL_WIDTH/2,y+44);ctx.restore();
+        }
         function spawnBoss(y) {
             bossActive = true;
             const mission=campaign.at(sector);
+            showBossTaunt(mission.boss);
             const bossConfig = {...BOSS_TYPES[mission.bossPattern],name:mission.boss,hp:mission.bossHp,score:1000+sector*240};
             const cycleMultiplier = 1 + Math.floor((sector - 1) / BOSS_TYPES.length) * 0.4;
             const calculatedHp = Math.round(bossConfig.hp * cycleMultiplier);
@@ -666,6 +682,7 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
             // Cada missão tem assinatura própria de projéteis, ciclos e velocidade.
             // As primeiras quatro mantêm o legado como camada adicional.
             const missionId=Math.max(1,Math.min(20,sector));
+            if(e.attackTimer%310===0)showBossTaunt(e.name);
             const patterns=[
               [35,3,2.8,.5],[44,5,3,.75],[27,2,4,1.25],[53,7,2.4,.65],
               [21,3,4.4,1.8],[58,6,3.4,.4],[18,2,4.8,2.1],[39,8,2.7,1.2],
@@ -1154,7 +1171,10 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
                 const normalization=Math.hypot(horizontal,vertical)||1;
                 player.x+=horizontal*player.speed/normalization;
                 player.y+=vertical*player.speed/normalization;
-                if(mouseInput.active&&!horizontal)player.x+=Math.max(-player.speed,Math.min(player.speed,mouseInput.x-player.x));
+                if(mouseInput.active&&!horizontal){
+                    player.x+=Math.max(-player.speed,Math.min(player.speed,mouseInput.x-player.x));
+                    if(!up&&!down)player.y+=Math.max(-player.speed,Math.min(player.speed,mouseInput.y-player.y));
+                }
             }
             player.y=Math.max(58,Math.min(VIRTUAL_HEIGHT-60,player.y));
             player.targetY=player.y;
@@ -1465,6 +1485,7 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
             missionTicks = 0;
             bombProjectiles = [];
             screenShake = 0;
+            bossTaunt = null;
             bombFlash = 0;
             sector = Math.max(1,Math.min(20,Number(levelSelector.value)||1));
             kills = 0;
@@ -1511,6 +1532,7 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
 
         function fireWeapon() {
             if (gameState !== 'PLAYING' || player.disabledTimer > 0) return;
+            try{window.RiverSFX?.weapon(player.weapon)}catch(e){}
             sound.playShoot();
             aircraftCatalog.shoot(player.weapon,player,bullets);
         }
@@ -1523,6 +1545,7 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
         }
         function explodeBomb(b){
             sound.playExplosion(true);
+            try{window.RiverSFX?.impact()}catch(e){}
             screenShake=15;bombFlash=13;
             enemyBullets=[];
             enemies.forEach(e=>{
@@ -1618,6 +1641,7 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
             drawParticles();
             drawFloatingTexts();
             drawHUD();
+            drawBossTaunt();
             if(bombFlash>0){ctx.fillStyle='rgba(255,246,215,'+(bombFlash/13*.4)+')';ctx.fillRect(0,0,VIRTUAL_WIDTH,VIRTUAL_HEIGHT)}
             ctx.restore();
         }
@@ -1663,7 +1687,7 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
         });
         window.addEventListener('gamepadconnected',()=>{lastControllerStatus='';});
         window.addEventListener('gamepaddisconnected',()=>{lastControllerStatus='';});
-        const mouseInput = {active:false,x:VIRTUAL_WIDTH/2,up:false,down:false,fire:false};
+        const mouseInput = {active:false,x:VIRTUAL_WIDTH/2,y:VIRTUAL_HEIGHT-100,up:false,down:false,fire:false};
         let lastMouseShot = 0;
         const playlist=new window.RiverPlaylist({onStatus:(message)=>{
             const status=document.getElementById('playlist-status');if(status)status.textContent=message;
@@ -1768,9 +1792,10 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
             const bounds = canvas.getBoundingClientRect();
             mouseInput.active = true;
             mouseInput.x = ((e.clientX - bounds.left) / bounds.width) * VIRTUAL_WIDTH;
+            mouseInput.y = ((e.clientY - bounds.top) / bounds.height) * VIRTUAL_HEIGHT;
             const vertical = (e.clientY - bounds.top) / bounds.height;
-            mouseInput.up = vertical < 0.32;
-            mouseInput.down = vertical > 0.72;
+            mouseInput.up = false;
+            mouseInput.down = false;
         });
         canvas.addEventListener('pointerleave', () => {mouseInput.active=false;mouseInput.fire=false;mouseInput.up=false;mouseInput.down=false;});
         canvas.addEventListener('pointerdown', e => {
