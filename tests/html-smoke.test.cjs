@@ -33,3 +33,14 @@ test('campanha tem 20 missões e identificação exclusiva dos chefes',()=>{
  assert.equal(new Set(levels.map(x=>x.boss)).size,20);
  assert.deepEqual(Array.from(new Set(levels.map(x=>x.difficulty))).sort(),[1,2,3]);
 });
+
+test('as vinte missões possuem biomas e chefes temáticos; represas têm abertura de passagem',()=>{
+ const context={window:{}};vm.runInNewContext(fs.readFileSync('src/game/campaign.js','utf8'),context);
+ const levels=context.window.RiverCampaign.levels;
+ assert.equal(levels.length,20);
+ assert.ok(levels.every(l=>l.biome&&l.bossVisual&&Number.isInteger(l.hazardSet)));
+ const html=fs.readFileSync('index.html','utf8');
+ assert.ok(html.includes("type==='DAM' && Math.abs(player.x-p.x)<p.opening/2-player.width/2"),'corredor livre ausente');
+ assert.ok(html.includes("opening:passage"),'represa sem abertura');
+ assert.ok(html.includes("islandLastDistance"),'distância entre ilhas ausente');
+});
