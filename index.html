@@ -250,6 +250,16 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
 @media (max-height:610px){#touch-controls{height:96px;padding:2px 8px!important}#virtual-joystick{width:90px}.joystick-base{width:88px}.action-cluster{grid-template-rows:42px 42px}.fire-action{height:77px}body>div:first-of-type{min-height:30px}}
 @media (max-width:350px){#touch-controls{height:100px;padding:2px 5px!important;gap:4px}.action-cluster{grid-template-columns:57px 65px;grid-template-rows:42px 42px}.fire-action{height:76px}#virtual-joystick{width:90px}.joystick-base{width:86px}body>div:first-of-type button{font-size:9px;padding:3px}}
 @media (pointer:fine) and (min-width:768px){#touch-controls{display:none!important}#game-container{max-width:960px}}
+
+/* Menu compacto e rolável: botão Iniciar sempre alcançável em telas pequenas. */
+#start-screen { padding:8px 12px 14px!important;row-gap:4px!important;overflow-y:auto!important;overflow-x:hidden!important;scrollbar-width:thin;align-items:center;justify-content:flex-start!important;min-height:0; }
+#start-screen>h1 { font-size:clamp(21px,5vw,34px)!important;margin:2px 0!important;line-height:1.1!important; }
+#start-screen>p { margin:1px 0!important;line-height:1.2!important; }
+#start-screen>details { padding:5px 9px!important;margin:2px 0!important; }
+#start-screen select,#start-screen input { min-height:32px!important; }
+#start-screen button { min-height:38px!important;margin:3px 0!important; }
+#start-btn { position:sticky!important;bottom:0!important;z-index:5;box-shadow:0 -5px 18px rgba(0,0,0,.75); }
+@media(max-height:750px){#start-screen {gap:2px!important;padding:5px 10px 7px!important;}#start-screen>div{margin:1px 0!important;padding:2px 5px!important;}#start-screen h1{font-size:22px!important;}#start-screen p{font-size:11px!important;}#start-screen button{padding:7px 10px!important;min-height:34px!important;}}
 </style>
     <script src="./src/input/gamepad.js"></script>
     <script src="./src/game/aircraft.js"></script>
