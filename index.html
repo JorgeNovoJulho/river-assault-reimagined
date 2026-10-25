@@ -370,6 +370,10 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
 
         let distance = 0;
         let missionStartDistance = 0;
+        let missionTicks = 0;
+        let bombProjectiles = [];
+        let screenShake = 0;
+        let bombFlash = 0;
         let sector = 1;
         let kills = 0;
         let crtEnabled = true;
@@ -544,11 +548,15 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
 
         // --- GERADOR DE ENTIDADES ---
         function spawnMapEntities(y, center, width) {
-            if (bossActive) return;
+            if (bossActive) {
+                // Reabastecimento vital nas batalhas longas contra chefes.
+                if (fuelDepots.length < 3 && Math.random() < 0.16) fuelDepots.push({x:center+(Math.random()-.5)*width*.5,y,width:24,height:32,hp:1});
+                return;
+            }
 
             distance += segmentHeight;
 
-            if (distance - missionStartDistance > campaign.at(sector).bossDistance) {
+            if (missionTicks >= 90*60 && distance - missionStartDistance > campaign.at(sector).bossDistance) {
                 spawnBoss(y);
                 return;
             }
@@ -1103,7 +1111,9 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
 
         function update() {
             if (gameState !== 'PLAYING') return;
-
+            missionTicks++;
+            if(screenShake>0)screenShake*=.83;
+            if(bombFlash>0)bombFlash--;
             // Timer de Desativação por EMP
             if (player.disabledTimer > 0) {
                 player.disabledTimer--;
@@ -1145,6 +1155,7 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
             }
 
             updateRiver();
+            updateBombs();
 
             // Colisão com Margens
             const bounds = getRiverBoundariesAt(player.y);
@@ -1268,7 +1279,7 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
 
                             if (e.type === 'BOSS') {
                                 bossActive = false;
-                                if(sector===20) {gameState='VICTORY';playlist.pause();document.getElementById('victory-screen').classList.remove('hidden')} else {sector++;missionStartDistance=distance;createFloatingText(e.x,e.y,'MISSÃO CONCLUÍDA!','#22c55e');document.getElementById('mission-banner').textContent=campaign.at(sector).name}
+                                if(sector===20) {gameState='VICTORY';playlist.pause();document.getElementById('victory-screen').classList.remove('hidden')} else {sector++;missionTicks=0;missionStartDistance=distance;createFloatingText(e.x,e.y,'MISSÃO CONCLUÍDA!','#22c55e');document.getElementById('mission-banner').textContent=campaign.at(sector).name}
                             } else {
                                 createFloatingText(e.x, e.y, `+${e.score}`, '#facc15');
                             }
@@ -1430,6 +1441,10 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
             score = 0;
             distance = 0;
             missionStartDistance = 0;
+            missionTicks = 0;
+            bombProjectiles = [];
+            screenShake = 0;
+            bombFlash = 0;
             sector = Math.max(1,Math.min(20,Number(levelSelector.value)||1));
             kills = 0;
             rescuedSoldiers = 0;
@@ -1480,19 +1495,43 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
         }
 
         function triggerBomb() {
-            if (gameState !== 'PLAYING' || player.bombs <= 0 || player.disabledTimer > 0) return;
-
+            if(gameState!=='PLAYING'||player.bombs<=0||player.disabledTimer>0)return;
             player.bombs--;
-            document.getElementById('bomb-count-touch').innerText = `(${player.bombs})`;
+            document.getElementById('bomb-count-touch').innerText='('+player.bombs+')';
+            bombProjectiles.push({x:player.x,y:player.y-16,vy:-9,life:52});
+        }
+        function explodeBomb(b){
             sound.playExplosion(true);
-
-            enemyBullets = [];
-            enemies.forEach((e) => {
-                e.hp -= 12;
-                addExplosion(e.x, e.y, '#f97316', 20);
+            screenShake=15;bombFlash=13;
+            enemyBullets=[];
+            enemies.forEach(e=>{
+                e.hp-=e.type==='BOSS'?16:999;
+                addExplosion(e.x,e.y,'#ffb347',20);
             });
-
-            createFloatingText(VIRTUAL_WIDTH / 2, VIRTUAL_HEIGHT / 2, 'BOMBA DETONADA!', '#ef4444');
+            for(let i=enemies.length-1;i>=0;i--){
+                if(enemies[i].hp<=0&&enemies[i].type!=='BOSS'){
+                    score+=enemies[i].score||100;kills++;
+                    enemies.splice(i,1);
+                }
+            }
+            addExplosion(b.x,b.y,'#fff3ad',34);
+            createFloatingText(b.x,b.y,'BOMBA IMPACTOU!','#fbbf24');
+        }
+        function updateBombs(){
+            for(let i=bombProjectiles.length-1;i>=0;i--){
+                const b=bombProjectiles[i];b.y+=b.vy;b.life--;
+                const hit=enemies.some(e=>Math.abs(e.x-b.x)<e.width/2+13&&Math.abs(e.y-b.y)<e.height/2+10);
+                if(hit||b.y<75||b.life<=0){explodeBomb(b);bombProjectiles.splice(i,1)}
+            }
+        }
+        function drawBombs(){
+            for(const b of bombProjectiles){
+                ctx.save();ctx.translate(b.x,b.y);
+                ctx.fillStyle='#fb923c';ctx.shadowColor='#f59e0b';ctx.shadowBlur=16;
+                ctx.beginPath();ctx.ellipse(0,0,7,15,0,0,Math.PI*2);ctx.fill();
+                ctx.fillStyle='#fff7cc';ctx.fillRect(-2,-12,4,8);
+                ctx.restore();
+            }
         }
 
         function spawnPowerupCheck(x, y) {
@@ -1543,18 +1582,23 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
 
         // --- RENDERIZAÇÃO PRINCIPAL ---
         function render() {
+            ctx.save();
+            if(screenShake>0)ctx.translate((Math.random()-.5)*screenShake,(Math.random()-.5)*screenShake);
             window.RiverVisuals.draw(ctx,{
                 w: VIRTUAL_WIDTH, h: VIRTUAL_HEIGHT, riverPoints, islands, enemies, player,
                 sector, aircraft:selectedPlane, distance, invulnerable:player.invulnerable,
                 quality:localStorage.getItem('river_quality') || 'eco'
             });
             drawFuelDepots();
+            drawBombs();
             drawRescueBoats();
             drawPowerups();
             drawBullets();
             drawParticles();
             drawFloatingTexts();
             drawHUD();
+            if(bombFlash>0){ctx.fillStyle='rgba(255,246,215,'+(bombFlash/13*.4)+')';ctx.fillRect(0,0,VIRTUAL_WIDTH,VIRTUAL_HEIGHT)}
+            ctx.restore();
         }
 
         const physicalGamepad = new window.RiverGamepadInput();
