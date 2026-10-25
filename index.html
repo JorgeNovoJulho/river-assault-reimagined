@@ -1528,7 +1528,14 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
 
         function drawHUD() {
             const fuelPercent = Math.max(0, player.fuel / player.maxFuel);
-            ctx.fillStyle='#fef08a';ctx.font='bold 12px system-ui';ctx.textAlign='left';ctx.fillText('BOMBAS: '+player.bombs+'/5   ·   J'+journey+' '+rankName(),12,37);
+            // Patente próxima ao indicador de escudo: painel independente e legível.
+            ctx.save();ctx.fillStyle='rgba(10,25,43,.88)';ctx.fillRect(160,VIRTUAL_HEIGHT-73,Math.min(VIRTUAL_WIDTH-172,238),40);
+            ctx.strokeStyle='#eab308';ctx.lineWidth=1.5;ctx.strokeRect(160,VIRTUAL_HEIGHT-73,Math.min(VIRTUAL_WIDTH-172,238),40);
+            ctx.font='bold 11px system-ui';ctx.fillStyle='#fde68a';ctx.textAlign='left';
+            ctx.fillText('PATENTE · JORNADA '+journey,169,VIRTUAL_HEIGHT-57);
+            ctx.fillStyle='#f8fafc';ctx.fillText(rankName().slice(0,27),169,VIRTUAL_HEIGHT-42);ctx.restore();
+
+            ctx.fillStyle='#fef08a';ctx.font='bold 12px system-ui';ctx.textAlign='left';ctx.fillText('BOMBAS: '+player.bombs+'/5',12,37);
             ctx.fillStyle='#bbf7d0';ctx.font='bold 11px system-ui';ctx.textAlign='right';ctx.fillText('RESGATADOS: '+rescuedSoldiers+' · VIDAS: '+lives,VIRTUAL_WIDTH-15,54);ctx.textAlign='left';
             ctx.fillStyle = 'rgba(15, 23, 42, 0.85)';
             ctx.fillRect(10, VIRTUAL_HEIGHT - 32, 140, 22);
