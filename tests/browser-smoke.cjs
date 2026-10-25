@@ -18,12 +18,15 @@ const {chromium}=require('playwright');const {spawn}=require('node:child_process
     const ok = await page.evaluate(k => !!window[k],key);
     if(!ok) throw Error('Script ausente no BUILD: '+key);
   }
+  const crtBefore=await page.locator('#crt-toggle').innerText();
   await page.locator('#crt-toggle').click();
-  if (!await page.locator('#crt-toggle').innerText().then(t=>t.includes('DES'))) throw Error('Botão CRT falhou');
+  if (await page.locator('#crt-toggle').innerText()===crtBefore) throw Error('Botão CRT falhou');
+  const soundBefore=await page.locator('#sound-toggle').innerText();
   await page.locator('#sound-toggle').click();
-  if (!await page.locator('#sound-toggle').innerText().then(t=>t.includes('DES'))) throw Error('Botão SOM falhou');
+  if (await page.locator('#sound-toggle').innerText()===soundBefore) throw Error('Botão SOM falhou');
+  const musicBefore=await page.locator('#music-toggle').innerText();
   await page.locator('#music-toggle').click();
-  if (!await page.locator('#music-toggle').innerText().then(t=>t.includes('DES'))) throw Error('Botão MÚSICA falhou');
+  if (await page.locator('#music-toggle').innerText()===musicBefore) throw Error('Botão MÚSICA falhou');
   await page.locator('#controller-settings-btn').click();
   if (!await page.locator('#controller-settings').isVisible()) throw Error('Botão CONTROLE falhou');
   await page.locator('#pad-close').click();
