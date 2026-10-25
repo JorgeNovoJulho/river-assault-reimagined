@@ -1,0 +1,50 @@
+name: Relatar problema na versão de testes
+description: Informe falhas no jogo, controles, desempenho e visual
+title: "[TESTE] "
+labels: []
+body:
+  - type: dropdown
+    id: platform
+    attributes:
+      label: Plataforma
+      options:
+        - Android navegador
+        - Windows navegador
+        - Android APK (futuro)
+        - Windows EXE (futuro)
+    validations:
+      required: true
+  - type: input
+    id: device
+    attributes:
+      label: Dispositivo / navegador
+      placeholder: Ex. Realme C55 / Chrome
+  - type: dropdown
+    id: category
+    attributes:
+      label: Problema
+      options:
+        - Travamento ou não inicia
+        - Controles de toque
+        - Bluetooth/USB gamepad
+        - Aviões e armas
+        - Combustível/bombas
+        - Desempenho/FPS
+        - Tela cortada/UI
+        - Áudio
+        - Outro
+  - type: textarea
+    id: steps
+    attributes:
+      label: Como reproduzir
+      description: Relate passo a passo o que você fez e o que aconteceu
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Resultado esperado
+  - type: textarea
+    id: attachments
+    attributes:
+      label: Capturas de tela e informações adicionais
