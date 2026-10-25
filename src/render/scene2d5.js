@@ -85,11 +85,13 @@ function landscape(c,data,t){
  if(t.time==='night'){c.fillStyle='rgba(5,10,30,.16)';c.fillRect(0,0,w,h);c.fillStyle='rgba(255,220,143,'+(.1+beat*.09)+')';for(let y=26;y<h;y+=130){let b=bankAt(points,y,w);c.beginPath();c.arc(b[0]-6,y,10,0,Math.PI*2);c.fill();c.beginPath();c.arc(b[1]+6,y,10,0,Math.PI*2);c.fill()}}
 }
 function plane(c,x,y,style='falcao',size=1){
- const colors={falcao:['#c7e2ec','#df4a42','#263e59'],vespa:['#e8be57','#f79430','#453b49'],cometa:['#7bdcf7','#3782df','#25386e'],fenix:['#f9a8d4','#db2777','#701a75'],titan:['#d9f99d','#65a30d','#365314']};
+ const colors={falcao:['#c7e2ec','#df4a42','#263e59'],vespa:['#e8be57','#f79430','#453b49'],cometa:['#7bdcf7','#3782df','#25386e'],fenix:['#f9a8d4','#db2777','#701a75'],titan:['#d9f99d','#65a30d','#365314'],helicoptero:['#93c5fd','#2563eb','#183153'],disco:['#d8b4fe','#8b5cf6','#312e81']};
  const [body,trim,dark]=colors[style]||colors.falcao;
  c.save();c.translate(x,y);c.scale(size,size);
  c.fillStyle='rgba(1,14,28,.35)';c.beginPath();c.ellipse(5,13,22,11,0,0,Math.PI*2);c.fill();
- if(style==='titan'){poly(c,[-29,12,-18,-5,-12,-9,0,-24,12,-9,18,-5,29,12,15,7,7,16,-7,16,-15,7],dark);poly(c,[-24,9,-9,-4,0,-22,9,-4,24,9,0,9],body)}
+ if(style==='disco'){c.fillStyle=dark;c.beginPath();c.ellipse(0,0,29,16,0,0,7);c.fill();c.fillStyle=body;c.beginPath();c.ellipse(0,-4,19,13,0,0,7);c.fill();c.fillStyle='#a5f3fc';c.beginPath();c.ellipse(0,-6,10,7,0,0,7);c.fill();c.strokeStyle='#ddd6fe';c.lineWidth=2;c.beginPath();c.ellipse(0,0,32,19,0,0,7);c.stroke()}
+ else if(style==='helicoptero'){poly(c,[-10,-14,10,-14,11,12,-11,12],dark);c.fillStyle=body;c.fillRect(-7,-12,14,22);c.strokeStyle='#dbeafe';c.lineWidth=3;c.beginPath();c.moveTo(-26,-10);c.lineTo(26,-10);c.stroke();c.fillStyle='#7dd3fc';c.fillRect(-4,-8,8,10)}
+ else if(style==='titan'){poly(c,[-29,12,-18,-5,-12,-9,0,-24,12,-9,18,-5,29,12,15,7,7,16,-7,16,-15,7],dark);poly(c,[-24,9,-9,-4,0,-22,9,-4,24,9,0,9],body)}
  else if(style==='fenix'){poly(c,[-27,7,-14,-7,-8,-6,0,-27,8,-6,14,-7,27,7,13,11,0,4,-13,11],dark);poly(c,[-23,5,0,-25,23,5,0,0],body)}
  else if(style==='cometa'){poly(c,[-21,11,-7,-12,0,-25,7,-12,21,11,7,7,0,14,-7,7],dark);poly(c,[-16,8,0,-23,16,8,0,3],body)}
  else if(style==='vespa'){poly(c,[-19,3,-7,-4,0,-23,7,-4,19,3,10,12,-10,12],dark);poly(c,[-17,3,0,-23,17,3,0,9],body)}
