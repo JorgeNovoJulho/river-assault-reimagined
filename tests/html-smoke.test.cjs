@@ -16,3 +16,11 @@ test('script principal tem sintaxe JavaScript válida',()=>{
  assert.equal(inline.length,1);
  new vm.Script(inline[0],{filename:'index-inline.js'});
 });
+
+test('renderizador moderno e CSS responsivo disponíveis',()=>{
+ const html=fs.readFileSync('index.html','utf8');
+ assert.ok(html.includes('src="./src/render/scene2d5.js"'),'renderizador não referenciado');
+ assert.ok(html.includes('id="mobile-responsive-v2"'));
+ assert.ok(html.includes('overflow-y:auto!important'),'modais sem rolagem');
+ assert.ok(html.includes('21dvh'),'altura de controles não responsiva');
+});
