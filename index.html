@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>River Assault — Teste Mobile</title>
+    <title>River Assault — Playtest 0.3.1</title>
     <link rel="stylesheet" href="./src/styles/tailwind.css">
     <style>
         body {
@@ -221,7 +221,7 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
 .bomb-action{background:linear-gradient(#f2bd54,#ab630d);color:#fff}
 .pause-action{background:linear-gradient(#638bac,#264563)}
 #start-screen,#pause-screen,#game-over-screen,#controller-settings{overflow-x:hidden!important;overflow-y:auto!important;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;display:flex;flex-direction:column;align-items:center;justify-content:flex-start!important;gap:8px;padding:clamp(12px,3vw,24px)!important;min-height:0;max-height:100%;scrollbar-width:thin}
-#start-screen.hidden,#pause-screen.hidden,#game-over-screen.hidden,#controller-settings.hidden{display:none!important}
+#start-screen.hidden,#pause-screen.hidden,#game-over-screen.hidden,#controller-settings.hidden,#victory-screen.hidden{display:none!important}\n#game-container[data-game-active=true] #start-screen{display:none!important;visibility:hidden!important;pointer-events:none!important}
 #start-screen>*,#pause-screen>*,#game-over-screen>*{flex-shrink:0;max-width:100%;margin-top:0!important;margin-bottom:4px!important}
 #start-screen>h1{font-size:clamp(22px,6vw,38px)!important;line-height:1.15}
 #start-screen>div{width:100%!important;max-width:440px!important}
@@ -1385,6 +1385,21 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
             }
         }
 
+        function enterGameplay() {
+            // A entrada no jogo não pode depender de permissão de áudio ou do MP3.
+            try { resetGame(); } catch (error) { showGameError(error); console.error('START:',error); return; }
+            for (const id of ['start-screen','pause-screen','game-over-screen','victory-screen']) {
+                const overlay=document.getElementById(id);
+                overlay.classList.add('hidden');
+                overlay.style.display='none';
+                overlay.setAttribute('aria-hidden','true');
+            }
+            const screen=document.getElementById('game-container');
+            screen.dataset.gameActive='true';
+            document.getElementById('start-btn').blur();
+            try { render(); } catch(error){showGameError(error);console.error('FIRST FRAME:',error)}
+            try { sound.init(); } catch(error){console.warn('Áudio indisponível',error)}
+        }
         function resetGame() {
             score = 0;
             distance = 0;
@@ -1428,7 +1443,7 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
             document.getElementById('mission-banner').textContent=campaign.at(sector).name;
             gameState = 'PLAYING';
             simulationClock.reset();
-            playlist.startNewGame();
+            try{playlist.startNewGame()}catch(error){console.warn('Playlist indisponível:',error)}
         }
 
         function fireWeapon() {
@@ -1760,16 +1775,10 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
             triggerBomb();
         });
 
-        document.getElementById('start-btn').addEventListener('click', () => {
-            sound.init();
-            resetGame();
-        });
+        document.getElementById('start-btn').addEventListener('click', enterGameplay);
 
         document.getElementById('victory-restart').addEventListener('click',()=>{document.getElementById('victory-screen').classList.add('hidden');levelSelector.value='1';resetGame()});
-        document.getElementById('restart-btn').addEventListener('click', () => {
-            sound.init();
-            resetGame();
-        });
+        document.getElementById('restart-btn').addEventListener('click', enterGameplay);
 
         document.getElementById('resume-btn').addEventListener('click', () => {
             gameState = 'PLAYING';
@@ -1790,7 +1799,7 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
         });
 
         window.addEventListener('load',()=>{
-            try{initRiver();requestAnimationFrame(gameLoop);}
+            try{initRiver();render();requestAnimationFrame(gameLoop);}
             catch(error){showGameError(error);console.error(error)}
         });
     </script>
