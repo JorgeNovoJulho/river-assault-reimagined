@@ -569,8 +569,9 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
                 islands.push({
                     x: center + (Math.random() - 0.5) * (width * 0.4),
                     y: y,
-                    width: 35 + Math.random() * 25,
-                    height: 35 + Math.random() * 25
+                    width: 32 + Math.random() * Math.min(66,width-122),
+                    height: 32 + Math.random() * 60,
+                    shape: Math.floor(Math.random()*5)
                 });
             }
 
