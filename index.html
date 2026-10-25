@@ -164,6 +164,7 @@
       @media(max-width:350px){.touch-layout {padding:2px;} .action-cluster {grid-template-columns:repeat(2,60px);} }
     </style>
 
+    <script src="./src/input/gamepad.js"></script>
     <script>
         // --- SINTETIZADOR DE ÁUDIO CHIPTUNE RETRO (Web Audio API) ---
         class SoundEngine {
@@ -991,10 +992,10 @@
 
             // Ações do Jogador (Apenas se NÃO estiver sob efeito EMP)
             if (player.disabledTimer <= 0) {
-                if (keys.ArrowUp || keys.KeyW) {
+                if (keys.ArrowUp || keys.KeyW || gamepadState.up || mouseInput.up) {
                     player.currentScrollSpeed = player.baseScrollSpeed * 1.8;
                     player.targetY = player.baseY - 70;
-                } else if (keys.ArrowDown || keys.KeyS) {
+                } else if (keys.ArrowDown || keys.KeyS || gamepadState.down || mouseInput.down) {
                     player.currentScrollSpeed = player.baseScrollSpeed * 0.5;
                     player.targetY = player.baseY + 25;
                 } else {
@@ -1002,8 +1003,12 @@
                     player.targetY = player.baseY;
                 }
 
-                if (keys.ArrowLeft || keys.KeyA) player.x -= player.speed;
-                if (keys.ArrowRight || keys.KeyD) player.x += player.speed;
+                if (keys.ArrowLeft || keys.KeyA || gamepadState.left) player.x -= player.speed;
+                if (keys.ArrowRight || keys.KeyD || gamepadState.right) player.x += player.speed;
+                if (mouseInput.active && !gamepadState.left && !gamepadState.right &&
+                    !keys.ArrowLeft && !keys.ArrowRight && !keys.KeyA && !keys.KeyD) {
+                    player.x += Math.max(-player.speed, Math.min(player.speed, mouseInput.x - player.x));
+                }
             }
 
             player.y += (player.targetY - player.y) * 0.1;
@@ -1432,7 +1437,24 @@
             drawHUD();
         }
 
-        function gameLoop() {
+        const physicalGamepad = new window.RiverGamepadInput();
+        let gamepadState = physicalGamepad.poll();
+        let lastGamepadShot = 0;
+        const mouseInput = {active:false,x:VIRTUAL_WIDTH/2,up:false,down:false,fire:false};
+        let lastMouseShot = 0;
+        function gameLoop(timestamp = 0) {
+            gamepadState = physicalGamepad.poll();
+            if (gamepadState.justPause) {
+                if (gameState === 'START' || gameState === 'GAMEOVER') { sound.init(); resetGame(); }
+                else togglePause();
+            }
+            if (gameState === 'PLAYING' && gamepadState.justBomb) triggerBomb();
+            if (gameState === 'PLAYING' && gamepadState.fire && timestamp - lastGamepadShot > 145) {
+                sound.init(); fireWeapon(); lastGamepadShot = timestamp;
+            }
+            if (gameState === 'PLAYING' && mouseInput.fire && timestamp - lastMouseShot > 145) {
+                sound.init(); fireWeapon(); lastMouseShot = timestamp;
+            }
             update();
             render();
             requestAnimationFrame(gameLoop);
@@ -1446,6 +1468,30 @@
         window.addEventListener('resize', resizeCanvas);
         resizeCanvas();
 
+        // --- MOUSE: mover para pilotar, botão esquerdo atira, direito lança bomba.
+        canvas.addEventListener('pointermove', e => {
+            if (e.pointerType !== 'mouse') return;
+            const bounds = canvas.getBoundingClientRect();
+            mouseInput.active = true;
+            mouseInput.x = ((e.clientX - bounds.left) / bounds.width) * VIRTUAL_WIDTH;
+            const vertical = (e.clientY - bounds.top) / bounds.height;
+            mouseInput.up = vertical < 0.32;
+            mouseInput.down = vertical > 0.72;
+        });
+        canvas.addEventListener('pointerleave', () => {mouseInput.active=false;mouseInput.fire=false;mouseInput.up=false;mouseInput.down=false;});
+        canvas.addEventListener('pointerdown', e => {
+            if (e.pointerType !== 'mouse') return;
+            e.preventDefault();
+            sound.init();
+            if (e.button === 0) {mouseInput.fire=true;fireWeapon();}
+            if (e.button === 2) triggerBomb();
+        });
+        window.addEventListener('pointerup', e => {if(e.pointerType==='mouse' && e.button===0) mouseInput.fire=false;});
+        window.addEventListener('blur', () => {
+            mouseInput.active=false;mouseInput.fire=false;mouseInput.up=false;mouseInput.down=false;
+            Object.keys(keys).forEach(key => keys[key] = false);
+        });
+        canvas.addEventListener('contextmenu', e => e.preventDefault());
         // --- INPUTS & CONTROLES ---
         window.addEventListener('keydown', e => {
             if (keys.hasOwnProperty(e.code)) { e.preventDefault(); keys[e.code] = true; }
@@ -1468,6 +1514,8 @@
             if (keys.hasOwnProperty(e.code)) keys[e.code] = false;
         });
 
+        // O navegador reconhece acessórios Bluetooth/USB através da Gamepad API.
+        // A conexão e o pareamento são realizados pelo sistema operacional.
         const bindTouch = (id, keyName) => {
             const btn = document.getElementById(id);
             btn.addEventListener('touchstart', (e) => { e.preventDefault(); keys[keyName] = true; });
