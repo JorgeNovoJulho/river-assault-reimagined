@@ -159,6 +159,7 @@
         <!-- Tela de Fim de Jogo (Game Over) -->
         <div id="game-over-screen" class="hidden absolute inset-0 bg-black/90 flex flex-col items-center justify-center p-6 text-center z-30">
             <h2 class="text-4xl font-black text-red-500 mb-2 tracking-widest">FIM DE JOGO</h2>
+            <button id="continue-btn" class="bg-amber-500 text-slate-950 font-black rounded-xl p-3 mb-2">CONTINUAR (1 CRÉDITO)</button>
             <p id="game-over-reason" class="text-slate-400 text-sm mb-4">COLIDIU COM O CÂNYON</p>
             
             <div class="bg-slate-900 border border-slate-800 p-4 rounded-lg mb-6 w-72 text-left space-y-2 text-sm">
@@ -464,6 +465,11 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
         let structures = [];
         let fuelSpawnAt = -99999;
         let bombsPickedThisMission = 0;
+        let structureLastDistance=-99999;
+        let lastEnemyDistance=-99999;
+        let lives=3;
+        let continues=1;
+        let earnedPoints=0;
         let rescuedSoldiers = 0;
         let particles = [];
         let floatingTexts = [];
@@ -596,17 +602,23 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
 
             // Pontos estratégicos de combustível; resgates e armas não são bloqueados.
             if (distance - fuelSpawnAt >= 650 && Math.random() < .2) trySpawnFuel(center,y,width,false);
-            if(structures.length < 2 && missionTicks > 60 && Math.random() < .009){
-                structures.push({type:Math.random()<.6?'BRIDGE':'DAM',x:center,y,width:Math.min(width-20,270),height:24,hp:18,maxHp:18});
+            if(structures.length<1 && distance-structureLastDistance>1100 && missionTicks>180 && Math.random()<.07){
+                // Conectada exatamente às margens do rio, com os pilares em terra firme.
+                const type=Math.random()<.7?'BRIDGE':'DAM';
+                structures.push({type,x:center,y,width:width+28,height:type==='BRIDGE'?21:31,hp:type==='BRIDGE'?17:30,maxHp:type==='BRIDGE'?17:30});
+                structureLastDistance=distance;
             }
             if(bombsPickedThisMission < 5 && Math.random()<.009 && !powerups.some(p=>p.type==='BOMB')){
                 powerups.push({x:center+(Math.random()-.5)*(width-65),y,type:'BOMB',label:'B+',color:'#f59e0b'});
             }
 
             // Inimigos com Spawn Constante
-            if (enemies.length < campaign.at(sector).spawnCap && Math.random() < campaign.at(sector).enemyRate) {
+            const hazards=[...enemies,...structures,...islands,...rescueBoats,...fuelDepots];
+            const clearLane=hazards.every(e=>Math.abs(e.y-y)>115);
+            if (clearLane && distance-lastEnemyDistance>105 && enemies.filter(e=>e.type!=='BOSS').length<4 && Math.random()<.48) {
+                lastEnemyDistance=distance;
                 const rand = Math.random();
-                const spawnX = leftBank + 25 + Math.random() * (width - 50);
+                const spawnX = leftBank + 34 + Math.random() * (width - 68);
 
                 if (rand < 0.28) {
                     enemies.push({
@@ -1132,6 +1144,8 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
                 ctx.fillStyle='rgba(5,15,31,.4)';ctx.fillRect(-p.width/2+4,-p.height/2+6,p.width,p.height);
                 ctx.fillStyle=p.type==='BRIDGE'?'#9eacb8':'#64748b';
                 ctx.fillRect(-p.width/2,-p.height/2,p.width,p.height);
+                ctx.fillStyle='#42566a';ctx.fillRect(-p.width/2,-p.height/2-12,18,p.height+24);ctx.fillRect(p.width/2-18,-p.height/2-12,18,p.height+24);
+                ctx.fillStyle='#cbd5e1';ctx.fillRect(-p.width/2+2,-p.height/2-9,5,p.height+18);ctx.fillRect(p.width/2-7,-p.height/2-9,5,p.height+18);
                 ctx.fillStyle='#fde68a';for(let i=-p.width/2+12;i<p.width/2;i+=22)ctx.fillRect(i,-3,9,6);
                 ctx.fillStyle='#fb7185';ctx.fillRect(-p.width/2,-p.height/2-8,p.width*Math.max(0,p.hp/p.maxHp),3);
                 ctx.restore();
@@ -1433,7 +1447,7 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
 
         function drawHUD() {
             const fuelPercent = Math.max(0, player.fuel / player.maxFuel);
-            ctx.fillStyle='#bbf7d0';ctx.font='bold 11px system-ui';ctx.textAlign='right';ctx.fillText('RESGATADOS: '+rescuedSoldiers,VIRTUAL_WIDTH-15,54);ctx.textAlign='left';
+            ctx.fillStyle='#bbf7d0';ctx.font='bold 11px system-ui';ctx.textAlign='right';ctx.fillText('RESGATADOS: '+rescuedSoldiers+' · VIDAS: '+lives,VIRTUAL_WIDTH-15,54);ctx.textAlign='left';
             ctx.fillStyle = 'rgba(15, 23, 42, 0.85)';
             ctx.fillRect(10, VIRTUAL_HEIGHT - 32, 140, 22);
             ctx.strokeStyle = '#475569';
@@ -1488,9 +1502,7 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
 
             sound.playExplosion(true);
 
-            if (player.shield <= 0) {
-                gameOver(reason);
-            }
+            if (player.shield <= 0) loseLife(reason);
         }
 
         function enterGameplay() {
@@ -1522,6 +1534,10 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
             rescuedSoldiers = 0;
             fuelSpawnAt = -99999;
             bombsPickedThisMission = 0;
+            structureLastDistance=-99999;
+            lastEnemyDistance=-99999;
+            lives=3;
+            continues=1;
             bossActive = false;
 
             player.x = VIRTUAL_WIDTH / 2;
@@ -1534,7 +1550,7 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
             player.speed = config.speed;
             player.baseScrollSpeed = config.scroll;
             player.currentScrollSpeed = config.scroll;
-            player.fuelDepletionRate = config.fuel;
+            player.fuelDepletionRate = config.fuel*.8;
             player.weapon = config.weapons[0];
             player.weaponTimer = 0;
             player.specialShots = 0;
@@ -1651,6 +1667,30 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
             floatingTexts.push({ x: x, y: y, text: text, color: color, life: 1.0 });
         }
 
+        function loseLife(reason){
+            if(gameState!=='PLAYING')return;
+            lives--;
+            addExplosion(player.x,player.y,'#fbbf24',24);
+            if(lives>0){
+                player.shield=player.maxShield;player.fuel=Math.max(player.fuel,65);
+                player.x=VIRTUAL_WIDTH/2;player.y=VIRTUAL_HEIGHT-100;
+                player.invulnerable=170;player.disabledTimer=0;
+                enemyBullets=[];bombProjectiles=[];
+                createFloatingText(player.x,player.y,'NOVA VIDA · '+lives+' RESTANTES','#fef08a');
+                return;
+            }
+            gameOver(reason);
+        }
+        function continueGame(){
+            if(continues<=0)return;
+            continues--;lives=3;player.shield=player.maxShield;player.fuel=100;
+            player.bombs=Math.max(1,player.bombs);player.invulnerable=180;
+            enemyBullets=[];enemies=enemies.filter(e=>e.type==='BOSS');
+            document.getElementById('game-over-screen').classList.add('hidden');
+            document.getElementById('game-over-screen').style.display='none';
+            gameState='PLAYING';simulationClock.reset();playlist.resume();
+            if(!playlist.tracks.length)soundtrack.start();
+        }
         function gameOver(reason) {
             gameState = 'GAMEOVER';
             playlist.pause();soundtrack.stop();
@@ -1664,6 +1704,9 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
             document.getElementById('final-score').innerText = score;
             document.getElementById('final-sector').innerText = sector;
             document.getElementById('final-kills').innerText = kills;
+            document.getElementById('game-over-screen').style.display='';
+            document.getElementById('continue-btn').disabled=continues<=0;
+            document.getElementById('continue-btn').textContent=continues>0?'CONTINUAR (1 CRÉDITO)':'SEM CRÉDITOS';
             document.getElementById('game-over-screen').classList.remove('hidden');
         }
 
@@ -1941,6 +1984,7 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
 
         document.getElementById('victory-restart').addEventListener('click',()=>{document.getElementById('victory-screen').classList.add('hidden');levelSelector.value='1';resetGame()});
         document.getElementById('restart-btn').addEventListener('click', enterGameplay);
+        document.getElementById('continue-btn').addEventListener('click',continueGame);
 
         document.getElementById('resume-btn').addEventListener('click', () => {
             gameState = 'PLAYING';
