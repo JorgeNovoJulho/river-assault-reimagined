@@ -1262,6 +1262,19 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
         function update() {
             if (gameState !== 'PLAYING') return;
             missionTicks++;
+            // Reforços pontuais impedem longos intervalos sem combate sem criar amontoados.
+            if(!bossActive && missionTicks%205===0){
+                const visible=enemies.filter(e=>e.type!=='BOSS'&&e.y>-25&&e.y<VIRTUAL_HEIGHT).length;
+                if(visible<2 && !structures.some(o=>o.y<145) && !rescueBoats.some(o=>o.y<100)){
+                    const bank=getRiverBoundariesAt(25);
+                    const center=Math.max(bank.leftBank+40,Math.min(bank.rightBank-40,bank.center+(Math.random()-.5)*bank.width*.55));
+                    const kind=['JET','HELI','SHIP','SUB'][Math.floor(Math.random()*4)];
+                    enemies.push({type:kind,x:center,y:-38,width:kind==='SHIP'?30:26,height:kind==='SHIP'?38:30,
+                        hp:kind==='SUB'?3:kind==='SHIP'?2:1,maxHp:kind==='SUB'?3:kind==='SHIP'?2:1,
+                        vx:(Math.random()<.5?-1:1)*(kind==='JET'?2.3:1.15),vy:kind==='JET'?2.6:.65,
+                        score:kind==='SUB'?280:kind==='SHIP'?200:150,shootTimer:0});
+                }
+            }
             if(screenShake>0)screenShake*=.83;
             if(hazardWaveCooldown>0)hazardWaveCooldown--;
             if(bombFlash>0)bombFlash--;
