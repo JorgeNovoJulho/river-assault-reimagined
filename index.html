@@ -698,6 +698,11 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
                 }
             }
 
+            // Tanques terrestres nas margens: tiro direcionado, destruíveis e sem recompensas.
+            if(enemies.filter(e=>e.type==='TANK').length<2 && !structures.some(p=>Math.abs(p.y-y)<115) && Math.random()<.045){
+                const left=Math.random()<.5;
+                enemies.push({type:'TANK',x:left?leftBank-18:rightBank+18,y,width:25,height:29,vx:0,vy:0,hp:4,maxHp:4,score:220,shootTimer:Math.floor(Math.random()*80),noDrop:true,bankSide:left?-1:1});
+            }
             // Torretas costeiras: raras para priorizar voo e resgates.
             if (enemies.filter(e => e.type==='TURRET').length < 2 && Math.random() < 0.009) {
                 const onLeft = Math.random() < 0.5;
@@ -1439,17 +1444,18 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
                     updateBossAttacks(e);
                 } else {
                     e.y += player.currentScrollSpeed + (e.vy || 0);
+                    if(e.type==='TANK'){const edge=getRiverBoundariesAt(e.y);e.x=e.bankSide<0?edge.leftBank-18:edge.rightBank+18;}
                     e.x += (e.vx || 0);
                 }
 
-                if(e.type!=='BOSS' && e.type!=='TURRET'){
+                if(e.type!=='BOSS' && e.type!=='TURRET' && e.type!=='TANK'){
                     e.motion=(e.motion||0)+.035;
                     const banks=getRiverBoundariesAt(e.y);
                     if(e.x < banks.leftBank+e.width/2+4 || e.x > banks.rightBank-e.width/2-4)e.vx=-(e.vx||1.2);
                     if(e.type==='HELI'||e.type==='JET'||e.type==='ZIGZAG')e.y+=Math.sin(e.motion)*1.3;
                     if(e.type==='SHIP'||e.type==='SUB')e.x+=Math.sin(e.motion)*.38;
                 }
-                if (e.type === 'SHIP' || e.type === 'TURRET' || e.type==='SUB') {
+                if (e.type === 'SHIP' || e.type === 'TURRET' || e.type==='SUB' || e.type==='TANK') {
                     e.shootTimer = (e.shootTimer || 0) + 1;
                     if (e.shootTimer > 60) {
                         const angle = Math.atan2(player.y - e.y, player.x - e.x);
@@ -1476,7 +1482,7 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
                         addExplosion(b.x, b.y, '#fba518', 4);
 
                         if (e.hp <= 0) {
-                            spawnPowerupCheck(e.x, e.y);
+                            if(!e.noDrop)spawnPowerupCheck(e.x, e.y);
                             addExplosion(e.x, e.y, '#ef4444', e.type === 'BOSS' ? 45 : 15);
                             sound.playExplosion(e.type === 'BOSS');
                             score += awardEnemyPoints(e.score);
