@@ -112,7 +112,7 @@
         <!-- Telas de Interface Overlay -->
         <!-- Tela Inicial / Menu Principal -->
         <div id="start-screen" class="absolute inset-0 bg-black/90 flex flex-col items-center justify-center p-6 text-center z-30">
-            <h1 class="text-3xl sm:text-5xl font-extrabold text-amber-500 tracking-wider mb-2 italic drop-shadow-[0_4px_8px_rgba(245,158,11,0.5)]">RIVER RAID</h1>
+            <h1 class="text-3xl sm:text-5xl font-extrabold text-amber-500 tracking-wider mb-2 italic drop-shadow-[0_4px_8px_rgba(245,158,11,0.5)]">RIVER ASSAULT</h1>
             <p class="text-xs sm:text-sm text-cyan-400 font-semibold tracking-widest mb-6">EDIÇÃO REIMAGINADA (PT-BR)</p>
 
             <div class="bg-slate-900/80 border border-slate-700 p-4 rounded-lg mb-6 text-left max-w-md text-xs sm:text-sm space-y-2 text-slate-300">
@@ -125,6 +125,7 @@
                 <p>• Cuidado com as <span class="text-red-400 font-bold">TORRETAS COSTEIRAS</span> instaladas nas paredes!</p>
             </div>
 
+            <div class="w-full max-w-sm mb-2 text-left"><label for="quality-select" class="text-xs text-cyan-300">QUALIDADE VISUAL</label><select id="quality-select" class="w-full bg-slate-800 text-white border border-slate-600 p-2 rounded"><option value="eco">Econômico — celulares antigos</option><option value="balanced">Equilibrado — mais detalhes</option></select></div>
             <div class="w-full max-w-sm mb-4 text-left">
                 <label for="plane-select" class="text-amber-400 block text-xs mb-2 font-bold">ESCOLHA SEU AVIÃO</label>
                 <select id="plane-select" class="w-full p-3 bg-slate-800 text-white rounded border border-cyan-500">
@@ -362,6 +363,9 @@
             { name: 'DESFILADEIRO DE LAVA', bank: '#334155', bankDark: '#1e293b', water: '#b91c1c', island: '#475569' }
         ];
 
+        const qualitySelect=document.getElementById('quality-select');
+        try{qualitySelect.value=localStorage.getItem('river_quality')||'eco'}catch(e){}
+        qualitySelect.addEventListener('change',()=>{try{localStorage.setItem('river_quality',qualitySelect.value)}catch(e){}});
         const aircraftCatalog = window.RiverAircraft;
         let selectedPlane = 'falcao';
         const planeSelect = document.getElementById('plane-select');
@@ -1437,34 +1441,16 @@
 
         // --- RENDERIZAÇÃO PRINCIPAL ---
         function render() {
-            const currentBiome = BIOMES[(sector - 1) % BIOMES.length];
-
-            ctx.fillStyle = currentBiome.bank;
-            ctx.fillRect(0, 0, VIRTUAL_WIDTH, VIRTUAL_HEIGHT);
-
-            ctx.fillStyle = currentBiome.water;
-            ctx.beginPath();
-            if (riverPoints.length > 0) {
-                ctx.moveTo(riverPoints[0].center - riverPoints[0].width / 2, riverPoints[0].y);
-                for (let i = 1; i < riverPoints.length; i++) {
-                    ctx.lineTo(riverPoints[i].center - riverPoints[i].width / 2, riverPoints[i].y);
-                }
-                for (let i = riverPoints.length - 1; i >= 0; i--) {
-                    ctx.lineTo(riverPoints[i].center + riverPoints[i].width / 2, riverPoints[i].y);
-                }
-            }
-            ctx.closePath();
-            ctx.fill();
-
-            drawIslands();
+            window.RiverVisuals.draw(ctx,{
+                w: VIRTUAL_WIDTH, h: VIRTUAL_HEIGHT, riverPoints, islands, enemies, player,
+                sector, aircraft:selectedPlane, distance, invulnerable:player.invulnerable,
+                quality:localStorage.getItem('river_quality') || 'eco'
+            });
             drawFuelDepots();
             drawPowerups();
-            drawEnemies();
             drawBullets();
-            drawPlayer(player.x, player.y);
             drawParticles();
             drawFloatingTexts();
-
             drawHUD();
         }
 
