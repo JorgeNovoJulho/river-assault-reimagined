@@ -24,3 +24,12 @@ test('renderizador moderno e CSS responsivo disponíveis',()=>{
  assert.ok(html.includes('overflow-y:auto!important'),'modais sem rolagem');
  assert.ok(html.includes('21dvh'),'altura de controles não responsiva');
 });
+
+test('campanha tem 20 missões e identificação exclusiva dos chefes',()=>{
+ const fs=require('node:fs'),vm=require('node:vm'),ctx={window:{}};
+ vm.runInNewContext(fs.readFileSync('src/game/campaign.js','utf8'),ctx);
+ const levels=ctx.window.RiverCampaign.levels;
+ assert.equal(levels.length,20);
+ assert.equal(new Set(levels.map(x=>x.boss)).size,20);
+ assert.deepEqual(Array.from(new Set(levels.map(x=>x.difficulty))).sort(),[1,2,3]);
+});
