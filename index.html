@@ -1856,8 +1856,6 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
             const status=document.getElementById('playlist-status');if(status)status.textContent=message;
         }});
         playlist.load();
-        playlist.audio.volume=userPrefs.music/100;
-        if(window.RiverSFX)window.RiverSFX.volume=userPrefs.sfx/100;
         document.getElementById('music-library').addEventListener('click',()=>document.getElementById('music-upload').click());
         document.getElementById('music-upload').addEventListener('change',async event=>{
             await playlist.importFiles(event.target.files);event.target.value='';
@@ -1888,6 +1886,8 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
             document.getElementById('buy-plane').click();
             document.getElementById('settings-wallet').textContent=document.getElementById('plane-status').textContent+' | '+document.getElementById('plane-wallet').textContent;
         });
+        playlist.audio.volume=userPrefs.music/100;
+        if(window.RiverSFX)window.RiverSFX.volume=userPrefs.sfx/100;
         const soundtrack=new window.RiverMusic();
         document.getElementById('music-toggle').addEventListener('click',()=>{
             const on=playlist.toggle();document.getElementById('music-toggle').textContent='MÚSICA: '+(on?'LIG':'DES');
