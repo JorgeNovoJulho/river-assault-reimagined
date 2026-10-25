@@ -100,6 +100,15 @@ function plane(c,x,y,style='falcao',size=1){
  poly(c,[-3,10,-3,-16,0,-25,3,-16,3,10],trim);
  poly(c,[-4,-4,0,-14,4,-4,2,1,-2,1],'#8ae6ff');
  c.fillStyle=trim;c.fillRect(-19,6,6,3);c.fillRect(13,6,6,3);
+ // Diferencia os motores e superfícies das aeronaves premium.
+ if(style==='fenix'){
+   c.strokeStyle='#ffd1ee';c.lineWidth=2;c.beginPath();c.moveTo(-22,4);c.lineTo(-8,-13);c.moveTo(22,4);c.lineTo(8,-13);c.stroke();
+   c.fillStyle='#67e8f9';c.fillRect(-16,6,5,3);c.fillRect(11,6,5,3);
+ }else if(style==='titan'){
+   c.fillStyle='#1f2937';c.fillRect(-27,3,9,12);c.fillRect(18,3,9,12);
+   c.fillStyle='#bef264';c.fillRect(-24,-1,5,13);c.fillRect(19,-1,5,13);
+   c.fillStyle='#fbbf24';c.fillRect(-4,9,8,8);
+ }
  c.fillStyle='#fbba5a';poly(c,[-5,13,0,23,5,13],'#ff984f');
  c.restore();
 }
