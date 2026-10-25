@@ -1492,7 +1492,7 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
                     }else if(p.type==='BOMB'){
                         if(player.bombs<5 && bombsPickedThisMission<5){player.bombs++;bombsPickedThisMission++;document.getElementById('bomb-count-touch').innerText='('+player.bombs+')'}
                     } else {
-                        player.weapon = config.weapons[Math.max(0,index)];
+                        player.weapon = ['HYBRID','CIRCLE','TRACKER','MULTI'].includes(p.type)?p.type:config.weapons[Math.max(0,index)];
                         player.specialShots = 50;
                     }
                     sound.playPowerupSound();
