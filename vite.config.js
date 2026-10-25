@@ -11,6 +11,7 @@ const legacyScripts = [
   'src/game/campaign.js',
   'src/render/scene2d5.js',
   'src/audio/music.js',
+  'src/audio/sfx-modern.js',
   'src/audio/playlist.js'
 ];
 function includeRuntimeScripts() {
