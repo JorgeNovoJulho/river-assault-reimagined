@@ -29,6 +29,24 @@ const {chromium}=require('playwright');const {spawn}=require('node:child_process
   await page.locator('#music-toggle').click();
   if (await page.locator('#music-toggle').innerText()===musicBefore) throw Error('Botão MÚSICA falhou');
   await page.locator('#controller-settings-btn').click();
+  await page.locator('#music-volume').fill('22');
+  await page.locator('#sfx-volume').fill('31');
+  await page.locator('#sarcasm-level').fill('4');
+  await page.locator('#pad-deadzone').fill('30');
+  const settings=await page.evaluate(()=>({
+     open:getComputedStyle(document.getElementById('controller-settings')).display,
+     parent:document.getElementById('controller-settings').parentElement.tagName,
+     scroll:document.getElementById('controller-settings').scrollHeight,
+     height:document.getElementById('controller-settings').clientHeight,
+     music:userPrefs.music,sfx:userPrefs.sfx,sarcasm:sarcasmLevel,
+     deadzone:physicalGamepad.settings.deadzone
+  }));
+  console.log('Settings controls:',JSON.stringify(settings));
+  if(settings.open==='none'||settings.parent!=='BODY'||settings.music!==22||settings.sfx!==31||settings.sarcasm!==4||Math.abs(settings.deadzone-.30)>.011)throw Error('Controles de Configurações sem efeito '+JSON.stringify(settings));
+  await page.locator('#settings-plane').selectOption('fenix');
+  await page.locator('#settings-buy-plane').click();
+  if(!(await page.locator('#settings-wallet').innerText()).includes('SALDO'))throw Error('Hangar não respondeu');
+
   if (!await page.locator('#controller-settings').isVisible()) throw Error('Botão CONTROLE falhou');
   await page.locator('#pad-close').click();
   if (await page.locator('#controller-settings').isVisible()) throw Error('Botão VOLTAR falhou');
