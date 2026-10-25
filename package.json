@@ -12,7 +12,8 @@
     "android:open": "npx cap open android",
     "desktop:init": "npx tauri init",
     "desktop:dev": "tauri dev",
-    "desktop:build": "tauri build"
+    "desktop:build": "tauri build",
+    "test": "node --test tests/*.test.cjs"
   },
   "devDependencies": {
     "vite": "^7.0.0",
