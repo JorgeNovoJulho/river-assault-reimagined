@@ -1713,7 +1713,7 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
             document.getElementById('mission-banner').textContent=campaign.at(sector).name;
             gameState = 'PLAYING';
             simulationClock.reset();
-            try{playlist.startNewGame();if(!playlist.tracks.length)soundtrack.start();else soundtrack.stop()}catch(error){console.warn('Playlist indisponível:',error);soundtrack.start()}
+            try{playlist.startNewGame();if(!playlist.tracks.length&&playlist.enabled)soundtrack.start();else soundtrack.stop()}catch(error){console.warn('Playlist indisponível:',error);soundtrack.start()}
         }
 
         function fireWeapon() {
@@ -1856,7 +1856,7 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
             document.getElementById('game-over-screen').classList.add('hidden');
             document.getElementById('game-over-screen').style.display='none';
             gameState='PLAYING';simulationClock.reset();playlist.resume();
-            if(!playlist.tracks.length)soundtrack.start();
+            if(!playlist.tracks.length&&playlist.enabled)soundtrack.start();
         }
         function gameOver(reason) {
             gameState = 'GAMEOVER';
@@ -1986,7 +1986,10 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
         const soundtrack=new window.RiverMusic();
         soundtrack.volume=userPrefs.music/100*.16;
         document.getElementById('music-toggle').addEventListener('click',()=>{
-            const on=playlist.toggle();document.getElementById('music-toggle').textContent='MÚSICA: '+(on?'LIG':'DES');
+            const on=playlist.toggle();
+            if(!on)soundtrack.stop();
+            else if(gameState==='PLAYING'&&!playlist.tracks.length)soundtrack.start();
+            document.getElementById('music-toggle').textContent='MÚSICA: '+(on?'LIG':'DES');
         });
         let lastGameError='';
         function showGameError(error){
