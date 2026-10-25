@@ -1855,11 +1855,38 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
             const status=document.getElementById('playlist-status');if(status)status.textContent=message;
         }});
         playlist.load();
+        playlist.audio.volume=userPrefs.music/100;
+        if(window.RiverSFX)window.RiverSFX.volume=userPrefs.sfx/100;
         document.getElementById('music-library').addEventListener('click',()=>document.getElementById('music-upload').click());
         document.getElementById('music-upload').addEventListener('change',async event=>{
             await playlist.importFiles(event.target.files);event.target.value='';
         });
         document.getElementById('track-next').addEventListener('click',()=>playlist.next());
+        const userPrefs={music:40,sfx:65,sarcasm:2};
+        try{Object.assign(userPrefs,JSON.parse(localStorage.getItem('river_audio_game_settings')||'{}'))}catch(e){}
+        for(const [key,id] of [['music','music-volume'],['sfx','sfx-volume'],['sarcasm','sarcasm-level']]){
+            const control=document.getElementById(id);control.value=userPrefs[key];
+            const label=document.getElementById(id+'-value');
+            const apply=()=>{userPrefs[key]=Number(control.value);label.textContent=control.value+(key==='sarcasm'?'':'%');
+                sarcasmLevel=userPrefs.sarcasm;
+                if(typeof playlist!=='undefined')playlist.audio.volume=userPrefs.music/100;
+                if(window.RiverSFX)window.RiverSFX.volume=userPrefs.sfx/100;
+                try{localStorage.setItem('river_audio_game_settings',JSON.stringify(userPrefs))}catch(e){}
+            };
+            control.addEventListener('input',apply);
+            // Defer playlist initialization until after creation.
+            label.textContent=control.value+(key==='sarcasm'?'':'%');
+        }
+        sarcasmLevel=userPrefs.sarcasm;
+        const settingsPlane=document.getElementById('settings-plane');
+        for(const [key,plane] of Object.entries(aircraftCatalog.PLANES)){
+            const opt=document.createElement('option');opt.value=key;opt.textContent=plane.name+(plane.price?' — '+plane.price+' pontos':' — grátis');settingsPlane.appendChild(opt);
+        }
+        document.getElementById('settings-buy-plane').addEventListener('click',()=>{
+            planeSelect.value=settingsPlane.value;refreshPlaneChoice();
+            document.getElementById('buy-plane').click();
+            document.getElementById('settings-wallet').textContent=document.getElementById('plane-status').textContent+' | '+document.getElementById('plane-wallet').textContent;
+        });
         const soundtrack=new window.RiverMusic();
         document.getElementById('music-toggle').addEventListener('click',()=>{
             const on=playlist.toggle();document.getElementById('music-toggle').textContent='MÚSICA: '+(on?'LIG':'DES');
