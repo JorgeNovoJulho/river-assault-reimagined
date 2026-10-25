@@ -461,6 +461,9 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
         let powerups = [];
         let islands = [];
         let rescueBoats = [];
+        let structures = [];
+        let fuelSpawnAt = -99999;
+        let bombsPickedThisMission = 0;
         let rescuedSoldiers = 0;
         let particles = [];
         let floatingTexts = [];
@@ -478,6 +481,7 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
             riverPoints = [];
             islands = [];
             rescueBoats = [];
+            structures = [];
             fuelDepots = [];
             let currentCenter = VIRTUAL_WIDTH / 2;
             let currentWidth = 280;
@@ -549,10 +553,18 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
         }
 
         // --- GERADOR DE ENTIDADES ---
+        function trySpawnFuel(center,y,width,emergency){
+            if(fuelDepots.length>=2 || (distance-fuelSpawnAt<600 && !emergency))return;
+            const x=center+(Math.random()-.5)*Math.max(10,width-100);
+            const overlaps=[...fuelDepots,...rescueBoats,...islands,...structures,...powerups].some(o=>Math.hypot(o.x-x,o.y-y)<85);
+            if(overlaps)return;
+            fuelDepots.push({x,y,width:24,height:32,indestructible:true});
+            fuelSpawnAt=distance;
+        }
         function spawnMapEntities(y, center, width) {
             if (bossActive) {
-                // Reabastecimento vital nas batalhas longas contra chefes.
-                if (fuelDepots.length < 3 && Math.random() < 0.16) fuelDepots.push({x:center+(Math.random()-.5)*width*.5,y,width:24,height:32,hp:1});
+                // Reabastecimento de emergência na arena, espaçado e nunca sobreposto.
+                if (missionTicks % 780 === 0) trySpawnFuel(center,y,width,true);
                 return;
             }
 
@@ -582,10 +594,13 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
                 rescueBoats.push({x:leftBank+30+Math.random()*(width-60),y,soldiers:2+Math.floor(Math.random()*4),phase:Math.random()*6.28});
             }
 
-            // Postos de Combustível em locais abertos
-            if (Math.random() < 0.08) { // Probabilidade aumentada para garantir postos constantes
-                const spawnX = leftBank + 35 + Math.random() * (width - 70);
-                fuelDepots.push({ x: spawnX, y: y, width: 24, height: 32, hp: 1 });
+            // Pontos estratégicos de combustível; resgates e armas não são bloqueados.
+            if (distance - fuelSpawnAt >= 650 && Math.random() < .2) trySpawnFuel(center,y,width,false);
+            if(structures.length < 2 && missionTicks > 60 && Math.random() < .009){
+                structures.push({type:Math.random()<.6?'BRIDGE':'DAM',x:center,y,width:Math.min(width-20,270),height:24,hp:18,maxHp:18});
+            }
+            if(bombsPickedThisMission < 5 && Math.random()<.009 && !powerups.some(p=>p.type==='BOMB')){
+                powerups.push({x:center+(Math.random()-.5)*(width-65),y,type:'BOMB',label:'B+',color:'#f59e0b'});
             }
 
             // Inimigos com Spawn Constante
@@ -603,11 +618,13 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
                         type: 'JET', x: spawnX, y: y, width: 22, height: 26,
                         vx: 0, vy: 2.8, hp: 1, maxHp: 1, score: 150
                     });
-                } else if (rand < 0.76) {
+                } else if (rand < 0.69) {
                     enemies.push({
                         type: 'SHIP', x: spawnX, y: y, width: 24, height: 32,
                         vx: (Math.random() < 0.5 ? 0.9 : -0.9), vy: 0.3, hp: 1, maxHp: 1, score: 200, shootTimer: 0
                     });
+                } else if(rand < .86) {
+                    enemies.push({type:'SUB',x:spawnX,y,width:28,height:38,vx:(Math.random()<.5?-1:1)*1.6,vy:.8,hp:3,maxHp:3,score:280,shootTimer:0});
                 } else {
                     enemies.push({
                         type: 'ZIGZAG', x: spawnX, y: y, width: 22, height: 22,
@@ -1109,6 +1126,17 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
             });
         }
 
+        function drawStructures(){
+            for(const p of structures){
+                ctx.save();ctx.translate(p.x,p.y);
+                ctx.fillStyle='rgba(5,15,31,.4)';ctx.fillRect(-p.width/2+4,-p.height/2+6,p.width,p.height);
+                ctx.fillStyle=p.type==='BRIDGE'?'#9eacb8':'#64748b';
+                ctx.fillRect(-p.width/2,-p.height/2,p.width,p.height);
+                ctx.fillStyle='#fde68a';for(let i=-p.width/2+12;i<p.width/2;i+=22)ctx.fillRect(i,-3,9,6);
+                ctx.fillStyle='#fb7185';ctx.fillRect(-p.width/2,-p.height/2-8,p.width*Math.max(0,p.hp/p.maxHp),3);
+                ctx.restore();
+            }
+        }
         function drawRescueBoats(){
             for(const b of rescueBoats){
                 ctx.save();ctx.translate(b.x,b.y);
@@ -1191,19 +1219,19 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
 
             if (player.invulnerable > 0) player.invulnerable--;
 
-            if (player.weaponTimer > 0) {
-                player.weaponTimer--;
-                if (player.weaponTimer <= 0) player.weapon = aircraftCatalog.PLANES[selectedPlane].weapons[0];
-            }
+            // Armas especiais usam disparos disponíveis, não tempo em quadros.
 
             updateRiver();
             updateBombs();
-
-            // Colisão com Margens
-            const bounds = getRiverBoundariesAt(player.y);
-            if (player.x - player.width / 2 < bounds.leftBank || player.x + player.width / 2 > bounds.rightBank) {
-                applyDamage(35, 'COLIDIU COM O CÂNYON!');
+            for(let i=structures.length-1;i>=0;i--){const p=structures[i];p.y+=player.currentScrollSpeed;
+                if(Math.abs(player.x-p.x)<p.width/2 && Math.abs(player.y-p.y)<p.height/2+player.height/2)applyDamage(35,'COLIDIU COM OBSTÁCULO!');
+                for(let j=bullets.length-1;j>=0;j--){const b=bullets[j];if(Math.abs(b.x-p.x)<p.width/2&&Math.abs(b.y-p.y)<p.height/2){p.hp--;bullets.splice(j,1)}}
+                if(p.hp<=0){addExplosion(p.x,p.y,'#fbbf24',18);score+=350;structures.splice(i,1)}else if(p.y>VIRTUAL_HEIGHT+40)structures.splice(i,1);
             }
+
+            // Encostar na margem limita o avanço lateral, sem dano.
+            const bounds = getRiverBoundariesAt(player.y);
+            player.x=Math.max(bounds.leftBank+player.width/2+2,Math.min(bounds.rightBank-player.width/2-2,player.x));
 
             // Colisão com Ilhas
             islands.forEach(is => {
@@ -1289,7 +1317,14 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
                     e.x += (e.vx || 0);
                 }
 
-                if (e.type === 'SHIP' || e.type === 'TURRET') {
+                if(e.type!=='BOSS' && e.type!=='TURRET'){
+                    e.motion=(e.motion||0)+.035;
+                    const banks=getRiverBoundariesAt(e.y);
+                    if(e.x < banks.leftBank+e.width/2+4 || e.x > banks.rightBank-e.width/2-4)e.vx=-(e.vx||1.2);
+                    if(e.type==='HELI'||e.type==='JET'||e.type==='ZIGZAG')e.y+=Math.sin(e.motion)*1.3;
+                    if(e.type==='SHIP'||e.type==='SUB')e.x+=Math.sin(e.motion)*.85;
+                }
+                if (e.type === 'SHIP' || e.type === 'TURRET' || e.type==='SUB') {
                     e.shootTimer = (e.shootTimer || 0) + 1;
                     if (e.shootTimer > 60) {
                         const angle = Math.atan2(player.y - e.y, player.x - e.x);
@@ -1336,20 +1371,7 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
                 if (e.y > VIRTUAL_HEIGHT + 50 && e.type !== 'BOSS') enemies.splice(eIndex, 1);
             });
 
-            // Tiros acertando Postos de Gasolina (Podem ser explodidos!)
-            fuelDepots.forEach((f, fIndex) => {
-                bullets.forEach((b, bIndex) => {
-                    if (Math.abs(b.x - f.x) < 14 && Math.abs(b.y - f.y) < 18) {
-                        bullets.splice(bIndex, 1);
-                        fuelDepots.splice(fIndex, 1);
-                        addExplosion(f.x, f.y, '#22c55e', 12);
-                        sound.playExplosion(false);
-                        score += 80;
-                        createFloatingText(f.x, f.y, '+80 PTS', '#22c55e');
-                    }
-                });
-                if (f.y > VIRTUAL_HEIGHT + 40) fuelDepots.splice(fIndex, 1);
-            });
+            fuelDepots=fuelDepots.filter(f=>f.y<=VIRTUAL_HEIGHT+40);
 
             // Coleta de Power-ups
             powerups.forEach((p, pIndex) => {
@@ -1357,8 +1379,12 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
                 if (Math.hypot(p.x - player.x, p.y - player.y) < 20) {
                     const config = aircraftCatalog.PLANES[selectedPlane];
                     const index = ['SINGLE','DOUBLE','SPREAD','LASER','MISSILE'].indexOf(p.type);
-                    player.weapon = config.weapons[Math.max(0,index)];
-                    player.weaponTimer = 600;
+                    if(p.type==='BOMB'){
+                        if(player.bombs<5 && bombsPickedThisMission<5){player.bombs++;bombsPickedThisMission++;document.getElementById('bomb-count-touch').innerText='('+player.bombs+')'}
+                    } else {
+                        player.weapon = config.weapons[Math.max(0,index)];
+                        player.specialShots = 50;
+                    }
                     sound.playPowerupSound();
                     createFloatingText(player.x, player.y, `ARMA: ${aircraftCatalog.WEAPONS[player.weapon]}!`, p.color);
                     powerups.splice(pIndex, 1);
@@ -1420,6 +1446,7 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
             ctx.font = 'bold 10px monospace';
             ctx.textAlign = 'left';
             ctx.fillText(`GAS: ${Math.ceil(player.fuel)}%`, 18, VIRTUAL_HEIGHT - 17);
+            ctx.fillStyle='#facc15';ctx.font='bold 12px system-ui';ctx.fillText('ARMA: '+player.weapon+' | '+(player.specialShots||0)+' TIROS',12,72);
 
             const shieldPercent = Math.max(0, player.shield / player.maxShield);
             ctx.fillStyle = 'rgba(15, 23, 42, 0.85)';
@@ -1493,6 +1520,8 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
             sector = Math.max(1,Math.min(20,Number(levelSelector.value)||1));
             kills = 0;
             rescuedSoldiers = 0;
+            fuelSpawnAt = -99999;
+            bombsPickedThisMission = 0;
             bossActive = false;
 
             player.x = VIRTUAL_WIDTH / 2;
@@ -1508,6 +1537,7 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
             player.fuelDepletionRate = config.fuel;
             player.weapon = config.weapons[0];
             player.weaponTimer = 0;
+            player.specialShots = 0;
             player.invulnerable = 0;
             player.disabledTimer = 0;
 
@@ -1535,6 +1565,16 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
 
         function fireWeapon() {
             if (gameState !== 'PLAYING' || player.disabledTimer > 0) return;
+            const baseWeapon=aircraftCatalog.PLANES[selectedPlane].weapons[0];
+            if(player.weapon!==baseWeapon){
+                if(player.specialShots<=0)player.weapon=baseWeapon;
+                else if(--player.specialShots===0){
+                    // Disparo número 50 ainda utiliza a arma especial.
+                    try{window.RiverSFX?.weapon(player.weapon)}catch(e){}
+                    aircraftCatalog.shoot(player.weapon,player,bullets);
+                    player.weapon=baseWeapon;return;
+                }
+            }
             try{window.RiverSFX?.weapon(player.weapon)}catch(e){}
             sound.playShoot();
             aircraftCatalog.shoot(player.weapon,player,bullets);
@@ -1637,6 +1677,7 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
                 quality:localStorage.getItem('river_quality') || 'eco'
             });
             drawFuelDepots();
+            drawStructures();
             drawBombs();
             drawRescueBoats();
             drawPowerups();
