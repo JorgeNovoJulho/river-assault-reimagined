@@ -36,5 +36,5 @@ w.RiverSFX={volume:.65,
  shield(){noise(.16,.05,900,3800);tone(400,.26,'triangle',110,.065)},
  engine(){tone(79,.14,'sine',71,.025)}
 };
-w.RiverVoice={chirp(){for(let i=0;i<6;i++)tone(135+i%3*70,.075,'sawtooth',110+i%4*45,.028,i*.09)}};
+w.RiverVoice={chirp(){const syllables=6+Math.floor(Math.random()*4);for(let i=0;i<syllables;i++){const base=90+Math.random()*150;const delay=i*.095;tone(base,.09,'sawtooth',base*(.65+Math.random()*.5),.065,delay);tone(base*1.48,.06,'square',base*.7,.022,delay+.018);}}};
 })(window);
