@@ -167,10 +167,11 @@
         <div id="pause-screen" class="hidden absolute inset-0 bg-black/80 flex flex-col items-center justify-center z-30">
             <h2 class="text-4xl font-bold text-cyan-400 mb-4 tracking-widest">PAUSADO</h2>
             <p class="text-slate-400 text-sm mb-6">PRESSIONE 'P' OU 'ESC' PARA CONTINUAR</p>
+            <button id="pause-settings-btn" class="arcade-btn bg-slate-700 hover:bg-slate-600 text-white font-bold px-6 py-2 rounded-lg mb-3">CONFIGURAÇÕES</button>
             <button id="resume-btn" class="arcade-btn bg-cyan-600 hover:bg-cyan-500 text-white font-bold px-6 py-2 rounded-lg">CONTINUAR</button>
         </div>
 
-        <div id="victory-screen" class="hidden absolute inset-0 z-40 bg-slate-950/95 p-5 text-center overflow-y-auto flex-col items-center justify-center gap-4"><h2 class="text-3xl font-black text-amber-400">CAMPANHA CONCLUÍDA!</h2><p>As vinte operações foram vencidas!</p><button id="victory-restart" class="bg-amber-500 text-black rounded-xl p-4 font-bold">JOGAR NOVAMENTE</button></div>
+        <div id="victory-screen" class="hidden absolute inset-0 z-40 bg-slate-950/95 p-5 text-center overflow-y-auto flex-col items-center justify-center gap-4"><h2 class="text-3xl font-black text-amber-400">CAMPANHA CONCLUÍDA!</h2><p>As vinte operações foram vencidas!</p><p id="rank-award" class="text-yellow-300 font-bold"></p><button id="victory-restart" class="bg-amber-500 text-black rounded-xl p-4 font-bold">JOGAR NOVAMENTE</button></div>
         <div id="mission-banner" class="absolute top-9 left-2 px-2 py-1 bg-slate-900/65 text-amber-200 font-bold text-xs pointer-events-none"></div>
         <!-- Tela de Fim de Jogo (Game Over) -->
         <div id="game-over-screen" class="hidden absolute inset-0 bg-black/90 flex flex-col items-center justify-center p-6 text-center z-30">
@@ -504,6 +505,12 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
         let bombsPickedThisMission = 0;
         let structureLastDistance=-99999;
         let lastEnemyDistance=-99999;
+        let journey=1;
+        const RANKS=['Soldado de Primeira Classe','Cabo','Terceiro-Sargento','Segundo-Sargento','Primeiro-Sargento','Suboficial','Aspirante a Oficial','Segundo-Tenente','Primeiro-Tenente','Capitão','Major','Tenente-Coronel','Coronel','Brigadeiro','Major-Brigadeiro','Tenente-Brigadeiro'];
+        try{journey=Math.max(1,Number(localStorage.getItem('river_journey_v1')||1))}catch(e){}
+        const rankName=()=>RANKS[Math.min(journey-1,RANKS.length-1)];
+        const scoreMultiplier=()=>Math.pow(1.1,journey-1);
+        const awardEnemyPoints=points=>Math.round((points||100)*scoreMultiplier());
         let lives=3;
         let continues=1;
         let earnedPoints=0;
@@ -658,7 +665,7 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
             // Inimigos com Spawn Constante
             const hazards=[...enemies,...structures,...islands,...rescueBoats,...fuelDepots];
             const clearLane=hazards.every(e=>Math.abs(e.y-y)>115);
-            if (clearLane && distance-lastEnemyDistance>90 && enemies.filter(e=>e.type!=='BOSS').length<5 && Math.random()<.68) {
+            if (clearLane && distance-lastEnemyDistance>75 && enemies.filter(e=>e.type!=='BOSS').length<6 && Math.random()<.75) {
                 lastEnemyDistance=distance;
                 const rand = Math.random();
                 const spawnX = leftBank + 34 + Math.random() * (width - 68);
@@ -1425,12 +1432,12 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
                             spawnPowerupCheck(e.x, e.y);
                             addExplosion(e.x, e.y, '#ef4444', e.type === 'BOSS' ? 45 : 15);
                             sound.playExplosion(e.type === 'BOSS');
-                            score += e.score;
+                            score += awardEnemyPoints(e.score);
                             kills++;
 
                             if (e.type === 'BOSS') {
                                 bossActive = false;
-                                if(sector===20) {gameState='VICTORY';playlist.pause();document.getElementById('victory-screen').classList.remove('hidden')} else {sector++;missionTicks=0;missionStartDistance=distance;createFloatingText(e.x,e.y,'MISSÃO CONCLUÍDA!','#22c55e');document.getElementById('mission-banner').textContent=campaign.at(sector).name}
+                                if(sector===20) {gameState='VICTORY';playlist.pause();journey++;try{localStorage.setItem('river_journey_v1',String(journey))}catch(error){}document.getElementById('rank-award').textContent='JORNADA '+journey+' · '+rankName()+' · MULTIPLICADOR x'+scoreMultiplier().toFixed(2);document.getElementById('victory-screen').classList.remove('hidden')} else {sector++;missionTicks=0;missionStartDistance=distance;createFloatingText(e.x,e.y,'MISSÃO CONCLUÍDA!','#22c55e');document.getElementById('mission-banner').textContent=campaign.at(sector).name}
                             } else {
                                 createFloatingText(e.x, e.y, `+${e.score}`, '#facc15');
                             }
@@ -1509,6 +1516,7 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
 
         function drawHUD() {
             const fuelPercent = Math.max(0, player.fuel / player.maxFuel);
+            ctx.fillStyle='#fef08a';ctx.font='bold 12px system-ui';ctx.textAlign='left';ctx.fillText('BOMBAS: '+player.bombs+'/5   ·   J'+journey+' '+rankName(),12,37);
             ctx.fillStyle='#bbf7d0';ctx.font='bold 11px system-ui';ctx.textAlign='right';ctx.fillText('RESGATADOS: '+rescuedSoldiers+' · VIDAS: '+lives,VIRTUAL_WIDTH-15,54);ctx.textAlign='left';
             ctx.fillStyle = 'rgba(15, 23, 42, 0.85)';
             ctx.fillRect(10, VIRTUAL_HEIGHT - 32, 140, 22);
@@ -1677,7 +1685,7 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
             });
             for(let i=enemies.length-1;i>=0;i--){
                 if(enemies[i].hp<=0&&enemies[i].type!=='BOSS'){
-                    score+=enemies[i].score||100;kills++;
+                    score+=awardEnemyPoints(enemies[i].score);kills++;
                     enemies.splice(i,1);
                 }
             }
@@ -1748,6 +1756,7 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
             addExplosion(player.x,player.y,'#fbbf24',24);
             if(lives>0){
                 player.shield=player.maxShield;player.fuel=Math.max(player.fuel,65);
+                player.bombs=3;document.getElementById('bomb-count-touch').textContent='(3)';
                 player.x=VIRTUAL_WIDTH/2;player.y=VIRTUAL_HEIGHT-100;
                 player.invulnerable=170;player.disabledTimer=0;
                 enemyBullets=[];bombProjectiles=[];
@@ -1759,7 +1768,7 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
         function continueGame(){
             if(continues<=0)return;
             continues--;lives=3;player.shield=player.maxShield;player.fuel=100;
-            player.bombs=Math.max(1,player.bombs);player.invulnerable=180;
+            player.bombs=3;document.getElementById('bomb-count-touch').textContent='(3)';player.invulnerable=180;
             enemyBullets=[];enemies=enemies.filter(e=>e.type==='BOSS');
             document.getElementById('game-over-screen').classList.add('hidden');
             document.getElementById('game-over-screen').style.display='none';
@@ -2067,6 +2076,7 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
         });
         ['pointerup','pointercancel','lostpointercapture'].forEach(type =>
             joystick.addEventListener(type, event => { if (event.pointerId === activeJoystickPointer) resetJoystick(); }));
+        document.getElementById('pause-settings-btn').addEventListener('click',()=>showControllerSettings(true));
         function togglePause() {
             if (gameState === 'PLAYING') {gameState='PAUSED'; playlist.pause();soundtrack.stop(); document.getElementById('pause-screen').classList.remove('hidden');}
             else if (gameState === 'PAUSED') {gameState='PLAYING'; playlist.resume();if(!playlist.tracks.length)soundtrack.start(); document.getElementById('pause-screen').classList.add('hidden');}
