@@ -29,10 +29,11 @@ const {chromium}=require('playwright');const {spawn}=require('node:child_process
   await page.locator('#music-toggle').click();
   if (await page.locator('#music-toggle').innerText()===musicBefore) throw Error('Botão MÚSICA falhou');
   await page.locator('#controller-settings-btn').click();
-  await page.locator('#music-volume').fill('22');
-  await page.locator('#sfx-volume').fill('31');
-  await page.locator('#sarcasm-level').fill('4');
-  await page.locator('#pad-deadzone').fill('30');
+  await page.evaluate(()=>{
+    for(const [id,value] of [['music-volume','22'],['sfx-volume','31'],['sarcasm-level','4'],['pad-deadzone','30']]){
+      const el=document.getElementById(id);el.value=value;el.dispatchEvent(new Event('input',{bubbles:true}));
+    }
+  });
   const settings=await page.evaluate(()=>({
      open:getComputedStyle(document.getElementById('controller-settings')).display,
      parent:document.getElementById('controller-settings').parentElement.tagName,
