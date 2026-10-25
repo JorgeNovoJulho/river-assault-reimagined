@@ -1,19 +1,40 @@
-/* Efeitos sintetizados originais, leves, sem arquivos externos. */
-(function(w){'use strict';let ctx=null;
-function tone(freq=330,duration=.16,type='sawtooth',pitch=0,gain=.09){
- try{const A=w.AudioContext||w.webkitAudioContext;if(!A)return;ctx=ctx||new A();ctx.resume();
- const o=ctx.createOscillator(),v=ctx.createGain(),f=ctx.createBiquadFilter(),now=ctx.currentTime;
- o.type=type;o.frequency.setValueAtTime(freq,now);o.frequency.exponentialRampToValueAtTime(Math.max(35,freq+pitch),now+duration);
- f.type='lowpass';f.frequency.value=2600;v.gain.setValueAtTime(.001,now);v.gain.linearRampToValueAtTime(gain,now+.012);v.gain.exponentialRampToValueAtTime(.001,now+duration);
- o.connect(f);f.connect(v);v.connect(ctx.destination);o.start(now);o.stop(now+duration+.02)}catch(e){}
+/* River Assault - FX procedural leve (camadas tonais, ruído filtrado e subgrave). */
+(function(w){'use strict';
+let ctx=null,noiseBuffer=null,last=0;
+function get(){try{const A=w.AudioContext||w.webkitAudioContext;if(!A)return null;ctx=ctx||new A();if(ctx.state==='suspended')ctx.resume();return ctx}catch(e){return null}}
+function tone(freq=330,duration=.16,type='sawtooth',end=120,gain=.09,delay=0){
+ const c=get();if(!c)return;try{
+ const t=c.currentTime+delay,o=c.createOscillator(),v=c.createGain(),lp=c.createBiquadFilter();
+ o.type=type;o.frequency.setValueAtTime(Math.max(36,freq),t);o.frequency.exponentialRampToValueAtTime(Math.max(35,end),t+duration);
+ lp.type='lowpass';lp.frequency.value=2100;
+ v.gain.setValueAtTime(.0001,t);v.gain.exponentialRampToValueAtTime(Math.max(.0002,gain),t+.013);v.gain.exponentialRampToValueAtTime(.0001,t+duration);
+ o.connect(lp);lp.connect(v);v.connect(c.destination);o.start(t);o.stop(t+duration+.02);
+ }catch(e){}
+}
+function noise(duration=.19,gain=.1,low=600,high=5000,delay=0){
+ const c=get();if(!c)return;try{
+ const t=c.currentTime+delay,frames=Math.ceil(c.sampleRate*duration);
+ const b=c.createBuffer(1,frames,c.sampleRate),d=b.getChannelData(0);
+ for(let i=0;i<frames;i++)d[i]=Math.random()*2-1;
+ const src=c.createBufferSource(),band=c.createBiquadFilter(),amp=c.createGain();
+ src.buffer=b;band.type='bandpass';band.frequency.value=Math.sqrt(low*high);band.Q.value=.65;
+ amp.gain.setValueAtTime(.0001,t);amp.gain.exponentialRampToValueAtTime(Math.max(.0002,gain),t+.015);amp.gain.exponentialRampToValueAtTime(.0001,t+duration);
+ src.connect(band);band.connect(amp);amp.connect(c.destination);src.start(t);src.stop(t+duration+.02);
+ }catch(e){}
 }
 w.RiverSFX={
- weapon(name){if(/LASER|BEAM|PULSE/.test(name))tone(950,.2,'sawtooth',-730,.05);
- else if(/MISSILE|ROCKET|PRECISION/.test(name))tone(190,.32,'sawtooth',-130,.075);
- else if(/RAPID|BURST|NEEDLE/.test(name))tone(510,.085,'square',-240,.04);
- else tone(670,.12,'triangle',-400,.06)},
- impact(){tone(105,.38,'sawtooth',-68,.14);setTimeout(()=>tone(62,.28,'triangle',-25,.08),65)},
- collect(){tone(550,.15,'triangle',350,.08);setTimeout(()=>tone(890,.18,'sine',120,.07),100)}
+ weapon(name){
+  const t=Date.now();if(t-last<70)return;last=t;
+  if(/LASER|BEAM|PULSE/.test(name)){tone(1320,.19,'sawtooth',300,.047);tone(1100,.12,'sine',520,.025,.012)}
+  else if(/MISSILE|ROCKET|PRECISION|TRACKER/.test(name)){noise(.18,.065,350,2400);tone(220,.26,'sawtooth',55,.067)}
+  else if(/CIRCLE|MULTI|HYBRID/.test(name)){tone(890,.16,'triangle',220,.065);noise(.07,.035,500,5500)}
+  else if(/RAPID|BURST|NEEDLE/.test(name)){noise(.072,.052,400,7200);tone(290,.11,'triangle',90,.052)}
+  else{noise(.045,.042,850,6300);tone(440,.11,'triangle',160,.045)}
+ },
+ impact(){noise(.48,.15,45,2200);tone(120,.55,'sawtooth',37,.16);tone(67,.36,'sine',35,.13,.045)},
+ collect(){tone(620,.16,'sine',840,.08);tone(930,.19,'triangle',1150,.075,.09)},
+ shield(){noise(.16,.05,900,3800);tone(400,.26,'triangle',110,.065)},
+ engine(){tone(79,.14,'sine',71,.025)}
 };
-w.RiverVoice={chirp(){for(let i=0;i<5;i++)setTimeout(()=>tone(160+i%3*95,.085,'sawtooth',i%2?120:-45,.033),i*100)}};
+w.RiverVoice={chirp(){for(let i=0;i<6;i++)tone(135+i%3*70,.075,'sawtooth',110+i%4*45,.028,i*.09)}};
 })(window);
