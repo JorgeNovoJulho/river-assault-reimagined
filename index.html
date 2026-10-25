@@ -1530,7 +1530,7 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
             document.getElementById('mission-banner').textContent=campaign.at(sector).name;
             gameState = 'PLAYING';
             simulationClock.reset();
-            try{playlist.startNewGame()}catch(error){console.warn('Playlist indisponível:',error)}
+            try{playlist.startNewGame();if(!playlist.tracks.length)soundtrack.start();else soundtrack.stop()}catch(error){console.warn('Playlist indisponível:',error);soundtrack.start()}
         }
 
         function fireWeapon() {
@@ -1613,7 +1613,7 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
 
         function gameOver(reason) {
             gameState = 'GAMEOVER';
-            playlist.pause();
+            playlist.pause();soundtrack.stop();
             if (score > hiScore) {
                 hiScore = score;
                 localStorage.setItem('rr_hiscore_ptbr', hiScore);
@@ -1879,8 +1879,8 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
         ['pointerup','pointercancel','lostpointercapture'].forEach(type =>
             joystick.addEventListener(type, event => { if (event.pointerId === activeJoystickPointer) resetJoystick(); }));
         function togglePause() {
-            if (gameState === 'PLAYING') {gameState='PAUSED'; playlist.pause(); document.getElementById('pause-screen').classList.remove('hidden');}
-            else if (gameState === 'PAUSED') {gameState='PLAYING'; playlist.resume(); document.getElementById('pause-screen').classList.add('hidden');}
+            if (gameState === 'PLAYING') {gameState='PAUSED'; playlist.pause();soundtrack.stop(); document.getElementById('pause-screen').classList.remove('hidden');}
+            else if (gameState === 'PAUSED') {gameState='PLAYING'; playlist.resume();if(!playlist.tracks.length)soundtrack.start(); document.getElementById('pause-screen').classList.add('hidden');}
         }
         document.getElementById('btn-pause-touch').addEventListener('pointerdown', event => {event.preventDefault();togglePause();});
 
