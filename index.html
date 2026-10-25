@@ -1237,13 +1237,31 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
         function drawStructures(){
             for(const p of structures){
                 ctx.save();ctx.translate(p.x,p.y);
-                ctx.fillStyle='rgba(5,15,31,.4)';ctx.fillRect(-p.width/2+4,-p.height/2+6,p.width,p.height);
-                ctx.fillStyle=p.type==='BRIDGE'?'#9eacb8':'#64748b';
-                ctx.fillRect(-p.width/2,-p.height/2,p.width,p.height);
-                ctx.fillStyle='#42566a';ctx.fillRect(-p.width/2,-p.height/2-12,18,p.height+24);ctx.fillRect(p.width/2-18,-p.height/2-12,18,p.height+24);
-                ctx.fillStyle='#cbd5e1';ctx.fillRect(-p.width/2+2,-p.height/2-9,5,p.height+18);ctx.fillRect(p.width/2-7,-p.height/2-9,5,p.height+18);
-                ctx.fillStyle='#fde68a';for(let i=-p.width/2+12;i<p.width/2;i+=22)ctx.fillRect(i,-3,9,6);
-                ctx.fillStyle='#fb7185';ctx.fillRect(-p.width/2,-p.height/2-8,p.width*Math.max(0,p.hp/p.maxHp),3);
+                const half=p.width/2;
+                const bankColor=p.type==='BRIDGE'?'#aab9c8':'#718695';
+                ctx.shadowColor='rgba(5,12,27,.55)';ctx.shadowBlur=9;ctx.shadowOffsetY=6;
+                if(p.type==='DAM'){
+                    const opening=p.opening||100,gate=opening/2;
+                    ctx.fillStyle='#24394a';ctx.fillRect(-half,-p.height/2,half-gate,p.height);
+                    ctx.fillRect(gate,-p.height/2,half-gate,p.height);
+                    ctx.shadowBlur=0;
+                    ctx.fillStyle=bankColor;
+                    ctx.fillRect(-half,-p.height/2+3,half-gate,p.height-6);
+                    ctx.fillRect(gate,-p.height/2+3,half-gate,p.height-6);
+                    ctx.fillStyle='#e5f1f5';ctx.fillRect(-gate-6,-p.height/2,6,p.height);
+                    ctx.fillRect(gate,-p.height/2,6,p.height);
+                    ctx.fillStyle='#1b6e91';ctx.fillRect(-gate+1,-p.height/2,opening-2,p.height);
+                    ctx.fillStyle='rgba(181,238,255,.75)';
+                    for(let i=0;i<3;i++)ctx.fillRect(-gate+8+i*opening/3,-4,Math.min(14,opening/5),2);
+                    ctx.fillStyle='#fbbf24';ctx.fillRect(-gate-9,-p.height/2-7,6,6);ctx.fillRect(gate+3,-p.height/2-7,6,6);
+                }else{
+                    ctx.fillStyle='#283f4b';ctx.fillRect(-half,-p.height/2, p.width,p.height);
+                    ctx.shadowBlur=0;ctx.fillStyle=bankColor;ctx.fillRect(-half,-p.height/2+3,p.width,p.height-6);
+                    ctx.strokeStyle='#e0ebf1';ctx.lineWidth=2;
+                    for(let i=-half+13;i<half-8;i+=25){ctx.beginPath();ctx.moveTo(i,-p.height/2+3);ctx.lineTo(i+6,p.height/2-3);ctx.stroke()}
+                    ctx.fillStyle='#415769';ctx.fillRect(-half,-p.height/2-11,19,p.height+22);ctx.fillRect(half-19,-p.height/2-11,19,p.height+22);
+                }
+                ctx.fillStyle='#fb7185';ctx.fillRect(-half,-p.height/2-13,p.width*Math.max(0,p.hp/p.maxHp),3);
                 ctx.restore();
             }
         }
