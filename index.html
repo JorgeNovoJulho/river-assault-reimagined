@@ -81,6 +81,9 @@
         <div class="flex items-center gap-3">
             <button id="crt-toggle" class="bg-slate-800 hover:bg-slate-700 text-xs px-2 py-1 rounded border border-slate-600 transition">CRT: LIG</button>
             <button id="controller-settings-btn" class="bg-slate-800 hover:bg-slate-700 text-xs px-2 py-1 rounded border border-slate-600">CONTROLE</button>
+            <button id="track-next" class="bg-slate-800 hover:bg-slate-700 text-xs px-2 py-1 rounded border border-slate-600">PRÓXIMA</button>
+            <button id="music-library" class="bg-slate-800 hover:bg-slate-700 text-xs px-2 py-1 rounded border border-slate-600">MÚSICAS</button>
+            <input id="music-upload" class="hidden" type="file" accept=".mp3,.ogg,.wav,.m4a,audio/*" multiple>
             <button id="music-toggle" class="bg-slate-800 hover:bg-slate-700 text-xs px-2 py-1 rounded border border-slate-600">MÚSICA: LIG</button>
             <button id="sound-toggle" class="bg-slate-800 hover:bg-slate-700 text-xs px-2 py-1 rounded border border-slate-600 transition">SOM: LIG</button>
         </div>
@@ -135,6 +138,7 @@
                     <option value="vespa">VESPA — Médio / ágil</option>
                     <option value="cometa">COMETA — Rápido / maior consumo</option>
                 </select>
+                <p id="playlist-status" class="text-emerald-300 text-xs mt-2" aria-live="polite">Músicas: carregando biblioteca local...</p>
                 <p id="plane-weapons" class="text-cyan-300 text-xs mt-2"></p>
             </div>
             <button id="start-btn" class="arcade-btn bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-lg px-8 py-3 rounded-lg uppercase tracking-wider cursor-pointer">
@@ -234,6 +238,7 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
     <script src="./src/game/clock.js"></script>
     <script src="./src/render/scene2d5.js"></script>
     <script src="./src/audio/music.js"></script>
+    <script src="./src/audio/playlist.js"></script>
     <script>
         // --- SINTETIZADOR DE ÁUDIO CHIPTUNE RETRO (Web Audio API) ---
         class SoundEngine {
@@ -1410,7 +1415,7 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
 
             gameState = 'PLAYING';
             simulationClock.reset();
-            soundtrack.start();
+            playlist.startNewGame();
         }
 
         function fireWeapon() {
@@ -1538,9 +1543,18 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
         window.addEventListener('gamepaddisconnected',()=>{lastControllerStatus='';});
         const mouseInput = {active:false,x:VIRTUAL_WIDTH/2,up:false,down:false,fire:false};
         let lastMouseShot = 0;
+        const playlist=new window.RiverPlaylist({onStatus:(message)=>{
+            const status=document.getElementById('playlist-status');if(status)status.textContent=message;
+        }});
+        playlist.load();
+        document.getElementById('music-library').addEventListener('click',()=>document.getElementById('music-upload').click());
+        document.getElementById('music-upload').addEventListener('change',async event=>{
+            await playlist.importFiles(event.target.files);event.target.value='';
+        });
+        document.getElementById('track-next').addEventListener('click',()=>playlist.next());
         const soundtrack=new window.RiverMusic();
         document.getElementById('music-toggle').addEventListener('click',()=>{
-            const on=soundtrack.toggle();document.getElementById('music-toggle').textContent='MÚSICA: '+(on?'LIG':'DES');
+            const on=playlist.toggle();document.getElementById('music-toggle').textContent='MÚSICA: '+(on?'LIG':'DES');
         });
         let lastGameError='';
         function showGameError(error){
