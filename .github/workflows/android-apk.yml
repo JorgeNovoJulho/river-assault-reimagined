@@ -28,8 +28,10 @@ jobs:
         with:
           distribution: temurin
           java-version: '21'
-      - name: Preparar SDK Android
-        uses: android-actions/setup-android@v3
+      - name: Verificar SDK Android do executor
+        run: |
+          echo "ANDROID_HOME=$ANDROID_HOME"
+          test -d "$ANDROID_HOME" || exit 1
       - name: Instalar dependências
         run: npm install --no-audit --no-fund
       - name: Testar código
