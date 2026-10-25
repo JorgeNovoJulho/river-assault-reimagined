@@ -1964,6 +1964,32 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
         let controllerMenuOpen = false, pendingRemap = null, remapPreviousButtons = [];
         let lastControllerStatus = '', controllerMenuIndex = 0, previousMenuDirection = false, previousMenuConfirm = false;
         const controllerDialog = document.getElementById('controller-settings');
+        // Portal independente do Canvas e das telas START/PAUSE: sem clipping ou captura de toques.
+        document.body.appendChild(controllerDialog);
+        controllerDialog.style.display='none';
+        controllerDialog.setAttribute('aria-hidden','true');
+        controllerDialog.style.position='fixed';
+        controllerDialog.style.inset='0';
+        controllerDialog.style.zIndex='99999';
+        controllerDialog.style.width='100vw';
+        controllerDialog.style.maxWidth='none';
+        controllerDialog.style.height='100dvh';
+        controllerDialog.style.maxHeight='100dvh';
+        controllerDialog.style.overflowY='auto';
+        controllerDialog.style.touchAction='pan-y';
+        controllerDialog.style.pointerEvents='auto';
+        controllerDialog.style.padding='max(16px,env(safe-area-inset-top)) max(14px,env(safe-area-inset-right)) max(24px,env(safe-area-inset-bottom)) max(14px,env(safe-area-inset-left))';
+        controllerDialog.style.alignItems='center';
+        controllerDialog.style.gap='12px';
+        controllerDialog.style.background='#071426';
+        for(const child of controllerDialog.children){child.style.width='min(100%,460px)';child.style.flexShrink='0'}
+        for(const id of ['music-volume','sfx-volume','sarcasm-level','pad-deadzone']){
+            const el=document.getElementById(id);el.style.width='100%';el.style.minHeight='40px';el.style.touchAction='pan-x';
+        }
+        document.getElementById('pad-close').style.position='sticky';
+        document.getElementById('pad-close').style.bottom='4px';
+        document.getElementById('pad-close').style.zIndex='1';
+
         const indicator = document.getElementById('controller-indicator');
         const settingsStatus = document.getElementById('gamepad-status');
         const sensitivity = document.getElementById('pad-deadzone');
@@ -1976,10 +2002,16 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
                 ({fire:'TIRO',bomb:'BOMBA',pause:'PAUSA'})[name] + ': BOTÃO ' + physicalGamepad.settings[name];
         }
         function showControllerSettings(open) {
-            controllerMenuOpen = open;pendingRemap=null;controllerMenuIndex=0;
+            controllerMenuOpen = Boolean(open);pendingRemap=null;controllerMenuIndex=0;
             controllerDialog.classList.toggle('hidden',!open);
-            updateSensitivityUI();
-            if(open) {remapPreviousButtons=[...physicalGamepad.lastButtons];document.getElementById('pad-close').focus();}
+            controllerDialog.style.display=open?'flex':'none';
+            controllerDialog.setAttribute('aria-hidden',String(!open));
+            if(open){
+                remapPreviousButtons=[...physicalGamepad.lastButtons];
+                updateSensitivityUI();
+                controllerDialog.scrollTop=0;
+                document.getElementById('music-volume').focus({preventScroll:true});
+            }
         }
         document.getElementById('controller-settings-btn').addEventListener('click',()=>showControllerSettings(true));
         document.getElementById('menu-settings-btn').addEventListener('click',()=>showControllerSettings(true));
