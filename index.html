@@ -1458,7 +1458,7 @@
         let gamepadState = physicalGamepad.poll();
         let lastGamepadShot = 0;
         let controllerMenuOpen = false, pendingRemap = null, remapPreviousButtons = [];
-        let lastControllerStatus = '', controllerMenuIndex = 0, previousMenuDirection = false;
+        let lastControllerStatus = '', controllerMenuIndex = 0, previousMenuDirection = false, previousMenuConfirm = false;
         const controllerDialog = document.getElementById('controller-settings');
         const indicator = document.getElementById('controller-indicator');
         const settingsStatus = document.getElementById('gamepad-status');
@@ -1522,12 +1522,20 @@
                         elements[controllerMenuIndex].focus();
                     }
                     previousMenuDirection=direction;
+                    const confirm = gamepadState.fire;
+                    if(confirm && !previousMenuConfirm) {
+                        if(controllerMenuIndex === 0) {
+                            physicalGamepad.configure({deadzone:Math.min(0.55,physicalGamepad.settings.deadzone+0.03)});
+                            updateSensitivityUI();
+                        } else elements[controllerMenuIndex].click();
+                    }
+                    previousMenuConfirm=confirm;
                     if(gamepadState.justPause)showControllerSettings(false);
                 }
                 // Configurações nunca causam tiros, bombas, início ou pausa no jogo.
-                draw();requestAnimationFrame(gameLoop);return;
+                render();requestAnimationFrame(gameLoop);return;
             }
-            previousMenuDirection=false;
+            previousMenuDirection=false;previousMenuConfirm=false;
             if (gamepadState.justPause) {
                 if (gameState === 'START' || gameState === 'GAMEOVER') { sound.init(); resetGame(); }
                 else togglePause();
