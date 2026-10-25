@@ -506,6 +506,9 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
         let fuelSpawnAt = -99999;
         let bombsPickedThisMission = 0;
         let structureLastDistance=-99999;
+        let islandLastDistance=-99999;
+        let obstacleLastType='';
+        let obstacleSequence=0;
         let lastEnemyDistance=-99999;
         let journey=1;
         const RANKS=['Soldado de Primeira Classe','Cabo','Terceiro-Sargento','Segundo-Sargento','Primeiro-Sargento','Suboficial','Aspirante a Oficial','Segundo-Tenente','Primeiro-Tenente','Capitão','Major','Tenente-Coronel','Coronel','Brigadeiro','Major-Brigadeiro','Tenente-Brigadeiro'];
@@ -630,15 +633,25 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
             const leftBank = center - width / 2;
             const rightBank = center + width / 2;
 
-            // Ilhas no meio do canal
-            if (islands.length < 3 && !structures.some(o=>Math.abs(o.y-y)<120) && Math.random() < campaign.at(sector).obstacleRate*.6) {
-                islands.push({
-                    x: center + (Math.random() - 0.5) * (width * 0.4),
-                    y: y,
-                    width: 32 + Math.random() * Math.min(66,width-122),
-                    height: 32 + Math.random() * 60,
-                    shape: Math.floor(Math.random()*5)
-                });
+            // Microsequências desenhadas por área: ilhotas, recifes, ilhas longas e corredores.
+            const level=campaign.at(sector);
+            const islandGap=[290,370,450][(level.hazardSet+obstacleSequence)%3];
+            if(islands.length<3 && distance-islandLastDistance>islandGap &&
+               distance-structureLastDistance>220 && !structures.some(o=>Math.abs(o.y-y)<180) &&
+               !rescueBoats.some(o=>Math.abs(o.y-y)<110) && Math.random()<.43){
+                let shape=(obstacleSequence+level.hazardSet)%5;
+                const islandWidth=Math.min(width*.34,shape===1?73:shape===3?64:90);
+                const offset=shape===2 ? width*.16 : shape===4 ? -width*.17 :(Math.random()-.5)*width*.22;
+                const island={x:center+offset,y,width:islandWidth,height:shape===1?128:shape===3?95:shape===4?65:75,shape};
+                // Garantir corredor de voo de pelo menos 46px + envergadura do jogador.
+                const leftGap=island.x-island.width/2-leftBank;
+                const rightGap=rightBank-(island.x+island.width/2);
+                if(Math.max(leftGap,rightGap)>=player.width+46){
+                    islands.push(island);
+                    islandLastDistance=distance;
+                    obstacleLastType='ISLAND';
+                    obstacleSequence++;
+                }
             }
 
             // Botes civis com soldados: voar perto realiza resgate, sem disparar.
@@ -648,11 +661,18 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
 
             // Pontos estratégicos de combustível; resgates e armas não são bloqueados.
             if (distance - fuelSpawnAt >= 650 && Math.random() < .2) trySpawnFuel(center,y,width,false);
-            if(structures.length<1 && distance-structureLastDistance>1400 && missionTicks>240 && !islands.some(o=>Math.abs(o.y-y)<140) && !rescueBoats.some(o=>Math.abs(o.y-y)<140) && Math.random()<.065){
-                // Conectada exatamente às margens do rio, com os pilares em terra firme.
-                const type=Math.random()<.7?'BRIDGE':'DAM';
-                structures.push({type,x:center,y,width:width+28,height:type==='BRIDGE'?21:31,hp:type==='BRIDGE'?17:30,maxHp:type==='BRIDGE'?17:30});
-                structureLastDistance=distance;
+            const structureGap=1250+((sector*173+obstacleSequence*97)%540);
+            if(structures.length<1 && distance-structureLastDistance>structureGap &&
+               distance-islandLastDistance>260 && missionTicks>240 &&
+               !islands.some(o=>Math.abs(o.y-y)<175) &&
+               !rescueBoats.some(o=>Math.abs(o.y-y)<135) && Math.random()<.055){
+                const type=obstacleLastType==='DAM'?'BRIDGE':
+                    obstacleLastType==='BRIDGE'?'DAM':(Math.random()<.58?'BRIDGE':'DAM');
+                const passage=type==='DAM'?Math.max(player.width+42,Math.min(width*.45,105+level.difficulty*12)):0;
+                structures.push({type,x:center,y,width:width+30,height:type==='BRIDGE'?22:35,
+                    opening:passage,variant:(level.hazardSet+obstacleSequence)%4,
+                    hp:type==='BRIDGE'?18:35,maxHp:type==='BRIDGE'?18:35});
+                structureLastDistance=distance;obstacleLastType=type;obstacleSequence++;
             }
             if(bombsPickedThisMission < 5 && Math.random()<.028 && !powerups.some(p=>p.type==='BOMB')){
                 powerups.push({x:center+(Math.random()-.5)*(width-65),y,type:'BOMB',label:'B+',color:'#f59e0b'});
@@ -754,6 +774,8 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
                 type: 'BOSS',
                 bossSubType: mission.bossPattern,
                 bossId: sector,
+                bossVisual: mission.bossVisual,
+                biome: mission.biome,
                 name: bossConfig.name,
                 x: VIRTUAL_WIDTH / 2,
                 y: 110,
@@ -1339,8 +1361,8 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
             updateRiver();
             updateBombs();
             for(let i=structures.length-1;i>=0;i--){const p=structures[i];p.y+=player.currentScrollSpeed;
-                if(Math.abs(player.x-p.x)<p.width/2 && Math.abs(player.y-p.y)<p.height/2+player.height/2)applyDamage(35,'COLIDIU COM OBSTÁCULO!');
-                for(let j=bullets.length-1;j>=0;j--){const b=bullets[j];if(Math.abs(b.x-p.x)<p.width/2&&Math.abs(b.y-p.y)<p.height/2){p.hp--;bullets.splice(j,1)}}
+                if(Math.abs(player.x-p.x)<p.width/2 && Math.abs(player.y-p.y)<p.height/2+player.height/2 && !(p.type==='DAM' && Math.abs(player.x-p.x)<p.opening/2-player.width/2))applyDamage(35,'COLIDIU COM OBSTÁCULO!');
+                for(let j=bullets.length-1;j>=0;j--){const b=bullets[j];if(Math.abs(b.x-p.x)<p.width/2&&Math.abs(b.y-p.y)<p.height/2 && !(p.type==='DAM'&&Math.abs(b.x-p.x)<p.opening/2)){p.hp--;bullets.splice(j,1)}}
                 if(p.hp<=0){addExplosion(p.x,p.y,'#fbbf24',18);score+=350;structures.splice(i,1)}else if(p.y>VIRTUAL_HEIGHT+40)structures.splice(i,1);
             }
 
@@ -1681,6 +1703,9 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
             fuelSpawnAt = -99999;
             bombsPickedThisMission = 0;
             structureLastDistance=-99999;
+            islandLastDistance=-99999;
+            obstacleLastType='';
+            obstacleSequence=0;
             lastEnemyDistance=-99999;
             lives=3;
             continues=1;
