@@ -54,6 +54,10 @@ const {chromium}=require('playwright');const {spawn}=require('node:child_process
   await page.locator('#quality-select').selectOption('balanced');
   await page.locator('#plane-select').selectOption('vespa');
   await page.locator('#level-select').selectOption('5');
+  console.log('Start hit test:',JSON.stringify(await page.evaluate(()=>{
+    const b=document.getElementById('start-btn'),r=b.getBoundingClientRect(),x=r.left+r.width/2,y=r.top+r.height/2;
+    return {x,y,target:document.elementFromPoint(x,y)?.id,overlay:document.getElementById('controller-settings').style.display,dialogOpen:controllerMenuOpen,scrollTop:document.getElementById('start-screen').scrollTop}
+  })));
   await page.locator('#start-btn').click({timeout:12000});
   await page.waitForTimeout(1500);
   const result=await page.evaluate(()=>{const c=document.getElementById('gameCanvas');const p=c.getContext('2d').getImageData(0,0,Math.min(40,c.width),Math.min(40,c.height)).data;return {state:gameState,sector,aircraft:selectedPlane,hidden:document.getElementById('start-screen').classList.contains('hidden'),overlayVisible:getComputedStyle(document.getElementById('start-screen')).display!=='none',error:document.getElementById('runtime-error')?.textContent,canvas:!!c,painted:p.some((value,i)=>i%4===3&&value>0),active:document.getElementById('game-container').dataset.gameActive==='true'}});
