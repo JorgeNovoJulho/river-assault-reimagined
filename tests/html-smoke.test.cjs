@@ -108,7 +108,7 @@ test('visuais especiais têm comprimento limitado e rastro curto',()=>{
 
 test('rastro é registrado após a correção de direção e não aceita saltos ou NaN',()=>{
  const html=fs.readFileSync('index.html','utf8');
- const update=html.slice(html.indexOf('bullets.forEach((b, index)'),html.indexOf('// Tiros Inimigos',html.indexOf('bullets.forEach((b, index)')));
+ const update=html.slice(html.indexOf('for(let index=bullets.length-1;index>=0;index--)'),html.indexOf('// Tiros Inimigos',html.indexOf('for(let index=bullets.length-1;index>=0;index--)')));
  assert.ok(update.indexOf("if (b.type === 'MISSILE'")<update.indexOf('b.trail.unshift('));
  assert.match(update,/Math\.hypot\(last\.x-b\.x,last\.y-b\.y\)>30/);
  assert.match(update,/!Number\.isFinite\(b\.x\)/);
