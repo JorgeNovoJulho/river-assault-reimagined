@@ -80,7 +80,8 @@ test('progressão NG+ exige campanha legítima e limita patente',()=>{
  const html=fs.readFileSync('index.html','utf8');
  assert.match(html,/campaignVerified&&sector===20/);
  assert.match(html,/if\(journey<RANKS\.length\)journey\+\+/);
- assert.match(html,/verifiedRun:campaignVerified&&\(nextSector===sector\|\|nextSector===sector\+1\)/);
+ assert.match(html,/if\(!campaignVerified\|\|\(nextSector!==sector&&nextSector!==sector\+1\)\)return false/);
+ assert.match(html,/verifiedRun:true/);
  assert.match(html,/MISSÃO 20 CONCLUÍDA — MODO TESTE/);
 });
 test('perfil tem nome de 18 caracteres e indicadores de carreira',()=>{
