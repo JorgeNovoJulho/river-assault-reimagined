@@ -1253,7 +1253,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
             bossActive=true;
             redAlertTicks=0;redAlertTriggered=true;
             document.getElementById('boss-special-hud')?.classList.add('hidden');
-            try{playlist.resume();if(!playlist.tracks.length&&playlist.enabled)soundtrack.start()}catch(error){console.warn('Áudio boss:',error)}
+            try{if(playlist.bossMode){soundtrack.stop();playlist.resume()}else if(!playlist.tracks.length&&playlist.enabled)soundtrack.start();else playlist.resume()}catch(error){console.warn('Áudio boss:',error)}
           }catch(error){
             // Nunca prender o piloto em um modal sem possibilidade de recuperar.
             console.error('Seleção de habilidades:',error);
