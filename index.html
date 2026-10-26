@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>RiverStorm — Playtest 0.3.3</title>
+    <title>RiverStorm — Playtest 0.3.4</title>
     <link rel="stylesheet" href="./src/styles/tailwind.css">
     <style>
         body {
@@ -184,6 +184,12 @@
         <div id="pause-screen" class="hidden absolute inset-0 bg-black/80 flex flex-col items-center justify-center z-30">
             <h2 class="text-4xl font-bold text-cyan-400 mb-4 tracking-widest">PAUSADO</h2>
             <p class="text-slate-400 text-sm mb-6">PRESSIONE 'P' OU 'ESC' PARA CONTINUAR</p>
+            <div id="save-confirm-modal" class="hidden absolute inset-0 z-50 bg-slate-950/95 flex-col items-center justify-center p-5 text-center" role="dialog" aria-modal="true">
+              <h3 class="text-2xl text-emerald-300 font-bold mb-3">SALVAR MISSÃO?</h3>
+              <p class="text-sm mb-4 text-slate-200">O jogo salva o início da missão atual, preservando o progresso. A fase recomeça do início ao continuar.</p>
+              <button id="confirm-save-btn" class="rounded-xl bg-emerald-700 px-6 py-3 font-bold mb-2">CONFIRMAR SALVAMENTO</button>
+              <button id="cancel-save-btn" class="rounded-xl bg-slate-700 px-6 py-2">CANCELAR</button>
+            </div>
             <button id="save-mission-btn" class="arcade-btn bg-emerald-700 text-white font-bold px-6 py-2 rounded-lg mb-3">SALVAR MISSÃO</button>
             <p id="save-mission-status" class="text-xs text-emerald-200 mb-2" aria-live="polite">Salva o início da missão atual.</p>
             <button id="pause-exit-btn" class="arcade-btn bg-amber-700 text-white font-bold px-6 py-2 rounded-lg mb-3">SALVAR E SAIR AO MENU</button>
@@ -837,7 +843,7 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
                 attackPattern: 0,
                 attackTimer: 0,
                 specialCharge: 0,
-                specialCooldown: mission.bossPattern===0 ? 1500 : 1050,
+                specialCooldown: mission.bossPattern===0 ? 2100 : 1050,
                 laserCharging: false,
                 laserTimer: 0
             });
@@ -868,7 +874,7 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
             if(e.specialCharge>=abilityCooldown && player.disabledTimer<=0){
                 e.specialCharge=0;
                 const pattern=(sector-1)%6;
-                if(pattern===0){player.disabledTimer=18;player.effectType='EMP';player.effectTimer=18; sound.playEmpSound();document.getElementById('game-container').classList.add('emp-flash');setTimeout(()=>document.getElementById('game-container').classList.remove('emp-flash'),300);createFloatingText(player.x,player.y,'EMP · 0,3 S','#67e8f9')}
+                if(pattern===0){player.disabledTimer=12;player.effectType='EMP';player.effectTimer=12; sound.playEmpSound();document.getElementById('game-container').classList.add('emp-flash');setTimeout(()=>document.getElementById('game-container').classList.remove('emp-flash'),300);createFloatingText(player.x,player.y,'EMP · 0,3 S','#67e8f9')}
                 else if(pattern===1){player.effectType='LIGHTNING';player.effectTimer=110;for(let n=-2;n<=2;n++)enemyBullets.push({x:e.x+n*26,y:e.y+25,vx:n*.65,vy:5.2,color:'#67e8f9'})}
                 else if(pattern===2){player.effectType='GRAVITY';player.effectTimer=130;player.x+=(e.x-player.x)*.15;createFloatingText(player.x,player.y,'PULSO GRAVITACIONAL','#c4b5fd')}
                 else if(pattern===3||pattern===4){player.effectType=pattern===3?'FIRE':'ICE';player.effectTimer=150;for(let n=-2;n<=2;n++)enemyBullets.push({x:e.x+n*20,y:e.y+28,vx:n*1.05,vy:3.8,color:pattern===3?'#fb923c':'#bae6fd'})}
@@ -1106,6 +1112,11 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
                 return;
             }
 
+            if(player.effectTimer>0 && ['ICE','FIRE','LIGHTNING','EMP'].includes(player.effectType)){
+                ctx.shadowColor=player.effectType==='ICE'?'#7dd3fc':player.effectType==='FIRE'?'#ef4444':'#22d3ee';
+                ctx.shadowBlur=18;
+                ctx.globalAlpha=.86;
+            }
             // Fogo do Pós-combustor
             ctx.fillStyle = Math.random() < 0.5 ? '#f97316' : '#ef4444';
             ctx.beginPath();
@@ -1467,7 +1478,7 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
             if(player.effectTimer>0){
                 const t=player.effectType;
                 if(t==='GRAVITY'){const boss=enemies.find(e=>e.type==='BOSS');if(boss){player.x+=(boss.x-player.x)*.021;player.y+=(boss.y+75-player.y)*.013;}}
-                else if(t==='LIGHTNING'){player.x+=Math.sin(missionTicks*2.7)*4;player.y+=Math.cos(missionTicks*2.2)*2;}
+                else if(t==='LIGHTNING'){player.x+=Math.sin(missionTicks*2.7)*7;player.y+=Math.cos(missionTicks*2.2)*4;}
                 else if(t==='FIRE'){player.shield=Math.max(0,player.shield-.08);}
                 player.x=Math.max(player.width/2,Math.min(VIRTUAL_WIDTH-player.width/2,player.x));
                 player.y=Math.max(58,Math.min(VIRTUAL_HEIGHT-60,player.y));
@@ -1643,7 +1654,7 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
                         bullets.splice(bIndex, 1);
                         if(e.type==='BOSS'&&bossDefeatedThisMission) return;
                         if(e.type==='BOSS')dropBossReward(e,1);
-                        e.hp=Math.max(0,e.hp-1);
+                        e.hp=Math.max(0,e.hp-(b.iceWeak?.5:1));
                         addExplosion(b.x, b.y, '#fba518', 4);
 
                         if (e.hp <= 0) {
@@ -1931,7 +1942,10 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
                 }
             }
             try{window.RiverSFX?.weapon(player.weapon)}catch(e){}
+            if(player.effectType==='ICE'&&player.effectTimer>0&&missionTicks%3!==0)return;
+            const previousCount=bullets.length;
             aircraftCatalog.shoot(player.weapon,player,bullets);
+            if(player.effectType==='ICE'&&player.effectTimer>0)bullets.slice(previousCount).forEach(b=>{b.vy=(b.vy||-8)*.55;b.vx=(b.vx||0)*.65;b.iceWeak=true});
             fireWingmen();
         }
 
@@ -2006,7 +2020,7 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
             createFloatingText(e.x,e.y,'ITEM LIBERADO!','#67e8f9');
         }
         function spawnPowerupCheck(x, y) {
-            if (Math.random() < 0.37) {
+            if (Math.random() < 0.18 && powerups.length<4) {
                 const types = [
                     { type: 'DOUBLE', color: '#60a5fa', label: '2X' },
                     { type: 'SPREAD', color: '#f59e0b', label: '3X' },
@@ -2492,7 +2506,9 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
         });
         ['pointerup','pointercancel','lostpointercapture'].forEach(type =>
             joystick.addEventListener(type, event => { if (event.pointerId === activeJoystickPointer) resetJoystick(); }));
-        document.getElementById('save-mission-btn').addEventListener('click',()=>{
+        document.getElementById('save-mission-btn').addEventListener('click',()=>{document.getElementById('save-confirm-modal').classList.remove('hidden');document.getElementById('save-confirm-modal').style.display='flex';});
+        document.getElementById('cancel-save-btn').addEventListener('click',()=>{document.getElementById('save-confirm-modal').classList.add('hidden');document.getElementById('save-confirm-modal').style.display='none';});
+        document.getElementById('confirm-save-btn').addEventListener('click',()=>{document.getElementById('save-confirm-modal').classList.add('hidden');document.getElementById('save-confirm-modal').style.display='none';
             const ok=writeCheckpoint(missionTransitionTicks>0?Math.min(20,sector+1):sector);
             document.getElementById('save-mission-status').textContent=ok?'MISSÃO SALVA! Volte pelo menu principal.':'Não foi possível salvar neste navegador.';
         });
