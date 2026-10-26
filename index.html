@@ -1286,8 +1286,21 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
               for(let n=0;n<spec[1];n++){
                 const normalized=spec[1]===1?0:n/(spec[1]-1)-.5;
                 const angle=target+normalized*spec[3]*2+Math.sin(e.attackTimer/70+missionId)*.26;
-                enemyBullets.push({x:e.x+Math.cos(angle)*22,y:e.y+12,vx:Math.cos(angle)*spec[2],vy:Math.max(.7,Math.sin(angle)*spec[2]),color:['#f87171','#a78bfa','#fbbf24','#67e8f9'][missionId%4]});
+                enemyBullets.push({x:e.x+Math.cos(angle)*22,y:e.y+12,vx:Math.cos(angle)*spec[2],vy:Math.max(.7,Math.sin(angle)*spec[2]),element:bossProjectileElement,color:BOSS_SKILLS[bossProjectileElement]?.color||'#f87171'});
               }
+            }
+            // Investidas com espada: sinal luminoso antes do golpe e rastro de corte no avanço.
+            if((e.bossVisual==='mech'||e.bossVisual==='jet')&&e.attackTimer%600===490){
+              e.swordCharge=45;e.swordTargetX=player.x;e.swordTargetY=Math.min(player.y-72,VIRTUAL_HEIGHT*.7);
+              createFloatingText(e.x,e.y-50,'⚔ INVESTIDA EM 0,75 S','#fb7185');
+            }
+            if(e.swordCharge>0){e.swordCharge--;if(e.swordCharge===0){e.swordDash=22;e.swordStartX=e.x;e.swordStartY=e.y;}}
+            if(e.swordDash>0){
+              const oldX=e.x,oldY=e.y;
+              e.x+=(e.swordTargetX-e.x)*.27;e.y+=(e.swordTargetY-e.y)*.27;
+              e.swordDash--;e.swordTrail={x1:oldX,y1:oldY,x2:e.x,y2:e.y,ticks:20};
+              if(Math.hypot(player.x-e.x,player.y-e.y)<46 && !e.swordHit){applyDamage(35,'INVESTIDA DE ESPADA DO BOSS');e.swordHit=true;}
+              if(e.swordDash===0){e.swordHit=false;e.swordTargetY=110;}
             }
             if(missionId>4)return; // Evita empilhar ataques legados em bosses avançados.
             const bossId = e.bossSubType;
@@ -2648,6 +2661,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
                 quality:qualitySelect.value
             });
             drawBossCompactMeters();
+            for(const e of enemies){if(e.type==='BOSS'&&e.swordTrail?.ticks>0){const t=e.swordTrail;t.ticks--;ctx.save();ctx.strokeStyle='#f8fafc';ctx.shadowColor='#f472b6';ctx.shadowBlur=25;ctx.lineWidth=7;ctx.beginPath();ctx.moveTo(t.x1-20,t.y1-18);ctx.quadraticCurveTo((t.x1+t.x2)/2+22,(t.y1+t.y2)/2-27,t.x2+23,t.y2+23);ctx.stroke();ctx.strokeStyle='#fb7185';ctx.lineWidth=3;ctx.stroke();ctx.restore();}}
             for(const e of enemies){if(e.type!=='BOSS'||e.dualTicks<=0)continue;ctx.save();ctx.globalAlpha=.23+.1*Math.sin(missionTicks*.15);ctx.strokeStyle=e.dualElement==='PRISM'?'#fef08a':'#a78bfa';ctx.lineWidth=5;ctx.beginPath();ctx.ellipse(e.x,e.y,e.width*.6,e.height*.6,missionTicks*.02,0,Math.PI*2);ctx.stroke();ctx.restore();}
             if(parryTicks>0){ctx.save();ctx.strokeStyle='#67e8f9';ctx.lineWidth=4;ctx.shadowColor='#22d3ee';ctx.shadowBlur=18;ctx.beginPath();ctx.arc(player.x,player.y,32+Math.sin(missionTicks*.4)*3,0,Math.PI*2);ctx.stroke();ctx.restore();}
             for(const e of enemies){if(e.type==='BOSS'&&e.warningTicks>0){ctx.save();ctx.strokeStyle='#facc15';ctx.lineWidth=4;ctx.globalAlpha=.5+Math.sin(missionTicks*.4)*.5;ctx.strokeRect(e.x-e.width/2-5,e.y-e.height/2-5,e.width+10,e.height+10);ctx.restore();}}
