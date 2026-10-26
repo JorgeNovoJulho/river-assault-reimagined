@@ -6,72 +6,72 @@ const PRESET=[
  {
   "id": "bundled-01",
   "name": "Airwolf — Main Theme (Remix 2026)",
-  "url": "./music/track-01.mp3"
+  "url": "./music/track-01.opus"
  },
  {
   "id": "bundled-02",
   "name": "Airwolf — Theme (HQ Mix)",
-  "url": "./music/track-02.mp3"
+  "url": "./music/track-02.opus"
  },
  {
   "id": "bundled-03",
   "name": "Airwolf — Below the Radar (Synthwave Cover)",
-  "url": "./music/track-03.mp3"
+  "url": "./music/track-03.opus"
  },
  {
   "id": "bundled-04",
   "name": "Airwolf — Ethereal Instrumental Remix",
-  "url": "./music/track-04.mp3"
+  "url": "./music/track-04.opus"
  },
  {
   "id": "bundled-05",
   "name": "Esaka / KOF ’98 — Epic Rock Version",
-  "url": "./music/track-05.mp3"
+  "url": "./music/track-05.opus"
  },
  {
   "id": "bundled-06",
   "name": "Rising Crimson — Heroic Cyber Rock",
-  "url": "./music/track-06.mp3"
+  "url": "./music/track-06.opus"
  },
  {
   "id": "bundled-07",
   "name": "Salamander — Planet Ratis (Arrange)",
-  "url": "./music/track-07.mp3"
+  "url": "./music/track-07.opus"
  },
  {
   "id": "bundled-08",
   "name": "Samurai Shodown — Galford Theme (Metal Arrange)",
-  "url": "./music/track-08.mp3"
+  "url": "./music/track-08.opus"
  },
  {
   "id": "bundled-09",
   "name": "Sarah Regina — U.S. Mangá (Instrumental)",
-  "url": "./music/track-09.mp3"
+  "url": "./music/track-09.opus"
  },
  {
   "id": "bundled-10",
   "name": "Sector 7 Defense Line — Shoot ’em Up Music",
-  "url": "./music/track-10.mp3"
+  "url": "./music/track-10.opus"
  },
  {
   "id": "bundled-11",
   "name": "Skyfire — Breaking the Sound Barrier",
-  "url": "./music/track-11.mp3"
+  "url": "./music/track-11.opus"
  },
  {
   "id": "bundled-12",
   "name": "Star Fox — Corneria (Restored)",
-  "url": "./music/track-12.mp3"
+  "url": "./music/track-12.opus"
  },
  {
   "id": "bundled-13",
   "name": "Star Fox / Starwing — Corneria (Metal Cover)",
-  "url": "./music/track-13.mp3"
+  "url": "./music/track-13.opus"
  },
  {
   "id": "bundled-14",
   "name": "KOF ’96 — Seoul Road (Arrange)",
-  "url": "./music/track-14.mp3"
+  "url": "./music/track-14.opus"
  }
 ];
 function openDB(){return new Promise((resolve,reject)=>{if(!global.indexedDB)return reject(Error('IndexedDB indisponível'));const req=indexedDB.open(DB,1);req.onupgradeneeded=()=>req.result.createObjectStore(STORE,{keyPath:'id'});req.onerror=()=>reject(req.error);req.onsuccess=()=>resolve(req.result)})}
@@ -79,12 +79,12 @@ function transaction(db,mode,action){return new Promise((resolve,reject)=>{const
 function shuffle(arr){const copy=[...arr];for(let i=copy.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[copy[i],copy[j]]=[copy[j],copy[i]]}return copy}
 class RiverPlaylist{
  constructor(opts={}){this.audio=new Audio();this.audio.preload='auto';this.audio.loop=false;this.audio.volume=.38;this.tracks=[];this.order=[];this.current=-1;this.enabled=true;this.loading=false;this.onStatus=opts.onStatus||(()=>{});this.objectURL=null;this.random=true;this.customOrder=[];try{this.random=localStorage.getItem('river_playlist_random')!=='false';this.customOrder=JSON.parse(localStorage.getItem('river_playlist_order')||'[]')}catch(e){}this.audio.addEventListener('ended',()=>this.next());this.audio.addEventListener('error',()=>{this.onStatus('Faixa indisponível; passando para próxima');this.next(true)});}
- async load(){try{const db=await openDB();const rows=await transaction(db,'readonly',s=>s.getAll());const bundled=await Promise.all(PRESET.map(async item=>{
+ async load(){let rows=[];try{const db=await openDB();rows=await transaction(db,'readonly',s=>s.getAll())}catch(e){this.onStatus('Biblioteca local indisponível; verificando faixas oficiais')}try{const bundled=await Promise.all(PRESET.map(async item=>{
        try{const res=await fetch(item.url,{method:'HEAD',cache:'force-cache'});return res.ok?{...item,bundled:true}:null}catch(e){return null}
      }));
      this.tracks=[...bundled.filter(Boolean),...rows.map(x=>({id:x.id,name:x.name,blob:x.blob}))];
      this.tracks.sort((a,b)=>{const x=this.customOrder.indexOf(a.id),y=this.customOrder.indexOf(b.id);return (x<0?999:x)-(y<0?999:y)});}catch(e){this.onStatus('Armazenamento local indisponível: '+e.message)}return this.tracks.length}
- async importFiles(files){const accepted=Array.from(files||[]).filter(f=>/^audio\//.test(f.type)||/\.(mp3|ogg|m4a|wav)$/i.test(f.name));if(!accepted.length)return 0;
+ async importFiles(files){const accepted=Array.from(files||[]).filter(f=>/^audio\//.test(f.type)||/\.(mp3|ogg|opus|m4a|wav)$/i.test(f.name));if(!accepted.length)return 0;
  let saved=0;
  for(let i=0;i<accepted.length;i++){const f=accepted[i];if(f.size>45*1024*1024)continue;const id='local-'+f.name+'-'+f.size;await transactionKeepOpenWorkaround(id,f);saved++}
  async function transactionKeepOpenWorkaround(id,f){const d=await openDB();await transaction(d,'readwrite',s=>s.put({id,name:f.name,blob:f}))}
