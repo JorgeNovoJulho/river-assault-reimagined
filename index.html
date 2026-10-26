@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>RiverStorm — Esquiva Fantasma 0.7.8</title>
+    <title>RiverStorm — Progressão XP 0.7.9</title>
     <link rel="stylesheet" href="./src/styles/tailwind.css">
     <style>
         body {
@@ -247,6 +247,7 @@
         <div class="rs-hud-cell"><span class="rs-label">🛡 ESCUDO <b id="hud-shield">150</b></span><div class="rs-meter"><span id="hud-shield-fill" style="background:#38bdf8;width:100%"></span></div></div>
         <div class="rs-hud-cell"><span class="rs-label">♟ RESGATES <b id="hud-rescues">0</b></span><span class="rs-label">✈ <b id="hud-plane">FALCÃO</b></span></div>
       </div>
+      <div id="pilot-progress" style="padding:4px 10px;background:#07172b;display:flex;align-items:center;gap:8px;flex-wrap:wrap;color:#e2e8f0;font:900 11px monospace"><span>⭐ NÍVEL <b id="hud-pilot-level" style="color:#facc15">0 / 100</b></span><span id="hud-pilot-xp">0 XP</span><span id="hud-next-xp" style="color:#67e8f9">100 p/ próximo</span><div style="flex:1;min-width:65px;height:7px;background:#1e293b;border-radius:6px;overflow:hidden"><div id="hud-xp-fill" style="height:100%;width:0%;background:linear-gradient(90deg,#0891b2,#facc15)"></div></div></div>
       <div class="rs-hud-footer"><span id="hud-version" style="color:#38bdf8;font-size:8px">HUD 0.7.6</span><span id="mission-hud">SELVA DA AURORA</span><b id="sector-hud">SETOR 1</b><span id="hud-rank">J1 SOLDADO</span></div>
     </section>
     <div id="rs-bottom-actions" aria-label="Opções rápidas">
@@ -622,6 +623,25 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
         let bombFlash = 0;
         let sector = 1;
         let kills = 0;
+        const XP_STORE='riverstorm_pilot_xp_v1';
+        let pilotXP=0,pilotLevel=0;
+        try{pilotXP=Math.max(0,Math.floor(Number(localStorage.getItem(XP_STORE))||0))}catch(e){}
+        const xpRequirement=level=>100+level*22+level*level*2;
+        const xpAtLevel=level=>{let total=0;for(let n=0;n<Math.min(100,level);n++)total+=xpRequirement(n);return total};
+        const XP_CAP=xpAtLevel(100);
+        pilotXP=Math.min(XP_CAP,pilotXP);
+        while(pilotLevel<100&&pilotXP>=xpAtLevel(pilotLevel+1))pilotLevel++;
+        const pilotBonus=()=>({damage:1+pilotLevel*.0075,resistance:1-pilotLevel*.0045,fuel:1-pilotLevel*.005});
+        function grantEnemyXP(enemy){
+          if(!enemy||enemy.xpGranted)return;
+          enemy.xpGranted=true;
+          const reward=enemy.type==='BOSS'?500+sector*30:Math.max(10,Math.round((enemy.score||100)*.20));
+          const previous=pilotLevel;
+          pilotXP=Math.min(XP_CAP,pilotXP+reward);
+          while(pilotLevel<100&&pilotXP>=xpAtLevel(pilotLevel+1))pilotLevel++;
+          try{localStorage.setItem(XP_STORE,String(pilotXP))}catch(e){}
+          if(pilotLevel>previous){createFloatingText(player.x,player.y-65,'NÍVEL '+pilotLevel+'!','#facc15');addExplosion(player.x,player.y,'#facc15',18)}
+        }
         let crtEnabled = true;
 
         // Propriedades do Jogador
@@ -1101,7 +1121,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
           playlist.endBossTheme?.();
           unlockBossSkill(e.skillAffinity);bossSkillEquipped=null;skillUseButton.classList.add('hidden');
           addExplosion(e.x,e.y,'#ef4444',45);sound.playExplosion(true);
-          score+=awardEnemyPoints(e.score);kills++;
+          score+=awardEnemyPoints(e.score);kills++;grantEnemyXP(e);
           enemies=enemies.filter(enemy=>enemy!==e);
           if(sector<20)writeCheckpoint(sector+1);else try{localStorage.removeItem(CHECKPOINT_KEY)}catch(err){}
           bossTaunt={name:e.name,line:'MEUS SISTEMAS... DERROTADOS!',ticks:175};
@@ -2053,7 +2073,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
                 player.y=Math.max(58,Math.min(VIRTUAL_HEIGHT-60,player.y));
             }
             // Consumo de Gasolina
-            player.fuel -= player.fuelDepletionRate * (player.currentScrollSpeed / player.baseScrollSpeed);
+            player.fuel -= player.fuelDepletionRate * (player.currentScrollSpeed / player.baseScrollSpeed) * pilotBonus().fuel;
             if(player.fuel<27 && !fuelDepots.some(f=>f.y>60&&f.y<VIRTUAL_HEIGHT-50)){
                 const bank=getRiverBoundariesAt(Math.max(85,player.y-120));
                 fuelDepots.push({x:bank.center,y:Math.max(85,player.y-120),width:24,height:32,indestructible:true});
@@ -2074,7 +2094,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
             if(parryPrecisionTicks>0)parryPrecisionTicks--;
             if(parryCooldown>0)parryCooldown--;
             if(swordRushCooldown>0)swordRushCooldown--;
-            if(swordRushFrames>0){const target=swordRushTarget;swordRushFrames--;if(target&&target.hp>0){player.x+=(target.x-player.x)*.24;player.y+=(target.y-player.y)*.24;player.invulnerable=Math.max(player.invulnerable,3);if(swordRushFrames===0||Math.hypot(target.x-player.x,target.y-player.y)<22){addExplosion(target.x,target.y,'#f472b6',24);createFloatingText(target.x,target.y-32,'CORTE FATAL','#fef08a');target.hp=0;score+=awardEnemyPoints(target.score||100);kills++;enemies=enemies.filter(e=>e!==target);swordRushFrames=0;}}else swordRushFrames=0;if(swordRushFrames===0)swordRushTarget=null;}
+            if(swordRushFrames>0){const target=swordRushTarget;swordRushFrames--;if(target&&target.hp>0){player.x+=(target.x-player.x)*.24;player.y+=(target.y-player.y)*.24;player.invulnerable=Math.max(player.invulnerable,3);if(swordRushFrames===0||Math.hypot(target.x-player.x,target.y-player.y)<22){addExplosion(target.x,target.y,'#f472b6',24);createFloatingText(target.x,target.y-32,'CORTE FATAL','#fef08a');target.hp=0;score+=awardEnemyPoints(target.score||100);kills++;grantEnemyXP(target);enemies=enemies.filter(e=>e!==target);swordRushFrames=0;}}else swordRushFrames=0;if(swordRushFrames===0)swordRushTarget=null;}
             skillUseButton.textContent=bossActive?'⚡ PODER [C]':'⚔ INVESTIDA [C] '+(swordRushCooldown>0?Math.ceil(swordRushCooldown/60)+'s':'PRONTO');
             skillUseButton.classList.remove('hidden');
             parryButton.textContent=parryTicks>0?'🛡 ESCUDO '+Math.max(1,Math.ceil(parryTicks/60))+'s':parryCooldown>0?'🛡 '+Math.ceil(parryCooldown/60)+'s':'🛡 PARRY [V]';
@@ -2296,7 +2316,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
                         bullets.splice(bIndex, 1);
                         if(e.type==='BOSS'&&bossDefeatedThisMission) return;
                         if(e.type==='BOSS')dropBossReward(e,1);
-                        e.hp=Math.max(0,e.hp-(b.damage||1)*(b.iceWeak?.5:1)*(e.gravityTicks>0?2:1)*(e.type==='BOSS'&&e.dualTicks>0&&e.dualElement==='PRISM'?1+(e.dualAmp||0):1)*(e.type==='BOSS'&&e.parryVulnerableTicks>0?1.5:1));
+                        e.hp=Math.max(0,e.hp-(b.damage||1)*(b.reflected?1:pilotBonus().damage)*(b.iceWeak?.5:1)*(e.gravityTicks>0?2:1)*(e.type==='BOSS'&&e.dualTicks>0&&e.dualElement==='PRISM'?1+(e.dualAmp||0):1)*(e.type==='BOSS'&&e.parryVulnerableTicks>0?1.5:1));
                         addExplosion(b.x, b.y, b.type==='BANK_MISSILE'?'#fb923c':'#fba518', b.type==='BANK_MISSILE'?16:4);
 
                         if (e.hp <= 0) {
@@ -2306,7 +2326,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
                             addExplosion(e.x, e.y, '#ef4444', e.type === 'BOSS' ? 45 : 15);
                             sound.playExplosion(e.type === 'BOSS');
                             score += awardEnemyPoints(e.score);
-                            kills++;
+                            kills++;grantEnemyXP(e);
 
                             if (e.type === 'BOSS') {
                                 if(!bossDefeatedThisMission){
@@ -2414,6 +2434,10 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
         function drawHUD(){
             const set=(id,value)=>{const el=document.getElementById(id);if(el && el.textContent!==String(value))el.textContent=String(value)};
             set('hud-score',String(score).padStart(6,'0'));
+            set('hud-pilot-level',pilotLevel+' / 100');
+            set('hud-pilot-xp',pilotXP.toLocaleString('pt-BR')+' XP');
+            set('hud-next-xp',pilotLevel===100?'MAX':(xpAtLevel(pilotLevel+1)-pilotXP).toLocaleString('pt-BR')+' p/ próximo');
+            const xpMeter=document.getElementById('hud-xp-fill');if(xpMeter)xpMeter.style.width=(pilotLevel===100?100:(pilotXP-xpAtLevel(pilotLevel))/xpRequirement(pilotLevel)*100)+'%';
             set('hud-weapon',player.weapon);
             set('hud-shots',player.specialShots||0);
             set('hud-bombs',player.bombs+' / 5');
@@ -2433,7 +2457,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
             if (player.invulnerable > 0 || parryTicks>0 || rollFrames>0) return;
             // Naves auxiliares têm escudo independente e só sofrem dano quando atingidas.
 
-            player.shield -= Math.round(amount*(bossActive||reason.includes('BOSS')?1.15:.7));
+            player.shield -= Math.round(amount*(bossActive||reason.includes('BOSS')?1.15:.7)*pilotBonus().resistance);
             player.invulnerable = 40;
 
             const container = document.getElementById('game-container');
@@ -2601,7 +2625,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
             });
             for(let i=enemies.length-1;i>=0;i--){
                 if(enemies[i].hp<=0&&enemies[i].type!=='BOSS'){
-                    score+=awardEnemyPoints(enemies[i].score);kills++;
+                    score+=awardEnemyPoints(enemies[i].score);kills++;grantEnemyXP(enemies[i]);
                     enemies.splice(i,1);
                 }
             }
