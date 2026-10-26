@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>RiverStorm — Investidas e Contra-ataque 0.7.3</title>
+    <title>RiverStorm — Chefes e Trilha 0.7.4</title>
     <link rel="stylesheet" href="./src/styles/tailwind.css">
     <style>
         body {
@@ -247,7 +247,7 @@
         <div class="rs-hud-cell"><span class="rs-label">🛡 ESCUDO <b id="hud-shield">150</b></span><div class="rs-meter"><span id="hud-shield-fill" style="background:#38bdf8;width:100%"></span></div></div>
         <div class="rs-hud-cell"><span class="rs-label">♟ RESGATES <b id="hud-rescues">0</b></span><span class="rs-label">✈ <b id="hud-plane">FALCÃO</b></span></div>
       </div>
-      <div class="rs-hud-footer"><span id="hud-version" style="color:#38bdf8;font-size:8px">HUD 0.7.3</span><span id="mission-hud">SELVA DA AURORA</span><b id="sector-hud">SETOR 1</b><span id="hud-rank">J1 SOLDADO</span></div>
+      <div class="rs-hud-footer"><span id="hud-version" style="color:#38bdf8;font-size:8px">HUD 0.7.4</span><span id="mission-hud">SELVA DA AURORA</span><b id="sector-hud">SETOR 1</b><span id="hud-rank">J1 SOLDADO</span></div>
     </section>
     <div id="rs-bottom-actions" aria-label="Opções rápidas">
       <button id="crt-toggle" type="button">CRT: LIG</button>
@@ -1096,6 +1096,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
         function finishBossDefeatedBySkill(e){
           if(bossDefeatedThisMission)return;
           e.hp=0;bossDefeatedThisMission=true;bossActive=false;enemyBullets=[];
+          playlist.endBossTheme?.();
           unlockBossSkill(e.skillAffinity);bossSkillEquipped=null;skillUseButton.classList.add('hidden');
           addExplosion(e.x,e.y,'#ef4444',45);sound.playExplosion(true);
           score+=awardEnemyPoints(e.score);kills++;
@@ -1917,6 +1918,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
                     player.bombs=3;document.getElementById('bomb-count-touch').textContent='(3)';bombsPickedThisMission=0;
                     bossDefeatedThisMission=false;
                     redAlertTriggered=false;redAlertTicks=0;missionTicks=0;missionStartDistance=distance;
+                    playlist.endBossTheme?.();
                     enemies=enemies.filter(e=>e.type!=='BOSS'&&e.y<VIRTUAL_HEIGHT*.45);
                     enemyBullets=[];
                     document.getElementById('mission-banner').textContent=campaign.at(sector).name;
@@ -1926,6 +1928,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
             if(!bossActive && !redAlertTriggered && missionTicks>=84*60
                && distance-missionStartDistance>=campaign.at(sector).bossDistance*.75){
                 redAlertTriggered=true;redAlertTicks=360;
+                playlist.beginBossTheme?.();
                 try{window.RiverSFX?.alert?.()}catch(e){}
             }
             if(redAlertTicks>0)redAlertTicks--;
@@ -2097,14 +2100,14 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
                 b.y -= b.speed;
                 if (b.vx) b.x += b.vx;
 
-                if (b.type === 'MISSILE') {
+                if (b.type === 'MISSILE'||b.type==='REFLECTED') {
                     let nearest = null;
                     let minDist = 220;
                     enemies.forEach(e => {
                         const d = Math.hypot(e.x - b.x, e.y - b.y);
                         if (d < minDist) { minDist = d; nearest = e; }
                     });
-                    if (nearest) b.x += (nearest.x - b.x) * 0.09;
+                    if (nearest){if(b.type==='REFLECTED'){const dx=nearest.x-b.x,dy=nearest.y-b.y,d=Math.max(1,Math.hypot(dx,dy));b.vx=dx/d*13;b.speed=-dy/d*13;}else b.x += (nearest.x - b.x) * 0.09;}
                 }
 
                 if (b.y < -25 || b.y > VIRTUAL_HEIGHT+25 || b.x < -25 || b.x > VIRTUAL_WIDTH+25) bullets.splice(index, 1);
@@ -2115,7 +2118,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
                 eb.x += eb.vx + (eb.waveStyle===2?Math.sin(missionTicks*.12+(eb.phase||0))*.45:0);
                 eb.y += eb.vy;
 
-                if(parryTicks>0&&Math.hypot(eb.x-player.x,eb.y-player.y)<53){enemyBullets.splice(index,1);const boss=enemies.find(e=>e.type==='BOSS'&&e.hp>0),target=boss||enemies.find(e=>e.hp>0);const tx=target?.x??eb.x,ty=target?.y??0,dx=tx-eb.x,dy=ty-eb.y,len=Math.max(1,Math.hypot(dx,dy));bullets.push({x:eb.x,y:eb.y,vx:dx/len*11,speed:-dy/len*11,type:'REFLECTED',color:'#22f7c4',damage:50,reflected:true});addExplosion(eb.x,eb.y,'#67e8f9',8);createFloatingText(player.x,player.y-40,'REFLETIDO!','#67e8f9');return;}
+                if(parryTicks>0&&Math.hypot(eb.x-player.x,eb.y-player.y)<53){enemyBullets.splice(index,1);const boss=enemies.find(e=>e.type==='BOSS'&&e.hp>0),target=boss||enemies.find(e=>e.hp>0);const tx=target?.x??eb.x,ty=target?.y??0,dx=tx-eb.x,dy=ty-eb.y,len=Math.max(1,Math.hypot(dx,dy));bullets.push({x:eb.x,y:eb.y,vx:dx/len*11,speed:-dy/len*11,type:'REFLECTED',color:'#22f7c4',damage:37.5,reflected:true,homing:true});addExplosion(eb.x,eb.y,'#67e8f9',8);createFloatingText(player.x,player.y-40,'REFLETIDO!','#67e8f9');return;}
                 const hitWingman=wingmen.find(w=>Math.hypot(eb.x-(player.x+w.side*36),eb.y-(player.y+10))<14);
                 if(hitWingman){
                     enemyBullets.splice(index,1);
@@ -2172,6 +2175,9 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
                     if(e.type==='SHIP'||e.type==='SUB')e.x+=Math.sin(e.motion)*.38;
                     if(e.type==='SUB'){e.x+=(e.vx||2.4)*.9;e.vy=-player.currentScrollSpeed;}
                 }
+                if(e.type==='HELI'||e.type==='MECHA_GUN'){
+                    e.gunTimer=(e.gunTimer||0)+1;
+                    if(e.gunTimer%(e.type==='HELI'?88:52)===0&&e.y>15&&e.y<VIRTUAL_HEIGHT-70){const dx=player.x-e.x,dy=player.y-e.y,len=Math.max(1,Math.hypot(dx,dy));enemyBullets.push({x:e.x,y:e.y+14,vx:dx/len*4.2,vy:dy/len*4.2,color:e.type==='HELI'?'#67e8f9':'#fbbf24',element:e.type==='HELI'?'LIGHTNING':'FIRE'});}}
                 if(e.type==='MEGAZORD'){
                     e.meleeTick=(e.meleeTick||0)+1;
                     if(e.meleeTick%45===0){
@@ -2488,7 +2494,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
                 if(w.ttl<=0)continue;
                 const guided=['TRACKER','MISSILE','ROCKET','PRECISION','MULTI'].includes(player.weapon);
                 const turbo=['BEAM','LASER','PULSE'].includes(player.weapon);
-                for(const angle of [-2.8,0,2.8]){
+                for(const angle of [-5.8,5.8]){
                     bullets.push({x:player.x+w.side*36,y:player.y+10,vx:angle,speed:turbo?11:8,
                         type:guided?'MISSILE':turbo?'LASER':'SINGLE',color:guided?'#fbbf24':turbo?'#67e8f9':'#a7f3d0'});
                 }
