@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>RiverStorm — Progressão XP 0.7.9</title>
+    <title>RiverStorm — NG+ e Patentes 0.8.0</title>
     <link rel="stylesheet" href="./src/styles/tailwind.css">
     <style>
         body {
@@ -596,11 +596,14 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
         // Estado do Jogo
         const CHECKPOINT_KEY='riverstorm_mission_checkpoint_v1';
         function writeCheckpoint(nextSector){
-            const checkpoint={version:1,sector:Math.max(1,Math.min(20,nextSector)),score,kills,lives:Math.max(1,lives),continues,selectedPlane,earnedPoints,journey};
+            const checkpoint={version:2,sector:Math.max(1,Math.min(20,nextSector)),score,kills,lives:Math.max(1,lives),continues,selectedPlane,earnedPoints,journey,verifiedRun:campaignVerified&&nextSector===sector+1};
             try{localStorage.setItem(CHECKPOINT_KEY,JSON.stringify(checkpoint));updateContinueButton();return true}catch(err){console.warn('Checkpoint indisponível',err);return false}
         }
-        function readCheckpoint(){try{const c=JSON.parse(localStorage.getItem(CHECKPOINT_KEY)||'null');return c&&c.version===1&&Number.isInteger(c.sector)&&c.sector>=1&&c.sector<=20?c:null}catch(e){return null}}
+        function readCheckpoint(){try{const c=JSON.parse(localStorage.getItem(CHECKPOINT_KEY)||'null');return c&&c.version===2&&c.verifiedRun===true&&Number.isInteger(c.sector)&&c.sector>=1&&c.sector<=20?c:null}catch(e){return null}}
         function updateContinueButton(){const b=document.getElementById('continue-mission-btn');if(b){const c=readCheckpoint();b.classList.toggle('hidden',!c);if(c)b.textContent='CONTINUAR MISSÃO '+c.sector;}}
+        let campaignVerified=false;
+        let careerPoints=0;
+        try{careerPoints=Math.max(0,Number(localStorage.getItem('riverstorm_career_points_v1'))||0)}catch(e){}
         let gameState = 'START'; // START, PAUSED, PLAYING, GAMEOVER
         let score = 0;
         let hiScore = localStorage.getItem('rr_hiscore_ptbr') || 0;
@@ -800,6 +803,28 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
         try{journey=Math.max(1,Number(localStorage.getItem('river_journey_v1')||1))}catch(e){}
         const rankName=()=>RANKS[Math.min(journey-1,RANKS.length-1)];
         const scoreMultiplier=()=>Math.pow(1.1,journey-1);
+        function finishFullCampaign(){
+          const legitimate=campaignVerified&&sector===20;
+          const finishedJourney=journey;
+          const oldRank=rankName();
+          const bonus=legitimate?Math.round(5000*scoreMultiplier()):0;
+          if(legitimate){
+            score+=bonus;earnedPoints+=bonus;careerPoints+=score;
+            try{localStorage.setItem('riverstorm_career_points_v1',String(careerPoints))}catch(e){}
+            if(journey<RANKS.length)journey++;
+            try{localStorage.setItem('river_journey_v1',String(journey))}catch(e){}
+          }
+          campaignVerified=false;
+          try{localStorage.removeItem(CHECKPOINT_KEY)}catch(e){}
+          gameState='VICTORY';playlist.pause();
+          const atMax=journey===RANKS.length;
+          document.querySelector('#victory-screen h2').textContent=legitimate?'TODAS AS 20 MISSÕES CONCLUÍDAS!':'MISSÃO 20 CONCLUÍDA — MODO TESTE';
+          document.getElementById('rank-award').textContent=legitimate?
+            'JORNADA '+finishedJourney+' FINALIZADA • '+oldRank+' → '+rankName()+' • BÔNUS +'+bonus+' • TOTAL DA CARREIRA '+careerPoints+' • '+(atMax?'PATENTE MÁXIMA ATINGIDA':'NG+'+finishedJourney+' LIBERADO'):
+            'Missão selecionada diretamente: sem promoção, NG+ ou bônus de campanha. Conclua as 20 missões em sequência para evoluir.';
+          document.getElementById('victory-restart').textContent=legitimate&&!atMax?'INICIAR NG+'+finishedJourney:'INICIAR NOVA CAMPANHA';
+          document.getElementById('victory-screen').classList.remove('hidden');
+        }
         const awardEnemyPoints=points=>Math.round((points||100)*scoreMultiplier());
         let lives=3;
         let continues=10;
@@ -1125,12 +1150,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
           enemies=enemies.filter(enemy=>enemy!==e);
           if(sector<20)writeCheckpoint(sector+1);else try{localStorage.removeItem(CHECKPOINT_KEY)}catch(err){}
           bossTaunt={name:e.name,line:'MEUS SISTEMAS... DERROTADOS!',ticks:175};
-          if(sector===20){
-            gameState='VICTORY';playlist.pause();journey++;
-            try{localStorage.setItem('river_journey_v1',String(journey))}catch(err){}
-            document.getElementById('rank-award').textContent='JORNADA '+journey+' · '+rankName()+' · MULTIPLICADOR x'+scoreMultiplier().toFixed(2);
-            document.getElementById('victory-screen').classList.remove('hidden');
-          }else{missionTransitionTicks=180;document.getElementById('mission-banner').textContent='PRÓXIMA MISSÃO: '+campaign.at(sector+1).name;createFloatingText(e.x,e.y,'CHEFE DERROTADO!','#22c55e')}
+          if(sector===20){finishFullCampaign();}else{missionTransitionTicks=180;document.getElementById('mission-banner').textContent='PRÓXIMA MISSÃO: '+campaign.at(sector+1).name;createFloatingText(e.x,e.y,'CHEFE DERROTADO!','#22c55e')}
         }
         function openBossSkillPicker(){
           gameState='BOSS_SELECT';bossSkillPending=null;skillPicker.classList.remove('hidden');
@@ -2334,12 +2354,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
                                     unlockBossSkill(e.skillAffinity);bossSkillEquipped=null;skillUseButton.classList.add('hidden');
                                     if(sector<20)writeCheckpoint(sector+1);else {try{localStorage.removeItem(CHECKPOINT_KEY)}catch(err){}}
                                     bossTaunt={name:e.name,line:['NÃO! MEUS SISTEMAS!','ISSO NÃO ACABOU, PILOTO!','IMPOSSÍVEL! VOCÊ VENCEU?!','RETIRADA! HA... HA...'][sector%4],ticks:175};
-                                    if(sector===20){
-                                        gameState='VICTORY';playlist.pause();journey++;
-                                        try{localStorage.setItem('river_journey_v1',String(journey))}catch(error){}
-                                        document.getElementById('rank-award').textContent='JORNADA '+journey+' · '+rankName()+' · MULTIPLICADOR x'+scoreMultiplier().toFixed(2);
-                                        document.getElementById('victory-screen').classList.remove('hidden');
-                                    } else {
+                                    if(sector===20){finishFullCampaign();} else {
                                         missionTransitionTicks=180;
                                         document.getElementById('mission-banner').textContent='PRÓXIMA MISSÃO: '+campaign.at(sector+1).name;
                                         createFloatingText(e.x,e.y,'CHEFE DERROTADO!','#22c55e');
@@ -2506,6 +2521,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
             hazardWaveCooldown=0;
             bombFlash = 0;
             sector = Math.max(1,Math.min(20,Number(levelSelector.value)||1));
+            campaignVerified=sector===1;
             kills = 0;
             rescuedSoldiers = 0;
             fuelSpawnAt = -99999;
@@ -3245,7 +3261,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
             enterGameplay();
             if(gameState!=='PLAYING')return;
             score=Math.max(0,Number(c.score)||0);kills=Math.max(0,Number(c.kills)||0);lives=Math.max(1,Number(c.lives)||3);
-            continues=Math.max(0,Number(c.continues)||0);earnedPoints=Math.max(0,Number(c.earnedPoints)||0);
+            continues=Math.max(0,Number(c.continues)||0);earnedPoints=Math.max(0,Number(c.earnedPoints)||0);campaignVerified=Boolean(c.verifiedRun&&c.journey===journey);
         });
         updateContinueButton();
         document.getElementById('pause-settings-btn').addEventListener('click',()=>showControllerSettings(true));
