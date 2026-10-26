@@ -617,6 +617,31 @@ const MAP_FEATURES=[
  'canopy','cranes','canyon','reeds','lighthouse','icewall','giantroots','skyline','lava','pines',
  'ruins','billboards','tributaries','icecracks','palms','spores','gantries','icebergs','tesla','citadel'
 ];
+
+/* Nova Geração: objetos industriais identificáveis, sem alterar colisões.
+   Desenho determinístico sem alocar sprites a cada frame. */
+function detailedSetPiece(c,kind,size,time){
+ const a=size,steel=c.createLinearGradient(-a,-a,a,a);
+ steel.addColorStop(0,'#b7cdd8');steel.addColorStop(.45,'#587487');steel.addColorStop(1,'#243b4b');
+ const poly=(pts,fill)=>{c.beginPath();pts.forEach(([x,y],i)=>i?c.lineTo(x,y):c.moveTo(x,y));c.closePath();c.fillStyle=fill;c.fill();c.strokeStyle='#203444';c.lineWidth=1.25;c.stroke()};
+ if(kind==='cranes'||kind==='gantries'){
+  // Guindaste: torre treliçada, lança, contrapeso, cabos e gancho suspenso.
+  c.strokeStyle='#f3bd58';c.lineWidth=3;
+  c.beginPath();c.moveTo(-a*.24,a*.8);c.lineTo(-a*.24,-a*.95);c.moveTo(a*.24,a*.8);c.lineTo(a*.24,-a*.95);c.stroke();
+  for(let y=-a*.8;y<a*.76;y+=a*.32){c.beginPath();c.moveTo(-a*.24,y);c.lineTo(a*.24,y+a*.3);c.moveTo(a*.24,y);c.lineTo(-a*.24,y+a*.3);c.stroke()}
+  poly([[-a*.7,-a],[a*1.25,-a],[a*1.25,-a*.75],[-a*.7,-a*.75]],steel);
+  c.fillStyle='#ebaa43';c.fillRect(-a*.72,-a*.95,a*.5,a*.2);
+  const hookX=a*.86,cable=a*.2+Math.sin(time*.8)*a*.08;
+  c.strokeStyle='#dce9f1';c.lineWidth=1.5;c.beginPath();c.moveTo(hookX,-a*.75);c.lineTo(hookX,-a*.75+cable);c.stroke();
+  c.strokeStyle='#f7cf67';c.lineWidth=3;c.beginPath();c.arc(hookX,-a*.75+cable+3,4,0,Math.PI);c.stroke();
+ }else if(kind==='skyline'||kind==='billboards'||kind==='ruins'){
+  for(let i=-1;i<=1;i++){const x=i*a*.46,height=a*(.95+(i===0?.65:0));poly([[x-a*.2,a],[x-a*.2,-height],[x+a*.2,-height],[x+a*.2,a]],steel);for(let j=0;j<3;j++){c.fillStyle='#ffd891';c.fillRect(x-3,-height+5+j*7,5,3)}}
+ }else if(kind==='pipes'||kind==='refinery'){
+  for(const x of [-a*.45,0,a*.45]){poly([[x-5,a],[x-5,-a*.9],[x+5,-a*.9],[x+5,a]],steel);c.fillStyle='#d0e1e6';c.fillRect(x-7,-a*.65,14,4)}
+  c.strokeStyle='#e8aa5d';c.lineWidth=4;c.beginPath();c.moveTo(-a,a*.3);c.lineTo(a,a*.3);c.stroke();
+ }
+}
+
 function mapSetPieces(c,d,t){
  const sector=Math.max(1,Math.min(20,Number(d.sector)||1)),kind=MAP_FEATURES[sector-1];
  const w=d.w,h=d.h,spacing=250+sector%4*32,offset=(d.distance||0)*.38;
@@ -631,6 +656,7 @@ function mapSetPieces(c,d,t){
    if(x<12||x>w-12)continue;
    const size=12+hash(cell*19+sector)*12;
    c.save();c.translate(x,y);c.lineWidth=2;c.strokeStyle=t.accent;c.fillStyle=t.ground[1];c.globalAlpha=.66;
+   if(detailEnabled&&['cranes','gantries','skyline','billboards','ruins','pipes','refinery'].includes(kind)){c.globalAlpha=.97;detailedSetPiece(c,kind,size,Date.now()*.001);c.restore();continue;}
    switch(kind){
     case 'canopy':case 'giantroots':case 'pines':case 'palms':case 'reeds':case 'spores':
      c.fillRect(-2,-size*.8,4,size);
