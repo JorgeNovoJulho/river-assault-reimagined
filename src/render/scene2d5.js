@@ -117,7 +117,17 @@ function plane(c,x,y,style='falcao',size=1){
 function enemy(c,e,time){
  c.save();c.translate(e.x,e.y);let type=e.type||'JET';
  c.fillStyle='rgba(0,8,20,.36)';c.beginPath();c.ellipse(3,8,Math.max(13,(e.width||22)*.5),8,0,0,Math.PI*2);c.fill();
- if(type==='TANK'){
+ if(type==='MECHA_SWORD'||type==='MECHA_GUN'){
+   const sword=type==='MECHA_SWORD',primary=sword?'#a855f7':'#d97731',light=sword?'#f0abfc':'#fbbf24';
+   // Robô humanoide articulado, armadura e equipamentos legíveis.
+   c.fillStyle='#1e293b';c.fillRect(-10,9,8,18);c.fillRect(2,9,8,18);
+   c.fillStyle=primary;c.fillRect(-11,-17,22,30);c.fillRect(-16,-12,5,22);c.fillRect(11,-12,5,22);
+   c.fillStyle='#334155';c.fillRect(-9,-27,18,14);
+   c.fillStyle=light;c.fillRect(-7,-22,14,4);c.fillRect(-6,-7,12,5);
+   if(sword){c.strokeStyle='#cffafe';c.lineWidth=5;c.beginPath();c.moveTo(17,5);c.lineTo(30,-27);c.stroke();c.strokeStyle='#7dd3fc';c.lineWidth=2;c.beginPath();c.moveTo(17,5);c.lineTo(30,-27);c.stroke()}
+   else{c.fillStyle='#111827';c.fillRect(10,-14,18,10);c.fillStyle=light;c.fillRect(27,-12,6,5)}
+ }
+ else if(type==='TANK'){
    c.fillStyle='#243c30';c.fillRect(-13,-17,26,34);
    c.fillStyle='#64866c';c.fillRect(-9,-14,18,28);
    c.fillStyle='#263b30';c.fillRect(-15,-15,5,30);c.fillRect(10,-15,5,30);
