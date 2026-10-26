@@ -70,7 +70,7 @@ test('gameplay 045: dams spaced, shots held, banks targetable',()=>{
  assert.match(html,/touchFireButton\.addEventListener\('pointerdown'/);
  assert.match(html,/e\.type === 'SHIP' \|\| e\.type === 'TURRET'/);
  assert.match(html,/e\.y>=5 && e\.y<VIRTUAL_HEIGHT-90/);
- assert.match(html,/HUD 0\.4\.9/);
+ assert.match(html,/HUD 0\.5\.0/);
 });
 
 test('hotfix 1: pickup spacing and visual types are enforced',()=>{
@@ -119,4 +119,20 @@ test('boss abilities 049: persistent unlocks, mandatory selection and elemental 
  assert.match(html,/unlockBossSkill\(e.skillAffinity\)/);
  assert.match(html,/boss-skill-picker/);
  assert.match(html,/e\.code==='KeyC'/);
+});
+
+test('visual phase 04: all twenty missions have deterministic biome atmosphere',()=>{
+ const renderer=read('src/render/scene2d5.js');
+ const html=read('index.html');
+ const campaign=read('src/game/campaign.js');
+ assert.match(renderer,/const BIOME_DETAILS=\[/);
+ assert.match(renderer,/function biomeAtmosphere\(/);
+ assert.match(renderer,/biomeAtmosphere\(c,d,t\)/);
+ assert.match(renderer,/BIOME_DETAILS,/);
+ assert.match(renderer,/c\.save\(\);c\.translate\(x,y\);c\.scale\(scale,scale\)/);
+ assert.match(renderer,/c\.restore\(\);/);
+ assert.match(html,/HUD 0\.5\.0/);
+ assert.match(campaign,/"id": 20/);
+ const codes=renderer.match(/\['[A-Z_]+','#[A-Fa-f0-9]+','[^']+'\]/g)||[];
+ assert.equal(codes.length,20);
 });
