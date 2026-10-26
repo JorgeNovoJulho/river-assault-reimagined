@@ -95,3 +95,13 @@ test('música de boss é exclusiva da arena e mísseis corrigem trajetória',()=
  assert.match(html,/playlist\.beginBossTheme\?\.\(\)/);
  assert.match(html,/const nextX=oldX\*\(1-turn\)\+targetX\*turn/);
 });
+
+test('visuais especiais têm comprimento limitado e rastro curto',()=>{
+ const html=fs.readFileSync('index.html','utf8');
+ const aircraft=fs.readFileSync('src/game/aircraft.js','utf8');
+ assert.match(html,/function drawBulletTrail\(/);
+ assert.match(html,/Math\.min\(b\.trail\.length,4\)/);
+ assert.match(html,/ctx\.shadowBlur=4/);
+ assert.match(aircraft,/bullet\.trailMax=\[/);
+ assert.doesNotMatch(html,/const wide=w==='BEAM'\?9/);
+});
