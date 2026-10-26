@@ -427,9 +427,38 @@ function enemy(c,e,time){
    c.fillStyle='#172d27';c.fillRect(-3,-22,6,22);
    c.fillStyle='#ffe08c';c.fillRect(-2,-22,4,5);
  }
- else if(type==='SUB'){poly(c,[-12,-17,0,-22,12,-17,11,17,0,22,-11,17],'#486b77');c.fillStyle='#93c5d0';c.fillRect(-4,-11,8,10);c.fillStyle='#d7f8ff';c.fillRect(-2,-17,4,5)}
- else if(type==='HELI'){poly(c,[-9,-13,9,-13,11,7,5,15,-5,15,-11,7],'#8d966c');poly(c,[-6,-9,0,-13,6,-9,4,1,-4,1],'#7dd3fc');c.strokeStyle='#e5f6ed';c.lineWidth=2;c.beginPath();const a=Date.now()/65;c.moveTo(-19*Math.cos(a),-8-19*Math.sin(a)*.2);c.lineTo(19*Math.cos(a),-8+19*Math.sin(a)*.2);c.stroke();c.fillStyle='#314453';c.fillRect(-2,11,4,14)}
- else if(type==='SHIP'){poly(c,[-12,-17,0,-22,12,-17,13,12,5,20,-5,20,-13,12],'#3b556d');poly(c,[-8,-13,0,-17,8,-13,8,13,-8,13],'#849cac');c.fillStyle='#d8e9ee';c.fillRect(-5,-8,10,14);c.fillStyle='#293d50';c.fillRect(-2,-16,4,9);c.fillRect(-3,9,6,5);c.fillStyle='#fbbf24';c.fillRect(-1,-18,2,2)}
+ else if(type==='SUB'||type==='SHIP'||type==='HELI'){
+  const heli=type==='HELI',sub=type==='SUB',ship=type==='SHIP';
+  const hull=c.createLinearGradient(-14,-22,15,22);
+  hull.addColorStop(0,heli?'#b6c6ab':sub?'#98bac7':'#c2d1d4');
+  hull.addColorStop(.3,heli?'#5d765c':sub?'#3c6678':'#627f91');
+  hull.addColorStop(1,'#152a3a');
+  // Navegacao no rio: esteira e espuma; helicóptero: sombra de altitude.
+  c.fillStyle='rgba(1,15,27,.34)';c.beginPath();c.ellipse(4,15,heli?21:17,heli?8:27,0,0,7);c.fill();
+  if(!heli){
+   c.strokeStyle='rgba(206,246,255,.5)';c.lineWidth=1.7;
+   c.beginPath();c.moveTo(-12,12);c.quadraticCurveTo(-19,28,-10,31);
+   c.moveTo(12,12);c.quadraticCurveTo(19,28,10,31);c.stroke();
+  }
+  if(heli){
+   c.fillStyle=hull;c.strokeStyle='#c3d2cc';c.lineWidth=1.3;
+   c.beginPath();c.moveTo(0,-18);c.bezierCurveTo(14,-16,15,4,8,13);c.lineTo(4,16);c.lineTo(4,29);c.lineTo(-4,29);c.lineTo(-4,16);c.lineTo(-8,13);c.bezierCurveTo(-15,4,-14,-16,0,-18);c.fill();c.stroke();
+   c.fillStyle='#1b3546';c.beginPath();c.ellipse(0,-9,7,8,0,0,7);c.fill();
+   c.fillStyle='#7fc5d6';c.beginPath();c.ellipse(-2,-12,3,4,-.4,0,7);c.fill();
+   for(let side of [-1,1]){c.fillStyle='#546a5c';c.fillRect(side*12-4,0,8,13);c.fillStyle='#1a2835';c.fillRect(side*13-2,5,4,5)}
+   const a=Date.now()/53;c.save();c.translate(0,-3);c.rotate(a);c.strokeStyle='rgba(229,247,255,.75)';c.lineWidth=2;c.beginPath();c.moveTo(-22,0);c.lineTo(22,0);c.moveTo(0,-8);c.lineTo(0,8);c.stroke();c.restore();
+   c.fillStyle='#ffe0a0';c.fillRect(-2,25,4,2);
+  }else{
+   c.fillStyle=hull;c.strokeStyle='#b0c8d1';c.lineWidth=1.7;
+   c.beginPath();c.moveTo(0,-25);c.bezierCurveTo(14,-24,16,-10,15,13);c.quadraticCurveTo(12,22,0,26);c.quadraticCurveTo(-12,22,-15,13);c.bezierCurveTo(-16,-10,-14,-24,0,-25);c.fill();c.stroke();
+   c.strokeStyle='#0f2739';c.lineWidth=2;c.beginPath();c.moveTo(-10,-15);c.lineTo(-9,14);c.moveTo(10,-15);c.lineTo(9,14);c.stroke();
+   c.fillStyle=sub?'#34495a':'#829ca9';c.beginPath();c.roundRect(-7,-10,14,22,3);c.fill();
+   c.fillStyle='#b2d7de';c.fillRect(-4,-7,8,5);
+   if(ship){c.fillStyle='#233748';c.fillRect(-2,-21,4,12);c.fillStyle='#d3a16a';c.fillRect(-2,15,4,4);}
+   else{c.strokeStyle='#d7eef0';c.lineWidth=2;c.beginPath();c.arc(0,0,6,0,7);c.stroke();c.fillStyle='#253d51';c.fillRect(-3,-14,6,8);}
+   for(const sign of [-1,1]){c.fillStyle='#ecae56';c.fillRect(sign*11-1,7,2,3);}
+  }
+ }
  else if(type==='TURRET'){c.fillStyle='#6a778b';c.beginPath();c.arc(0,0,11,0,Math.PI*2);c.fill();c.fillStyle='#efbe7b';c.fillRect(-3,-16,6,16)}
  else if(type==='BOSS'){
   const id=((e.bossId||1)-1)%20,mode=({ship:0,heli:1,sub:2,mech:3,insect:4,jet:4}[e.bossVisual]??id%5),variant=Math.floor(id/5),w=Math.min(175,e.width||110),h=Math.min(85,e.height||60);
