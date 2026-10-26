@@ -353,3 +353,19 @@ test('069: prism and shadow arsenal and opposite weaknesses',()=>{
  assert.match(html,/pattern===7\|\|pattern===8/);
  assert.match(html,/HUD 0\.6\.9/);
 });
+
+test('070: light/shadow offensive powers, boss summons and slash combat',()=>{
+ const html=read('index.html'),render=read('src/render/scene2d5.js');
+ for(const skill of ['PRISM','SHADOW'])assert.match(html,new RegExp(skill+":\\{icon:"));
+ assert.match(html,/boss\.dualRate=advantage\?\.01:\.005/);
+ assert.match(html,/boss\.dualAmp=kind==='PRISM'/);
+ assert.match(html,/boss\.dualSlow=kind==='SHADOW'/);
+ assert.match(html,/e\.dualElement==='PRISM'\?1\+/);
+ assert.match(html,/useMecha=\[1,4,7,10,13,16,19\]/);
+ assert.match(html,/e\.swordCharge=45/);
+ assert.match(html,/e\.slashWarn=45/);
+ assert.match(html,/bossProjectileElement/);
+ assert.match(html,/function playBiomeEnemySound\(/);
+ assert.match(render,/function drawBiomeEnemy\(/);
+ assert.match(html,/HUD 0\.7\.0/);
+});
