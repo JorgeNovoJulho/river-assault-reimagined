@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>RiverStorm — Aeronaves e Elementos 0.6.3</title>
+    <title>RiverStorm — Elementos Balanceados 0.6.4</title>
     <link rel="stylesheet" href="./src/styles/tailwind.css">
     <style>
         body {
@@ -246,7 +246,7 @@
         <div class="rs-hud-cell"><span class="rs-label">🛡 ESCUDO <b id="hud-shield">150</b></span><div class="rs-meter"><span id="hud-shield-fill" style="background:#38bdf8;width:100%"></span></div></div>
         <div class="rs-hud-cell"><span class="rs-label">♟ RESGATES <b id="hud-rescues">0</b></span><span class="rs-label">✈ <b id="hud-plane">FALCÃO</b></span></div>
       </div>
-      <div class="rs-hud-footer"><span id="hud-version" style="color:#38bdf8;font-size:8px">HUD 0.6.3</span><span id="mission-hud">SELVA DA AURORA</span><b id="sector-hud">SETOR 1</b><span id="hud-rank">J1 SOLDADO</span></div>
+      <div class="rs-hud-footer"><span id="hud-version" style="color:#38bdf8;font-size:8px">HUD 0.6.4</span><span id="mission-hud">SELVA DA AURORA</span><b id="sector-hud">SETOR 1</b><span id="hud-rank">J1 SOLDADO</span></div>
     </section>
     <div id="rs-bottom-actions" aria-label="Opções rápidas">
       <button id="crt-toggle" type="button">CRT: LIG</button>
@@ -1171,10 +1171,10 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
           const advantage=skill.strong===foe;
           let damage=advantage?Math.round(skill.damage*2.8):Math.max(6,Math.round(skill.damage*.35));
           if(boss.gravityTicks>0)damage*=2;
-          if(kind==='GRAVITY'){boss.gravityTicks=600;boss.y=Math.min(VIRTUAL_HEIGHT*.32,boss.y+24);}
-          if(kind==='BLEED'||kind==='POISON'){boss.statusKind=kind;boss.statusTicks=600;boss.statusClock=0;boss.statusBaseHp=boss.maxHp;}
+          if(kind==='GRAVITY'){boss.gravityTicks=180;boss.gravityRate=advantage?.06:.03;boss.gravityClock=0;boss.y=Math.min(VIRTUAL_HEIGHT*.32,boss.y+24);}
+          if(kind==='BLEED'||kind==='POISON'){boss.statusKind=kind;boss.statusTicks=600;boss.statusClock=0;boss.statusBaseHp=boss.maxHp;boss.statusRate=(kind==='BLEED'?.015:.01)*(advantage?2:1);boss.statusDealt=boss.statusDealt||0;}
           if(kind==='ICE')boss.frozenTicks=600;
-          if(kind==='EMP')boss.specialCharge=0;
+          if(kind==='EMP'){boss.specialCharge=0;boss.stunnedTicks=300;}
           if(kind==='LIGHTNING')boss.stunnedTicks=600;
           if(kind==='FIRE')boss.burningTicks=600;
           boss.hp=Math.max(0,boss.hp-damage);
@@ -1194,7 +1194,8 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
             e.shootTimer++;
             if(bossSkillCooldown>0)bossSkillCooldown--;
             for(const prop of ['gravityTicks','frozenTicks','stunnedTicks','burningTicks'])if(e[prop]>0)e[prop]--;
-            if(e.statusTicks>0){e.statusTicks--;if(++e.statusClock>=60){e.statusClock=0;const rate=e.statusKind==='BLEED'?.02:.01;const dot=Math.max(1,e.statusBaseHp*rate);e.hp=Math.max(0,e.hp-dot);createFloatingText(e.x,e.y-35,(e.statusKind==='BLEED'?'SANGRAMENTO':'VENENO')+' -'+Math.ceil(dot),e.statusKind==='BLEED'?'#fb7185':'#4ade80');if(e.hp<=0){finishBossDefeatedBySkill(e);return;}}}
+            if(e.statusTicks>0){e.statusTicks--;if(++e.statusClock>=60){e.statusClock=0;const cap=e.statusBaseHp*.30;const dot=Math.max(0,Math.min(e.statusBaseHp*(e.statusRate||.01),cap-(e.statusDealt||0)));e.statusDealt=(e.statusDealt||0)+dot;e.hp=Math.max(0,e.hp-dot);createFloatingText(e.x,e.y-35,(e.statusKind==='BLEED'?'SANGRAMENTO':'VENENO')+' -'+Math.ceil(dot),e.statusKind==='BLEED'?'#fb7185':'#4ade80');if(e.hp<=0){finishBossDefeatedBySkill(e);return;}}}
+            if(e.gravityTicks>0){e.gravityClock=(e.gravityClock||0)+1;if(e.gravityClock%60===0){const d=e.maxHp*(e.gravityRate||.03);e.hp=Math.max(0,e.hp-d);createFloatingText(e.x,e.y-46,'GRAVIDADE -'+Math.ceil(d),'#c4b5fd');if(e.hp<=0){finishBossDefeatedBySkill(e);return;}}}
             if(e.stunnedTicks>0)return;
             if(e.rewardCooldown>0)e.rewardCooldown--;
 
@@ -1217,9 +1218,9 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
             if(e.specialCharge>=abilityCooldown && player.disabledTimer<=0){
                 e.specialCharge=0;
                 const pattern=(sector-1)%7;
-                if(pattern===0){player.disabledTimer=600;player.effectType='EMP';player.effectTimer=600; sound.playEmpSound();document.getElementById('game-container').classList.add('emp-flash');setTimeout(()=>document.getElementById('game-container').classList.remove('emp-flash'),300);createFloatingText(player.x,player.y,'EMP · 10 S','#67e8f9')}
+                if(pattern===0){player.disabledTimer=300;player.effectType='EMP';player.effectTimer=300; sound.playEmpSound();document.getElementById('game-container').classList.add('emp-flash');setTimeout(()=>document.getElementById('game-container').classList.remove('emp-flash'),300);createFloatingText(player.x,player.y,'EMP · 5 S','#67e8f9')}
                 else if(pattern===1){player.effectType='LIGHTNING';player.effectTimer=600;for(let n=-2;n<=2;n++)enemyBullets.push({x:e.x+n*26,y:e.y+25,vx:n*.65,vy:5.2,color:'#67e8f9'})}
-                else if(pattern===2){player.effectType='GRAVITY';player.effectTimer=600;player.x+=(e.x-player.x)*.15;createFloatingText(player.x,player.y,'PULSO GRAVITACIONAL','#c4b5fd')}
+                else if(pattern===2){player.effectType='GRAVITY';player.effectTimer=180;player.gravityDamageRate=.03;player.x+=(e.x-player.x)*.15;createFloatingText(player.x,player.y,'PULSO GRAVITACIONAL','#c4b5fd')}
                 else if(pattern===3||pattern===4){player.effectType=pattern===3?'FIRE':'ICE';player.effectTimer=600;for(let n=-2;n<=2;n++)enemyBullets.push({x:e.x+n*20,y:e.y+28,vx:n*1.05,vy:3.8,color:pattern===3?'#fb923c':'#bae6fd'})}
                 else if(pattern===5){player.effectType='BLEED';player.effectTimer=600;applyDamage(25,'SANGRAMENTO');createFloatingText(player.x,player.y,'SANGRAMENTO','#fb7185')}
                 else if(pattern===6){player.effectType='POISON';player.effectTimer=600;applyDamage(20,'VENENO');createFloatingText(player.x,player.y,'ENVENENADO','#4ade80')}
@@ -1385,7 +1386,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
                 ctx.save();
                 ctx.translate(b.x, b.y);
 
-                if (b.type === 'BANK_MISSILE') { ctx.shadowBlur=14;ctx.shadowColor='#fb923c';ctx.fillStyle='#f8fafc';ctx.fillRect(-3,-10,6,18);ctx.fillStyle='#ef4444';ctx.beginPath();ctx.moveTo(-3,-10);ctx.lineTo(0,-19);ctx.lineTo(3,-10);ctx.fill();ctx.fillStyle='#fbbf24';ctx.fillRect(-2,8,4,11); } else if (b.type === 'LASER') {
+                if (b.type === 'BANK_MISSILE') { ctx.rotate(b.angle||0);ctx.shadowBlur=14;ctx.shadowColor='#fb923c';ctx.fillStyle='#f8fafc';ctx.fillRect(-3,-10,6,18);ctx.fillStyle='#ef4444';ctx.beginPath();ctx.moveTo(-3,-10);ctx.lineTo(0,-19);ctx.lineTo(3,-10);ctx.fill();ctx.fillStyle='#fbbf24';ctx.fillRect(-2,8,4,11); } else if (b.type === 'LASER') {
                     ctx.fillStyle = b.color || '#06b6d4';
                     ctx.fillRect(-2, -12, 4, 24);
                     ctx.shadowColor = '#06b6d4';
@@ -2283,9 +2284,9 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
         }
 
         function fireBankMissiles(){
-            const offsets=[-25,25];
-            for(const w of wingmen)if(w.ttl>0)offsets.push(w.side*48);
-            for(const dx of offsets)bullets.push({x:player.x+dx,y:player.y-14,vx:0,speed:12,type:'BANK_MISSILE',color:'#fb923c',damage:6});
+            const launch=(x,y,vx,vy)=>bullets.push({x,y,vx,speed:-vy,type:'BANK_MISSILE',color:'#fb923c',damage:6,angle:Math.atan2(vx,-vy)});
+            launch(player.x,player.y-24,0,-12);launch(player.x-24,player.y-6,-11,0);launch(player.x+24,player.y-6,11,0);
+            for(const w of wingmen)if(w.ttl>0)launch(player.x+w.side*45,player.y-8,w.side*7,-9);
         }
         function fireWeapon() {
             if (gameState !== 'PLAYING' || player.disabledTimer > 0) return;
@@ -2785,7 +2786,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
             if (gameState === 'PLAYING' && gamepadState.fire && timestamp - lastGamepadShot > 145) {
                 sound.init(); fireWeapon(); lastGamepadShot = timestamp;
             }
-            if (gameState === 'PLAYING' && (mouseInput.fire || mouseFireHeld || keys.Space || keys.KeyZ || touchFireHeld) && timestamp - lastMouseShot > 115) {
+            if (gameState === 'PLAYING' && (mouseInput.fire || mouseFireHeld || keys.Space || keys.KeyZ || touchFireHeld) && timestamp - lastMouseShot >= 100) {
                 sound.init(); fireWeapon(); lastMouseShot = timestamp;
             }
             if(gameState === "PLAYING") simulationClock.advance(timestamp, update);
