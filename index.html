@@ -1249,18 +1249,21 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
             skillPicker.classList.add('hidden');
             skillPicker.style.display='none';
             skillPicker.setAttribute('aria-hidden','true');
-            gameState='PLAYING';simulationClock.reset();
+            // Instala o chefe antes de reativar a simulação para evitar o frame intermediário.
             spawnBoss(0,true);
+            if(!enemies.some(e=>e.type==='BOSS'))throw Error('Chefe não foi criado após a escolha');
             bossActive=true;
             redAlertTicks=0;redAlertTriggered=true;
+            gameState='PLAYING';simulationClock.reset();
             document.getElementById('boss-special-hud')?.classList.add('hidden');
             try{if(playlist.bossMode){soundtrack.stop();playlist.resume()}else if(!playlist.tracks.length&&playlist.enabled)soundtrack.start();else playlist.resume()}catch(error){console.warn('Áudio boss:',error)}
           }catch(error){
             // Nunca prender o piloto em um modal sem possibilidade de recuperar.
             console.error('Seleção de habilidades:',error);
             skillPicker.classList.add('hidden');skillPicker.style.display='none';
-            gameState='PLAYING';simulationClock.reset();
             try{if(!enemies.some(e=>e.type==='BOSS'))spawnBoss(0,true)}catch(bossError){console.error('Boss recovery:',bossError)}
+            gameState=enemies.some(e=>e.type==='BOSS')?'PLAYING':'BOSS_SELECT';simulationClock.reset();
+            if(gameState==='BOSS_SELECT'){skillPicker.classList.remove('hidden');skillPicker.style.display='flex'}
             showGameError(error);
           }finally{bossSelectionCommitting=false}
         }
