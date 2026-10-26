@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>RiverStorm — Escudo e Rolagem 0.7.7</title>
+    <title>RiverStorm — Esquiva Fantasma 0.7.8</title>
     <link rel="stylesheet" href="./src/styles/tailwind.css">
     <style>
         body {
@@ -1181,11 +1181,11 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
           f.life--;if(f.life<=0)bossSkillEffect=null;
         }
         let swordRushCooldown=0,swordRushTarget=null,swordRushFrames=0;
-        let rollFrames=0,rollCooldown=0,rollDirection=0,rollSpin=0;
+        let rollFrames=0,rollCooldown=0,rollDirection=0,rollSpin=0,rollOriginX=0;
         function activateRoll(direction){
           if(gameState!=='PLAYING'||player.disabledTimer>0||rollFrames>0||rollCooldown>0)return;
-          rollDirection=direction<0?-1:1;rollFrames=18;rollCooldown=48;rollSpin=0;
-          player.invulnerable=Math.max(player.invulnerable,18);
+          rollDirection=direction<0?-1:1;rollFrames=24;rollCooldown=48;rollSpin=0;rollOriginX=player.x;
+          player.invulnerable=Math.max(player.invulnerable,26);
           createFloatingText(player.x,player.y-34,rollDirection<0?'ROLAGEM ◀':'ROLAGEM ▶','#67e8f9');
         }
         function activateSwordRush(){
@@ -1532,7 +1532,12 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
         function drawPlayer(x, y) {
             ctx.save();
             ctx.translate(x, y);
-            if(rollFrames>0){ctx.rotate(rollSpin*rollDirection);ctx.shadowColor='#67e8f9';ctx.shadowBlur=16;}
+            if(rollFrames>0){
+                ctx.save();ctx.globalAlpha=.4;ctx.strokeStyle='#67e8f9';ctx.lineWidth=5;ctx.shadowColor='#22d3ee';ctx.shadowBlur=20;
+                ctx.beginPath();ctx.moveTo(rollOriginX-x,0);ctx.lineTo(0,0);ctx.stroke();
+                ctx.beginPath();ctx.ellipse(0,0,28,18,rollSpin,0,Math.PI*2);ctx.stroke();ctx.restore();
+                ctx.rotate(rollSpin*rollDirection);ctx.shadowColor='#67e8f9';ctx.shadowBlur=24;
+            }
 
             if (player.invulnerable > 0 && rollFrames<=0 && Math.floor(Date.now() / 100) % 2 === 0) {
                 ctx.restore();
@@ -1802,10 +1807,23 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
             }
         }
         function launchWingmanMissile(w){
-            const target=enemies.filter(e=>e.hp>0).sort((a,b)=>Math.hypot(a.x-(player.x+w.side*36),a.y-player.y)-Math.hypot(b.x-(player.x+w.side*36),b.y-player.y))[0];
-            if(target){const damage=target.type==='BOSS'?18:40; if(target.type==='BOSS')dropBossReward(target,damage);target.hp=Math.max(target.type==='BOSS'?1:0,target.hp-damage);addExplosion(target.x,target.y,'#67e8f9',24);createFloatingText(target.x,target.y,'MÍSSIL TELEGUiADO -'+damage,'#7dd3fc');}
+            const sourceX=player.x+w.side*36,sourceY=player.y+10;
+            const target=enemies.filter(e=>e.hp>0).sort((a,b)=>Math.hypot(a.x-sourceX,a.y-sourceY)-Math.hypot(b.x-sourceX,b.y-sourceY))[0];
+            if(!target)return;
+            // Detonação equivalente à bomba, inclusive limpeza de projéteis e efeito global.
+            const tx=target.x,ty=target.y;
+            const originalHp=target.hp;
+            explodeBomb({x:tx,y:ty});
+            // Inimigo diretamente atingido recebe mais 10% que os demais.
+            if(target.type==='BOSS'){
+                const base=10*(target.parryVulnerableTicks>0?1.5:1);
+                target.hp=Math.max(1,target.hp-base*.10);
+            }else if(target.hp>0){target.hp-=99.9;}
+            addExplosion(tx,ty,'#ff4dd8',38);
+            createFloatingText(tx,ty-38,'DRONE KAMIKAZE +10%','#fef08a');
+            launchSkillTrajectory('FIRE',sourceX,sourceY,tx,ty,'#67e8f9');
         }
-        function drawWingmen(){
+                function drawWingmen(){
             for(const w of wingmen){ctx.save();ctx.globalAlpha=w.ttl<=0?Math.max(0,1-(w.detach||0)/36):1;ctx.translate(player.x+w.side*(36+(w.detach||0)*2),player.y+10+(w.detach||0)*1.1);ctx.fillStyle='#18425e';ctx.strokeStyle='#67e8f9';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(0,-14);ctx.lineTo(-13,9);ctx.lineTo(0,3);ctx.lineTo(13,9);ctx.closePath();ctx.fill();ctx.stroke();ctx.fillStyle='#67e8f9';ctx.fillRect(-12,14,24*w.hp/w.maxHp,3);ctx.restore()}
         }
         function drawRescueBoats(){
@@ -2057,7 +2075,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
             if(parryTicks>0){parryHeldTicks++;parryTicks--;}
             if(parryTicks>0)player.invulnerable=Math.max(player.invulnerable,2);
             if(rollCooldown>0)rollCooldown--;
-            if(rollFrames>0){rollFrames--;rollSpin=(18-rollFrames)/18*Math.PI*2;player.x=Math.max(24,Math.min(VIRTUAL_WIDTH-24,player.x+rollDirection*9));player.invulnerable=Math.max(player.invulnerable,2);}
+            if(rollFrames>0){rollFrames--;rollSpin=(24-rollFrames)/24*Math.PI*2;player.x=Math.max(24,Math.min(VIRTUAL_WIDTH-24,player.x+rollDirection*16));player.invulnerable=Math.max(player.invulnerable,3);if(rollFrames%4===0){addExplosion(player.x,player.y,'#67e8f9',4);}}
             if(parryPrecisionTicks>0)parryPrecisionTicks--;
             if(parryCooldown>0)parryCooldown--;
             if(swordRushCooldown>0)swordRushCooldown--;
@@ -2148,7 +2166,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
                 eb.x += eb.vx + (eb.waveStyle===2?Math.sin(missionTicks*.12+(eb.phase||0))*.45:0);
                 eb.y += eb.vy;
 
-                if(parryTicks>0&&Math.hypot(eb.x-player.x,eb.y-player.y)<53){enemyBullets.splice(index,1);const boss=enemies.find(e=>e.type==='BOSS'&&e.hp>0),target=boss||enemies.find(e=>e.hp>0);const tx=target?.x??eb.x,ty=target?.y??0,dx=tx-eb.x,dy=ty-eb.y,len=Math.max(1,Math.hypot(dx,dy));bullets.push({x:eb.x,y:eb.y,vx:dx/len*11,speed:-dy/len*11,type:'REFLECTED',color:'#22f7c4',damage:37.5,reflected:true,homing:true});addExplosion(eb.x,eb.y,'#67e8f9',8);createFloatingText(player.x,player.y-40,'REFLETIDO!','#67e8f9');return;}
+                if((parryTicks>0||rollFrames>0)&&Math.hypot(eb.x-player.x,eb.y-player.y)<(rollFrames>0?67:53)){enemyBullets.splice(index,1);const boss=enemies.find(e=>e.type==='BOSS'&&e.hp>0),target=boss||enemies.find(e=>e.hp>0);const tx=target?.x??eb.x,ty=target?.y??0,dx=tx-eb.x,dy=ty-eb.y,len=Math.max(1,Math.hypot(dx,dy));bullets.push({x:eb.x,y:eb.y,vx:dx/len*11,speed:-dy/len*11,type:'REFLECTED',color:rollFrames>0?'#ff4dd8':'#22f7c4',damage:rollFrames>0?Math.max(1,eb.damage||25)*1.10:37.5,reflected:true,homing:true,dodgeReflect:rollFrames>0});addExplosion(eb.x,eb.y,'#67e8f9',8);createFloatingText(player.x,player.y-40,rollFrames>0?'ESQUIVA + REFLEXO 110%!':'REFLETIDO!',rollFrames>0?'#ff4dd8':'#67e8f9');return;}
                 const hitWingman=wingmen.find(w=>Math.hypot(eb.x-(player.x+w.side*36),eb.y-(player.y+10))<14);
                 if(hitWingman){
                     enemyBullets.splice(index,1);
@@ -2417,7 +2435,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
         }
 
         function applyDamage(amount, reason) {
-            if (player.invulnerable > 0 || parryTicks>0) return;
+            if (player.invulnerable > 0 || parryTicks>0 || rollFrames>0) return;
             // Naves auxiliares têm escudo independente e só sofrem dano quando atingidas.
 
             player.shield -= Math.round(amount*(bossActive||reason.includes('BOSS')?1.15:.7));
