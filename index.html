@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>RiverStorm — Áudio e Perfil 0.8.2</title>
+    <title>RiverStorm — Mísseis Inteligentes 0.8.3</title>
     <link rel="stylesheet" href="./src/styles/tailwind.css">
     <style>
         body {
@@ -1581,6 +1581,8 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
                     ctx.shadowColor = '#06b6d4';
                     ctx.shadowBlur = 8;
                 } else if (b.type === 'MISSILE') {
+                    ctx.rotate(Math.atan2(b.vx||0,-(b.speed||7)));
+                    ctx.shadowColor=b.color||'#fb923c';ctx.shadowBlur=10;
                     ctx.fillStyle = b.color || '#f97316';
                     ctx.fillRect(-2, -8, 4, 16);
                     ctx.fillStyle = '#ef4444';
@@ -2233,13 +2235,24 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
                 if (b.vx) b.x += b.vx;
 
                 if (b.type === 'MISSILE'||b.type==='REFLECTED') {
-                    let nearest = null;
-                    let minDist = 220;
-                    enemies.forEach(e => {
-                        const d = Math.hypot(e.x - b.x, e.y - b.y);
-                        if (d < minDist) { minDist = d; nearest = e; }
-                    });
-                    if (nearest){if(b.type==='REFLECTED'){const dx=nearest.x-b.x,dy=nearest.y-b.y,d=Math.max(1,Math.hypot(dx,dy));b.vx=dx/d*13;b.speed=-dy/d*13;}else b.x += (nearest.x - b.x) * 0.09;}
+                    // Steering 2D: busca alvos vivos, limita curva e mantém velocidade estável.
+                    // O movimento base acontece antes; ajustar a direção para o próximo quadro.
+                    let nearest=null,minDist=b.type==='REFLECTED'?480:320;
+                    for(const e of enemies){
+                        if(e.hp<=0)continue;
+                        const d=Math.hypot(e.x-b.x,e.y-b.y);
+                        if(d<minDist){minDist=d;nearest=e}
+                    }
+                    if(nearest){
+                        const dx=nearest.x-b.x,dy=nearest.y-b.y,d=Math.max(1,Math.hypot(dx,dy));
+                        const speed=b.type==='REFLECTED'?13:Math.max(6,Math.hypot(b.vx||0,b.speed||7));
+                        const oldX=(b.vx||0)/speed,oldY=-(b.speed||7)/speed;
+                        const turn=b.type==='REFLECTED'?.22:.12;
+                        const targetX=dx/d,targetY=dy/d;
+                        const nextX=oldX*(1-turn)+targetX*turn,nextY=oldY*(1-turn)+targetY*turn;
+                        const len=Math.max(.001,Math.hypot(nextX,nextY));
+                        b.vx=nextX/len*speed;b.speed=-nextY/len*speed;
+                    }
                 }
 
                 if (b.y < -25 || b.y > VIRTUAL_HEIGHT+25 || b.x < -25 || b.x > VIRTUAL_WIDTH+25) bullets.splice(index, 1);
