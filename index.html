@@ -1184,6 +1184,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
           const advantage=skill.strong===foe;
           let damage=kind==='EMP'||kind==='PRISM'||kind==='SHADOW'?0:(advantage?Math.round(skill.damage*2.8):Math.max(6,Math.round(skill.damage*.35)));
           if(boss.gravityTicks>0)damage*=2;
+          if(boss.parryVulnerableTicks>0)damage*=1.5;
           if(kind==='PRISM'||kind==='SHADOW'){const base=boss.maxHp*.03;damage=base;boss.dualElement=kind;boss.dualTicks=600;boss.dualClock=0;boss.dualRate=advantage?.01:.005;boss.dualAdvantage=advantage;boss.dualCount=0;boss.dualAmp=kind==='PRISM'?(advantage?.5:.25):0;boss.dualSlow=kind==='SHADOW'?(advantage?.5:.3):0;
             if(kind==='PRISM'){for(let i=-3;i<=3;i++){const x=boss.x+i*12;addExplosion(x,boss.y-10-i%2*7,i%2?'#67e8f9':'#fde68a',5);}createFloatingText(boss.x,boss.y-50,'REFRAÇÃO +'+Math.round(boss.dualAmp*100)+'%','#fef08a')}
             else{for(let i=-1;i<=1;i++){const x=boss.x+i*22;addExplosion(x,boss.y+15,'#a78bfa',6)}createFloatingText(boss.x,boss.y-50,'LANÇAS ABISSAIS','#a78bfa')}
@@ -1321,13 +1322,13 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
               e.swordCharge=60;e.swordTargetX=player.x;e.swordTargetY=Math.min(player.y-72,VIRTUAL_HEIGHT*.7);
               createFloatingText(e.x,e.y-50,'⚔ INVESTIDA EM 0,75 S','#fb7185');
             }
-            if(e.swordCharge>0){e.swordCharge--;if(e.swordCharge===0){e.swordDash=30;e.swordStartX=e.x;e.swordStartY=e.y;}}
+            if(e.swordCharge>0){e.swordCharge--;if(e.swordCharge===0){e.swordHit=false;e.swordDash=30;e.swordStartX=e.x;e.swordStartY=e.y;}}
             if(e.swordDash>0){
               const oldX=e.x,oldY=e.y;
               e.x+=(e.swordTargetX-e.x)*.27;e.y+=(e.swordTargetY-e.y)*.27;
               e.swordDash--;e.swordTrail={x1:oldX,y1:oldY,x2:e.x,y2:e.y,ticks:20,kind:BOSS_STRIKES[sector]||'energy'};
               if(Math.hypot(player.x-e.x,player.y-e.y)<55 && !e.swordHit){if(!defendCharge(e))applyDamage(35,'INVESTIDA DO BOSS');e.swordHit=true;}
-              if(e.swordDash===0){e.swordHit=false;e.swordTargetY=110;}
+              if(e.swordDash<=0){e.swordHit=false;e.swordDash=0;e.swordTargetY=110;}
             }
             if(missionId>4)return; // Evita empilhar ataques legados em bosses avançados.
             const bossId = e.bossSubType;
@@ -2510,7 +2511,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
                     createFloatingText(e.x,e.y,'DANO MASSIVO!','#ff6b6b');
                     bossRobotVoice(e,true);e.bombKnockback=38;e.stunnedTicks=Math.max(e.stunnedTicks||0,20);
                 }
-                e.hp=e.type==='BOSS'?Math.max(1,e.hp-10):e.hp-999;
+                e.hp=e.type==='BOSS'?Math.max(1,e.hp-10*(e.parryVulnerableTicks>0?1.5:1)):e.hp-999;
                 addExplosion(e.x,e.y,'#ffb347',20);
             });
             for(let i=enemies.length-1;i>=0;i--){
