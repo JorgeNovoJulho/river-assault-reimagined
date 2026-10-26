@@ -835,10 +835,20 @@ function vehicleAtlas(type){
   panel([[-11,-31],[0,-43],[11,-31],[9,4],[-9,4]],'#245578');
   c.fillStyle='#a4ebff';c.beginPath();c.ellipse(0,-20,6,11,0,0,7);c.fill();
  }else if(type==='TURRET'){
-  panel([[-31,-31],[31,-31],[35,30],[-35,30]],'#567080');
-  c.fillStyle='#253b50';c.beginPath();c.arc(0,0,22,0,7);c.fill();
-  c.fillStyle='#cbe1e8';c.fillRect(-5,-51,10,53);
-  c.fillStyle='#819dac';c.beginPath();c.arc(0,0,12,0,7);c.fill();
+  // Base hexagonal estacionária, anel de rotação, arma dupla, ótica e rebites.
+  panel([[0,-39],[32,-21],[37,16],[19,36],[-19,36],[-37,16],[-32,-21]],'#273b47');
+  panel([[0,-32],[27,-17],[31,16],[15,28],[-15,28],[-31,16],[-27,-17]],grad);
+  c.strokeStyle='#152a35';c.lineWidth=6;c.beginPath();c.arc(0,0,22,0,Math.PI*2);c.stroke();
+  c.strokeStyle='#b8d1d8';c.lineWidth=2;c.beginPath();c.arc(0,0,18,0,Math.PI*2);c.stroke();
+  // Canhões gémeos sobre a base circular; não são uma ponta triangular.
+  for(const d of [-1,1]){
+   panel([[d*6,-12],[d*14,-12],[d*14,-54],[d*6,-54]],'#647e8d');
+   c.fillStyle='#13242f';c.fillRect(d*8-2,-55,6,5);
+   c.fillStyle='#b7d1d8';c.beginPath();c.arc(d*22,21,2.5,0,Math.PI*2);c.fill();
+  }
+  panel([[-17,-16],[17,-16],[21,10],[12,20],[-12,20],[-21,10]],'#435d6e');
+  c.fillStyle='#83ddec';c.fillRect(-9,-8,18,6);
+  c.fillStyle='#203a49';c.beginPath();c.arc(0,8,7,0,Math.PI*2);c.fill();
  }
  VEHICLE_ATLAS.set(type,canvas);return canvas;
 }
@@ -846,8 +856,8 @@ function drawAtlasVehicle(c,e){
  if(!detailEnabled)return;
  const type=e.type;
  if(!['TANK','TURRET','SUB','HELI','JET','ZIGZAG','SHIP'].includes(type))return;
- const w=type==='SUB'?47:type==='TANK'?39:type==='HELI'?39:type==='SHIP'?43:type==='TURRET'?30:38;
- const h=type==='SUB'?59:type==='TANK'?42:type==='HELI'?43:type==='SHIP'?54:type==='TURRET'?30:42;
+ const w=type==='SUB'?47:type==='TANK'?39:type==='HELI'?39:type==='SHIP'?43:type==='TURRET'?46:38;
+ const h=type==='SUB'?59:type==='TANK'?42:type==='HELI'?43:type==='SHIP'?54:type==='TURRET'?47:42;
  c.save();c.globalAlpha=.94;c.drawImage(vehicleAtlas(type),e.x-w/2,e.y-h/2,w,h);
  if(type==='HELI'){
   const rot=Date.now()*.06;c.strokeStyle='rgba(208,247,255,.83)';c.lineWidth=2;
