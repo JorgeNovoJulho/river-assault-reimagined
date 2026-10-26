@@ -211,6 +211,29 @@ function plane(c,x,y,style='falcao',size=1){
  else if(style==='cometa'){poly(c,[-21,11,-7,-12,0,-25,7,-12,21,11,7,7,0,14,-7,7],dark);poly(c,[-16,8,0,-23,16,8,0,3],body)}
  else if(style==='vespa'){poly(c,[-19,3,-7,-4,0,-23,7,-4,19,3,10,12,-10,12],dark);poly(c,[-17,3,0,-23,17,3,0,9],body)}
  else{poly(c,[-23,8,-7,-5,0,-23,7,-5,23,8,9,11,-9,11],dark);poly(c,[-19,5,0,-22,19,5,0,9],body)}
+ // Silhuetas independentes: asas e blindagem próprias, não apenas troca de cores.
+ if(style==='vespa'){
+   poly(c,[-29,-5,-13,-15,-9,9,-29,17], '#d97706');
+   poly(c,[29,-5,13,-15,9,9,29,17], '#d97706');
+   c.fillStyle='#fef08a';c.fillRect(-24,8,9,4);c.fillRect(15,8,9,4);
+ }else if(style==='cometa'){
+   poly(c,[-9,-10,-30,23,-6,8], '#2563eb');
+   poly(c,[9,-10,30,23,6,8], '#2563eb');
+   poly(c,[-5,-20,0,-38,5,-20], '#93c5fd');
+ }else if(style==='fenix'){
+   poly(c,[-14,-7,-36,-18,-23,1,-30,13,-11,9], '#be185d');
+   poly(c,[14,-7,36,-18,23,1,30,13,11,9], '#be185d');
+ }else if(style==='helicoptero'){
+   c.strokeStyle='#dbeafe';c.lineWidth=4;c.beginPath();c.moveTo(-34,-15);c.lineTo(34,-15);c.stroke();
+   c.fillStyle='#1e40af';c.fillRect(-9,15,18,15);
+   c.fillStyle='#60a5fa';c.fillRect(-25,-6,8,13);c.fillRect(17,-6,8,13);
+ }else if(style==='titan'){
+   c.fillStyle='#365314';c.fillRect(-31,-12,13,38);c.fillRect(18,-12,13,38);
+   c.fillStyle='#a3e635';c.fillRect(-27,-8,5,30);c.fillRect(22,-8,5,30);
+ }else if(style==='falcao'){
+   poly(c,[-30,13,-10,-8,-13,13], '#ef4444');
+   poly(c,[30,13,10,-8,13,13], '#ef4444');
+ }
  // Luzes de asa, painéis e fuselagem de leitura clara em telas pequenas.
  c.strokeStyle='#d9f6ff';c.lineWidth=1;c.globalAlpha=.65;
  c.beginPath();c.moveTo(-15,5);c.lineTo(-5,-4);c.moveTo(15,5);c.lineTo(5,-4);c.stroke();c.globalAlpha=1;
