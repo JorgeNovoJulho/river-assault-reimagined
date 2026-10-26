@@ -16,6 +16,8 @@ const WEAPONS={
  RAPID:'CANHÃO RÁPIDO',DIAGONAL:'DIAGONAIS',TRIDENT:'TRIDENTE',BEAM:'RAIO CONCENTRADO',PRECISION:'PRECISÃO',HYBRID:'RETO + DIAGONAIS',CIRCLE:'360 GRAUS',TRACKER:'MÍSSEIS PERSEGUIDORES',MULTI:'CANHÃO + MÍSSEIS'
 };
 function shoot(weapon,player,bullets){
+ const tuning={SINGLE:[2.2,'#facc15'],DOUBLE:[2.5,'#fde68a'],SPREAD:[1.8,'#f59e0b'],LASER:[5.5,'#22d3ee'],MISSILE:[9,'#fb923c'],BURST:[2.3,'#fb7185'],ALTERNATE:[3.2,'#e879f9'],NEEDLE:[4.8,'#fef08a'],PULSE:[3.6,'#a78bfa'],ROCKET:[11,'#f97316'],RAPID:[1.8,'#4ade80'],DIAGONAL:[3.1,'#38bdf8'],TRIDENT:[3.3,'#60a5fa'],BEAM:[6.5,'#67e8f9'],PRECISION:[12,'#f8fafc'],HYBRID:[2.8,'#34d399'],CIRCLE:[1.6,'#f0abfc'],TRACKER:[7.5,'#fb7185'],MULTI:[4.1,'#fbbf24']};
+ const origin=bullets.length;
  const add=(dx=0,vx=0,speed=7,type='SINGLE',color='#facc15')=>bullets.push({x:player.x+dx,y:player.y-14,vx,speed,type,color});
  switch(weapon){
  case 'HYBRID':add();add(-9,-2.3,8);add(9,2.3,8);break;
@@ -38,6 +40,8 @@ function shoot(weapon,player,bullets){
  case 'PRECISION':add(0,0,9,'MISSILE','#fb7185');break;
  default:add();
  }
+ const [damage,color]=tuning[weapon]||tuning.SINGLE;
+ for(const bullet of bullets.slice(origin)){bullet.weaponId=weapon;bullet.damage=damage;bullet.color=color;bullet.visualSeed=(bullet.x*17+bullet.vx*23)%100;}
 }
 global.RiverAircraft={PLANES,WEAPONS,shoot};
 })(window);
