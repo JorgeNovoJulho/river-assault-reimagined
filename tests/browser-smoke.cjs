@@ -24,6 +24,7 @@ const {chromium}=require('playwright');const {spawn}=require('node:child_process
       const el=document.getElementById(id);el.value=value;el.dispatchEvent(new Event('input',{bubbles:true}));
     }
   });
+  console.log('STARTUP DIAGNOSTICS:',JSON.stringify({errors,globals:await page.evaluate(()=>({prefs:typeof userPrefs,game:typeof gameState,profile:typeof pilotProfile}))}));
   const settings=await page.evaluate(()=>({
      open:getComputedStyle(document.getElementById('controller-settings')).display,
      parent:document.getElementById('controller-settings').parentElement.tagName,
