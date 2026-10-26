@@ -13,18 +13,21 @@
     "desktop:init": "npx tauri init",
     "desktop:dev": "tauri dev",
     "desktop:build": "tauri build",
-    "test": "node --test tests/*.test.cjs"
+    "test": "node --test tests/*.test.cjs",
+    "check:sprites": "tsc -p tsconfig.sprite-lab.json"
   },
   "devDependencies": {
     "vite": "^7.0.0",
     "@tauri-apps/cli": "^2.0.0",
     "tailwindcss": "^3.4.17",
     "postcss": "^8.4.49",
-    "autoprefixer": "^10.4.20"
+    "autoprefixer": "^10.4.20",
+    "typescript": "^5.9.3"
   },
   "dependencies": {
     "@capacitor/core": "^7.0.0",
     "@capacitor/android": "^7.0.0",
-    "@capacitor/cli": "^7.0.0"
+    "@capacitor/cli": "^7.0.0",
+    "phaser": "^4.2.1"
   }
 }
