@@ -789,16 +789,88 @@ function highDetailPlane(c,x,y,style){
  c.beginPath();c.moveTo(x,y-h*.44);c.lineTo(x,y+h*.28);c.stroke();c.restore();
 }
 
+
+/* RiverStorm Graphic Pass 2: água volumétrica, luz reativa, clima e jatos.
+   A simulação original permanece como fonte única de colisões e estados. */
+function enhancedWorld(c,d,t){
+ if(!detailEnabled)return;
+ const {w,h,riverPoints:points,distance=0}=d,now=Date.now()*.001,sector=Number(d.sector)||1;
+ c.save();
+ // Reflexos adicionais seguem a geometria real do rio (não desenham sobre terra).
+ if(riverPath(c,points)){
+  c.clip();c.globalCompositeOperation='screen';
+  const rays=sector%4===2?24:17;
+  for(let i=0;i<rays;i++){
+   const y=((i*79+distance*.48)%(h+100))-50;
+   const banks=bankAt(points,y,w),span=banks[1]-banks[0];
+   if(span<35)continue;
+   const x=banks[0]+span*(.12+.76*hash(i*27+sector*31));
+   const length=8+23*hash(i*53+sector),alpha=.11+.16*(.5+.5*Math.sin(now*2+i));
+   c.strokeStyle='rgba(185,246,255,'+alpha.toFixed(3)+')';
+   c.lineWidth=i%3===0?2.5:1;c.beginPath();c.moveTo(x-length*.5,y);c.quadraticCurveTo(x,y-2,x+length*.5,y);c.stroke();
+  }
+  c.globalCompositeOperation='source-over';
+  // Espuma das margens, seguindo as margens reais, animação sem novos objetos.
+  for(let y=8;y<h;y+=32){
+    const banks=bankAt(points,y,w);
+    for(let side=0;side<2;side++){
+      const x=banks[side]+(side===0?5:-5),pulse=.23+.12*Math.sin(now*2+y*.025);
+      c.strokeStyle='rgba(215,252,249,'+pulse.toFixed(3)+')';
+      c.lineWidth=2;c.beginPath();c.moveTo(x-3,y-8);c.quadraticCurveTo(x+4,y,x-2,y+8);c.stroke();
+    }
+  }
+ }
+ c.restore();
+ // Clima por setor: névoa úmida, chuva, poeira e neve com intensidade conservadora.
+ const climate=(sector-1)%5;
+ c.save();
+ if(climate===1||climate===3){
+  c.strokeStyle=climate===1?'rgba(156,211,244,.27)':'rgba(251,194,131,.16)';
+  c.lineWidth=1;
+  for(let i=0;i<46;i++){
+    const x=(hash(i*57+sector*13)*w+now*(climate===1?-75:35))%w;
+    const y=(hash(i*91+sector*23)*h+now*(climate===1?420:100))%h;
+    c.beginPath();c.moveTo(x,y);c.lineTo(x+(climate===1?-8:4),y+(climate===1?18:6));c.stroke();
+  }
+ }else if(climate===4){
+  c.fillStyle='rgba(223,245,255,.44)';
+  for(let i=0;i<31;i++){const x=(hash(i*83+sector)*w+now*19)%w,y=(hash(i*19+sector)*h+now*43)%h;c.beginPath();c.arc(x,y,1.1+i%3*.35,0,7);c.fill()}
+ }
+ const fog=c.createLinearGradient(0,0,0,h);fog.addColorStop(0,'rgba(103,167,197,.10)');fog.addColorStop(.42,'rgba(103,167,197,0)');fog.addColorStop(1,'rgba(9,29,50,.13)');
+ c.fillStyle=fog;c.fillRect(0,0,w,h);c.restore();
+}
+function enhancedBattleLight(c,d){
+ if(!detailEnabled)return;
+ const enemies=d.enemies||[],time=Date.now()*.001;
+ c.save();c.globalCompositeOperation='screen';
+ for(const e of enemies){
+   if(e.hp<=0||e.y<0||e.y>d.h)continue;
+   const boss=e.type==='BOSS',mech=e.type==='MECHA_SWORD'||e.type==='MECHA_GUN';
+   if(!boss&&!mech&&e.type!=='HELI')continue;
+   const radius=boss?76:mech?36:29,glow=c.createRadialGradient(e.x,e.y,1,e.x,e.y,radius);
+   const tint=boss?'255,117,71':e.type==='MECHA_SWORD'?'184,91,255':'70,208,255';
+   glow.addColorStop(0,'rgba('+tint+','+(boss?.20:.13)+')');glow.addColorStop(1,'rgba('+tint+',0)');
+   c.fillStyle=glow;c.beginPath();c.arc(e.x,e.y,radius,0,7);c.fill();
+ }
+ const p=d.player;if(p){
+   const thruster=24+7*Math.sin(time*22),v=c.createRadialGradient(p.x,p.y+25,2,p.x,p.y+27,thruster);
+   v.addColorStop(0,'rgba(125,233,255,.40)');v.addColorStop(1,'rgba(125,233,255,0)');
+   c.fillStyle=v;c.beginPath();c.arc(p.x,p.y+27,thruster,0,7);c.fill();
+   c.strokeStyle='rgba(100,231,255,.68)';c.lineWidth=3;c.beginPath();c.moveTo(p.x-11,p.y+22);c.lineTo(p.x-11,p.y+34+Math.sin(time*25)*5);c.moveTo(p.x+11,p.y+22);c.lineTo(p.x+11,p.y+34+Math.cos(time*23)*5);c.stroke();
+ }
+ c.restore();
+}
+
 function draw(c,d){
  const t=THEMES[((d.sector-1)%THEMES.length+THEMES.length)%THEMES.length];
- landscape(c,d,t);terrainSignature(c,d,t);landmark(c,d,t);mapSetPieces(c,d,t);biomeAtmosphere(c,d,t);
+ landscape(c,d,t);terrainSignature(c,d,t);landmark(c,d,t);mapSetPieces(c,d,t);biomeAtmosphere(c,d,t);enhancedWorld(c,d,t);
  // Culling explícito: evitar traçar sprites fora da tela e preservar FPS em ondas intensas.
  islands(c,(d.islands||[]).filter(p=>p.y+(p.height||0)>-32&&p.y-(p.height||0)<d.h+32&&p.x+(p.width||0)>-32&&p.x-(p.width||0)<d.w+32),t);
  for(const e of d.enemies||[]){
    if(e.hp<=0||e.y+(e.height||40)<-45||e.y-(e.height||40)>d.h+45||e.x+(e.width||40)<-45||e.x-(e.width||40)>d.w+45)continue;
    enemy(c,e,t.time);highDetailEnemy(c,e,t.time);
  }
- if(!d.invulnerable||Math.floor(Date.now()/110)%2){plane(c,d.player.x,d.player.y,d.player.aircraftType||d.aircraft,0.85);highDetailPlane(c,d.player.x,d.player.y,d.player.aircraftType||d.aircraft)}
+ if(!d.invulnerable||Math.floor(Date.now()/110)%2){plane(c,d.player.x,d.player.y,d.player.aircraftType||d.aircraft,0.85);highDetailPlane(c,d.player.x,d.player.y,d.player.aircraftType||d.aircraft)}enhancedBattleLight(c,d);
 }
 root.RiverVisuals={draw,plane,enemy,THEMES,BIOME_DETAILS,drawIslands(c,items,sector){const t=THEMES[((sector-1)%THEMES.length+THEMES.length)%THEMES.length];islands(c,items,t)}};
 })(window);
