@@ -2079,10 +2079,48 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
             x:center+(Math.random()-.5)*70,y:-48,width:def.id==='HOVERCAR'?42:34,height:def.id==='ALLIGATOR'?42:34,
             vx:0,vy:.35,hp:4+Math.floor(sector/5),maxHp:4+Math.floor(sector/5),score:350+sector*15,shootTimer:0});
         }
+
+// Eventos de jogabilidade específicos de cada bioma. Todos são temporários e sem alocações contínuas.
+const TERRAIN_EVENTS=[
+ ['UPDRAFT',0],['CROSSWIND',1],['SANDSTORM',2],['MUD',3],['CROSSWIND',4],
+ ['ICE',5],['UPDRAFT',6],['EMP_FIELD',7],['THERMAL',8],['CROSSWIND',9],
+ ['UPDRAFT',10],['EMP_FIELD',11],['MUD',12],['ICE',13],['SANDSTORM',14],
+ ['EMP_FIELD',15],['CROSSWIND',16],['ICE',17],['EMP_FIELD',18],['THERMAL',19]
+];
+let terrainEventTicks=0,terrainEventType='',terrainEventNotice=0;
+function updateTerrainEvent(){
+ if(bossActive||missionTransitionTicks>0){terrainEventTicks=0;terrainEventType='';return;}
+ // Aviso periódico e janela curta: evita penalidades permanentes.
+ const period=1080+sector%4*120,phase=(missionTicks+sector*47)%period;
+ if(phase===1){
+   terrainEventType=TERRAIN_EVENTS[(sector-1)%20][0];
+   terrainEventTicks=160;
+   terrainEventNotice=100;
+   const names={UPDRAFT:'CORRENTE ASCENDENTE',CROSSWIND:'VENTO LATERAL',SANDSTORM:'AREIA DENSA',MUD:'ÁGUAS TURVAS',ICE:'CORRENTE GELADA',EMP_FIELD:'INTERFERÊNCIA',THERMAL:'CALOR EXTREMO'};
+   createFloatingText(player.x,player.y-65,names[terrainEventType],'#fcd34d');
+ }
+ if(terrainEventTicks>0){
+   terrainEventTicks--;
+   const oscillation=Math.sin(missionTicks*.09+sector);
+   if(terrainEventType==='CROSSWIND'||terrainEventType==='SANDSTORM'){
+     player.x=Math.max(24,Math.min(VIRTUAL_WIDTH-24,player.x+oscillation*.45));
+   }else if(terrainEventType==='UPDRAFT'){
+     player.fuel=Math.min(player.maxFuel,player.fuel+.025);
+   }else if(terrainEventType==='THERMAL'){
+     player.fuel=Math.max(0,player.fuel-.01);
+   }else if(terrainEventType==='ICE'){
+     player.x=Math.max(24,Math.min(VIRTUAL_WIDTH-24,player.x+oscillation*.18));
+   }
+   if(terrainEventTicks===0)terrainEventType='';
+ }
+ if(terrainEventNotice>0)terrainEventNotice--;
+}
+
         function update() {
             if (gameState !== 'PLAYING') return;
             if(!enemies.some(e=>e.type==='BOSS'))document.getElementById('boss-special-hud').classList.add('hidden');
             missionTicks++;
+            updateTerrainEvent();
             trackPilotProgress();
             const skillActive=!!(bossActive&&bossSkillEquipped);
             skillUseButton.classList.remove('hidden');
@@ -2097,6 +2135,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
                     player.bombs=3;document.getElementById('bomb-count-touch').textContent='(3)';bombsPickedThisMission=0;
                     bossDefeatedThisMission=false;
                     clearBossArenaEffects();
+                    terrainEventTicks=0;terrainEventType='';terrainEventNotice=0;
                     // Ao iniciar a próxima missão, estados hostis do chefe não persistem.
                     if(['EMP','GRAVITY','ICE','POISON','BLEED','PRISM','SHADOW','FIRE','LIGHTNING'].includes(player.effectType)){
                         player.effectType='';player.effectTimer=0;player.disabledTimer=0;
@@ -2639,6 +2678,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
             distance = 0;
             missionStartDistance = 0;
             missionTicks = 0;
+            terrainEventTicks=0;terrainEventType='';terrainEventNotice=0;
             bombProjectiles = [];
             screenShake = 0;
             bossTaunt = null;
