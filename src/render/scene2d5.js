@@ -498,6 +498,44 @@ function landmark(c,d,t){
  }
  c.restore();
 }
+// Assinaturas visuais próprias de cada operação: estruturas costeiras e margens dinâmicas.
+const MAP_FEATURES=[
+ 'canopy','cranes','canyon','reeds','lighthouse','icewall','giantroots','skyline','lava','pines',
+ 'ruins','billboards','tributaries','icecracks','palms','spores','gantries','icebergs','tesla','citadel'
+];
+function mapSetPieces(c,d,t){
+ const sector=Math.max(1,Math.min(20,Number(d.sector)||1)),kind=MAP_FEATURES[sector-1];
+ const w=d.w,h=d.h,spacing=250+sector%4*32,offset=(d.distance||0)*.38;
+ const count=d.quality==='eco'?2:d.quality==='enhanced'?6:4;
+ c.save();
+ for(let i=0;i<count;i++){
+   const cell=Math.floor(offset/spacing)+i;
+   const y=h-((offset+cell*spacing)%(h+spacing))+i*spacing*.38;
+   if(y<-45||y>h+40)continue;
+   const bounds=bankAt(d.riverPoints,y,w),side=(cell+sector)%2===0?-1:1;
+   const x=side<0?bounds[0]*.52:bounds[1]+(w-bounds[1])*.48;
+   if(x<12||x>w-12)continue;
+   const size=12+hash(cell*19+sector)*12;
+   c.save();c.translate(x,y);c.lineWidth=2;c.strokeStyle=t.accent;c.fillStyle=t.ground[1];c.globalAlpha=.66;
+   switch(kind){
+    case 'canopy':case 'giantroots':case 'pines':case 'palms':case 'reeds':case 'spores':
+     c.fillRect(-2,-size*.8,4,size);
+     for(let a=-1;a<=1;a++){c.beginPath();c.ellipse(a*size*.42,-size,Math.max(3,size*.36),Math.max(3,size*.42),a*.28,0,Math.PI*2);c.fill();}break;
+    case 'cranes':case 'gantries':case 'skyline':case 'billboards':case 'tesla':case 'citadel':
+     c.strokeRect(-size*.6,-size,size*1.2,size);c.beginPath();c.moveTo(-size*.8,-size);c.lineTo(size*.9,-size*1.2);c.lineTo(size*.9,-size*.7);c.stroke();
+     if(kind==='tesla'){c.beginPath();c.moveTo(0,-size*1.7);c.lineTo(4,-size*1.45);c.lineTo(-3,-size*1.25);c.stroke();}break;
+    case 'icewall':case 'icecracks':case 'icebergs':case 'canyon':case 'lava':case 'ruins':
+     c.beginPath();c.moveTo(-size*.8,3);c.lineTo(-size*.35,-size*.85);c.lineTo(0,-size*1.4);c.lineTo(size*.7,-size*.45);c.lineTo(size*.8,3);c.closePath();c.fill();c.stroke();
+     c.beginPath();c.moveTo(0,-size*1.4);c.lineTo(-size*.13,-size*.4);c.lineTo(size*.25,2);c.stroke();break;
+    case 'lighthouse':case 'tributaries':
+     c.fillRect(-size*.22,-size*1.2,size*.44,size*1.2);c.fillRect(-size*.45,-size*1.35,size*.9,4);
+     c.fillStyle=t.accent;c.fillRect(-3,-size*1.25,6,4);break;
+    default:c.beginPath();c.arc(0,0,size*.42,0,Math.PI*2);c.stroke();
+   }
+   c.restore();
+ }
+ c.restore();
+}
 function biomeAtmosphere(c,data,t){
  const sector=Math.max(1,Math.min(20,Number(data.sector)||1)),detail=BIOME_DETAILS[sector-1];
  const {w,h,distance=0,quality='balanced',riverPoints:points}=data;
@@ -544,7 +582,7 @@ function biomeAtmosphere(c,data,t){
 
 function draw(c,d){
  const t=THEMES[((d.sector-1)%THEMES.length+THEMES.length)%THEMES.length];
- landscape(c,d,t);landmark(c,d,t);biomeAtmosphere(c,d,t);
+ landscape(c,d,t);landmark(c,d,t);mapSetPieces(c,d,t);biomeAtmosphere(c,d,t);
  // Culling explícito: evitar traçar sprites fora da tela e preservar FPS em ondas intensas.
  islands(c,(d.islands||[]).filter(p=>p.y+(p.height||0)>-32&&p.y-(p.height||0)<d.h+32&&p.x+(p.width||0)>-32&&p.x-(p.width||0)<d.w+32),t);
  for(const e of d.enemies||[]){
