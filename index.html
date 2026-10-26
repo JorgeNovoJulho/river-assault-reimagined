@@ -2081,7 +2081,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
                     }
                 }else if (player.invulnerable <= 0 && Math.hypot(eb.x - player.x, eb.y - player.y) < 12) {
                     enemyBullets.splice(index, 1);
-                    applyDamage(25, 'ABATIDO POR TIRO INIMIGO!');
+                    applyDamage(player.effectType==='PRISM'&&player.effectTimer>0?31:25, 'ABATIDO POR TIRO INIMIGO!');
                 } else if (eb.y > VIRTUAL_HEIGHT + 10 || eb.y < -30 || eb.x < -35 || eb.x > VIRTUAL_WIDTH+35) {
                     enemyBullets.splice(index, 1);
                 }
@@ -2919,7 +2919,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
             if (gameState === 'PLAYING' && gamepadState.fire && timestamp - lastGamepadShot > 145) {
                 sound.init(); fireWeapon(); lastGamepadShot = timestamp;
             }
-            if (gameState === 'PLAYING' && (mouseInput.fire || mouseFireHeld || keys.Space || keys.KeyZ || touchFireHeld) && timestamp - lastMouseShot >= 100) {
+            if (gameState === 'PLAYING' && (mouseInput.fire || mouseFireHeld || keys.Space || keys.KeyZ || touchFireHeld) && timestamp - lastMouseShot >= (player.effectType==='SHADOW'&&player.effectTimer>0?Math.round(100/(1-.3)):100)) {
                 sound.init(); fireWeapon(); lastMouseShot = timestamp;
             }
             if(gameState === "PLAYING") simulationClock.advance(timestamp, update);
