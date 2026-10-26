@@ -73,3 +73,23 @@ test('recompensas, mechas e transição estão no jogo',()=>{
  assert.match(html,/e\.attackTimer%850===0/);
  assert.match(html,/missionTransitionTicks=180/);
 });
+
+test('progressão NG+ exige campanha legítima e limita patente',()=>{
+ const html=fs.readFileSync('index.html','utf8');
+ assert.match(html,/campaignVerified&&sector===20/);
+ assert.match(html,/if\(journey<RANKS\.length\)journey\+\+/);
+ assert.match(html,/verifiedRun:campaignVerified&&nextSector===sector\+1/);
+ assert.match(html,/MISSÃO 20 CONCLUÍDA — MODO TESTE/);
+});
+test('perfil tem nome de 18 caracteres e indicadores de carreira',()=>{
+ const html=fs.readFileSync('index.html','utf8');
+ assert.match(html,/id="pilot-nickname"[^>]*maxlength="18"/);
+ for(const field of ['pilot-profile-stats','pilot-photo-upload','pilot-profile-open','hud-pilot-xp'])assert.ok(html.includes('id="'+field+'"'));
+});
+test('música de boss é exclusiva da arena e mísseis corrigem trajetória',()=>{
+ const html=fs.readFileSync('index.html','utf8');
+ const playlist=fs.readFileSync('src/audio/playlist.js','utf8');
+ assert.match(playlist,/t\.id!=='bundled-14'/);
+ assert.match(html,/playlist\.beginBossTheme\?\.\(\)/);
+ assert.match(html,/const nextX=oldX\*\(1-turn\)\+targetX\*turn/);
+});
