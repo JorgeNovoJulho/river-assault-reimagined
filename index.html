@@ -1486,7 +1486,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
                 ctx.save();
                 ctx.translate(b.x, b.y);
 
-                if(b.type==='REFLECTED'){ctx.save();ctx.rotate(Math.atan2(b.vx,-b.speed));ctx.shadowColor=b.color;ctx.shadowBlur=15;ctx.fillStyle='#f8fafc';ctx.beginPath();ctx.moveTo(0,-14);ctx.lineTo(6,8);ctx.lineTo(0,5);ctx.lineTo(-6,8);ctx.closePath();ctx.fill();ctx.restore();} else if (b.type === 'BANK_MISSILE') { ctx.rotate(b.angle||0);ctx.shadowBlur=14;ctx.shadowColor='#fb923c';ctx.fillStyle='#f8fafc';ctx.fillRect(-3,-10,6,18);ctx.fillStyle='#ef4444';ctx.beginPath();ctx.moveTo(-3,-10);ctx.lineTo(0,-19);ctx.lineTo(3,-10);ctx.fill();ctx.fillStyle='#fbbf24';ctx.fillRect(-2,8,4,11); } else if (b.type === 'LASER') {
+                if(b.type==='REFLECTED'){ctx.save();ctx.rotate(Math.atan2(b.vx,-b.speed));ctx.shadowColor=b.color;ctx.shadowBlur=15;ctx.fillStyle=b.dodgeReflect?'#ff4dd8':'#f8fafc';ctx.beginPath();if(b.dodgeReflect){for(let i=0;i<8;i++){const a=i*Math.PI/4,r=i%2?5:16;ctx.lineTo(Math.cos(a)*r,Math.sin(a)*r);} }else{ctx.moveTo(0,-14);ctx.lineTo(6,8);ctx.lineTo(0,5);ctx.lineTo(-6,8);}ctx.closePath();ctx.fill();ctx.restore();} else if (b.type === 'BANK_MISSILE') { ctx.rotate(b.angle||0);ctx.shadowBlur=14;ctx.shadowColor='#fb923c';ctx.fillStyle='#f8fafc';ctx.fillRect(-3,-10,6,18);ctx.fillStyle='#ef4444';ctx.beginPath();ctx.moveTo(-3,-10);ctx.lineTo(0,-19);ctx.lineTo(3,-10);ctx.fill();ctx.fillStyle='#fbbf24';ctx.fillRect(-2,8,4,11); } else if (b.type === 'LASER') {
                     ctx.fillStyle = b.color || '#06b6d4';
                     ctx.fillRect(-2, -12, 4, 24);
                     ctx.shadowColor = '#06b6d4';
@@ -1813,12 +1813,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
             // Detonação equivalente à bomba, inclusive limpeza de projéteis e efeito global.
             const tx=target.x,ty=target.y;
             const originalHp=target.hp;
-            explodeBomb({x:tx,y:ty});
-            // Inimigo diretamente atingido recebe mais 10% que os demais.
-            if(target.type==='BOSS'){
-                const base=10*(target.parryVulnerableTicks>0?1.5:1);
-                target.hp=Math.max(1,target.hp-base*.10);
-            }else if(target.hp>0){target.hp-=99.9;}
+            explodeBomb({x:tx,y:ty},target);
             addExplosion(tx,ty,'#ff4dd8',38);
             createFloatingText(tx,ty-38,'DRONE KAMIKAZE +10%','#fef08a');
             launchSkillTrajectory('FIRE',sourceX,sourceY,tx,ty,'#67e8f9');
@@ -2590,7 +2585,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
             document.getElementById('bomb-count-touch').innerText='('+player.bombs+')';
             bombProjectiles.push({x:player.x,y:player.y-16,vy:-9,life:52});
         }
-        function explodeBomb(b){
+        function explodeBomb(b,directTarget=null){
             try{window.RiverSFX?.impact()}catch(e){}
             screenShake=15;bombFlash=13;
             enemyBullets=[];
@@ -2601,7 +2596,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
                     createFloatingText(e.x,e.y,'DANO MASSIVO!','#ff6b6b');
                     bossRobotVoice(e,true);e.bombKnockback=38;e.stunnedTicks=Math.max(e.stunnedTicks||0,20);
                 }
-                e.hp=e.type==='BOSS'?Math.max(1,e.hp-10*(e.parryVulnerableTicks>0?1.5:1)):e.hp-999;
+                e.hp=e.type==='BOSS'?Math.max(1,e.hp-10*(e.parryVulnerableTicks>0?1.5:1)*(e===directTarget?1.10:1)):e.hp-999*(e===directTarget?1.10:1);
                 addExplosion(e.x,e.y,'#ffb347',20);
             });
             for(let i=enemies.length-1;i>=0;i--){
