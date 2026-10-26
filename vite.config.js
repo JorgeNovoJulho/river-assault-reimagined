@@ -44,6 +44,6 @@ function copyAndVersionRuntime() {
 
 export default defineConfig({
   base: './',
-  build: { target: 'es2020', rollupOptions: { input: { main: resolve('index.html'), spriteLab: resolve('phaser-preview.html') } } },
+  build: { target: 'es2020', rollupOptions: { input: { main: resolve('index.html'), spriteLab: resolve('phaser-preview.html'), combatLab: resolve('combat-lab.html') } } },
   plugins: [copyAndVersionRuntime()]
 });
