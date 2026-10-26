@@ -108,7 +108,14 @@
             </div>
             <p id="map-help" aria-live="polite" class="text-yellow-300 min-h-8 mb-2">Ajustes salvos automaticamente neste dispositivo.</p>
             <div class="grid grid-cols-1 gap-2 rounded-xl bg-slate-900 p-3 border border-slate-700">
-              <label for="music-volume">Volume das músicas: <span id="music-volume-value">40%</span></label>
+              <div id="playlist-panel" class="rounded-xl border border-cyan-700 bg-slate-950 p-3" style="width:100%;max-width:460px;box-sizing:border-box">
+              <h3 class="font-bold text-cyan-200 mb-2">TRILHA MUSICAL</h3>
+              <label class="flex items-center gap-2 mb-2"><input id="playlist-random" type="checkbox" checked> Ordem aleatória (padrão)</label>
+              <button id="playlist-add" type="button" class="rounded bg-blue-700 p-2 mb-2">ADICIONAR MP3 DESTE DISPOSITIVO</button>
+              <p class="text-xs text-slate-300 mb-2">Toque em ▶ para ouvir; use ↑ e ↓ para organizar a ordem.</p>
+              <div id="playlist-items" style="max-height:190px;overflow-y:auto;touch-action:pan-y"></div>
+            </div>
+            <label for="music-volume">Volume das músicas: <span id="music-volume-value">40%</span></label>
               <input id="music-volume" type="range" min="0" max="100" value="40">
               <label for="sfx-volume">Volume dos efeitos: <span id="sfx-volume-value">65%</span></label>
               <input id="sfx-volume" type="range" min="0" max="100" value="65">
@@ -2082,9 +2089,31 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
         playlist.load();
         document.getElementById('music-library').addEventListener('click',()=>document.getElementById('music-upload').click());
         document.getElementById('music-upload').addEventListener('change',async event=>{
-            await playlist.importFiles(event.target.files);event.target.value='';
+            await playlist.importFiles(event.target.files);event.target.value='';renderPlaylistItems();
         });
         document.getElementById('track-next').addEventListener('click',()=>playlist.next());
+        const playlistItems=document.getElementById('playlist-items');
+        const playlistRandom=document.getElementById('playlist-random');
+        playlistRandom.checked=playlist.random;
+        playlistRandom.addEventListener('change',()=>playlist.setRandom(playlistRandom.checked));
+        document.getElementById('playlist-add').addEventListener('click',()=>document.getElementById('music-upload').click());
+        function renderPlaylistItems(){
+            playlistItems.replaceChildren();
+            if(!playlist.tracks.length){playlistItems.textContent='Nenhuma faixa importada. Selecione seus arquivos MP3 acima.';return}
+            playlist.tracks.forEach((item,i)=>{
+                const row=document.createElement('div');row.style.cssText='display:flex;align-items:center;gap:6px;padding:7px 0;border-bottom:1px solid #29405e';
+                const name=document.createElement('span');name.textContent=(i+1)+'. '+item.name;name.style.cssText='font-size:11px;flex:1;overflow:hidden;overflow-wrap:anywhere';
+                row.appendChild(name);
+                for(const [label,action] of [['▶',()=>playlist.preview(item.id)],['↑',()=>{playlist.move(item.id,-1);renderPlaylistItems()}],['↓',()=>{playlist.move(item.id,1);renderPlaylistItems()}]]){
+                    const btn=document.createElement('button');btn.type='button';btn.textContent=label;
+                    btn.style.cssText='flex:0 0 38px;min-height:36px;background:#164e63;border-radius:8px';
+                    btn.addEventListener('click',action);row.appendChild(btn);
+                }
+                playlistItems.appendChild(row);
+            });
+        }
+        playlist.load().then(renderPlaylistItems);
+
         const userPrefs={music:40,sfx:65,sarcasm:2};
         try{Object.assign(userPrefs,JSON.parse(localStorage.getItem('river_audio_game_settings')||'{}'))}catch(e){}
         for(const [key,id] of [['music','music-volume'],['sfx','sfx-volume'],['sarcasm','sarcasm-level']]){
