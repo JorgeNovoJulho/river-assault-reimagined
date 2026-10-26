@@ -1215,6 +1215,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
         parryButton.addEventListener('pointerdown',event=>{event.preventDefault();activateParry()});
         function reflectBossSpecial(boss){
           createFloatingText(player.x,player.y-45,'PARRY PERFEITO!','#67e8f9');
+          if(boss)launchSkillTrajectory('PRISM',player.x,player.y,boss.x,boss.y,'#67e8f9');
           addExplosion(player.x,player.y,'#67e8f9',24);
           if(boss){boss.hp=Math.max(0,boss.hp-boss.maxHp*.035);boss.stunnedTicks=Math.max(boss.stunnedTicks||0,35);
             createFloatingText(boss.x,boss.y-35,'REFLETIDO -3,5%','#facc15');
