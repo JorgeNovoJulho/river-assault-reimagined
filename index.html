@@ -2278,7 +2278,8 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
             });
 
             // Tiros do Jogador
-            bullets.forEach((b, index) => {
+            for(let index=bullets.length-1;index>=0;index--){
+                const b=bullets[index];
                 b.y -= b.speed;
                 if (b.vx) b.x += b.vx;
                 if (b.type === 'MISSILE'||b.type==='REFLECTED') {
@@ -2310,14 +2311,16 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
                     if(b.trail.length>b.trailMax+1)b.trail.length=b.trailMax+1;
                 }
                 if (!Number.isFinite(b.x)||!Number.isFinite(b.y)||b.y < -25 || b.y > VIRTUAL_HEIGHT+25 || b.x < -25 || b.x > VIRTUAL_WIDTH+25) bullets.splice(index, 1);
-            });
+            }
 
             // Tiros Inimigos
-            enemyBullets.forEach((eb, index) => {
+            for(let index=enemyBullets.length-1;index>=0;index--){
+                const eb=enemyBullets[index];
+                if(!eb||!Number.isFinite(eb.x)||!Number.isFinite(eb.y)||!Number.isFinite(eb.vx)||!Number.isFinite(eb.vy)){enemyBullets.splice(index,1);continue;}
                 eb.x += eb.vx + (eb.waveStyle===2?Math.sin(missionTicks*.12+(eb.phase||0))*.45:0);
                 eb.y += eb.vy;
 
-                if((parryTicks>0||rollFrames>0)&&Math.hypot(eb.x-player.x,eb.y-player.y)<(rollFrames>0?67:53)){enemyBullets.splice(index,1);const boss=enemies.find(e=>e.type==='BOSS'&&e.hp>0),target=boss||enemies.find(e=>e.hp>0);const tx=target?.x??eb.x,ty=target?.y??0,dx=tx-eb.x,dy=ty-eb.y,len=Math.max(1,Math.hypot(dx,dy));bullets.push({x:eb.x,y:eb.y,vx:dx/len*11,speed:-dy/len*11,type:'REFLECTED',color:rollFrames>0?'#ff4dd8':'#22f7c4',damage:rollFrames>0?Math.max(1,eb.damage||25)*1.10:37.5,reflected:true,homing:true,dodgeReflect:rollFrames>0});addExplosion(eb.x,eb.y,'#67e8f9',8);createFloatingText(player.x,player.y-40,rollFrames>0?'ESQUIVA + REFLEXO 110%!':'REFLETIDO!',rollFrames>0?'#ff4dd8':'#67e8f9');return;}
+                if((parryTicks>0||rollFrames>0)&&Math.hypot(eb.x-player.x,eb.y-player.y)<(rollFrames>0?67:53)){enemyBullets.splice(index,1);const boss=enemies.find(e=>e.type==='BOSS'&&e.hp>0),target=boss||enemies.find(e=>e.hp>0);const tx=target?.x??eb.x,ty=target?.y??0,dx=tx-eb.x,dy=ty-eb.y,len=Math.max(1,Math.hypot(dx,dy));bullets.push({x:eb.x,y:eb.y,vx:dx/len*11,speed:-dy/len*11,type:'REFLECTED',color:rollFrames>0?'#ff4dd8':'#22f7c4',damage:rollFrames>0?Math.max(1,eb.damage||25)*1.10:37.5,reflected:true,homing:true,dodgeReflect:rollFrames>0});addExplosion(eb.x,eb.y,'#67e8f9',8);createFloatingText(player.x,player.y-40,rollFrames>0?'ESQUIVA + REFLEXO 110%!':'REFLETIDO!',rollFrames>0?'#ff4dd8':'#67e8f9');continue;}
                 const hitWingman=wingmen.find(w=>Math.hypot(eb.x-(player.x+w.side*36),eb.y-(player.y+10))<14);
                 if(hitWingman){
                     enemyBullets.splice(index,1);
@@ -2333,7 +2336,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
                 } else if (eb.y > VIRTUAL_HEIGHT + 10 || eb.y < -30 || eb.x < -35 || eb.x > VIRTUAL_WIDTH+35) {
                     enemyBullets.splice(index, 1);
                 }
-            });
+            }
 
             // Escudo cinético: contato arremessa inimigos e ricochetes causam colisões entre si.
             if(parryTicks>0){for(const e of enemies){
