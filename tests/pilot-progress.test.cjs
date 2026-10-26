@@ -4,8 +4,8 @@ const vm=require('node:vm');
 const fs=require('node:fs');
 function progress(){const context={window:{}};vm.runInNewContext(fs.readFileSync('src/game/pilot-progress.js','utf8'),context);return context.window.RiverPilotProgress;}
 test('XP: começa no nível zero e chega ao nível máximo 100',()=>{
- const p=progress();assert.equal(p.levelFor(0),0);assert.equal(p.levelFor(99),0);
- assert.equal(p.levelFor(100),1);assert.equal(p.levelFor(p.threshold(100)),100);
+ const p=progress();assert.equal(p.levelFor(0),0);assert.equal(p.levelFor(899),0);
+ assert.equal(p.levelFor(900),1);assert.equal(p.levelFor(p.threshold(100)),100);
  assert.equal(p.levelFor(Number.MAX_SAFE_INTEGER),100);assert.equal(p.levelFor(-100),0);
 });
 test('XP: níveis crescentes e limite de pontos',()=>{
