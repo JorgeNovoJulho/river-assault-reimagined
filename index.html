@@ -2154,7 +2154,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
             set('hud-fuel',Math.max(0,Math.ceil(player.fuel))+'%');
             set('hud-shield',Math.max(0,Math.ceil(player.shield)));
             set('hud-rescues',rescuedSoldiers);
-            set('hud-plane',aircraftCatalog.PLANES[selectedPlane].name);
+            set('hud-plane',aircraftCatalog.PLANES[player.aircraftType||selectedPlane].name);
             set('mission-hud',campaign.at(sector).name.toUpperCase());
             set('sector-hud','SETOR '+sector);
             set('hud-rank','J'+journey+' '+rankName().slice(0,16));
@@ -2237,6 +2237,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
             player.shield = 150;
             player.bombs = 3;
             const config = aircraftCatalog.PLANES[selectedPlane];
+            player.aircraftType=selectedPlane;
             player.speed = config.speed;
             player.baseScrollSpeed = config.scroll;
             player.currentScrollSpeed = config.scroll;
@@ -2278,7 +2279,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
         }
         function fireWeapon() {
             if (gameState !== 'PLAYING' || player.disabledTimer > 0) return;
-            const baseWeapon=aircraftCatalog.PLANES[selectedPlane].weapons[0];
+            const baseWeapon=aircraftCatalog.PLANES[player.aircraftType||selectedPlane].weapons[0];
             if(player.weapon!==baseWeapon){
                 if(player.specialShots<=0)player.weapon=baseWeapon;
                 else if(--player.specialShots===0){
@@ -2427,6 +2428,8 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
             enemyBullets=[];enemies=enemies.filter(e=>e.type==='BOSS');
             document.getElementById('game-over-screen').classList.add('hidden');
             document.getElementById('game-over-screen').style.display='none';
+            // Mantém a mesma aeronave que foi utilizada antes da perda das vidas.
+            selectedPlane=player.aircraftType||selectedPlane;
             gameState='PLAYING';simulationClock.reset();playlist.resume();
             if(!playlist.tracks.length&&playlist.enabled)soundtrack.start();
         }
@@ -2493,7 +2496,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
             if(screenShake>0)ctx.translate((Math.random()-.5)*screenShake,(Math.random()-.5)*screenShake);
             window.RiverVisuals.draw(ctx,{
                 w: VIRTUAL_WIDTH, h: VIRTUAL_HEIGHT, riverPoints, islands, enemies, player,
-                sector, aircraft:selectedPlane, distance, invulnerable:player.invulnerable,
+                sector, aircraft:player.aircraftType||selectedPlane, distance, invulnerable:player.invulnerable,
                 quality:qualitySelect.value
             });
             drawBossCompactMeters();
