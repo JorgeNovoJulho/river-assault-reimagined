@@ -470,6 +470,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
     <script src="./src/input/gamepad.js"></script>
     <script src="./src/game/aircraft.js"></script>
     <script src="./src/game/clock.js"></script>
+    <script src="./src/game/pilot-progress.js"></script>
     <script src="./src/game/campaign.js"></script>
     <script src="./src/render/scene2d5.js"></script>
     <script src="./src/audio/music.js"></script>
@@ -675,19 +676,19 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
         const XP_STORE='riverstorm_pilot_xp_v1';
         let pilotXP=0,pilotLevel=0;
         try{pilotXP=Math.max(0,Math.floor(Number(localStorage.getItem(XP_STORE))||0))}catch(e){}
-        const xpRequirement=level=>100+level*22+level*level*2;
-        const xpAtLevel=level=>{let total=0;for(let n=0;n<Math.min(100,level);n++)total+=xpRequirement(n);return total};
+        const xpRequirement=window.RiverPilotProgress.required;
+        const xpAtLevel=window.RiverPilotProgress.threshold;
         const XP_CAP=xpAtLevel(100);
         pilotXP=Math.min(XP_CAP,pilotXP);
-        while(pilotLevel<100&&pilotXP>=xpAtLevel(pilotLevel+1))pilotLevel++;
-        const pilotBonus=()=>({damage:1+pilotLevel*.0075,resistance:1-pilotLevel*.0045,fuel:1-pilotLevel*.005});
+        pilotLevel=window.RiverPilotProgress.levelFor(pilotXP);
+        const pilotBonus=()=>window.RiverPilotProgress.bonus(pilotLevel);
         function grantEnemyXP(enemy){
           if(!enemy||enemy.xpGranted)return;
           enemy.xpGranted=true;
           const reward=enemy.type==='BOSS'?500+sector*30:Math.max(10,Math.round((enemy.score||100)*.20));
           const previous=pilotLevel;
           pilotXP=Math.min(XP_CAP,pilotXP+reward);
-          while(pilotLevel<100&&pilotXP>=xpAtLevel(pilotLevel+1))pilotLevel++;
+          pilotLevel=window.RiverPilotProgress.levelFor(pilotXP);
           try{localStorage.setItem(XP_STORE,String(pilotXP))}catch(e){}
           if(pilotLevel>previous){createFloatingText(player.x,player.y-65,'NÍVEL '+pilotLevel+'!','#facc15');addExplosion(player.x,player.y,'#facc15',18)}
         }
