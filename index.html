@@ -1749,7 +1749,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
             const skillActive=!!(bossActive&&bossSkillEquipped);
             skillUseButton.classList.toggle('hidden',!skillActive);
             if(skillActive)skillUseButton.textContent=BOSS_SKILLS[bossSkillEquipped].icon+' '+bossSkillCharge+' · '+(bossSkillCooldown>0?Math.ceil(bossSkillCooldown/60)+'s':'PRONTO')+' [C]';
-            if(player.effectTimer>0){player.effectTimer--;if((player.effectType==='POISON'||player.effectType==='BLEED')&&player.effectTimer%60===0)applyDamage(player.effectType==='POISON'?3:5,player.effectType);if(player.effectTimer===0)player.effectType='';}
+            if(player.effectTimer>0){player.effectTimer--;if((player.effectType==='POISON'||player.effectType==='BLEED')&&player.effectTimer%60===0)applyDamage(player.effectType==='POISON'?3:5,player.effectType);if(player.effectType==='GRAVITY'&&player.effectTimer%60===0)applyDamage(player.maxShield*.03,'GRAVIDADE');if(player.effectType==='FIRE'&&player.effectTimer%60===0)applyDamage(player.maxShield*.01,'QUEIMADURA');if(player.effectType==='ICE'&&player.effectTimer%60===0)applyDamage(player.maxShield*.01,'CONGELAMENTO');if(player.effectType==='LIGHTNING'&&player.effectTimer%60===0)applyDamage(player.maxShield*.01,'CHOQUE');if(player.effectTimer===0)player.effectType='';}
             if(missionTransitionTicks>0){
                 missionTransitionTicks--;
                 if(missionTransitionTicks===0){
