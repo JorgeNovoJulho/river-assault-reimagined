@@ -536,6 +536,37 @@ function mapSetPieces(c,d,t){
  }
  c.restore();
 }
+// Variações de relevo e margem por operação, sem alterar a faixa de colisão navegável.
+const TERRAIN_SIGNATURES=[
+ 'roots','docks','strata','lilies','reefs','floes','vines','highway','vents','ridges',
+ 'sandbars','cables','branches','crevasses','dunes','glow','containers','bergs','coils','fortress'
+];
+function terrainSignature(c,d,t){
+ const sector=Math.max(1,Math.min(20,Number(d.sector)||1)),kind=TERRAIN_SIGNATURES[sector-1];
+ const w=d.w,h=d.h,step=d.quality==='eco'?170:d.quality==='enhanced'?96:128,shift=(d.distance||0)*.34;
+ c.save();c.lineWidth=1.8;c.strokeStyle=t.accent;c.globalAlpha=d.quality==='eco'?.24:.39;
+ for(let y=-step+(shift%step);y<h+step;y+=step){
+   const [left,right]=bankAt(d.riverPoints,y,w);
+   for(const side of [-1,1]){
+     const edge=side<0?left:right,x=edge+side*15;
+     if(x<6||x>w-6)continue;
+     c.beginPath();
+     if(['roots','vines','branches','cables','coils','crevasses'].includes(kind)){
+       c.moveTo(x,y-18);c.lineTo(x+side*7,y);c.lineTo(x+side*2,y+14);
+       c.moveTo(x+side*7,y);c.lineTo(x+side*15,y-5);
+     }else if(['docks','highway','containers','fortress'].includes(kind)){
+       c.rect(x+(side<0?-14:0),y-13,14,26);
+       c.moveTo(x,y);c.lineTo(x+side*18,y);
+     }else if(['reefs','floes','sandbars','bergs','dunes','strata','ridges'].includes(kind)){
+       c.moveTo(x-side*4,y+10);c.lineTo(x+side*8,y-13);c.lineTo(x+side*18,y+10);
+     }else{
+       c.arc(x,y,7,0,Math.PI*2);c.moveTo(x-4,y);c.lineTo(x+4,y);
+     }
+     c.stroke();
+   }
+ }
+ c.restore();
+}
 function biomeAtmosphere(c,data,t){
  const sector=Math.max(1,Math.min(20,Number(data.sector)||1)),detail=BIOME_DETAILS[sector-1];
  const {w,h,distance=0,quality='balanced',riverPoints:points}=data;
@@ -582,7 +613,7 @@ function biomeAtmosphere(c,data,t){
 
 function draw(c,d){
  const t=THEMES[((d.sector-1)%THEMES.length+THEMES.length)%THEMES.length];
- landscape(c,d,t);landmark(c,d,t);mapSetPieces(c,d,t);biomeAtmosphere(c,d,t);
+ landscape(c,d,t);terrainSignature(c,d,t);landmark(c,d,t);mapSetPieces(c,d,t);biomeAtmosphere(c,d,t);
  // Culling explícito: evitar traçar sprites fora da tela e preservar FPS em ondas intensas.
  islands(c,(d.islands||[]).filter(p=>p.y+(p.height||0)>-32&&p.y-(p.height||0)<d.h+32&&p.x+(p.width||0)>-32&&p.x-(p.width||0)<d.w+32),t);
  for(const e of d.enemies||[]){
