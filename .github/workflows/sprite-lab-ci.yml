@@ -22,4 +22,5 @@ jobs:
         run: |
           test -s dist/index.html
           test -s dist/phaser-preview.html
+          test -s dist/combat-lab.html
           test -s dist/build-info.json
