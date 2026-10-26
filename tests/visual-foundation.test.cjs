@@ -333,3 +333,17 @@ test('076: boss health, sword rush, ricochet collisions, re-tap parry',()=>{
  assert.match(html,/swordRushCooldown=240/);
  assert.match(html,/reflectHits/);
 });
+
+test('performance: culling evita desenhar sprites fora da viewport',()=>{
+ const render=read('src/render/scene2d5.js');
+ assert.match(render,/function draw\(c,d\)/);
+ assert.match(render,/e\.hp<=0\|\|e\.y\+/);
+ assert.match(render,/p\.y\+\(p\.height\|\|0\)>-32/);
+});
+test('mapas: marcos ambientais com cinco famílias, deslocamento e baixo custo',()=>{
+ const render=read('src/render/scene2d5.js');
+ assert.match(render,/function landmark\(c,d,t\)/);
+ assert.match(render,/switch\(\(sector-1\)%5\)/);
+ assert.match(render,/landscape\(c,d,t\);landmark\(c,d,t\);biomeAtmosphere\(c,d,t\)/);
+ assert.match(render,/d\.quality==='eco'\?2/);
+});
