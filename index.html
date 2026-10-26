@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>RiverStorm — Escudo Repulsor 0.7.5</title>
+    <title>RiverStorm — Investida e Ricochete 0.7.6</title>
     <link rel="stylesheet" href="./src/styles/tailwind.css">
     <style>
         body {
@@ -247,7 +247,7 @@
         <div class="rs-hud-cell"><span class="rs-label">🛡 ESCUDO <b id="hud-shield">150</b></span><div class="rs-meter"><span id="hud-shield-fill" style="background:#38bdf8;width:100%"></span></div></div>
         <div class="rs-hud-cell"><span class="rs-label">♟ RESGATES <b id="hud-rescues">0</b></span><span class="rs-label">✈ <b id="hud-plane">FALCÃO</b></span></div>
       </div>
-      <div class="rs-hud-footer"><span id="hud-version" style="color:#38bdf8;font-size:8px">HUD 0.7.5</span><span id="mission-hud">SELVA DA AURORA</span><b id="sector-hud">SETOR 1</b><span id="hud-rank">J1 SOLDADO</span></div>
+      <div class="rs-hud-footer"><span id="hud-version" style="color:#38bdf8;font-size:8px">HUD 0.7.6</span><span id="mission-hud">SELVA DA AURORA</span><b id="sector-hud">SETOR 1</b><span id="hud-rank">J1 SOLDADO</span></div>
     </section>
     <div id="rs-bottom-actions" aria-label="Opções rápidas">
       <button id="crt-toggle" type="button">CRT: LIG</button>
@@ -1036,7 +1036,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
             const bossConfig = {...BOSS_TYPES[mission.bossPattern],name:mission.boss,hp:mission.bossHp,score:1000+sector*240};
             const cycleMultiplier = 1 + Math.floor((sector - 1) / BOSS_TYPES.length) * 0.4;
             // Boss é confronto prolongado; escala por dificuldade, missão e jornada.
-            const calculatedHp = Math.round((360+mission.difficulty*110+sector*27)*cycleMultiplier*Math.pow(1.16,journey-1));
+            const calculatedHp = Math.round((360+mission.difficulty*110+sector*27)*cycleMultiplier*Math.pow(1.16,journey-1)*1.20);
 
             enemies.push({
                 type: 'BOSS',
@@ -1178,6 +1178,19 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
           ctx.fillText(f.kind+' -'+f.damage,f.x,f.y-radius-14);ctx.restore();
           f.life--;if(f.life<=0)bossSkillEffect=null;
         }
+        let swordRushCooldown=0;
+        function activateSwordRush(){
+          if(gameState!=='PLAYING'||bossActive||swordRushCooldown>0)return;
+          const target=enemies.filter(e=>e.hp>0&&e.type!=='BOSS').sort((a,b)=>Math.hypot(a.x-player.x,a.y-player.y)-Math.hypot(b.x-player.x,b.y-player.y))[0];
+          if(!target)return;
+          swordRushCooldown=240;
+          launchSkillTrajectory('BLEED',player.x,player.y,target.x,target.y,'#f8fafc');
+          addExplosion(target.x,target.y,'#f472b6',24);
+          createFloatingText(target.x,target.y-32,'CORTE FATAL','#fef08a');
+          target.hp=0;
+          score+=awardEnemyPoints(target.score||100);kills++;
+          enemies=enemies.filter(e=>e!==target);
+        }
         function useBossSkill(){
           if(gameState!=='PLAYING'||!bossActive||!bossSkillEquipped||bossSkillCharge<=0||bossSkillCooldown>0)return;
           const boss=enemies.find(e=>e.type==='BOSS'&&e.hp>0);if(!boss)return;
@@ -1208,14 +1221,16 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
           bossSkillCharge--;bossSkillCooldown=skill.cooldown;
           if(boss.hp<=0)finishBossDefeatedBySkill(boss);
         }
-        skillUseButton.addEventListener('pointerdown',event=>{event.preventDefault();useBossSkill()});
+        skillUseButton.addEventListener('pointerdown',event=>{event.preventDefault();if(bossActive)useBossSkill();else activateSwordRush()});
         // --- HABILIDADES E PADRÕES DE TIROS DOS CHEFÕES ---
         let parryTicks=0,parryCooldown=0,parryHeld=false,parryHeldTicks=0;
         const BOSS_STRIKES={1:'impact',3:'energy',5:'energy',7:'blade',8:'blade',9:'impact',10:'energy',12:'blade',14:'blade',16:'blade',19:'blade',20:'energy'};
         function defendCharge(attacker){if(parryTicks<=0)return false;const precise=parryHeldTicks<=15;if(precise&&attacker?.type==='BOSS'){attacker.stunnedTicks=Math.max(attacker.stunnedTicks||0,180);attacker.parryVulnerableTicks=180;attacker.swordDash=0;attacker.swordCharge=0;createFloatingText(attacker.x,attacker.y-45,'PARRY! IMÓVEL 3 S · +50% DANO','#fef08a');addExplosion(attacker.x,attacker.y,'#fde68a',26);}else createFloatingText(player.x,player.y-35,'ESCUDO: DEFESA TOTAL','#67e8f9');addExplosion(player.x,player.y,'#67e8f9',12);return true;}
         const parryButton=document.getElementById('parry-btn');
         function activateParry(){
-          if(gameState!=='PLAYING'||parryCooldown>0||parryTicks>0||player.disabledTimer>0)return;
+          if(gameState!=='PLAYING')return;
+          if(parryTicks>0){parryHeldTicks=0;parryTicks=Math.max(parryTicks,15);createFloatingText(player.x,player.y-38,'PARRY!','#fef08a');return;}
+          if(parryCooldown>0||player.disabledTimer>0)return;
           parryTicks=15;parryCooldown=600;parryHeldTicks=0;createFloatingText(player.x,player.y-38,'ESCUDO REFLETOR','#67e8f9');
           try{window.RiverSFX?.shield?.()}catch(error){}
         }
@@ -2034,6 +2049,9 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
             if (player.invulnerable > 0) player.invulnerable--;
             if(parryTicks>0){parryHeldTicks++;if(parryHeld&&parryHeldTicks<360)parryTicks=Math.max(1,360-parryHeldTicks);else parryTicks--;if(parryHeldTicks>=360)parryTicks=0;}
             if(parryCooldown>0)parryCooldown--;
+            if(swordRushCooldown>0)swordRushCooldown--;
+            skillUseButton.textContent=bossActive?'⚡ PODER [C]':'⚔ INVESTIDA [C] '+(swordRushCooldown>0?Math.ceil(swordRushCooldown/60)+'s':'PRONTO');
+            skillUseButton.classList.remove('hidden');
             parryButton.textContent=parryTicks>0?'🛡 ESCUDO '+Math.max(1,Math.ceil((360-parryHeldTicks)/60))+'s':parryCooldown>0?'🛡 '+Math.ceil(parryCooldown/60)+'s':'🛡 PARRY [V]';
 
             // Armas especiais usam disparos disponíveis, não tempo em quadros.
@@ -2217,7 +2235,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
                         e.y=Math.max(32,Math.min(VIRTUAL_HEIGHT-40,e.y+dy/len*push));
                         e.vx=(e.vx||0)+dx/len*(e.type==='BOSS'?1.5:3.5);
                         e.hp=Math.max(0,e.hp-40*1.25);
-                        e.shieldBounceCooldown=45;
+                        e.shieldBounceCooldown=45;e.shieldReboundTicks=28;
                         addExplosion(e.x,e.y,'#22f7c4',16);
                         createFloatingText(e.x,e.y-26,'REPULSÃO -50','#22f7c4');
                         if(e.type==='BOSS'&&e.hp<=0)finishBossDefeatedBySkill(e);
@@ -2226,6 +2244,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
                     applyDamage(40,'COLISÃO AÉREA!');
                 }
                 if(e.shieldBounceCooldown>0)e.shieldBounceCooldown--;
+                if(e.shieldReboundTicks>0){e.shieldReboundTicks--;for(const other of enemies){if(other===e||other.hp<=0||other.type==='BOSS'&&e.type!=='BOSS')continue;if(Math.hypot(e.x-other.x,e.y-other.y)<(e.width+other.width)/2+10){const damage=30;e.hp=Math.max(0,e.hp-damage);other.hp=Math.max(0,other.hp-damage);e.shieldReboundTicks=0;addExplosion(other.x,other.y,'#22f7c4',12);createFloatingText(other.x,other.y-25,'COLISÃO -30','#22f7c4');break;}}}
 
                 // Tiros acertando Inimigos
                 bullets.forEach((b, bIndex) => {
@@ -2431,7 +2450,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
             lives=3;
             continues=10;
             bossActive = false;
-            parryTicks=0;parryCooldown=0;parryHeld=false;parryHeldTicks=0;skillTrajectories=[];
+            parryTicks=0;parryCooldown=0;parryHeld=false;parryHeldTicks=0;swordRushCooldown=0;skillTrajectories=[];
             bossSkillEquipped=null;bossSkillCharge=0;bossSkillCooldown=0;bossSkillEffect=null;
             skillPicker.classList.add('hidden');skillUseButton.classList.add('hidden');
 
@@ -3062,7 +3081,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
             if (keys.hasOwnProperty(e.code)) { e.preventDefault(); keys[e.code] = true; }
 
             if (e.code === 'Space' || e.code === 'KeyZ') { if(!e.repeat)fireWeapon(); }
-            if(e.code==='KeyC'&&!e.repeat){e.preventDefault();useBossSkill()}
+            if(e.code==='KeyC'&&!e.repeat){e.preventDefault();if(bossActive)useBossSkill();else activateSwordRush()}
             if(e.code==='KeyV'&&!e.repeat){e.preventDefault();parryHeld=true;activateParry()}
             if (e.code === 'KeyX' || e.code === 'KeyF' || e.code === 'ShiftLeft') triggerBomb();
 
