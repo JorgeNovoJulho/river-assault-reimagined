@@ -70,7 +70,7 @@ test('gameplay 045: dams spaced, shots held, banks targetable',()=>{
  assert.match(html,/touchFireButton\.addEventListener\('pointerdown'/);
  assert.match(html,/e\.type === 'SHIP' \|\| e\.type === 'TURRET'/);
  assert.match(html,/e\.y>=5 && e\.y<VIRTUAL_HEIGHT-90/);
- assert.match(html,/HUD 0\.5\.0/);
+ assert.match(html,/HUD 0\.5\.1/);
 });
 
 test('hotfix 1: pickup spacing and visual types are enforced',()=>{
@@ -131,8 +131,24 @@ test('visual phase 04: all twenty missions have deterministic biome atmosphere',
  assert.match(renderer,/BIOME_DETAILS,/);
  assert.match(renderer,/c\.save\(\);c\.translate\(x,y\);c\.scale\(scale,scale\)/);
  assert.match(renderer,/c\.restore\(\);/);
- assert.match(html,/HUD 0\.5\.0/);
+ assert.match(html,/HUD 0\.5\.1/);
  assert.match(campaign,/"id": 20/);
  const codes=renderer.match(/\['[A-Z_]+','#[A-Fa-f0-9]+','[^']+'\]/g)||[];
  assert.equal(codes.length,20);
+});
+
+test('visual 05: all seven player aircraft and key enemy types render unique details',()=>{
+ const scene=read('src/render/scene2d5.js');
+ const aircraft=read('src/game/aircraft.js');
+ for(const type of ['falcao','vespa','cometa','fenix','helicoptero','disco','titan']){
+   assert.match(scene,new RegExp(type+":\\["));
+   assert.match(aircraft,new RegExp(type+":\\{name:"));
+ }
+ for(const type of ['MECHA_SWORD','MECHA_GUN','MEGAZORD','TANK','TURRET','SHIP','SUB','HELI','JET','ZIGZAG'])
+   assert.ok(scene.includes(type));
+ assert.match(scene,/function aircraftDetails\(/);
+ assert.match(scene,/function enemyDetails\(/);
+ assert.match(scene,/aircraftDetails\(c,style,trim\)/);
+ assert.match(scene,/enemyDetails\(c,e\)/);
+ assert.match(read('index.html'),/HUD 0\.5\.1/);
 });
