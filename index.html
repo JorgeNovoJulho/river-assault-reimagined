@@ -1126,9 +1126,8 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
         }
         function spawnBoss(y,confirmed=false) {
             if(!confirmed){openBossSkillPicker();return;}
-            if(enemies.some(e=>e.type==='BOSS'))return;
             bossActive = true;
-            try{playlist.beginBossTheme?.()}catch(audioError){console.warn('Trilha de chefe:',audioError)}
+            playlist.beginBossTheme?.();
             redAlertTicks=0;
             const mission=campaign.at(sector);
             showBossTaunt(mission.boss);
@@ -1212,19 +1211,10 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
           if(sector===20){finishFullCampaign();}else{missionTransitionTicks=180;document.getElementById('mission-banner').textContent='PRÓXIMA MISSÃO: '+campaign.at(sector+1).name;createFloatingText(e.x,e.y,'CHEFE DERROTADO!','#22c55e')}
         }
         function openBossSkillPicker(){
-          if(gameState==='BOSS_SELECT'||bossActive)return;
-          controllerMenuOpen=false;
-          gameState='BOSS_SELECT';
-          bossSkillPending=null; // requer escolha explícita, como no original
-          try{playlist.pause();soundtrack.stop()}catch(error){console.warn('Áudio da seleção:',error)}
-          skillPicker.classList.remove('hidden');
-          skillPicker.style.display='flex';
-          skillPicker.style.pointerEvents='auto';
-          skillPicker.setAttribute('aria-hidden','false');
+          gameState='BOSS_SELECT';bossSkillPending=null;skillPicker.classList.remove('hidden');
           const options=document.getElementById('boss-skill-options');
           options.replaceChildren();
           document.getElementById('boss-skill-confirm').disabled=true;
-          document.getElementById('boss-skill-selected').textContent='Escolha uma habilidade ou Lutar sem poder';
           const foe=BOSS_AFFINITIES[(sector-1)%BOSS_AFFINITIES.length];
           document.getElementById('boss-skill-advice').textContent='Boss de '+BOSS_SKILLS[foe].name+' · Selecione uma habilidade ou voe sem poder.';
           for(const key of bossSkillUnlocked){
@@ -1237,54 +1227,13 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
           const none=document.createElement('button');none.textContent='✈ LUTAR SEM PODER';none.type='button';none.style.cssText='grid-column:1/-1;color:#cbd5e1;padding:8px;border:1px solid #64748b;border-radius:8px';
           none.addEventListener('click',()=>{bossSkillPending='NONE';document.getElementById('boss-skill-selected').textContent='Sem poder nesta batalha';document.getElementById('boss-skill-confirm').disabled=false});options.appendChild(none);
         }
-        let bossSelectionCommitting=false;
-        function confirmBossSelection(){
-          if(gameState!=='BOSS_SELECT'||bossSelectionCommitting||bossSkillPending===null)return;
-          bossSelectionCommitting=true;
-          try{
-            const chosen=BOSS_SKILLS[bossSkillPending]?bossSkillPending:null;
-            bossSkillEquipped=chosen;
-            bossSkillCharge=chosen?BOSS_SKILLS[chosen].charges:0;
-            bossSkillCooldown=0;
-            skillPicker.classList.add('hidden');
-            skillPicker.style.display='none';
-            skillPicker.setAttribute('aria-hidden','true');
-            // Instala o chefe antes de reativar a simulação para evitar o frame intermediário.
-            spawnBoss(0,true);
-            if(!enemies.some(e=>e.type==='BOSS'))throw Error('Chefe não foi criado após a escolha');
-            bossActive=true;
-            redAlertTicks=0;redAlertTriggered=true;
-            gameState='PLAYING';simulationClock.reset();
-            document.getElementById('boss-special-hud')?.classList.add('hidden');
-            try{if(playlist.bossMode){soundtrack.stop();playlist.resume()}else if(!playlist.tracks.length&&playlist.enabled)soundtrack.start();else playlist.resume()}catch(error){console.warn('Áudio boss:',error)}
-          }catch(error){
-            // Nunca prender o piloto em um modal sem possibilidade de recuperar.
-            console.error('Seleção de habilidades:',error);
-            skillPicker.classList.add('hidden');skillPicker.style.display='none';
-            try{if(!enemies.some(e=>e.type==='BOSS'))spawnBoss(0,true)}catch(bossError){console.error('Boss recovery:',bossError)}
-            gameState=enemies.some(e=>e.type==='BOSS')?'PLAYING':'BOSS_SELECT';simulationClock.reset();
-            if(gameState==='BOSS_SELECT'){skillPicker.classList.remove('hidden');skillPicker.style.display='flex'}
-            showGameError(error);
-          }finally{bossSelectionCommitting=false}
-        }
-        document.getElementById('boss-skill-confirm').addEventListener('click',confirmBossSelection);
-        // Falhas de UI/foco não podem transformar o pré-chefe em um estado sem saída.
-        const bossSkillSkip=document.createElement('button');
-        bossSkillSkip.type='button';bossSkillSkip.id='boss-skill-skip';
-        bossSkillSkip.textContent='CONTINUAR SEM HABILIDADE';
-        bossSkillSkip.style.cssText='margin-top:12px;background:#0b2535;color:#ddf9ff;border:1px solid #67e8f9;border-radius:8px;padding:12px;font-weight:bold;cursor:pointer';
-        bossSkillSkip.addEventListener('click',()=>{bossSkillPending='NONE';confirmBossSelection()});
-        skillPicker.querySelector('div')?.appendChild(bossSkillSkip);
-        window.addEventListener('keydown',event=>{
-          if(gameState==='BOSS_SELECT'&&(event.code==='Enter'||event.code==='Escape')){
-            event.preventDefault();confirmBossSelection();
-          }
-        },true);
-
-        skillPicker.addEventListener('keydown',event=>{
-          if(event.key==='Enter'||event.key==='Escape'){event.preventDefault();confirmBossSelection()}
+        document.getElementById('boss-skill-confirm').addEventListener('click',()=>{
+          if(bossSkillPending===null)return;
+          bossSkillEquipped=bossSkillPending==='NONE'?null:bossSkillPending;
+          bossSkillCharge=bossSkillEquipped?BOSS_SKILLS[bossSkillEquipped].charges:0;
+          bossSkillCooldown=0;skillPicker.classList.add('hidden');gameState='PLAYING';simulationClock.reset();
+          spawnBoss(0,true);
         });
-
 
         // Animação real do poder (não somente partículas genéricas).
         let bossSkillEffect=null;
@@ -2074,11 +2023,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
                 ctx.translate(0,bob);
                 ctx.fillStyle='rgba(5,16,31,.35)';ctx.beginPath();ctx.ellipse(3,7,22,11,0,0,Math.PI*2);ctx.fill();
                 ctx.fillStyle='#f97316';ctx.beginPath();ctx.moveTo(0,-20);ctx.lineTo(15,-10);ctx.lineTo(13,13);ctx.lineTo(0,19);ctx.lineTo(-13,13);ctx.lineTo(-15,-10);ctx.closePath();ctx.fill();
-                // Casco com borda inflável, bancos, proa e espuma lateral: leitura de bote salva-vidas.
-                ctx.strokeStyle='#ffd4a1';ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(0,-17);ctx.bezierCurveTo(17,-11,16,13,0,16);ctx.bezierCurveTo(-16,13,-17,-11,0,-17);ctx.closePath();ctx.stroke();
-                ctx.fillStyle='#26394a';ctx.fillRect(-10,-7,20,3);ctx.fillRect(-9,5,18,3);
-                ctx.fillStyle='#ffdf94';ctx.fillRect(-9,-2,18,7);
-                ctx.fillStyle='#14532d';
+                ctx.fillStyle='#ffdf94';ctx.fillRect(-9,-9,18,21);ctx.fillStyle='#14532d';
                 for(let j=0;j<Math.min(4,b.soldiers);j++){const x=j%2?6:-6,y=Math.floor(j/2)*9-5;ctx.beginPath();ctx.arc(x,y,3,0,Math.PI*2);ctx.fill()}
                 ctx.fillStyle='#fff';ctx.strokeStyle='#ef4444';ctx.lineWidth=2;ctx.beginPath();ctx.arc(0,-25,12,0,Math.PI*2);ctx.fill();ctx.stroke();ctx.fillStyle='#b91c1c';ctx.font='bold 9px system-ui';ctx.textAlign='center';ctx.fillText('SOS',0,-22);
                 ctx.restore();
@@ -2290,7 +2235,6 @@ function updateTerrainEvent(){
                 try{window.RiverSFX?.alert?.()}catch(e){}
             }
             if(redAlertTicks>0)redAlertTicks--;
-            if(gameState==='BOSS_SELECT'||bossActive)redAlertTicks=0;
             for(let i=wingmen.length-1;i>=0;i--){
                 const w=wingmen[i];
                 if(w.ttl>0)w.ttl--;
@@ -2886,7 +2830,7 @@ function updateTerrainEvent(){
             bossActive = false;
             parryTicks=0;parryCooldown=0;parryHeld=false;parryHeldTicks=0;parryPrecisionTicks=0;swordRushCooldown=0;swordRushTarget=null;swordRushFrames=0;skillTrajectories=[];
             bossSkillEquipped=null;bossSkillCharge=0;bossSkillCooldown=0;bossSkillEffect=null;
-            skillPicker.classList.add('hidden');skillPicker.style.display='none';skillUseButton.classList.add('hidden');
+            skillPicker.classList.add('hidden');skillUseButton.classList.add('hidden');
 
             player.x = VIRTUAL_WIDTH / 2;
             player.y = VIRTUAL_HEIGHT - 100;
@@ -2929,7 +2873,7 @@ function updateTerrainEvent(){
             document.getElementById('mission-banner').textContent=campaign.at(sector).name;
             gameState = 'PLAYING';
             simulationClock.reset();
-            try{if(playlist.enabled){playlist.startNewGame();if(!playlist.tracks.length)soundtrack.start();else soundtrack.stop()}else soundtrack.stop()}catch(error){console.warn('Playlist indisponível:',error);if(playlist.enabled)soundtrack.start()}
+            try{playlist.startNewGame();if(!playlist.tracks.length&&playlist.enabled)soundtrack.start();else soundtrack.stop()}catch(error){console.warn('Playlist indisponível:',error);soundtrack.start()}
         }
 
         function fireBankMissiles(){
@@ -3422,14 +3366,7 @@ function updateTerrainEvent(){
         const playlist=new window.RiverPlaylist({onStatus:(message)=>{
             const status=document.getElementById('playlist-status');if(status)status.textContent=message;
         }});
-        const playlistReady=playlist.load().catch(error=>{console.warn('Biblioteca musical:',error);return 0});
-        playlist.onReady=(count)=>{
-          if(gameState!=='PLAYING'||!playlist.enabled)return;
-          if(count){soundtrack.stop();playlist.startNewGame()}
-          else soundtrack.start();
-        };
-        playlist.onUnavailable=()=>{if(gameState==='PLAYING'&&playlist.enabled)soundtrack.start()};
-
+        playlist.load();
         document.getElementById('music-library').addEventListener('click',()=>document.getElementById('music-upload').click());
         document.getElementById('music-upload').addEventListener('change',async event=>{
             await playlist.importFiles(event.target.files);event.target.value='';renderPlaylistItems();
@@ -3493,7 +3430,7 @@ function updateTerrainEvent(){
         document.getElementById('music-toggle').addEventListener('click',()=>{
             const on=playlist.toggle();
             if(!on)soundtrack.stop();
-            else if(gameState==='PLAYING'){if(playlist.tracks.length){soundtrack.stop();playlist.resume()}else soundtrack.start()}
+            else if(gameState==='PLAYING'&&!playlist.tracks.length)soundtrack.start();
             document.getElementById('music-toggle').textContent='MÚSICA: '+(on?'LIG':'DES');
         });
         let lastGameError='';
@@ -3568,10 +3505,7 @@ function updateTerrainEvent(){
             }
             previousMenuDirection=false;previousMenuConfirm=false;
             if (gamepadState.justPause) {
-                if(gameState==='BOSS_SELECT'){
-                    // O botão Start confirma SOMENTE uma escolha já feita.
-                    if(bossSkillPending!==null)confirmBossSelection();
-                }else if (gameState === 'START' || gameState === 'GAMEOVER') { sound.init(); resetGame(); }
+                if (gameState === 'START' || gameState === 'GAMEOVER') { sound.init(); resetGame(); }
                 else togglePause();
             }
             if (gameState === 'PLAYING' && gamepadState.justBomb) triggerBomb();
@@ -3739,7 +3673,7 @@ function updateTerrainEvent(){
         document.getElementById('pause-settings-btn').addEventListener('click',()=>showControllerSettings(true));
         function togglePause() {
             if (gameState === 'PLAYING') {gameState='PAUSED'; playlist.pause();soundtrack.stop(); document.getElementById('pause-screen').classList.remove('hidden');}
-            else if (gameState === 'PAUSED') {gameState='PLAYING'; playlist.resume();if(!playlist.tracks.length&&playlist.enabled)soundtrack.start(); document.getElementById('pause-screen').classList.add('hidden');}
+            else if (gameState === 'PAUSED') {gameState='PLAYING'; playlist.resume();if(!playlist.tracks.length)soundtrack.start(); document.getElementById('pause-screen').classList.add('hidden');}
         }
         document.getElementById('btn-pause-touch').addEventListener('pointerdown', event => {event.preventDefault();togglePause();});
 
@@ -3762,7 +3696,7 @@ function updateTerrainEvent(){
 
         document.getElementById('resume-btn').addEventListener('click', () => {
             gameState = 'PLAYING';
-            playlist.resume();if(!playlist.tracks.length&&playlist.enabled)soundtrack.start();
+            playlist.resume();
             document.getElementById('pause-screen').classList.add('hidden');
         });
 
@@ -3783,7 +3717,6 @@ function updateTerrainEvent(){
             catch(error){showGameError(error);console.error(error)}
         });
     </script>
-
     <!-- Comparador experimental: mantém toda a lógica original do jogo. -->
     <script>
     (function(){
