@@ -1552,6 +1552,23 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
             }
         }
 
+        // Colisao continua com ilhas: impede atravessar cobertura entre frames, inclusive tiros rapidos.
+        function riverIslandHit(x0,y0,x1,y1,is){
+            const rx=Math.max(8,is.width*.47),ry=Math.max(8,is.height*.43);
+            const dx=x1-x0,dy=y1-y0,ox=x0-is.x,oy=y0-is.y;
+            const a=dx*dx/(rx*rx)+dy*dy/(ry*ry);
+            if(a<1e-9)return ox*ox/(rx*rx)+oy*oy/(ry*ry)<=1;
+            const b=2*(ox*dx/(rx*rx)+oy*dy/(ry*ry)),c=ox*ox/(rx*rx)+oy*oy/(ry*ry)-1;
+            if(c<=0)return true;
+            const disc=b*b-4*a*c;
+            if(disc<0)return false;
+            const t=(-b-Math.sqrt(disc))/(2*a);
+            return t>=0&&t<=1;
+        }
+        function riverIslandBlocks(x0,y0,x1,y1){
+            return islands.some(is=>riverIslandHit(x0,y0,x1,y1,is));
+        }
+
         // --- RENDERIZAÇÃO GRÁFICA MILITAR RETRO ---
         function drawIslands() {
             // Renderização unificada em RiverVisuals; evita segunda camada desalinhada.
@@ -2354,6 +2371,7 @@ function updateTerrainEvent(){
             // Tiros do Jogador
             for(let index=bullets.length-1;index>=0;index--){
                 const b=bullets[index];
+                const previousX=b.x,previousY=b.y;
                 b.y -= b.speed;
                 if (b.vx) b.x += b.vx;
                 if (b.type === 'MISSILE'||b.type==='REFLECTED') {
@@ -2377,6 +2395,11 @@ function updateTerrainEvent(){
                     }
                 }
 
+                if(riverIslandBlocks(previousX,previousY,b.x,b.y)){
+                    addExplosion(b.x,b.y,'#d5bb82',4);
+                    bullets.splice(index,1);
+                    continue;
+                }
                 if(b.trail&&b.trailMax){
                     // Registrar o ponto após o steering; descartar traços com salto abrupto.
                     const last=b.trail[0];
@@ -2391,8 +2414,14 @@ function updateTerrainEvent(){
             for(let index=enemyBullets.length-1;index>=0;index--){
                 const eb=enemyBullets[index];
                 if(!eb||!Number.isFinite(eb.x)||!Number.isFinite(eb.y)||!Number.isFinite(eb.vx)||!Number.isFinite(eb.vy)){enemyBullets.splice(index,1);continue;}
+                const previousEnemyX=eb.x,previousEnemyY=eb.y;
                 eb.x += eb.vx + (eb.waveStyle===2?Math.sin(missionTicks*.12+(eb.phase||0))*.45:0);
                 eb.y += eb.vy;
+                if(riverIslandBlocks(previousEnemyX,previousEnemyY,eb.x,eb.y)){
+                    addExplosion(eb.x,eb.y,'#d5bb82',4);
+                    enemyBullets.splice(index,1);
+                    continue;
+                }
 
                 if((parryTicks>0||rollFrames>0)&&Math.hypot(eb.x-player.x,eb.y-player.y)<(rollFrames>0?67:53)){enemyBullets.splice(index,1);const boss=enemies.find(e=>e.type==='BOSS'&&e.hp>0),target=boss||enemies.find(e=>e.hp>0);const tx=target?.x??eb.x,ty=target?.y??0,dx=tx-eb.x,dy=ty-eb.y,len=Math.max(1,Math.hypot(dx,dy));bullets.push({x:eb.x,y:eb.y,vx:dx/len*11,speed:-dy/len*11,type:'REFLECTED',color:rollFrames>0?'#ff4dd8':'#22f7c4',damage:rollFrames>0?Math.max(1,eb.damage||25)*1.10:37.5,reflected:true,homing:true,dodgeReflect:rollFrames>0});addExplosion(eb.x,eb.y,'#67e8f9',8);createFloatingText(player.x,player.y-40,rollFrames>0?'ESQUIVA + REFLEXO 110%!':'REFLETIDO!',rollFrames>0?'#ff4dd8':'#67e8f9');continue;}
                 const hitWingman=wingmen.find(w=>Math.hypot(eb.x-(player.x+w.side*36),eb.y-(player.y+10))<14);
@@ -2841,6 +2870,16 @@ function updateTerrainEvent(){
             try{window.RiverSFX?.impact()}catch(e){}
             screenShake=15;bombFlash=13;
             enemyBullets=[];
+            // Bombas ignoram cobertura; destroem ilhotas pequenas e mantem dano global.
+            for(let i=islands.length-1;i>=0;i--){
+                const is=islands[i];
+                if(is.width<=80 && is.height<=100){
+                    addExplosion(is.x,is.y,'#fbbf24',26);
+                    createFloatingText(is.x,is.y,'ILHA DESTRUIDA!','#fbbf24');
+                    islands.splice(i,1);
+                    score+=150;
+                }
+            }
             enemies.forEach(e=>{
                 if(e.type==='BOSS'){
                     dropBossReward(e,16);
