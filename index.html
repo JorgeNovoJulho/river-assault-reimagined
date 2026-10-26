@@ -1173,9 +1173,10 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
           if(boss.gravityTicks>0)damage*=2;
           if(kind==='GRAVITY'){boss.gravityTicks=180;boss.gravityRate=advantage?.06:.03;boss.gravityClock=0;boss.y=Math.min(VIRTUAL_HEIGHT*.32,boss.y+24);}
           if(kind==='BLEED'||kind==='POISON'){boss.statusKind=kind;boss.statusTicks=600;boss.statusClock=0;boss.statusBaseHp=boss.maxHp;boss.statusRate=(kind==='BLEED'?.015:.01)*(advantage?2:1);boss.statusDealt=boss.statusDealt||0;}
+          if(['ICE','FIRE','LIGHTNING'].includes(kind)){boss.elementKind=kind;boss.elementTicks=600;boss.elementClock=0;boss.elementRate=advantage?.02:.01;}
           if(kind==='ICE')boss.frozenTicks=600;
           if(kind==='EMP'){boss.specialCharge=0;boss.stunnedTicks=300;}
-          if(kind==='LIGHTNING')boss.stunnedTicks=600;
+          if(kind==='LIGHTNING')boss.shockTicks=600;
           if(kind==='FIRE')boss.burningTicks=600;
           boss.hp=Math.max(0,boss.hp-damage);
           bossTaunt={name:boss.name,line:advantage?'COMO DESCOBRIU MINHA FRAQUEZA?! '+skill.name.toUpperCase()+'!':'HA! '+skill.name.toUpperCase()+' MAL ME AFETA! MINHA FRAQUEZA É '+(Object.values(BOSS_SKILLS).find(v=>v.strong===foe)?.name||'ELEMENTO OPOSTO').toUpperCase()+'!',ticks:300};
@@ -1196,6 +1197,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
             for(const prop of ['gravityTicks','frozenTicks','stunnedTicks','burningTicks'])if(e[prop]>0)e[prop]--;
             if(e.statusTicks>0){e.statusTicks--;if(++e.statusClock>=60){e.statusClock=0;const cap=e.statusBaseHp*.30;const dot=Math.max(0,Math.min(e.statusBaseHp*(e.statusRate||.01),cap-(e.statusDealt||0)));e.statusDealt=(e.statusDealt||0)+dot;e.hp=Math.max(0,e.hp-dot);createFloatingText(e.x,e.y-35,(e.statusKind==='BLEED'?'SANGRAMENTO':'VENENO')+' -'+Math.ceil(dot),e.statusKind==='BLEED'?'#fb7185':'#4ade80');if(e.hp<=0){finishBossDefeatedBySkill(e);return;}}}
             if(e.gravityTicks>0){e.gravityClock=(e.gravityClock||0)+1;if(e.gravityClock%60===0){const d=e.maxHp*(e.gravityRate||.03);e.hp=Math.max(0,e.hp-d);createFloatingText(e.x,e.y-46,'GRAVIDADE -'+Math.ceil(d),'#c4b5fd');if(e.hp<=0){finishBossDefeatedBySkill(e);return;}}}
+            if(e.elementTicks>0){e.elementTicks--;e.elementClock=(e.elementClock||0)+1;if(e.elementClock%60===0){const d=e.maxHp*(e.elementRate||.01);e.hp=Math.max(0,e.hp-d);createFloatingText(e.x,e.y-40,e.elementKind+' -'+Math.ceil(d),BOSS_SKILLS[e.elementKind].color);if(e.hp<=0){finishBossDefeatedBySkill(e);return;}}}
             if(e.stunnedTicks>0)return;
             if(e.rewardCooldown>0)e.rewardCooldown--;
 
