@@ -17,4 +17,16 @@ jobs:
       - run: npm install --no-save playwright
       - run: npx playwright install --with-deps chromium
       - run: npm run preview -- --host 127.0.0.1 --port 4173 > /tmp/riverstorm-preview.log 2>&1 &
-      - run: node tests/boss-flow-smoke.mjs
+      - name: Wait for preview server
+        run: |
+          for i in $(seq 1 40); do
+            if curl --fail --silent http://127.0.0.1:4173/ > /dev/null; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/riverstorm-preview.log
+          exit 1
+      - name: Run RED ALERT browser test
+        run: node tests/boss-flow-smoke.mjs
+      - name: Show preview logs on failure
+        if: failure()
+        run: cat /tmp/riverstorm-preview.log || true
