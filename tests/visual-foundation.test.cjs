@@ -70,7 +70,7 @@ test('gameplay 045: dams spaced, shots held, banks targetable',()=>{
  assert.match(html,/touchFireButton\.addEventListener\('pointerdown'/);
  assert.match(html,/e\.type === 'SHIP' \|\| e\.type === 'TURRET'/);
  assert.match(html,/e\.y>=5 && e\.y<VIRTUAL_HEIGHT-90/);
- assert.match(html,/HUD 0\.4\.8/);
+ assert.match(html,/HUD 0\.4\.9/);
 });
 
 test('hotfix 1: pickup spacing and visual types are enforced',()=>{
@@ -102,4 +102,21 @@ test('boss UI fix: active renderer uses compact meters and synthesized boss voic
  assert.match(html,/bossRobotVoice\(e,true\)/);
  assert.match(html,/115\)/);
  assert.match(html,/window.addEventListener\('pointermove'/);
+});
+
+test('boss abilities 049: persistent unlocks, mandatory selection and elemental gameplay',()=>{
+ const html=read('index.html');
+ for(const skill of ['EMP','LIGHTNING','GRAVITY','ICE','FIRE','BLEED'])
+   assert.match(html,new RegExp(skill+":\\{icon:"));
+ assert.match(html,/river_boss_skills_v1/);
+ assert.match(html,/function openBossSkillPicker\(/);
+ assert.match(html,/function useBossSkill\(/);
+ assert.match(html,/gameState='BOSS_SELECT'/);
+ assert.match(html,/spawnBoss\(0,true\)/);
+ assert.match(html,/bossSkillCooldown=skill.cooldown/);
+ assert.match(html,/boss\.gravityTicks=180/);
+ assert.match(html,/e\.bleedClock>=180/);
+ assert.match(html,/unlockBossSkill\(e.skillAffinity\)/);
+ assert.match(html,/boss-skill-picker/);
+ assert.match(html,/e\.code==='KeyC'/);
 });
