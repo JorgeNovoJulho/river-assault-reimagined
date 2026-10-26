@@ -1020,6 +1020,54 @@ function enhancedWeaponGlints(c,d){
  c.restore();
 }
 
+
+/* Atlases de identidades por bioma: aparência e animação independentes das regras de IA. */
+const BIOME_ATLAS=new Map();
+function biomeSprite(id){
+ if(BIOME_ATLAS.has(id))return BIOME_ATLAS.get(id);
+ const cv=document.createElement('canvas');cv.width=120;cv.height=120;
+ const p=cv.getContext('2d');p.translate(60,60);
+ const palette={TUCANO:['#13c7d6','#173e59'],CRANE:['#e5ac47','#536a70'],SCORPION:['#e9a25f','#54341f'],ALLIGATOR:['#63a776','#244f37'],CORSAIR:['#ff6e69','#552733'],WALRUS:['#d7efff','#668ba1'],MANTIS:['#a1e45b','#435d37'],MOTOJET:['#ff74da','#572b66'],SALAMANDER:['#ff995b','#753c28'],EAGLE:['#f7d765','#525d66'],DREDGER:['#edc069','#52565b'],HOVERCAR:['#c58cff','#483f7d'],PIRANHA:['#7dde89','#2d655d'],ICE_RAY:['#dcf5ff','#608dab'],BEETLE:['#edb05e','#765036'],PRISM_WASP:['#df9aff','#6a4291'],WELDER:['#ffc06c','#7c4d3c'],NARWHAL:['#8de6ff','#2b6479'],EEL:['#79c5ff','#285a91'],HYBRID_HUNTER:['#ff9299','#69364b']};
+ const [light,dark]=palette[id]||['#bcd9e5','#4d6676'],insect=/MANTIS|WASP|BEETLE|SCORPION/.test(id),aquatic=/WALRUS|PIRANHA|ICE_RAY|NARWHAL|EEL|ALLIGATOR/.test(id),machine=/CRANE|DREDGER|WELDER|HOVERCAR/.test(id);
+ const fill=p.createLinearGradient(-25,-38,27,41);fill.addColorStop(0,light);fill.addColorStop(.4,'#8c9ca7');fill.addColorStop(1,dark);
+ const poly=(points,color=fill)=>{p.beginPath();points.forEach(([x,y],i)=>i?p.lineTo(x,y):p.moveTo(x,y));p.closePath();p.fillStyle=color;p.fill();p.lineWidth=2;p.strokeStyle='#d1e2e9';p.stroke()};
+ p.fillStyle='rgba(4,16,30,.35)';p.beginPath();p.ellipse(4,13,34,17,0,0,7);p.fill();
+ if(insect){
+  for(const side of [-1,1]){p.save();p.scale(side,1);poly([[8,-20],[25,-27],[37,-8],[14,-4]],dark);poly([[10,10],[28,12],[36,31],[24,21],[6,16]],dark);
+   p.strokeStyle=light;p.lineWidth=3;p.beginPath();p.moveTo(17,7);p.lineTo(43,21);p.moveTo(18,-3);p.lineTo(43,-16);p.stroke();p.restore()}
+  poly([[0,-41],[20,-26],[24,20],[0,39],[-24,20],[-20,-26]]);
+  p.fillStyle=dark;p.beginPath();p.ellipse(0,-13,11,14,0,0,7);p.fill();
+ }else if(aquatic){
+  poly([[0,-45],[18,-26],[29,7],[15,31],[0,47],[-15,31],[-29,7],[-18,-26]]);
+  for(const side of [-1,1]){p.save();p.scale(side,1);poly([[14,2],[43,18],[23,27],[11,18]],dark);p.restore()}
+  p.strokeStyle=light;p.lineWidth=2;p.beginPath();p.moveTo(0,-32);p.lineTo(0,30);p.stroke();
+ }else if(machine){
+  poly([[-27,-29],[27,-29],[33,24],[19,35],[-19,35],[-33,24]]);
+  poly([[-16,-19],[16,-19],[20,17],[-20,17]],dark);
+  for(const side of [-1,1]){p.save();p.scale(side,1);poly([[19,-19],[35,-17],[37,17],[22,19]],dark);p.restore()}
+  p.fillStyle=light;p.fillRect(-5,-29,10,9);
+ }else{
+  poly([[0,-42],[13,-25],[46,21],[18,14],[8,35],[0,21],[-8,35],[-18,14],[-46,21],[-13,-25]]);
+  poly([[-10,-22],[10,-22],[12,11],[-12,11]],dark);
+ }
+ p.save();p.shadowColor=light;p.shadowBlur=14;p.fillStyle=light;p.beginPath();p.arc(0,-13,5,0,7);p.fill();p.restore();
+ BIOME_ATLAS.set(id,cv);return cv;
+}
+function drawBiomeOverlay(c,e){
+ if(!detailEnabled||e.type!=='BIOME_ENEMY')return;
+ const sprite=biomeSprite(e.biomeId||'HYBRID_HUNTER'),bob=Math.sin(Date.now()*.005+(e.biomeAge||0)*.02)*1.5;
+ c.save();c.globalAlpha=.91;c.drawImage(sprite,e.x-24,e.y-26+bob,48,52);c.restore();
+}
+function mechArticulation(c,e){
+ if(!detailEnabled||!['MECHA_SWORD','MECHA_GUN'].includes(e.type))return;
+ const pulse=Math.sin(Date.now()*.009+(e.motion||0)),sword=e.type==='MECHA_SWORD';
+ c.save();c.translate(e.x,e.y);c.strokeStyle=sword?'#b3eeff':'#ffd78c';c.shadowColor=c.strokeStyle;c.shadowBlur=10;c.lineWidth=3;
+ for(const d of [-1,1]){c.beginPath();c.moveTo(d*9,12);c.lineTo(d*(13+pulse*3),24);c.lineTo(d*15,31+pulse*3*d);c.stroke()}
+ if(sword){c.beginPath();c.moveTo(21,6);c.lineTo(30+3*pulse,-25);c.stroke()}
+ else{c.fillStyle='#536d80';c.fillRect(14,-12,26,9);c.fillStyle='#ffca7d';c.fillRect(37,-10,5,4)}
+ c.restore();
+}
+
 function draw(c,d){
  const t=THEMES[((d.sector-1)%THEMES.length+THEMES.length)%THEMES.length];
  landscape(c,d,t);terrainSignature(c,d,t);landmark(c,d,t);mapSetPieces(c,d,t);biomeAtmosphere(c,d,t);enhancedWorld(c,d,t);
@@ -1027,7 +1075,7 @@ function draw(c,d){
  islands(c,(d.islands||[]).filter(p=>p.y+(p.height||0)>-32&&p.y-(p.height||0)<d.h+32&&p.x+(p.width||0)>-32&&p.x-(p.width||0)<d.w+32),t);
  for(const e of d.enemies||[]){
    if(e.hp<=0||e.y+(e.height||40)<-45||e.y-(e.height||40)>d.h+45||e.x+(e.width||40)<-45||e.x-(e.width||40)>d.w+45)continue;
-   enemy(c,e,t.time);highDetailEnemy(c,e,t.time);drawAtlasVehicle(c,e);
+   enemy(c,e,t.time);highDetailEnemy(c,e,t.time);drawAtlasVehicle(c,e);drawBiomeOverlay(c,e);mechArticulation(c,e);
  }
  if(!d.invulnerable||Math.floor(Date.now()/110)%2){plane(c,d.player.x,d.player.y,d.player.aircraftType||d.aircraft,0.85);highDetailPlane(c,d.player.x,d.player.y,d.player.aircraftType||d.aircraft)}enhancedBattleLight(c,d);enhancedWeaponGlints(c,d);
 }
