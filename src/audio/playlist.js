@@ -119,17 +119,24 @@ class RiverPlaylist{
   this.fadeTimer=setInterval(()=>{step++;this.audio.volume=Math.max(0,Math.min(1,start+delta*step));if(step>=steps){clearInterval(this.fadeTimer);this.fadeTimer=null;if(onDone)onDone()}},duration/steps);
  }
  beginBossTheme(){
-  if(this.bossMode||!this.enabled)return;
+  if(!this.enabled)return;
   const theme=this.tracks.find(t=>t.id==='bundled-14')||this.tracks.find(t=>/Seoul Road/i.test(t.name));
   if(!theme){this.onStatus('Trilha de chefe não disponível; mantendo música atual');return;}
-  this.bossMode=true;this.audio.loop=true;this.fadeTo(0,1350,()=>{if(!this.bossMode)return;this.playItem(theme);this.audio.volume=0;this.fadeTo(.38,1600)});
+  clearInterval(this.fadeTimer);this.fadeTimer=null;
+  this.bossMode=true;this.audio.loop=true;
+  this.audio.volume=.38;
+  this.playItem(theme);
+  this.onStatus('BATALHA: '+theme.name);
  }
  endBossTheme(){
-  if(!this.bossMode)return;this.bossMode=false;this.audio.loop=false;
-  this.fadeTo(0,1300,()=>{if(this.bossMode)return;this.audio.volume=0;if(this.order.length)this.next();this.fadeTo(.38,1600)});
+  if(!this.bossMode)return;
+  clearInterval(this.fadeTimer);this.fadeTimer=null;
+  this.bossMode=false;this.audio.loop=false;this.audio.volume=.38;
+  if(this.enabled&&this.order.length)this.next();
+  else this.pause();
  }
  pause(){this.audio.pause()}
- resume(){if(!this.enabled)return;this.needsGesture=false;if(this.order.length&&!this.audio.src)this.next();else if(this.order.length)this.audio.play().catch(()=>{});else this.onUnavailable?.()}
+ resume(){if(!this.enabled)return;this.needsGesture=false;if(this.bossMode){this.audio.play().catch(()=>{});return}if(this.order.length&&!this.audio.src)this.next();else if(this.order.length)this.audio.play().catch(()=>{});else this.onUnavailable?.()}
  stop(){this.audio.pause();this.audio.removeAttribute('src');this.audio.load();if(this.objectURL)URL.revokeObjectURL(this.objectURL);this.objectURL=null}
  toggle(){this.enabled=!this.enabled;if(!this.enabled)this.pause();else this.resume();return this.enabled}
  getName(){return this.order[this.current]?.name||'Nenhuma música'}
