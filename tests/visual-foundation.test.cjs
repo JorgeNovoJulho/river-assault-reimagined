@@ -30,3 +30,11 @@ test('scene renderer parses and differentiates quality',()=>{
  assert.match(source,/quality==='enhanced'/);
  assert.match(source,/quality==='eco'/);
 });
+test('river graphics use deterministic current and shoreline detail without gameplay mutation',()=>{
+ const source=read('src/render/scene2d5.js');
+ assert.match(source,/function waterMotion\(/);
+ assert.match(source,/function bankDetails\(/);
+ assert.match(source,/waterMotion\(c,points,w,h,distance,quality,t\)/);
+ assert.match(source,/bankDetails\(c,points,w,h,distance,quality,t\)/);
+ assert.doesNotMatch(source.slice(source.indexOf('function waterMotion'),source.indexOf('function landscape')),/Math\.random/);
+});
