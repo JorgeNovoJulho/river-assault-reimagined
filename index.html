@@ -1433,8 +1433,8 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
                 return;
             }
 
-            if(player.effectTimer>0 && ['ICE','FIRE','LIGHTNING','EMP'].includes(player.effectType)){
-                ctx.shadowColor=player.effectType==='ICE'?'#7dd3fc':player.effectType==='FIRE'?'#ef4444':'#22d3ee';
+            if(player.effectTimer>0 && ['ICE','FIRE','LIGHTNING','EMP','POISON','BLEED','GRAVITY'].includes(player.effectType)){
+                ctx.shadowColor=player.effectType==='ICE'?'#7dd3fc':player.effectType==='FIRE'?'#ef4444':player.effectType==='POISON'?'#4ade80':player.effectType==='BLEED'?'#fb7185':player.effectType==='GRAVITY'?'#c4b5fd':'#22d3ee';
                 ctx.shadowBlur=18;
                 ctx.globalAlpha=.86;
             }
