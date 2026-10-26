@@ -645,7 +645,7 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
 
             distance += segmentHeight;
 
-            if (missionTicks >= 90*60 && distance - missionStartDistance > campaign.at(sector).bossDistance) {
+            if (missionTicks >= 90*60 && redAlertTriggered && redAlertTicks===0 && distance - missionStartDistance > campaign.at(sector).bossDistance) {
                 spawnBoss(y);
                 return;
             }
@@ -1334,7 +1334,7 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
             missionTicks++;
             // Alerta 6s antes do chefe, acionado uma vez por missão.
             if(!bossActive && !redAlertTriggered && missionTicks>=84*60
-               && distance-missionStartDistance>=campaign.at(sector).bossDistance*.82){
+               && distance-missionStartDistance>=campaign.at(sector).bossDistance*.75){
                 redAlertTriggered=true;redAlertTicks=360;
                 try{window.RiverSFX?.alert?.()}catch(e){}
             }
