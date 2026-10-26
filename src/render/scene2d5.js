@@ -406,7 +406,7 @@ function enemy(c,e,time){
    for(let i=0;i<3;i++){c.fillStyle='#9ca6b3';c.fillRect(34,-8+i*3,5,2)}
    c.fillStyle='#ffac4b';c.shadowColor='#ffac4b';c.shadowBlur=8;c.fillRect(39,-5,2,4);
   }
-  c.restore();return;
+  c.restore();c.restore();return; // restaura tambem a translacao do inimigo
  }
  c.fillStyle='rgba(0,8,20,.36)';c.beginPath();c.ellipse(3,8,Math.max(13,(e.width||22)*.5),8,0,0,Math.PI*2);c.fill();
  if(type==='MECHA_SWORD'||type==='MECHA_GUN'){
