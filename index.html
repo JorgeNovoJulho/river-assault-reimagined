@@ -1524,6 +1524,9 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
             // Armas especiais usam disparos disponíveis, não tempo em quadros.
 
             updateRiver();
+            // Ilhas acompanham a correnteza: antes ficavam permanentemente fora da tela.
+            for(const island of islands)island.y+=player.currentScrollSpeed;
+            islands=islands.filter(island=>island.y-island.height/2<=VIRTUAL_HEIGHT+50);
             updateBombs();
             for(let i=structures.length-1;i>=0;i--){const p=structures[i];p.y+=player.currentScrollSpeed;
                 if(Math.abs(player.x-p.x)<p.width/2 && Math.abs(player.y-p.y)<p.height/2+player.height/2 && !(p.type==='DAM' && Math.abs(player.x-p.x)<p.opening/2-player.width/2))applyDamage(35,'COLIDIU COM OBSTÁCULO!');
