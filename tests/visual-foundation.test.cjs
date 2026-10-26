@@ -344,7 +344,7 @@ test('mapas: marcos ambientais com cinco famílias, deslocamento e baixo custo',
  const render=read('src/render/scene2d5.js');
  assert.match(render,/function landmark\(c,d,t\)/);
  assert.match(render,/switch\(\(sector-1\)%5\)/);
- assert.match(render,/landscape\(c,d,t\);landmark\(c,d,t\);biomeAtmosphere\(c,d,t\)/);
+ assert.match(render,/landscape\(c,d,t\);landmark\(c,d,t\);mapSetPieces\(c,d,t\);biomeAtmosphere\(c,d,t\)/);
  assert.match(render,/d\.quality==='eco'\?2/);
 });
 
