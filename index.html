@@ -1213,6 +1213,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
         }
         function openBossSkillPicker(){
           if(gameState==='BOSS_SELECT'||bossActive)return;
+          controllerMenuOpen=false;
           gameState='BOSS_SELECT';
           bossSkillPending=null; // requer escolha explícita, como no original
           try{playlist.pause();soundtrack.stop()}catch(error){console.warn('Áudio da seleção:',error)}
@@ -3564,7 +3565,10 @@ function updateTerrainEvent(){
             }
             previousMenuDirection=false;previousMenuConfirm=false;
             if (gamepadState.justPause) {
-                if (gameState === 'START' || gameState === 'GAMEOVER') { sound.init(); resetGame(); }
+                if(gameState==='BOSS_SELECT'){
+                    // O botão Start confirma SOMENTE uma escolha já feita.
+                    if(bossSkillPending!==null)confirmBossSelection();
+                }else if (gameState === 'START' || gameState === 'GAMEOVER') { sound.init(); resetGame(); }
                 else togglePause();
             }
             if (gameState === 'PLAYING' && gamepadState.justBomb) triggerBomb();
