@@ -279,7 +279,7 @@ test('069: prism and shadow arsenal and opposite weaknesses',()=>{
  assert.match(html,/SHADOW:\{icon:/);
  assert.match(html,/strong:'SHADOW'/);
  assert.match(html,/strong:'PRISM'/);
- assert.match(html,/boss\.dualRate=advantage\?\.01:\.005/);
+ assert.match(html,/boss\.dualRate=advantage\?\.003:\.0015/);
  assert.match(html,/boss\.dualAmp=kind==='PRISM'/);
  assert.match(html,/boss\.dualSlow=kind==='SHADOW'/);
  assert.match(html,/dualElement==='PRISM'\?1\+/);
