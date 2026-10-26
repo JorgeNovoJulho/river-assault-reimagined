@@ -44,3 +44,21 @@ test('as vinte missões possuem biomas e chefes temáticos; represas têm abertu
  assert.ok(html.includes("opening:passage"),'represa sem abertura');
  assert.ok(html.includes("islandLastDistance"),'distância entre ilhas ausente');
 });
+
+test('trilha catalogada com 14 faixas e ordens random/manual',()=>{
+  const music=fs.readFileSync('src/audio/playlist.js','utf8');
+  const entries=[...music.matchAll(/"id": "bundled-\d+"/g)];
+  assert.equal(entries.length,14);
+  assert.match(music,/this\.random=true/);
+  assert.match(music,/startNewGame\(\).*this\.random\?shuffle/);
+  assert.match(music,/preview\(id\)/);
+  assert.match(music,/move\(id,delta\)/);
+  assert.match(music,/item\.url/);
+});
+test('bosses usam HP ampliado, alerta e tempo minimo de batalha',()=>{
+  const html=fs.readFileSync('index.html','utf8');
+  assert.match(html,/360\+mission\.difficulty\*110\+sector\*27/);
+  assert.match(html,/RED ALERT/);
+  assert.match(html,/redAlertTicks===0/);
+  assert.match(html,/missionTicks >= 90\*60/);
+});
