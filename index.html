@@ -1125,7 +1125,26 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
             strip.classList.remove('hidden');
         }
         function spawnBoss(y,confirmed=false) {
-            if(!confirmed){openBossSkillPicker();return;}
+            if(!confirmed){
+                // Transição RED ALERT -> chefe sem modal bloqueante.
+                // Equipar automaticamente uma habilidade já desbloqueada; sem alterar dano ou recarga.
+                const affinity=bossSkillForMission(sector);
+                const chosen=bossSkillUnlocked.find(key=>BOSS_SKILLS[key]?.strong===affinity)
+                  ||bossSkillUnlocked.find(key=>BOSS_SKILLS[key])||null;
+                bossSkillPending=chosen||'NONE';
+                bossSkillEquipped=chosen;
+                bossSkillCharge=chosen?BOSS_SKILLS[chosen].charges:0;
+                bossSkillCooldown=0;
+                skillPicker.classList.add('hidden');
+                skillPicker.style.display='none';
+                skillPicker.setAttribute('aria-hidden','true');
+                redAlertTicks=0;
+                redAlertTriggered=true; // mantém marca de alerta desta missão
+                gameState='PLAYING';
+                simulationClock.reset();
+                return spawnBoss(y,true);
+            }
+            if(enemies.some(e=>e.type==='BOSS'))return;
             bossActive = true;
             playlist.beginBossTheme?.();
             redAlertTicks=0;
