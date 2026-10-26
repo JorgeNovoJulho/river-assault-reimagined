@@ -2,7 +2,7 @@
 (function(root){
   'use strict';
   const MAX_LEVEL=100;
-  function required(level){return 100+level*22+level*level*2;}
+  function required(level){return 900+level*180+level*level*20;}
   const thresholds=[0];for(let level=0;level<MAX_LEVEL;level++)thresholds.push(thresholds[level]+required(level));
   function cap(xp){return Math.min(thresholds[MAX_LEVEL],Math.max(0,Math.floor(Number(xp)||0)));}
   function levelFor(xp){
