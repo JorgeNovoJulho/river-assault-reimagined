@@ -38,3 +38,11 @@
 3. Substituir assets vetoriais por renderizador 3D leve e sprites autorais.
 4. Desenvolver campanhas e chefes singulares com homologação por missão.
 5. Gerar releases estáveis e assinadas APK/EXE e pipeline de atualização.
+
+## Diagnóstico CI — 26/10/2026
+- Investigados logs do job de teste: 53 testes, 37 aprovados e 16 reprovados na versão 0.8.3 com regressões adicionadas.
+- Testes do fluxo de continue e entrada de boss atualizados para as regras atuais (10 continues e escolha de habilidade pré-boss).
+- Cobertura acrescentada para promoção NG+, perfil de piloto, playlist exclusiva do boss e perseguição de mísseis.
+- Persistem 16 falhas na suíte: muitas são verificações textuais de implementações anteriores. Precisam ser classificadas entre regressões reais e assertivas obsoletas, sem ocultar falhas.
+- GitHub Pages já publicou versão anterior, mas pipeline completo não foi homologado.
+- Pendente: testes de longa duração/colisão, extração modular do HTML, arte 2.5D/3D final, 20 chefes exclusivos, e builds APK/EXE assinadas/homologadas.
