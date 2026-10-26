@@ -83,7 +83,7 @@ class RiverPlaylist{
  if(item)this.failedTracks.add(item.id);
  if(this.bossMode){this.bossMode=false;this.audio.loop=false;this.onStatus('Faixa de chefe indisponível; retomando playlist');this.next(true);return}
  this.onStatus('Faixa indisponível; procurando outra');this.next(true)});}
- async load(){if(this.loading&&this.loadPromise)return this.loadPromise;this.loading=true;this.loadPromise=this.loadTracks();return this.loadPromise}
+ async load(){if(this.loading&&this.loadPromise)return this.loadPromise;this.loading=true;this.loadPromise=this.loadTracks().finally(()=>{this.loadPromise=null;this.loading=false});return this.loadPromise}
  async loadTracks(){let rows=[];try{const db=await openDB();rows=await transaction(db,'readonly',s=>s.getAll())}catch(e){this.onStatus('Biblioteca local indisponível; verificando faixas oficiais')}try{const bundled=await Promise.all(PRESET.map(async item=>{
        try{
          // Vite publica public/ na raiz; GitHub/GitHack serve a pasta literalmente.
