@@ -38,7 +38,7 @@ function landscape(c,data,t){
  const beat=(Math.sin(Date.now()/215)+1)*.5;
  const water=c.createLinearGradient(0,0,0,h);water.addColorStop(0,t.water[0]);water.addColorStop(1,t.water[1]);
  if(riverPath(c,points)){
-   c.shadowColor='rgba(0,11,26,.75)';c.shadowBlur=quality==='eco'?6:15;
+   c.shadowColor='rgba(0,11,26,.75)';c.shadowBlur=quality==='eco'?6:quality==='enhanced'?19:15;
    c.fillStyle=water;c.fill();c.shadowBlur=0;
    c.strokeStyle='rgba(165,240,232,'+(.3+beat*.15)+')';c.lineWidth=3;c.stroke();
  }
@@ -51,7 +51,7 @@ function landscape(c,data,t){
      }
    }
  }
- const tile=quality==='eco'?70:42, phase=(distance*.17)%tile;
+ const tile=quality==='eco'?70:quality==='enhanced'?34:42, phase=(distance*.17)%tile;
  for(let y=-tile+phase;y<h+tile;y+=tile){
    let banks=bankAt(points,y,w);
    for(let side=0;side<2;side++){
@@ -75,11 +75,22 @@ function landscape(c,data,t){
  if(weather==='mist'){
    const fog=c.createLinearGradient(0,0,0,h);fog.addColorStop(0,'rgba(225,239,241,.17)');fog.addColorStop(.55,'rgba(196,215,221,.08)');fog.addColorStop(1,'rgba(213,239,244,.21)');c.fillStyle=fog;c.fillRect(0,0,w,h);
  }else if(weather==='rain'||weather==='snow'){
-   const amount=quality==='eco'?28:62;
+   const amount=quality==='eco'?28:quality==='enhanced'?76:62;
    c.strokeStyle=weather==='rain'?'rgba(171,214,255,.34)':'rgba(255,255,255,.6)';
    c.lineWidth=weather==='rain'?1:2;
    const phase=(Date.now()/(weather==='rain'?7:21))%h;
    for(let k=0;k<amount;k++){const x=hash(k*33+mission)*w,y=(hash(k*13+mission)*h+phase*(.3+hash(k*9)))%h;c.beginPath();c.moveTo(x,y);c.lineTo(x+(weather==='rain'?7:2),y+(weather==='rain'?17:3));c.stroke()}
+ }
+ // Perfil Aprimorado: reflexos discretos limitados ao canal, sem afetar colisões.
+ if(quality==='enhanced'&&riverPath(c,points)){
+   c.save();c.clip();c.lineWidth=1;
+   const phase=(distance*.35)%58;
+   for(let y=phase-58;y<h;y+=58){
+     const b=bankAt(points,y,w);const x=lerp(b[0],b[1],.27+hash(y+mission)*.46);
+     c.strokeStyle='rgba(208,252,255,.16)';
+     c.beginPath();c.moveTo(x-18,y);c.quadraticCurveTo(x,y-3,x+20,y);c.stroke();
+   }
+   c.restore();
  }
  // Vinheta leve preservando visibilidade dos alvos noturnos.
  if(t.time==='night'){c.fillStyle='rgba(5,10,30,.16)';c.fillRect(0,0,w,h);c.fillStyle='rgba(255,220,143,'+(.1+beat*.09)+')';for(let y=26;y<h;y+=130){let b=bankAt(points,y,w);c.beginPath();c.arc(b[0]-6,y,10,0,Math.PI*2);c.fill();c.beginPath();c.arc(b[1]+6,y,10,0,Math.PI*2);c.fill()}}
