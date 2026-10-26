@@ -70,6 +70,6 @@ test('recompensas, mechas e transição estão no jogo',()=>{
  assert.match(html,/p\.type==='FUEL'/);
  assert.match(html,/type==='MECHA_SWORD'/);
  assert.match(html,/type==='MECHA_GUN'/);
- assert.match(html,/e\.attackTimer%960===0/);
+ assert.match(html,/e\.attackTimer%850===0/);
  assert.match(html,/missionTransitionTicks=180/);
 });
