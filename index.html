@@ -1986,15 +1986,18 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
         controllerDialog.style.height='100dvh';
         controllerDialog.style.maxHeight='100dvh';
         controllerDialog.style.overflowY='auto';
-        controllerDialog.style.touchAction='pan-y';
+        controllerDialog.style.touchAction='auto';
+        controllerDialog.style.webkitOverflowScrolling='touch';
+        controllerDialog.style.contain='layout style';
         controllerDialog.style.pointerEvents='auto';
         controllerDialog.style.padding='max(16px,env(safe-area-inset-top)) max(14px,env(safe-area-inset-right)) max(24px,env(safe-area-inset-bottom)) max(14px,env(safe-area-inset-left))';
         controllerDialog.style.alignItems='center';
         controllerDialog.style.gap='12px';
         controllerDialog.style.background='#071426';
-        for(const child of controllerDialog.children){child.style.width='min(100%,460px)';child.style.flexShrink='0'}
+        controllerDialog.style.scrollBehavior='auto';
+        for(const child of controllerDialog.children){child.style.width='min(100%,460px)';child.style.maxWidth='460px';child.style.marginLeft='auto';child.style.marginRight='auto';child.style.display=child.tagName==='BUTTON'?'block':child.style.display;child.style.flexShrink='0'}
         for(const id of ['music-volume','sfx-volume','sarcasm-level','pad-deadzone']){
-            const el=document.getElementById(id);el.style.width='100%';el.style.minHeight='40px';el.style.touchAction='pan-x';
+            const el=document.getElementById(id);el.style.width='100%';el.style.minHeight='40px';el.style.touchAction='auto';el.style.accentColor='#22d3ee';
         }
         // Botão de fechar no topo: sem rolagem obrigatória nem sobreposição ao Hangar.
         const closeSettings=document.getElementById('pad-close');
@@ -2019,13 +2022,13 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
         function showControllerSettings(open) {
             controllerMenuOpen = Boolean(open);pendingRemap=null;controllerMenuIndex=0;
             controllerDialog.classList.toggle('hidden',!open);
-            controllerDialog.style.display=open?'flex':'none';
+            controllerDialog.style.display=open?'block':'none';
             controllerDialog.setAttribute('aria-hidden',String(!open));
             if(open){
                 remapPreviousButtons=[...physicalGamepad.lastButtons];
                 updateSensitivityUI();
                 controllerDialog.scrollTop=0;
-                document.getElementById('music-volume').focus({preventScroll:true});
+                // Não roubar foco/rolagem dos controles de toque.
             }
         }
         document.getElementById('controller-settings-btn').addEventListener('click',()=>showControllerSettings(true));
@@ -2110,6 +2113,10 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
         const simulationClock = new window.RiverClock();
         function gameLoop(timestamp = 0) {
             try {
+            if(controllerMenuOpen && timestamp-(gameLoop.lastSettingsPoll||0)<140){return;}
+            if(controllerMenuOpen)gameLoop.lastSettingsPoll=timestamp;
+            if(gameState!=='PLAYING'&&!controllerMenuOpen && timestamp-(gameLoop.lastMenuFrame||0)<50){return;}
+            if(gameState!=='PLAYING'&&!controllerMenuOpen)gameLoop.lastMenuFrame=timestamp;
             gamepadState = physicalGamepad.poll();
             const status = gamepadState.connected ? 'Controle: '+physicalGamepad.name.slice(0,35) : 'Controle: não conectado';
             if (status !== lastControllerStatus) {
