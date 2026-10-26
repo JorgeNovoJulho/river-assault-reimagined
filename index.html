@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>RiverStorm — Playtest 0.3.4</title>
+    <title>RiverStorm — Playtest 0.3.5</title>
     <link rel="stylesheet" href="./src/styles/tailwind.css">
     <style>
         body {
@@ -686,23 +686,17 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
 
             // Microsequências desenhadas por área: ilhotas, recifes, ilhas longas e corredores.
             const level=campaign.at(sector);
-            const islandGap=[180,250,310][(level.hazardSet+obstacleSequence)%3];
-            if(islands.length<3 && distance-islandLastDistance>islandGap &&
-               distance-structureLastDistance>220 && !structures.some(o=>Math.abs(o.y-y)<180) &&
-               !rescueBoats.some(o=>Math.abs(o.y-y)<100) && Math.random()<.96){
-                let shape=(obstacleSequence+level.hazardSet)%5;
-                const islandWidth=Math.min(width*.34,shape===1?73:shape===3?64:90);
-                const offset=shape===2 ? width*.16 : shape===4 ? -width*.17 :(Math.random()-.5)*width*.22;
-                const island={x:center+offset,y,width:islandWidth,height:shape===1?128:shape===3?95:shape===4?65:75,shape};
-                // Garantir corredor de voo de pelo menos 46px + envergadura do jogador.
-                const leftGap=island.x-island.width/2-leftBank;
-                const rightGap=rightBank-(island.x+island.width/2);
-                if(Math.max(leftGap,rightGap)>=player.width+46){
-                    islands.push(island);
-                    islandLastDistance=distance;
-                    obstacleLastType='ISLAND';
-                    obstacleSequence++;
-                }
+            // Ilhas garantidas a intervalos regulares e posicionadas próximas a uma margem.
+            const islandGap=340+(sector%3)*60;
+            if(islands.length<3 && distance-islandLastDistance>=islandGap &&
+               !structures.some(o=>Math.abs(o.y-y)<110)){
+                const shape=(obstacleSequence+level.hazardSet)%5;
+                const islandWidth=Math.min(66,Math.max(35,width*.19));
+                const islandHeight=68+shape*13;
+                const side=obstacleSequence%2===0?-1:1;
+                const offset=side*(width/2-islandWidth/2-19);
+                islands.push({x:center+offset,y,width:islandWidth,height:islandHeight,shape});
+                islandLastDistance=distance;obstacleLastType='ISLAND';obstacleSequence++;
             }
 
             // Botes civis com soldados: voar perto realiza resgate, sem disparar.
@@ -712,13 +706,12 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
 
             // Pontos estratégicos de combustível; resgates e armas não são bloqueados.
             if (distance - fuelSpawnAt >= 650 && Math.random() < .2) trySpawnFuel(center,y,width,false);
-            const structureGap=420+((sector*173+obstacleSequence*97)%230);
+            const structureGap=460+((sector*173+obstacleSequence*97)%150);
             if(structures.length<1 && distance-structureLastDistance>structureGap &&
-               distance-islandLastDistance>260 && missionTicks>180 &&
-               !islands.some(o=>Math.abs(o.y-y)<175) &&
-               !rescueBoats.some(o=>Math.abs(o.y-y)<135) && Math.random()<.75){
-                const type=obstacleLastType==='DAM'?'BRIDGE':
-                    obstacleLastType==='BRIDGE'?'DAM':(Math.random()<.32?'BRIDGE':'DAM');
+               distance-islandLastDistance>135 && missionTicks>180 &&
+               !islands.some(o=>Math.abs(o.y-y)<110) &&
+               !rescueBoats.some(o=>Math.abs(o.y-y)<90)){
+                const type=obstacleSequence%3===0?'BRIDGE':'DAM';
                 const passage=type==='DAM'?Math.max(player.width+42,Math.min(width*.45,105+level.difficulty*12)):0;
                 structures.push({type,x:center,y,width:width+30,height:type==='BRIDGE'?22:35,
                     opening:passage,variant:(level.hazardSet+obstacleSequence)%4,
@@ -856,8 +849,8 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
             if(e.rewardCooldown>0)e.rewardCooldown--;
 
             // Mechas convocados pelo chefe: uma pequena onda, com intervalo próprio.
-            if(e.attackTimer%960===0 && enemies.filter(x=>x.type==='MECHA_SWORD'||x.type==='MECHA_GUN').length<2){
-                const type=(sector+e.attackTimer/960)%2?'MECHA_SWORD':'MECHA_GUN';
+            if(e.attackTimer%220===0 && enemies.filter(x=>x.type==='MECHA_SWORD'||x.type==='MECHA_GUN').length<5){
+                const type=(sector+e.attackTimer/220)%2?'MECHA_SWORD':'MECHA_GUN';
                 enemies.push({type,x:e.x+(Math.random()<.5?-80:80),y:e.y+45,width:34,height:45,
                     hp:9,maxHp:9,vx:type==='MECHA_SWORD'?2.2:1.3,vy:1.2,score:400,shootTimer:0,noDrop:true});
             }
@@ -1168,7 +1161,15 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
                 ctx.save();
                 ctx.translate(e.x, e.y);
 
-                if (e.type === 'HELI') {
+                if(e.type==='MEGAZORD'){
+                    ctx.fillStyle='#25354e';ctx.fillRect(-29,-34,58,68);
+                    ctx.fillStyle='#f97316';ctx.fillRect(-19,-52,38,24);
+                    ctx.fillStyle='#67e8f9';ctx.fillRect(-13,-45,26,7);
+                    ctx.fillStyle='#94a3b8';ctx.fillRect(-43,-25,16,62);ctx.fillRect(27,-25,16,62);
+                    ctx.strokeStyle='#fbbf24';ctx.lineWidth=8;ctx.beginPath();ctx.moveTo(41,-22);ctx.lineTo(57,36);ctx.stroke();
+                    ctx.fillStyle='#ef4444';ctx.fillRect(-38,-66,76*Math.max(0,e.hp/e.maxHp),7);
+                }
+                else if (e.type === 'HELI') {
                     ctx.fillStyle = '#1e293b';
                     ctx.fillRect(-2, 4, 4, 10);
                     ctx.fillRect(-4, 12, 8, 3);
@@ -1439,11 +1440,32 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
                 }
             }
             // Patrulhas mecha em turnos, no máximo duas unidades simultâneas.
-            if(!bossActive && missionTicks%210===0 && enemies.filter(e=>e.type==='MECHA_SWORD'||e.type==='MECHA_GUN').length<2){
-                const banks=getRiverBoundariesAt(35),type=(Math.floor(missionTicks/210)%2===0)?'MECHA_GUN':'MECHA_SWORD';
+            if(!bossActive && missionTicks%145===0 && enemies.filter(e=>e.type==='MECHA_SWORD'||e.type==='MECHA_GUN').length<5){
+                const banks=getRiverBoundariesAt(35),type=(Math.floor(missionTicks/145)%2===0)?'MECHA_GUN':'MECHA_SWORD';
                 enemies.push({type,x:banks.center+(Math.random()-.5)*banks.width*.5,y:-35,width:34,height:45,
                     hp:6+Math.floor(sector/5),maxHp:6+Math.floor(sector/5),vx:type==='MECHA_SWORD'?2:1,vy:1.25,
                     score:340,shootTimer:0,mechaCooldown:0});
+            }
+            // Ataque coordenado: até cinco mechas patrulham; no chefe, cinco se fundem.
+            const squad=enemies.filter(e=>e.type==='MECHA_SWORD'||e.type==='MECHA_GUN');
+            if(squad.length>=3 && missionTicks%100===0){
+                const leader=squad[0];
+                squad.slice(0,5).forEach((m,i)=>{
+                    m.squadIndex=i;
+                    m.vx=(i%2===0?1:-1)*(1.25+i*.14);
+                    if(Math.abs(m.y-player.y)<230){
+                        enemyBullets.push({x:m.x,y:m.y+18,vx:(player.x-m.x)*.012,vy:3.5+i*.25,color:'#fb7185'});
+                    }
+                });
+                createFloatingText(leader.x,leader.y,'ATAQUE EM FORMAÇÃO!','#fca5a5');
+            }
+            if(bossActive && squad.length>=5 && !enemies.some(e=>e.type==='MEGAZORD')){
+                const members=squad.slice(0,5);
+                const x=members.reduce((sum,m)=>sum+m.x,0)/5;
+                const y=Math.max(115,Math.min(250,members.reduce((sum,m)=>sum+m.y,0)/5));
+                members.forEach(m=>{const i=enemies.indexOf(m);if(i>=0)enemies.splice(i,1)});
+                enemies.push({type:'MEGAZORD',x,y,width:82,height:95,hp:150,maxHp:150,vx:1.6,vy:0,score:2500,shootTimer:0,meleeTick:0});
+                createFloatingText(x,y,'FUSÃO MEGAZORD!','#fbbf24');
             }
             if(screenShake>0)screenShake*=.83;
             if(hazardWaveCooldown>0)hazardWaveCooldown--;
@@ -1608,6 +1630,7 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
 
                     updateBossAttacks(e);
                 } else {
+                    if(e.type==='MEGAZORD'){e.y=155+Math.sin(missionTicks/40)*35;e.x+=Math.sin(missionTicks/65)*2.4;}
                     if(e.type==='MECHA_SWORD'){
                         if(e.returning){e.y-=4.5;if(e.y< -45){e.returning=false;e.y=-45;e.reentries=(e.reentries||0)+1;}}
                         else {e.y+=player.currentScrollSpeed+(e.vy||0);if(e.y>VIRTUAL_HEIGHT-42)e.returning=true;}
@@ -1623,6 +1646,15 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
                     if(e.type==='HELI'||e.type==='JET'||e.type==='ZIGZAG')e.y+=Math.sin(e.motion)*1.3;
                     if(e.type==='SHIP'||e.type==='SUB')e.x+=Math.sin(e.motion)*.38;
                     if(e.type==='SUB'){e.x+=(e.vx||2.4)*.9;e.vy=-player.currentScrollSpeed;}
+                }
+                if(e.type==='MEGAZORD'){
+                    e.meleeTick=(e.meleeTick||0)+1;
+                    if(e.meleeTick%45===0){
+                        [-2,-1,0,1,2].forEach(i=>enemyBullets.push({x:e.x+i*11,y:e.y+28,vx:i*.8,vy:4.5,color:'#fb923c'}));
+                    }
+                    if(e.meleeTick%135===0 && Math.abs(e.x-player.x)<100 && Math.abs(e.y-player.y)<155){
+                        applyDamage(55,'ESPADA DO MEGAZORD');wingmen=[];addExplosion(player.x,player.y,'#f97316',12);
+                    }
                 }
                 if(e.type==='MECHA_SWORD'){
                     e.meleeTick=(e.meleeTick||0)+1;
@@ -1692,7 +1724,7 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
                     }
                 });
 
-                if (e.y > VIRTUAL_HEIGHT + 50 && e.type !== 'BOSS') enemies.splice(eIndex, 1);
+                if (e.y > VIRTUAL_HEIGHT + 50 && e.type !== 'BOSS' && e.type!=='MECHA_SWORD' && e.type!=='MEGAZORD') enemies.splice(eIndex, 1);
             });
 
             fuelDepots=fuelDepots.filter(f=>f.y<=VIRTUAL_HEIGHT+40);
