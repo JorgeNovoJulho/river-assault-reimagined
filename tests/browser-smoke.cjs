@@ -78,11 +78,11 @@ const {chromium}=require('playwright');const {spawn}=require('node:child_process
   if(lifeFlow.a.lives!==2||lifeFlow.b.lives!==1||lifeFlow.c.lives!==0||lifeFlow.c.state!=='GAMEOVER'||!lifeFlow.c.visible)throw Error('Fluxo de vidas/game over não funciona');
   await page.locator('#continue-btn').click();
   const continued=await page.evaluate(()=>({lives,state:gameState,credits:continues,screenHidden:document.getElementById('game-over-screen').classList.contains('hidden')}));
-  if(continued.lives!==3||continued.state!=='PLAYING'||continued.credits!==0||!continued.screenHidden)throw Error('O botão CONTINUAR falhou: '+JSON.stringify(continued));
+  if(continued.lives!==3||continued.state!=='PLAYING'||continued.credits!==9||!continued.screenHidden)throw Error('O botão CONTINUAR falhou: '+JSON.stringify(continued));
   const bossFlow=await page.evaluate(()=>{
     enemies=[];bullets=[];enemyBullets=[];bossDefeatedThisMission=false;
     missionTransitionTicks=0;missionTicks=5500;player.invulnerable=5000;player.shield=player.maxShield;
-    spawnBoss(-100);
+    spawnBoss(-100,true);
     const boss=enemies.find(e=>e.type==='BOSS');boss.x=player.x;boss.y=110;boss.hp=1;
     bullets.push({x:boss.x,y:boss.y,speed:0,vx:0});
     update();
