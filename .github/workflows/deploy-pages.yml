@@ -34,7 +34,7 @@ jobs:
         run: |
           test -f dist/index.html
           grep -q 'id="compact-hud"' dist/index.html
-          grep -q 'HUD 0.4.6' dist/index.html
+          grep -q 'HUD 0.4.7' dist/index.html
           grep -q 'id="rs-bottom-actions"' dist/index.html
       - name: Auditar arquivos visuais compilados
         shell: bash
@@ -62,12 +62,12 @@ jobs:
           URL="https://jorgenovojulho.github.io/river-assault-reimagined/?build=${GITHUB_SHA}"
           for attempt in 1 2 3 4 5; do
             if curl -fLsS --max-time 25 "$URL" -o /tmp/riverstorm-public.html; then
-              if grep -q 'id="compact-hud"' /tmp/riverstorm-public.html && grep -q 'HUD 0.4.6' /tmp/riverstorm-public.html; then
+              if grep -q 'id="compact-hud"' /tmp/riverstorm-public.html && grep -q 'HUD 0.4.7' /tmp/riverstorm-public.html; then
                 echo 'PUBLICACAO VERIFICADA: HUD NOVO DISPONIVEL'
                 exit 0
               fi
             fi
             sleep 8
           done
-          echo '::error::GitHub Pages nao entregou o HUD 0.4.6. Verificar Settings > Pages > Source = GitHub Actions'
+          echo '::error::GitHub Pages nao entregou o HUD 0.4.7. Verificar Settings > Pages > Source = GitHub Actions'
           exit 1
