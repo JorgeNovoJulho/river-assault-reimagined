@@ -1146,7 +1146,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
             }
             if(enemies.some(e=>e.type==='BOSS'))return;
             bossActive = true;
-            playlist.beginBossTheme?.();
+            try{playlist.beginBossTheme?.()}catch(audioError){console.warn('Trilha de chefe:',audioError)}
             redAlertTicks=0;
             const mission=campaign.at(sector);
             showBossTaunt(mission.boss);
