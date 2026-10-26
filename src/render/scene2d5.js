@@ -858,10 +858,38 @@ function drawAtlasVehicle(c,e){
  if(!['TANK','TURRET','SUB','HELI','JET','ZIGZAG','SHIP'].includes(type))return;
  const w=type==='SUB'?47:type==='TANK'?39:type==='HELI'?39:type==='SHIP'?43:type==='TURRET'?46:38;
  const h=type==='SUB'?59:type==='TANK'?42:type==='HELI'?43:type==='SHIP'?54:type==='TURRET'?47:42;
- c.save();c.globalAlpha=.94;c.drawImage(vehicleAtlas(type),e.x-w/2,e.y-h/2,w,h);
+ const time=Date.now()*.001;
+ const moving=['JET','HELI','ZIGZAG','SHIP','SUB'].includes(type);
+ const bank=Math.max(-.14,Math.min(.14,(Number(e.vx)||0)*.035));
+ const hover=moving?Math.sin(time*(type==='HELI'?6:3)+e.x*.03)*(type==='HELI'?1.5:.65):0;
+ c.save();c.translate(e.x,e.y+hover);c.rotate(bank);
+ // Silhueta e sombra acompanham a unidade, sem modificar colisões ou posições de jogo.
+ c.fillStyle='rgba(0,12,25,.30)';
+ c.beginPath();c.ellipse(3,5,w*.45,h*.38,0,0,Math.PI*2);c.fill();
+ c.globalAlpha=.96;c.drawImage(vehicleAtlas(type),-w/2,-h/2,w,h);
  if(type==='HELI'){
-  const rot=Date.now()*.06;c.strokeStyle='rgba(208,247,255,.83)';c.lineWidth=2;
-  c.beginPath();c.moveTo(e.x-Math.cos(rot)*24,e.y-Math.sin(rot)*8);c.lineTo(e.x+Math.cos(rot)*24,e.y+Math.sin(rot)*8);c.stroke();
+   const a=time*25,spread=20+Math.sin(time*34)*2;
+   c.strokeStyle='rgba(210,245,255,.72)';c.lineWidth=2;
+   c.beginPath();c.moveTo(-spread*Math.cos(a),-8-spread*.28*Math.sin(a));c.lineTo(spread*Math.cos(a),-8+spread*.28*Math.sin(a));c.stroke();
+   c.strokeStyle='rgba(179,232,255,.22)';c.beginPath();c.ellipse(0,-8,spread,8,0,0,Math.PI*2);c.stroke();
+ }
+ if(type==='SUB'||type==='SHIP'){
+   c.strokeStyle='rgba(173,240,255,.50)';c.lineWidth=1.5;
+   const wake=3+2*Math.sin(time*4+e.x);
+   for(const dir of [-1,1]){
+     c.beginPath();c.moveTo(dir*(w*.39),h*.18);c.quadraticCurveTo(dir*(w*.56+wake),h*.35,dir*(w*.65),h*.57);c.stroke();
+   }
+ }
+ if(type==='TURRET'){
+   // Luz de carregamento no canhão (efeito visual apenas, sem alterar cadência dos disparos).
+   const intensity=.22+.45*(.5+.5*Math.sin(time*5+e.x));
+   c.fillStyle='rgba(255,195,100,'+intensity.toFixed(3)+')';
+   c.beginPath();c.arc(0,-h*.40,2.3,0,Math.PI*2);c.fill();
+ }
+ if(type==='JET'||type==='ZIGZAG'){
+   const flicker=4+3*(.5+.5*Math.sin(time*21+e.x));
+   c.fillStyle='rgba(112,225,255,.75)';
+   c.beginPath();c.moveTo(-3,h*.35);c.lineTo(0,h*.35+flicker);c.lineTo(3,h*.35);c.fill();
  }
  c.restore();
 }
