@@ -254,6 +254,62 @@ function islands(c,items,t){
   c.restore();
  }
 }
-function draw(c,d){const t=THEMES[((d.sector-1)%THEMES.length+THEMES.length)%THEMES.length];landscape(c,d,t);islands(c,d.islands,t);for(let e of d.enemies)enemy(c,e,t.time);if(!d.invulnerable||Math.floor(Date.now()/110)%2)plane(c,d.player.x,d.player.y,d.aircraft,1);}
-root.RiverVisuals={draw,plane,enemy,THEMES,drawIslands(c,items,sector){const t=THEMES[((sector-1)%THEMES.length+THEMES.length)%THEMES.length];islands(c,items,t)}};
+
+/* Fase visual 04: ambientação exclusiva e determinística por setor.
+ * Apenas decoração, sem alterar colisões, caminhos ou probabilidades. */
+const BIOME_DETAILS=[
+ ['JUNGLE','#5ee4a0','🌿'],['PORT','#e5ac64','⚙'],['DUNES','#fbd38a','◇'],['SWAMP','#9ec46a','◌'],
+ ['ARCHIPELAGO','#4ce0d2','≈'],['GLACIER','#e9faff','✧'],['RAINFOREST','#8df5b0','✳'],
+ ['NEON_CITY','#ff69d1','▥'],['VOLCANO','#ff714e','▲'],['ALPINE','#e0fcff','△'],
+ ['GOLD_RIVER','#ffe69c','✦'],['NIGHT_CITY','#f28de9','▦'],['DELTA','#69dda9','≈'],
+ ['SNOWSTORM','#d9edff','❄'],['OASIS','#f8da79','☼'],['LUMINOUS_FOREST','#7effd5','✴'],
+ ['SHIPYARD','#f0bd79','⚓'],['ICE_ISLANDS','#d5f8ff','◇'],['ELECTRIC_RUINS','#8ed7ff','ϟ'],
+ ['FINAL_CONFLUENCE','#fbe1a1','✷']
+];
+function biomeAtmosphere(c,data,t){
+ const sector=Math.max(1,Math.min(20,Number(data.sector)||1)),detail=BIOME_DETAILS[sector-1];
+ const {w,h,distance=0,quality='balanced',riverPoints:points}=data;
+ const count=quality==='eco'?5:quality==='enhanced'?16:10;
+ const shift=distance*.27;
+ c.save();
+ for(let i=0;i<count;i++){
+   const seed=sector*113+i*41;
+   const y=((i*97+hash(seed)*h+shift)%(h+80))-40;
+   const bank=bankAt(points,y,w);
+   const side=i%2===0?-1:1;
+   const margin=side<0?bank[0]:w-bank[1];
+   if(margin<14)continue;
+   const x=side<0?Math.max(8,bank[0]*(.15+.55*hash(seed+4))):w-Math.max(8,(w-bank[1])*(.15+.55*hash(seed+4)));
+   const scale=.62+hash(seed+8)*.9;
+   c.globalAlpha=quality==='eco'?.4:.55+hash(seed+11)*.22;
+   c.translate(x,y);c.scale(scale,scale);
+   c.strokeStyle=detail[1];c.fillStyle=detail[1];c.lineWidth=1.6;
+   if([1,7,11,16,18].includes(sector-1)){
+     c.strokeRect(-7,-6,14,12);c.beginPath();c.moveTo(-11,8);c.lineTo(11,8);c.stroke();
+     if(sector===8||sector===12)c.fillRect(-3,-4,6,3);
+   }else if([2,4,9,14].includes(sector-1)){
+     c.beginPath();c.moveTo(-12,7);c.lineTo(0,-10);c.lineTo(12,7);c.closePath();c.stroke();
+     if(sector===15){c.beginPath();c.arc(0,-3,3,0,Math.PI*2);c.fill()}
+   }else if([5,13,17].includes(sector-1)){
+     for(let j=-1;j<=1;j++){c.beginPath();c.moveTo(j*6,-8);c.lineTo(j*6+3,6);c.stroke();}
+     c.beginPath();c.arc(0,0,8,0,Math.PI*2);c.stroke();
+   }else if([8,18].includes(sector-1)){
+     c.beginPath();c.moveTo(-8,7);c.lineTo(-2,-3);c.lineTo(2,3);c.lineTo(8,-8);c.stroke();
+   }else{
+     c.beginPath();c.moveTo(-8,7);c.lineTo(0,-10);c.lineTo(8,7);c.stroke();
+     c.beginPath();c.moveTo(0,-8);c.lineTo(0,8);c.stroke();
+   }
+   c.setTransform(1,0,0,1,0,0);
+ }
+ c.restore();
+ // Emblema de ambientação discreto que confirma visualmente o cenário carregado.
+ if(quality!=='eco'){
+   c.save();c.globalAlpha=.67;c.fillStyle='rgba(3,16,28,.5)';c.fillRect(8,h-87,84,13);
+   c.fillStyle=detail[1];c.font='bold 8px monospace';c.textAlign='left';
+   c.fillText('BIOMA '+String(sector).padStart(2,'0')+' · '+detail[2],13,h-78);c.restore();
+ }
+}
+
+function draw(c,d){const t=THEMES[((d.sector-1)%THEMES.length+THEMES.length)%THEMES.length];landscape(c,d,t);biomeAtmosphere(c,d,t);islands(c,d.islands,t);for(let e of d.enemies)enemy(c,e,t.time);if(!d.invulnerable||Math.floor(Date.now()/110)%2)plane(c,d.player.x,d.player.y,d.aircraft,1);}
+root.RiverVisuals={draw,plane,enemy,THEMES,BIOME_DETAILS,drawIslands(c,items,sector){const t=THEMES[((sector-1)%THEMES.length+THEMES.length)%THEMES.length];islands(c,items,t)}};
 })(window);
