@@ -414,7 +414,7 @@ test('074: shooting enemies, homing reflection, diagonal escorts and boss music'
  assert.match(html,/e\.type==='HELI'\|\|e\.type==='MECHA_GUN'/);
  assert.match(html,/b\.type==='REFLECTED'/);
  assert.match(html,/damage:37\.5,reflected:true,homing:true/);
- assert.match(html,/for\(const angle of \[-5\.8,5\.8\]\)/);
+ assert.match(html,/for\(const direction of \[-1,1\]\)/);
  assert.match(html,/playlist\.beginBossTheme/);
  assert.match(html,/playlist\.endBossTheme/);
  assert.match(music,/beginBossTheme\(\)/);
