@@ -264,7 +264,39 @@ function plane(c,x,y,style='falcao',size=1){
  distinctAircraft(c,style);
  c.restore();
 }
+function drawBiomeEnemy(c,e){
+ const id=e.biomeId||'',age=e.biomeAge||0,k=e.biomeSector||1;
+ const colors={TUCANO:['#0e7490','#67e8f9'],CRANE:['#475569','#fbbf24'],SCORPION:['#92400e','#fcd34d'],ALLIGATOR:['#14532d','#86efac'],CORSAIR:['#991b1b','#fca5a5'],WALRUS:['#64748b','#e0f2fe'],MANTIS:['#3f6212','#a3e635'],MOTOJET:['#831843','#f9a8d4'],SALAMANDER:['#9a3412','#fdba74'],EAGLE:['#a16207','#fef08a'],DREDGER:['#78716c','#facc15'],HOVERCAR:['#581c87','#e879f9'],PIRANHA:['#166534','#4ade80'],ICE_RAY:['#475569','#bfdbfe'],BEETLE:['#92400e','#fed7aa'],PRISM_WASP:['#6b21a8','#ddd6fe'],WELDER:['#7c2d12','#fb923c'],NARWHAL:['#0369a1','#bae6fd'],EEL:['#1d4ed8','#93c5fd'],HYBRID_HUNTER:['#7f1d1d','#fda4af']};
+ const [body,light]=colors[id]||['#334155','#e2e8f0'];
+ c.save();c.translate(e.x,e.y);c.fillStyle=body;c.strokeStyle=light;c.lineWidth=2;
+ const long=['ALLIGATOR','NARWHAL','EEL','SALAMANDER','PIRANHA','WALRUS'].includes(id);
+ const insect=['MANTIS','PRISM_WASP','SCORPION','BEETLE'].includes(id);
+ const flyer=['TUCANO','EAGLE','ICE_RAY','MOTOJET','HOVERCAR'].includes(id);
+ if(long){
+   c.beginPath();c.ellipse(0,3,11,21,Math.sin(age*.03)*.12,0,Math.PI*2);c.fill();c.stroke();
+   c.beginPath();c.moveTo(-8,12);c.lineTo(-4,25);c.lineTo(0,30);c.lineTo(5,24);c.lineTo(8,13);c.stroke();
+   if(id==='ALLIGATOR'){for(let i=-2;i<=2;i++){c.fillStyle=light;c.fillRect(-9,8+i*5,3,2);c.fillRect(6,8+i*5,3,2)}}
+   if(id==='NARWHAL'){c.beginPath();c.moveTo(0,-16);c.lineTo(0,-35);c.stroke()}
+   if(id==='EEL'){c.beginPath();for(let i=0;i<=28;i+=4)c.lineTo(Math.sin(age*.12+i*.3)*9,-18+i);c.stroke()}
+ }else if(insect){
+   c.beginPath();c.ellipse(0,0,11,17,0,0,Math.PI*2);c.fill();c.stroke();
+   for(let i=-1;i<=1;i++){c.beginPath();c.moveTo(-8,i*7);c.lineTo(-25,i*10+Math.sin(age*.12)*3);c.moveTo(8,i*7);c.lineTo(25,i*10-Math.sin(age*.12)*3);c.stroke()}
+   if(id==='PRISM_WASP'){c.fillStyle='#c4b5fd';c.beginPath();c.ellipse(-13,-9,12,6,-.4,0,Math.PI*2);c.ellipse(13,-9,12,6,.4,0,Math.PI*2);c.fill()}
+ }else if(flyer){
+   c.beginPath();c.moveTo(0,-22);c.lineTo(9,-7);c.lineTo(25,3);c.lineTo(26,12);c.lineTo(5,8);c.lineTo(0,18);c.lineTo(-5,8);c.lineTo(-26,12);c.lineTo(-25,3);c.lineTo(-9,-7);c.closePath();c.fill();c.stroke();
+   if(id==='HOVERCAR'){c.fillStyle='#1e1b4b';c.fillRect(-13,-8,26,17);c.fillStyle='#a5f3fc';c.fillRect(-8,-6,16,6)}
+ }else{
+   c.fillRect(-13,-16,26,34);c.strokeRect(-13,-16,26,34);
+   c.fillStyle=light;c.fillRect(-6,-12,12,12);
+   if(id==='CRANE'){c.beginPath();c.moveTo(8,-10);c.lineTo(29,-29);c.lineTo(29,2);c.stroke()}
+   if(id==='WELDER'){c.fillStyle='#fb923c';c.fillRect(12,0,17,5)}
+ }
+ c.fillStyle=light;c.beginPath();c.arc(-4,-8,2.3,0,Math.PI*2);c.arc(4,-8,2.3,0,Math.PI*2);c.fill();
+ c.globalAlpha=.3+Math.sin(age*.12)*.14;c.strokeStyle=light;c.beginPath();c.ellipse(0,0,23,27,0,0,Math.PI*2);c.stroke();
+ c.restore();
+}
 function enemy(c,e,time){
+ if(e.type==='BIOME_ENEMY'){drawBiomeEnemy(c,e);return;}
  c.save();c.translate(e.x,e.y);let type=e.type||'JET';
  c.fillStyle='rgba(0,8,20,.36)';c.beginPath();c.ellipse(3,8,Math.max(13,(e.width||22)*.5),8,0,0,Math.PI*2);c.fill();
  if(type==='MECHA_SWORD'||type==='MECHA_GUN'){
