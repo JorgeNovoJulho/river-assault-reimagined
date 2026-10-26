@@ -725,6 +725,59 @@ function biomeAtmosphere(c,data,t){
  }
 }
 
+
+/* Integração visual não invasiva: usa a simulação, os 20 setores,
+   as hitboxes, inimigos, armas, itens e chefes do motor oficial. */
+const DETAIL_CACHE=new Map();
+function detailStamp(type,variant=0){
+ const key=type+':'+variant;
+ if(DETAIL_CACHE.has(key))return DETAIL_CACHE.get(key);
+ const el=document.createElement('canvas');el.width=128;el.height=128;
+ const g=el.getContext('2d');g.translate(64,64);
+ const big=type==='BOSS',mech=type==='MECHA_SWORD'||type==='MECHA_GUN';
+ const ship=type==='SHIP'||type==='SUB'||type==='PATROL';
+ const accent=type==='MECHA_SWORD'?'#b67dff':type==='MECHA_GUN'?'#ffc376':big?'#ffbc7b':ship?'#89e3ff':'#8feaff';
+ const path=(pts,fill,stroke)=>{g.beginPath();pts.forEach(([x,y],i)=>i?g.lineTo(x,y):g.moveTo(x,y));g.closePath();g.fillStyle=fill;g.fill();g.strokeStyle=stroke||'#b9cfdf';g.lineWidth=1.5;g.stroke()};
+ const metal=g.createLinearGradient(-28,-35,30,36);metal.addColorStop(0,'#d2e5ef');metal.addColorStop(.38,'#748a9b');metal.addColorStop(1,'#23384b');
+ if(mech){
+  for(const d of [-1,1]){g.save();g.scale(d,1);path([[7,7],[17,11],[21,31],[10,32],[5,16]],metal);path([[14,-17],[29,-14],[31,5],[18,9],[10,-1]],metal);g.restore()}
+  path([[-20,-24],[0,-35],[20,-24],[25,15],[8,27],[-8,27],[-25,15]],metal);
+  path([[-9,-32],[9,-32],[12,-22],[-12,-22]],'#2d4b63');
+ }else if(big){
+  path([[-49,-28],[0,-46],[49,-28],[55,17],[25,40],[-25,40],[-55,17]],metal);
+  path([[-35,-22],[35,-22],[28,18],[0,32],[-28,18]],'#30475b');
+  for(const d of [-1,1]){g.save();g.scale(d,1);path([[36,-15],[58,-10],[59,4],[38,9]],'#354e64');g.fillStyle='#dbeaf2';g.fillRect(53,-6,11,3);g.fillRect(53,0,11,3);g.restore()}
+ }else if(ship){
+  path([[0,-36],[19,-20],[26,22],[15,38],[-15,38],[-26,22],[-19,-20]],metal);
+  path([[-11,-18],[11,-18],[12,15],[-12,15]],'#2f5c74');
+ }else{
+  path([[0,-36],[12,-23],[32,20],[11,12],[0,30],[-11,12],[-32,20],[-12,-23]],metal);
+  path([[-8,-27],[8,-27],[9,-7],[-9,-7]],'#295b77');
+ }
+ g.save();g.shadowColor=accent;g.shadowBlur=12;g.fillStyle=accent;g.beginPath();g.arc(0,big?0:-14,big?7:4,0,Math.PI*2);g.fill();g.restore();
+ g.strokeStyle='rgba(235,248,255,.42)';g.lineWidth=1;
+ for(let i=0;i<6;i++){const y=-14+i*5;g.beginPath();g.moveTo(-10,y);g.lineTo(10,y);g.stroke()}
+ DETAIL_CACHE.set(key,el);return el;
+}
+function highDetailEnemy(c,e,time){
+ const type=e.type||'JET';
+ if(type==='BIOME_ENEMY'||type==='TANK'||type==='TURRET')return;
+ if(!['MECHA_SWORD','MECHA_GUN','HELI','JET','SHIP','SUB','ZIGZAG','BOSS'].includes(type))return;
+ const w=type==='BOSS'?Math.max(110,Math.min(185,(e.width||140))):type.startsWith('MECHA')?37:type==='SUB'?31:type==='SHIP'?34:29;
+ const h=type==='BOSS'?Math.max(75,Math.min(112,(e.height||70)*1.25)):type.startsWith('MECHA')?46:type==='SUB'?40:type==='SHIP'?42:33;
+ c.save();c.globalAlpha=type==='BOSS'?.88:.76;
+ c.drawImage(detailStamp(type),e.x-w/2,e.y-h/2,w,h);
+ if(type==='HELI'){const a=(Date.now()/36)%(Math.PI*2);c.strokeStyle='rgba(204,248,255,.75)';c.lineWidth=2;c.beginPath();c.moveTo(e.x-Math.cos(a)*20,e.y-Math.sin(a)*9);c.lineTo(e.x+Math.cos(a)*20,e.y+Math.sin(a)*9);c.stroke()}
+ if(type==='MECHA_SWORD'&&(e.slashWarn>0||e.slashArc>0)){c.strokeStyle='#defaff';c.lineWidth=3;c.shadowColor='#93eaff';c.shadowBlur=12;c.beginPath();c.arc(e.x+15,e.y-2,24,-1.2,.6);c.stroke()}
+ c.restore();
+}
+function highDetailPlane(c,x,y,style){
+ const scale=style==='titan'?1.08:.9,w=48*scale,h=59*scale;
+ c.save();c.globalAlpha=.8;c.drawImage(detailStamp('PLAYER'),x-w/2,y-h/2,w,h);
+ c.strokeStyle='rgba(170,242,255,.68)';c.lineWidth=1;
+ c.beginPath();c.moveTo(x,y-h*.44);c.lineTo(x,y+h*.28);c.stroke();c.restore();
+}
+
 function draw(c,d){
  const t=THEMES[((d.sector-1)%THEMES.length+THEMES.length)%THEMES.length];
  landscape(c,d,t);terrainSignature(c,d,t);landmark(c,d,t);mapSetPieces(c,d,t);biomeAtmosphere(c,d,t);
@@ -732,9 +785,9 @@ function draw(c,d){
  islands(c,(d.islands||[]).filter(p=>p.y+(p.height||0)>-32&&p.y-(p.height||0)<d.h+32&&p.x+(p.width||0)>-32&&p.x-(p.width||0)<d.w+32),t);
  for(const e of d.enemies||[]){
    if(e.hp<=0||e.y+(e.height||40)<-45||e.y-(e.height||40)>d.h+45||e.x+(e.width||40)<-45||e.x-(e.width||40)>d.w+45)continue;
-   enemy(c,e,t.time);
+   enemy(c,e,t.time);highDetailEnemy(c,e,t.time);
  }
- if(!d.invulnerable||Math.floor(Date.now()/110)%2)plane(c,d.player.x,d.player.y,d.player.aircraftType||d.aircraft,0.85);
+ if(!d.invulnerable||Math.floor(Date.now()/110)%2){plane(c,d.player.x,d.player.y,d.player.aircraftType||d.aircraft,0.85);highDetailPlane(c,d.player.x,d.player.y,d.player.aircraftType||d.aircraft)}
 }
 root.RiverVisuals={draw,plane,enemy,THEMES,BIOME_DETAILS,drawIslands(c,items,sector){const t=THEMES[((sector-1)%THEMES.length+THEMES.length)%THEMES.length];islands(c,items,t)}};
 })(window);
