@@ -861,6 +861,28 @@ function enhancedBattleLight(c,d){
  c.restore();
 }
 
+
+function enhancedWeaponGlints(c,d){
+ if(!detailEnabled)return;
+ const time=Date.now()*.001,units=d.enemies||[];
+ c.save();
+ // Micro-animações de energia por tipo, ancoradas nos inimigos da simulação.
+ for(const e of units){
+  if(e.hp<=0||e.y<-25||e.y>d.h+25)continue;
+  const mech=e.type==='MECHA_SWORD',gun=e.type==='MECHA_GUN',boss=e.type==='BOSS';
+  if(!mech&&!gun&&!boss)continue;
+  const x=e.x+(mech?15:boss?30:12),y=e.y-7;
+  c.save();c.translate(x,y);
+  const pulse=.50+.50*Math.sin(time*(boss?5:9)+e.x*.06);
+  c.globalAlpha=.28+pulse*.53;
+  c.strokeStyle=mech?'#b9c0ff':gun?'#ffc58b':'#ff8b6b';
+  c.shadowColor=c.strokeStyle;c.shadowBlur=boss?16:9;c.lineWidth=boss?3:2;
+  c.beginPath();c.moveTo(-3,-8);c.lineTo(2+pulse*4,0);c.lineTo(-2,8);c.stroke();
+  c.restore();
+ }
+ c.restore();
+}
+
 function draw(c,d){
  const t=THEMES[((d.sector-1)%THEMES.length+THEMES.length)%THEMES.length];
  landscape(c,d,t);terrainSignature(c,d,t);landmark(c,d,t);mapSetPieces(c,d,t);biomeAtmosphere(c,d,t);enhancedWorld(c,d,t);
@@ -870,7 +892,7 @@ function draw(c,d){
    if(e.hp<=0||e.y+(e.height||40)<-45||e.y-(e.height||40)>d.h+45||e.x+(e.width||40)<-45||e.x-(e.width||40)>d.w+45)continue;
    enemy(c,e,t.time);highDetailEnemy(c,e,t.time);
  }
- if(!d.invulnerable||Math.floor(Date.now()/110)%2){plane(c,d.player.x,d.player.y,d.player.aircraftType||d.aircraft,0.85);highDetailPlane(c,d.player.x,d.player.y,d.player.aircraftType||d.aircraft)}enhancedBattleLight(c,d);
+ if(!d.invulnerable||Math.floor(Date.now()/110)%2){plane(c,d.player.x,d.player.y,d.player.aircraftType||d.aircraft,0.85);highDetailPlane(c,d.player.x,d.player.y,d.player.aircraftType||d.aircraft)}enhancedBattleLight(c,d);enhancedWeaponGlints(c,d);
 }
 root.RiverVisuals={draw,plane,enemy,THEMES,BIOME_DETAILS,drawIslands(c,items,sector){const t=THEMES[((sector-1)%THEMES.length+THEMES.length)%THEMES.length];islands(c,items,t)}};
 })(window);
