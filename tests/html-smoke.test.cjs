@@ -156,3 +156,21 @@ test('eventos de jogabilidade por bioma não congelam nave e encerram ao entrar 
  assert.match(html,/terrainEventTicks=0;terrainEventType='';terrainEventNotice=0/);
  assert.match(html,/player\.fuel=Math\.min\(player\.maxFuel,player\.fuel\+\.025\)/);
 });
+
+test('20 missões possuem alvos secundários destrutíveis e recompensas em rotas alternadas',()=>{
+ const html=fs.readFileSync('index.html','utf8');
+ const names=html.match(/const TERRAIN_OBJECTS=\[([^\]]+)\]/);
+ assert.ok(names);
+ assert.equal((names[1].match(/'[^']+'/g)||[]).length,20);
+ assert.match(html,/function spawnTerrainTarget\(center\)/);
+ assert.match(html,/secondaryTargetsDestroyed%2===0\?-1:1/);
+ assert.match(html,/terrainObstacle:true/);
+ assert.match(html,/if\(e\.terrainObstacle\)return/);
+ assert.match(html,/if\(e\.terrainObstacle\)\{/);
+ assert.match(html,/ROTA EXTRA \+ RECOMPENSA!/);
+});
+test('clima altera movimento dos inimigos sem afetar chefes e objetivos destrutíveis',()=>{
+ const html=fs.readFileSync('index.html','utf8');
+ assert.match(html,/!e\.terrainObstacle&&terrainEventTicks>0/);
+ assert.match(html,/CROSSWIND','SANDSTORM','ICE/);
+});
