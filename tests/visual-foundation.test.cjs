@@ -70,7 +70,7 @@ test('gameplay 045: dams spaced, shots held, banks targetable',()=>{
  assert.match(html,/touchFireButton\.addEventListener\('pointerdown'/);
  assert.match(html,/e\.type === 'SHIP' \|\| e\.type === 'TURRET'/);
  assert.match(html,/e\.y>=5 && e\.y<VIRTUAL_HEIGHT-90/);
- assert.match(html,/HUD 0\.4\.6/);
+ assert.match(html,/HUD 0\.4\.7/);
 });
 
 test('hotfix 1: pickup spacing and visual types are enforced',()=>{
@@ -81,4 +81,14 @@ test('hotfix 1: pickup spacing and visual types are enforced',()=>{
  for(const type of ['BOMB','SHIELD','SPREAD','LIFE','WINGMAN'])assert.ok(html.includes(type+':{color:'));
  assert.match(html,/mouseFireHeld/);
  assert.match(html,/const corridor=Math.max\(96,player.width\+55\)/);
+});
+
+test('boss hud 047: compact boss bars without full width overlay',()=>{
+ const html=read('index.html');
+ assert.match(html,/width=Math.min\(92,Math.max\(66,e.width\*\.76\)\)/);
+ assert.match(html,/charge>=\.99/);
+ assert.doesNotMatch(html,/ESPECIAL DO CHEFE · RECARGA/);
+ assert.match(html,/boss-dialogue-strip/);
+ const scene=read('src/render/scene2d5.js');
+ assert.doesNotMatch(scene,/c\.fillRect\(e.x-e.width\/2,e.y-e.height\/2-9,e.width,5\)/);
 });
