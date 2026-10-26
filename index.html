@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>RiverStorm — Aeronaves Auditadas 0.6.2</title>
+    <title>RiverStorm — Aeronaves e Elementos 0.6.3</title>
     <link rel="stylesheet" href="./src/styles/tailwind.css">
     <style>
         body {
@@ -246,7 +246,7 @@
         <div class="rs-hud-cell"><span class="rs-label">🛡 ESCUDO <b id="hud-shield">150</b></span><div class="rs-meter"><span id="hud-shield-fill" style="background:#38bdf8;width:100%"></span></div></div>
         <div class="rs-hud-cell"><span class="rs-label">♟ RESGATES <b id="hud-rescues">0</b></span><span class="rs-label">✈ <b id="hud-plane">FALCÃO</b></span></div>
       </div>
-      <div class="rs-hud-footer"><span id="hud-version" style="color:#38bdf8;font-size:8px">HUD 0.6.2</span><span id="mission-hud">SELVA DA AURORA</span><b id="sector-hud">SETOR 1</b><span id="hud-rank">J1 SOLDADO</span></div>
+      <div class="rs-hud-footer"><span id="hud-version" style="color:#38bdf8;font-size:8px">HUD 0.6.3</span><span id="mission-hud">SELVA DA AURORA</span><b id="sector-hud">SETOR 1</b><span id="hud-rank">J1 SOLDADO</span></div>
     </section>
     <div id="rs-bottom-actions" aria-label="Opções rápidas">
       <button id="crt-toggle" type="button">CRT: LIG</button>
@@ -1039,7 +1039,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
             enemies.push({
                 type: 'BOSS',
                 bossSubType: mission.bossPattern,
-                skillAffinity:BOSS_AFFINITIES[(mission.bossPattern||0)%6],
+                skillAffinity:BOSS_AFFINITIES[(sector-1)%7],
                 bossId: sector,
                 bossVisual: mission.bossVisual,
                 biome: mission.biome,
@@ -1070,9 +1070,10 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
           GRAVITY:{icon:'◉',name:'Gravidade',color:'#c4b5fd',damage:35,charges:2,cooldown:660,strong:'LIGHTNING'},
           ICE:{icon:'❄',name:'Gelo',color:'#93c5fd',damage:75,charges:3,cooldown:520,strong:'FIRE'},
           FIRE:{icon:'🔥',name:'Fogo',color:'#fb923c',damage:75,charges:3,cooldown:520,strong:'ICE'},
-          BLEED:{icon:'⚔',name:'Sangramento',color:'#fb7185',damage:50,charges:2,cooldown:600,strong:'BLEED'}
+          BLEED:{icon:'⚔',name:'Sangramento',color:'#fb7185',damage:20,charges:3,cooldown:600,strong:'POISON'},
+          POISON:{icon:'☣',name:'Veneno',color:'#4ade80',damage:20,charges:3,cooldown:600,strong:'BLEED'}
         };
-        const BOSS_AFFINITIES=['EMP','LIGHTNING','GRAVITY','ICE','FIRE','BLEED'];
+        const BOSS_AFFINITIES=['EMP','LIGHTNING','GRAVITY','ICE','FIRE','BLEED','POISON'];
         let bossSkillUnlocked=[];
         try{bossSkillUnlocked=JSON.parse(localStorage.getItem('river_boss_skills_v1')||'[]').filter(k=>BOSS_SKILLS[k])}catch(e){}
         let bossSkillEquipped=null,bossSkillCharge=0,bossSkillCooldown=0,bossSkillPending=null;
@@ -1105,7 +1106,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
           const options=document.getElementById('boss-skill-options');
           options.replaceChildren();
           document.getElementById('boss-skill-confirm').disabled=true;
-          const foe=BOSS_AFFINITIES[(campaign.at(sector).bossPattern||0)%6];
+          const foe=BOSS_AFFINITIES[(sector-1)%7];
           document.getElementById('boss-skill-advice').textContent='Boss de '+BOSS_SKILLS[foe].name+' · Selecione uma habilidade ou voe sem poder.';
           for(const key of bossSkillUnlocked){
             const info=BOSS_SKILLS[key],button=document.createElement('button');
@@ -1156,7 +1157,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
               ctx.lineTo(f.x+Math.cos(theta)*radius,f.y+Math.sin(theta)*radius);ctx.stroke();}
           }else if(f.kind==='ICE'){
             for(let i=0;i<8;i++){const theta=i*Math.PI/4;ctx.beginPath();ctx.moveTo(f.x,f.y);ctx.lineTo(f.x+Math.cos(theta)*radius,f.y+Math.sin(theta)*radius);ctx.stroke();}
-          }else if(f.kind==='FIRE'||f.kind==='BLEED'){
+          }else if(f.kind==='FIRE'||f.kind==='BLEED'||f.kind==='POISON'){
             for(let i=0;i<9;i++){const x=f.x+Math.sin(i*3+elapsed*.14)*radius*.7;const y=f.y+Math.cos(i*5+elapsed*.12)*radius*.65;ctx.fillStyle=f.color;ctx.fillRect(x,y,6,12);}
           }else if(f.kind==='GRAVITY'){ctx.beginPath();ctx.ellipse(f.x,f.y,radius*1.3,radius*.5,elapsed*.08,0,Math.PI*2);ctx.stroke();}
           ctx.shadowBlur=0;ctx.font='bold 16px system-ui';ctx.textAlign='center';ctx.fillStyle='#ffffff';
@@ -1168,15 +1169,16 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
           const boss=enemies.find(e=>e.type==='BOSS'&&e.hp>0);if(!boss)return;
           const kind=bossSkillEquipped,skill=BOSS_SKILLS[kind],foe=boss.skillAffinity;
           const advantage=skill.strong===foe;
-          let damage=kind==='BLEED'?(advantage?180:50):(advantage?220:skill.damage);
+          let damage=advantage?Math.round(skill.damage*2.8):Math.max(6,Math.round(skill.damage*.35));
           if(boss.gravityTicks>0)damage*=2;
           if(kind==='GRAVITY'){boss.gravityTicks=600;boss.y=Math.min(VIRTUAL_HEIGHT*.32,boss.y+24);}
-          if(kind==='BLEED'){boss.bleeding=true;boss.bleedClock=0;}
+          if(kind==='BLEED'||kind==='POISON'){boss.statusKind=kind;boss.statusTicks=600;boss.statusClock=0;boss.statusBaseHp=boss.maxHp;}
           if(kind==='ICE')boss.frozenTicks=600;
           if(kind==='EMP')boss.specialCharge=0;
           if(kind==='LIGHTNING')boss.stunnedTicks=600;
           if(kind==='FIRE')boss.burningTicks=600;
           boss.hp=Math.max(0,boss.hp-damage);
+          bossTaunt={name:boss.name,line:advantage?'COMO DESCOBRIU MINHA FRAQUEZA?! '+skill.name.toUpperCase()+'!':'HA! '+skill.name.toUpperCase()+' MAL ME AFETA! MINHA FRAQUEZA É '+BOSS_SKILLS[foe].name.toUpperCase()+'!',ticks:300};
           dropBossReward(boss,damage);
           addExplosion(boss.x,boss.y,skill.color,32);
           playBossSkillEffect(kind,boss,damage,skill.color);
@@ -1192,7 +1194,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
             e.shootTimer++;
             if(bossSkillCooldown>0)bossSkillCooldown--;
             for(const prop of ['gravityTicks','frozenTicks','stunnedTicks','burningTicks'])if(e[prop]>0)e[prop]--;
-            if(e.bleeding && ++e.bleedClock>=180){e.bleedClock=0;e.hp=Math.max(0,e.hp-2);createFloatingText(e.x,e.y-35,'SANGRAMENTO -2','#fb7185');if(e.hp<=0){finishBossDefeatedBySkill(e);return}}
+            if(e.statusTicks>0){e.statusTicks--;if(++e.statusClock>=60){e.statusClock=0;const rate=e.statusKind==='BLEED'?.02:.01;const dot=Math.max(1,e.statusBaseHp*rate);e.hp=Math.max(0,e.hp-dot);createFloatingText(e.x,e.y-35,(e.statusKind==='BLEED'?'SANGRAMENTO':'VENENO')+' -'+Math.ceil(dot),e.statusKind==='BLEED'?'#fb7185':'#4ade80');if(e.hp<=0){finishBossDefeatedBySkill(e);return;}}}
             if(e.stunnedTicks>0)return;
             if(e.rewardCooldown>0)e.rewardCooldown--;
 
@@ -1214,11 +1216,13 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
             document.getElementById('boss-special-status').textContent=fraction>=1?'PRONTO':'RECARGA '+Math.round(fraction*100)+'%';
             if(e.specialCharge>=abilityCooldown && player.disabledTimer<=0){
                 e.specialCharge=0;
-                const pattern=(sector-1)%6;
+                const pattern=(sector-1)%7;
                 if(pattern===0){player.disabledTimer=600;player.effectType='EMP';player.effectTimer=600; sound.playEmpSound();document.getElementById('game-container').classList.add('emp-flash');setTimeout(()=>document.getElementById('game-container').classList.remove('emp-flash'),300);createFloatingText(player.x,player.y,'EMP · 10 S','#67e8f9')}
                 else if(pattern===1){player.effectType='LIGHTNING';player.effectTimer=600;for(let n=-2;n<=2;n++)enemyBullets.push({x:e.x+n*26,y:e.y+25,vx:n*.65,vy:5.2,color:'#67e8f9'})}
                 else if(pattern===2){player.effectType='GRAVITY';player.effectTimer=600;player.x+=(e.x-player.x)*.15;createFloatingText(player.x,player.y,'PULSO GRAVITACIONAL','#c4b5fd')}
                 else if(pattern===3||pattern===4){player.effectType=pattern===3?'FIRE':'ICE';player.effectTimer=600;for(let n=-2;n<=2;n++)enemyBullets.push({x:e.x+n*20,y:e.y+28,vx:n*1.05,vy:3.8,color:pattern===3?'#fb923c':'#bae6fd'})}
+                else if(pattern===5){player.effectType='BLEED';player.effectTimer=600;applyDamage(25,'SANGRAMENTO');createFloatingText(player.x,player.y,'SANGRAMENTO','#fb7185')}
+                else if(pattern===6){player.effectType='POISON';player.effectTimer=600;applyDamage(20,'VENENO');createFloatingText(player.x,player.y,'ENVENENADO','#4ade80')}
                 else{player.effectType='SWORD';player.effectTimer=600;wingmen=[];applyDamage(55,'GOLPE FRONTAL DO CHEFE');e.x+=(player.x-e.x)*.3;enemyBullets.push({x:e.x,y:e.y+20,vx:0,vy:6,color:'#fef08a'})}
             }
 
@@ -1744,7 +1748,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
             const skillActive=!!(bossActive&&bossSkillEquipped);
             skillUseButton.classList.toggle('hidden',!skillActive);
             if(skillActive)skillUseButton.textContent=BOSS_SKILLS[bossSkillEquipped].icon+' '+bossSkillCharge+' · '+(bossSkillCooldown>0?Math.ceil(bossSkillCooldown/60)+'s':'PRONTO')+' [C]';
-            if(player.effectTimer>0){player.effectTimer--;if(player.effectTimer===0)player.effectType='';}
+            if(player.effectTimer>0){player.effectTimer--;if((player.effectType==='POISON'||player.effectType==='BLEED')&&player.effectTimer%60===0)applyDamage(player.effectType==='POISON'?3:5,player.effectType);if(player.effectTimer===0)player.effectType='';}
             if(missionTransitionTicks>0){
                 missionTransitionTicks--;
                 if(missionTransitionTicks===0){
@@ -2515,6 +2519,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
                 quality:qualitySelect.value
             });
             drawBossCompactMeters();
+            for(const e of enemies){if(e.type!=='BOSS'||e.statusTicks<=0)continue;ctx.save();ctx.globalAlpha=.34;ctx.fillStyle=e.statusKind==='POISON'?'#4ade80':'#fb233a';ctx.beginPath();ctx.ellipse(e.x,e.y,e.width*.55,e.height*.56,0,0,Math.PI*2);ctx.fill();ctx.restore();}
             drawFuelDepots();
             drawStructures();
             drawBombs();
@@ -2927,7 +2932,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
         continueMissionBtn.addEventListener('click',()=>{
             const c=readCheckpoint();if(!c)return;
             levelSelector.value=String(c.sector);
-            if(aircraftCatalog.PLANES[c.selectedPlane]){selectedPlane=c.selectedPlane;planeSelect.value=c.selectedPlane;refreshPlaneChoice();}
+            selectedPlane=planeSelect.value;refreshPlaneChoice(); // escolha atual vence checkpoint
             enterGameplay();
             if(gameState!=='PLAYING')return;
             score=Math.max(0,Number(c.score)||0);kills=Math.max(0,Number(c.kills)||0);lives=Math.max(1,Number(c.lives)||3);
