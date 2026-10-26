@@ -129,6 +129,7 @@ class RiverPlaylist{
   clearInterval(this.fadeTimer);this.fadeTimer=null;
   this.bossMode=true;this.audio.loop=true;
   this.audio.volume=.38;
+  // A faixa 14 substitui imediatamente a música da missão após a confirmação.
   this.playItem(theme);
   this.onStatus('BATALHA: '+theme.name);
  }
