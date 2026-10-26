@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>RiverStorm — Perfil do Piloto 0.8.1</title>
+    <title>RiverStorm — Áudio e Perfil 0.8.2</title>
     <link rel="stylesheet" href="./src/styles/tailwind.css">
     <style>
         body {
@@ -108,7 +108,7 @@
               <h3 style="font-size:19px;font-weight:900;color:#facc15;margin-bottom:9px">IDENTIDADE DO PILOTO</h3>
               <div style="display:flex;gap:12px;align-items:center"><img id="pilot-profile-photo" alt="Foto do piloto" style="width:76px;height:76px;object-fit:cover;border-radius:50%;border:2px solid #67e8f9;background:#172b48"><div style="flex:1"><label for="pilot-photo-upload">Foto de perfil (local)</label><input id="pilot-photo-upload" type="file" accept="image/png,image/jpeg,image/webp" style="width:100%;font-size:11px"></div></div>
               <label for="pilot-nickname" style="display:block;margin-top:10px">Nome de usuário (3 a 18 caracteres)</label>
-              <div style="display:flex;gap:6px"><input id="pilot-nickname" maxlength="18" autocomplete="off" style="min-width:0;flex:1;color:white;background:#0f2540;border:1px solid #64748b;border-radius:6px;padding:9px"><button id="pilot-nickname-save" type="button" style="background:#047857;padding:9px;border-radius:6px">SALVAR</button></div>
+              <div style="display:flex;gap:6px"><input id="pilot-nickname" type="text" size="18" minlength="3" maxlength="18" autocomplete="off" autocapitalize="off" spellcheck="false" style="min-width:0;width:100%;flex:1 1 200px;box-sizing:border-box;font-size:16px;color:white;background:#0f2540;border:1px solid #64748b;border-radius:6px;padding:9px"><button id="pilot-nickname-save" type="button" style="background:#047857;padding:9px;border-radius:6px">SALVAR</button></div>
               <p id="pilot-nickname-status" aria-live="polite" style="font-size:11px;color:#fbbf24;margin-top:4px">Nome salvo apenas neste dispositivo; exclusividade global requer servidor de contas.</p>
               <div id="pilot-profile-stats" style="font:12px/1.9 monospace;white-space:pre-line;margin-top:12px;padding:10px;background:#061124;border-radius:8px"></div>
               <button id="pilot-profile-close" type="button" style="margin-top:10px;padding:10px;width:100%;background:#334155;border-radius:8px">VOLTAR ÀS CONFIGURAÇÕES</button>
@@ -134,8 +134,8 @@
             </div>
             <label for="music-volume">Volume das músicas: <span id="music-volume-value">40%</span></label>
               <input id="music-volume" type="range" min="0" max="100" value="40">
-              <label for="sfx-volume">Volume dos efeitos: <span id="sfx-volume-value">65%</span></label>
-              <input id="sfx-volume" type="range" min="0" max="100" value="65">
+              <label for="sfx-volume">Volume dos efeitos: <span id="sfx-volume-value">85%</span></label>
+              <input id="sfx-volume" type="range" min="0" max="100" value="85">
               <label for="sarcasm-level">Sarcasmo dos chefes: <span id="sarcasm-level-value">2</span>/5</label>
               <input id="sarcasm-level" type="range" min="0" max="5" value="2">
               <p class="text-xs text-slate-400">0 = silencioso, 5 = provocações frequentes</p>
@@ -1124,6 +1124,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
         function spawnBoss(y,confirmed=false) {
             if(!confirmed){openBossSkillPicker();return;}
             bossActive = true;
+            playlist.beginBossTheme?.();
             redAlertTicks=0;
             const mission=campaign.at(sector);
             showBossTaunt(mission.boss);
@@ -2052,7 +2053,6 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
             if(!bossActive && !redAlertTriggered && missionTicks>=84*60
                && distance-missionStartDistance>=campaign.at(sector).bossDistance*.75){
                 redAlertTriggered=true;redAlertTicks=360;
-                playlist.beginBossTheme?.();
                 try{window.RiverSFX?.alert?.()}catch(e){}
             }
             if(redAlertTicks>0)redAlertTicks--;
@@ -2993,7 +2993,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
         document.getElementById('pilot-profile-open').addEventListener('click',()=>{renderPilotProfile();profilePanel.hidden=false;profilePanel.style.display='block';profilePanel.scrollIntoView({block:'start',behavior:'smooth'})});
         document.getElementById('pilot-profile-close').addEventListener('click',()=>{profilePanel.hidden=true;profilePanel.style.display='none';controllerDialog.scrollTop=0});
         document.getElementById('pilot-nickname-save').addEventListener('click',()=>{
-          const value=document.getElementById('pilot-nickname').value.trim();
+          const value=document.getElementById('pilot-nickname').value.trim().slice(0,18);
           const status=document.getElementById('pilot-nickname-status');
           if(!/^[a-zA-Z0-9_]{3,18}$/.test(value)){status.textContent='Use entre 3 e 18 letras, números ou _. ';return}
           pilotProfile.nickname=value;savePilotProfile();
@@ -3065,8 +3065,9 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
         }
         playlist.load().then(renderPlaylistItems);
 
-        const userPrefs={music:40,sfx:65,sarcasm:2};
+        const userPrefs={music:40,sfx:85,sarcasm:2};
         try{Object.assign(userPrefs,JSON.parse(localStorage.getItem('river_audio_game_settings')||'{}'))}catch(e){}
+        if(window.RiverSFX)window.RiverSFX.volume=Math.min(1.3,userPrefs.sfx/100*1.3);
         for(const [key,id] of [['music','music-volume'],['sfx','sfx-volume'],['sarcasm','sarcasm-level']]){
             const control=document.getElementById(id);control.value=userPrefs[key];
             const label=document.getElementById(id+'-value');
@@ -3074,7 +3075,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
                 sarcasmLevel=userPrefs.sarcasm;
                 if(typeof playlist!=='undefined')playlist.audio.volume=userPrefs.music/100;
                 if(typeof soundtrack!=='undefined' && soundtrack.master && soundtrack.ctx) soundtrack.master.gain.setTargetAtTime(userPrefs.music/100*.16,soundtrack.ctx.currentTime,.04);
-                if(window.RiverSFX)window.RiverSFX.volume=userPrefs.sfx/100;
+                if(window.RiverSFX)window.RiverSFX.volume=Math.min(1.3,userPrefs.sfx/100*1.3);
                 try{localStorage.setItem('river_audio_game_settings',JSON.stringify(userPrefs))}catch(e){}
             };
             control.addEventListener('input',apply);
