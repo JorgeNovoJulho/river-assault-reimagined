@@ -49,3 +49,15 @@ test('visual 03: dam and bridge share a traversable opening',()=>{
  assert.match(renderer,/drawIslands\(c,items,sector\)/);
  assert.match(renderer,/const icy=\/ÁRTICO/);
 });
+
+test('approved compact HUD occupies bottom and preserves control ids',()=>{
+ const html=read('index.html');
+ assert.match(html,/id="compact-hud"/);
+ assert.match(html,/id="rs-bottom-actions"/);
+ assert.match(html,/id="hud-score"/);
+ assert.match(html,/id="boss-special-hud"/);
+ assert.match(html,/function drawHUD\(/);
+ for(const id of ['hi-score-text','crt-toggle','controller-settings-btn','track-next','music-library','music-toggle','sound-toggle'])
+   assert.equal((html.match(new RegExp('id="'+id+'"','g'))||[]).length,1);
+ assert.ok(html.indexOf('id="compact-hud"')>html.indexOf('id="game-over-screen"'));
+});
