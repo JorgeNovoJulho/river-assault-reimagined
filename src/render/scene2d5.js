@@ -422,30 +422,70 @@ function enemy(c,e,time){
  // HP e recarga dos bosses são desenhados uma única vez em drawEnemies().
 }
 function islands(c,items,t){
- for(let p of items){
+ // Materiais de relevo: renderizacao deterministica em camadas, sem sprites vetoriais lisos.
+ const icy=/ÁRTICO|GLACIAL|FIORDE|NEVE|ICE/.test(t.name);
+ const desert=/DESERTO|OÁSIS|DUNAS/.test(t.name);
+ const industrial=/CIDADE|INDUSTRIAL|ESTALEIRO|RUÍNAS|PORTO/.test(t.name);
+ const volcanic=/LAVA|VULC|MAGMA/.test(t.name);
+ for(const p of items){
+  const n=p.shape||0,rx=p.width*.48,ry=p.height*.43,seed=(n+1)*31+p.width*3;
+  const contour=(scale=1,ox=0,oy=0)=>{
+   c.beginPath();
+   for(let i=0;i<=24;i++){
+    const a=i/24*Math.PI*2;
+    const h=1+.075*Math.sin(a*5+seed)+.055*Math.cos(a*9-seed);
+    const x=ox+Math.cos(a)*rx*scale*h,y=oy+Math.sin(a)*ry*scale*h;
+    if(!i)c.moveTo(x,y);else c.lineTo(x,y);
+   }
+   c.closePath();
+  };
   c.save();c.translate(p.x,p.y);
-  const n=p.shape||0,rx=p.width*.5,ry=p.height*.45;
-  c.fillStyle='rgba(2,12,20,.4)';c.beginPath();c.ellipse(5,8,rx*1.2,ry*1.2,0,0,Math.PI*2);c.fill();
-  c.fillStyle=t.ground[1];c.strokeStyle=t.accent;c.lineWidth=2;c.beginPath();
-  const count=[9,5,7,12,6][n%5];
-  for(let i=0;i<count;i++){
-    const angle=i/count*Math.PI*2,irreg=1+(Math.sin(i*21.7+n*3)*.12);
-    const x=Math.cos(angle)*rx*irreg,y=Math.sin(angle)*ry*irreg;
-    if(i===0)c.moveTo(x,y);else c.lineTo(x,y);
+  // Agua espumando ao redor, com sombras de contato e espuma descontinua.
+  c.fillStyle='rgba(1,9,19,.46)';c.beginPath();c.ellipse(4,9,rx*1.23,ry*1.21,-.06,0,Math.PI*2);c.fill();
+  for(let j=0;j<24;j++){
+   const a=j/24*Math.PI*2,rad=1.13+.045*Math.sin(seed+j*2.4);
+   const x=Math.cos(a)*rx*rad,y=Math.sin(a)*ry*rad;
+   c.strokeStyle=j%3===0?'rgba(244,252,255,.75)':'rgba(109,204,230,.52)';
+   c.lineWidth=j%4===0?2:1;
+   c.beginPath();c.arc(x,y,2.7+(j%3)*1.1,a-.5,a+.7);c.stroke();
   }
-  c.closePath();c.fill();c.stroke();
-  // Orla arenosa/pedregosa, rochas e vegetação coerentes com o bioma.
-  c.strokeStyle='rgba(244,238,198,.48)';c.lineWidth=2;
-  c.beginPath();c.ellipse(0,1,rx*.78,ry*.7,0,0,Math.PI*2);c.stroke();
-  const icy=/ÁRTICO|GLACIAL|FIORDE/.test(t.name);
-  const desert=/DESERTO|OÁSIS/.test(t.name);
-  const industrial=/CIDADE|INDUSTRIAL|ESTALEIRO|RUÍNAS/.test(t.name);
-  for(let i=0;i<3;i++){
-    const x=(hash(n*19+i*13)-.5)*rx*1.4,y=(hash(n*41+i*7)-.5)*ry*1.35;
-    c.fillStyle=icy?'#e1f1f7':desert?'#bca07b':industrial?'#566f83':'#627b6b';
-    c.beginPath();c.ellipse(x,y,3+i%2,2+i%3,.2,0,Math.PI*2);c.fill();
+  c.fillStyle=icy?'#aacfdc':desert?'#ab8554':volcanic?'#30242b':'#5f655c';contour(1);c.fill();
+  c.strokeStyle='rgba(251,245,217,.60)';c.lineWidth=2;contour(1.02);c.stroke();
+  // Face escura da ilha: sobreposicao de rocha recortada sob o topo iluminado.
+  c.fillStyle=volcanic?'#201d27':icy?'#547686':'#252f36';contour(.93,1.5,5.5);c.fill();
+  const grad=c.createLinearGradient(-rx,-ry,rx,ry);
+  if(icy){grad.addColorStop(0,'#e8faff');grad.addColorStop(.55,'#a5d7e8');grad.addColorStop(1,'#678eaf')}
+  else if(desert){grad.addColorStop(0,'#ead19b');grad.addColorStop(.55,'#be9b64');grad.addColorStop(1,'#66513d')}
+  else if(volcanic){grad.addColorStop(0,'#8d5d4b');grad.addColorStop(.55,'#46333b');grad.addColorStop(1,'#211d29')}
+  else{grad.addColorStop(0,'#a0a396');grad.addColorStop(.45,'#777e73');grad.addColorStop(1,'#39434a')}
+  c.fillStyle=grad;contour(.83,-2,-4);c.fill();
+  // Facetas e fendas de pedra com variacoes do material por bioma.
+  for(let j=0;j<18;j++){
+   const a=hash(seed+j*17.1)*Math.PI*2,r=Math.sqrt(hash(seed+91+j*7.4))*.74;
+   const x=Math.cos(a)*rx*r,y=Math.sin(a)*ry*r-3;
+   const size=2+hash(seed+j*19.3)*Math.min(8,rx*.17);
+   c.fillStyle=icy?(j%2?'#ecfaff':'#779cab'):desert?(j%2?'#edcb87':'#806344'):volcanic?(j%2?'#7a5144':'#251d25'):(j%2?'#b3ae90':'#455353');
+   c.beginPath();c.moveTo(x-size,y+size*.3);c.lineTo(x-size*.1,y-size*.85);c.lineTo(x+size,y-size*.2);c.lineTo(x+size*.4,y+size*.5);c.closePath();c.fill();
+   c.strokeStyle='rgba(10,22,30,.28)';c.lineWidth=.7;c.beginPath();c.moveTo(x-size*.1,y-size*.85);c.lineTo(x+size*.4,y+size*.5);c.stroke();
   }
-  if(p.width>42&&!icy&&!industrial&&!desert)tree(c,-p.width*.13,-3,.6,t,t.time==='night');
+  if(volcanic){
+   c.strokeStyle='#f97316';c.lineWidth=1.8;c.shadowColor='#fb4c18';c.shadowBlur=5;
+   c.beginPath();c.moveTo(-rx*.25,-ry*.4);c.lineTo(rx*.06,-ry*.16);c.lineTo(rx*.32,ry*.17);c.stroke();c.shadowBlur=0;
+  }else if(industrial){
+   // Sucata e chapas enferrujadas, coerentes com os portos industriais.
+   for(let i=0;i<3;i++){const x=(i-1)*rx*.43,y=ry*(i%2?-.14:.26);c.fillStyle=i%2?'#738b91':'#82674d';c.fillRect(x-5,y-3,11,7);c.strokeStyle='#28353a';c.lineWidth=1;c.strokeRect(x-5,y-3,11,7)}
+  }else if(!icy&&!desert&&p.width>42){
+   // Vegetacao como agrupamentos sombreados em vez de circulos vetoriais chapados.
+   for(let i=0;i<9;i++){const x=(hash(seed+i*11)-.5)*rx*1.15,y=(hash(seed+i*23)-.5)*ry*.9;
+    const canopy=2.5+(i%3)*1.9;
+    c.fillStyle='#183d2e';c.beginPath();c.arc(x+1,y+2,canopy+1,0,7);c.fill();
+    c.fillStyle=i%3===0?'#6ca85b':i%3===1?'#356a43':'#4e8545';
+    c.beginPath();c.arc(x,y,canopy,0,7);c.fill();
+    c.fillStyle='#a7ba73';c.fillRect(x-canopy*.3,y-canopy*.6,1.4,1.4);
+   }
+   if(p.width>72)tree(c,-rx*.17,-ry*.08,.48,t,t.time==='night');
+  }
+  if(icy){c.strokeStyle='#f3ffff';c.lineWidth=1.2;c.beginPath();c.moveTo(-rx*.3,-ry*.3);c.lineTo(0,-ry*.47);c.lineTo(rx*.26,-ry*.22);c.stroke()}
   c.restore();
  }
 }
