@@ -5,6 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>RiverStorm — Balanceamento de Chefes 0.8.5</title>
     <link rel="stylesheet" href="./src/styles/tailwind.css">
+    <!-- Fallback mínimo para execução estática sem compilação Tailwind. -->
+    <style id="riverstorm-overlay-safety">
+      .hidden{display:none!important}
+      #boss-skill-picker:not(.hidden){display:flex!important;position:absolute;inset:0;z-index:1000;align-items:center;justify-content:center;padding:12px;pointer-events:auto}
+      #boss-skill-picker button{cursor:pointer;touch-action:manipulation}
+      #boss-skill-picker button:disabled{opacity:.48;cursor:not-allowed}
+      #boss-skill-picker #boss-skill-options button{min-height:58px}
+      #game-container{position:relative;overflow:hidden}
+    </style>
+
     <style>
         body {
             background-color: #0b0f19;
