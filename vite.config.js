@@ -6,6 +6,7 @@ const legacyScripts = [
   'src/input/gamepad.js',
   'src/game/aircraft.js',
   'src/game/clock.js',
+  'src/game/pilot-progress.js',
   'src/game/campaign.js',
   'src/render/scene2d5.js',
   'src/audio/music.js',
