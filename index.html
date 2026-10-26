@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>RiverStorm — HUD Inferior 0.4.4</title>
+    <title>RiverStorm — Combate Ajustado 0.4.5</title>
     <link rel="stylesheet" href="./src/styles/tailwind.css">
     <style>
         body {
@@ -213,7 +213,7 @@
         <div class="rs-hud-cell"><span class="rs-label">🛡 ESCUDO <b id="hud-shield">150</b></span><div class="rs-meter"><span id="hud-shield-fill" style="background:#38bdf8;width:100%"></span></div></div>
         <div class="rs-hud-cell"><span class="rs-label">♟ RESGATES <b id="hud-rescues">0</b></span><span class="rs-label">✈ <b id="hud-plane">FALCÃO</b></span></div>
       </div>
-      <div class="rs-hud-footer"><span id="hud-version" style="color:#38bdf8;font-size:8px">HUD 0.4.4</span><span id="mission-hud">SELVA DA AURORA</span><b id="sector-hud">SETOR 1</b><span id="hud-rank">J1 SOLDADO</span></div>
+      <div class="rs-hud-footer"><span id="hud-version" style="color:#38bdf8;font-size:8px">HUD 0.4.5</span><span id="mission-hud">SELVA DA AURORA</span><b id="sector-hud">SETOR 1</b><span id="hud-rank">J1 SOLDADO</span></div>
     </section>
     <div id="rs-bottom-actions" aria-label="Opções rápidas">
       <button id="crt-toggle" type="button">CRT: LIG</button>
@@ -723,14 +723,14 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
             // Microsequências desenhadas por área: ilhotas, recifes, ilhas longas e corredores.
             const level=campaign.at(sector);
             // Ilhas garantidas a intervalos regulares e posicionadas próximas a uma margem.
-            const islandGap=340+(sector%3)*60;
+            const islandGap=580+(sector%3)*110;
             if(islands.length<3 && distance-islandLastDistance>=islandGap &&
                !structures.some(o=>Math.abs(o.y-y)<110)){
                 const shape=(obstacleSequence+level.hazardSet)%5;
-                const islandWidth=Math.min(66,Math.max(35,width*.19));
+                const islandWidth=Math.min(102,Math.max(54,width*.28));
                 const islandHeight=68+shape*13;
                 const side=obstacleSequence%2===0?-1:1;
-                const offset=side*(width/2-islandWidth/2-19);
+                const offset=side*(width/2-islandWidth/2-10);
                 islands.push({x:center+offset,y,width:islandWidth,height:islandHeight,shape});
                 islandLastDistance=distance;obstacleLastType='ISLAND';obstacleSequence++;
             }
@@ -742,10 +742,10 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
 
             // Pontos estratégicos de combustível; resgates e armas não são bloqueados.
             if (distance - fuelSpawnAt >= 650 && Math.random() < .2) trySpawnFuel(center,y,width,false);
-            const structureGap=460+((sector*173+obstacleSequence*97)%150);
+            const structureGap=1600+((sector*173+obstacleSequence*97)%650);
             if(structures.length<1 && distance-structureLastDistance>structureGap &&
-               distance-islandLastDistance>135 && missionTicks>180 &&
-               !islands.some(o=>Math.abs(o.y-y)<110) &&
+               distance-islandLastDistance>260 && missionTicks>360 &&
+               !islands.some(o=>Math.abs(o.y-y)<180) &&
                !rescueBoats.some(o=>Math.abs(o.y-y)<90)){
                 const type=obstacleSequence%3===0?'BRIDGE':'DAM';
                 const passage=Math.max(player.width+50,Math.min(width*.46,112+level.difficulty*12));
@@ -1640,7 +1640,7 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
                 }else if (player.invulnerable <= 0 && Math.hypot(eb.x - player.x, eb.y - player.y) < 12) {
                     enemyBullets.splice(index, 1);
                     applyDamage(25, 'ABATIDO POR TIRO INIMIGO!');
-                } else if (eb.y > VIRTUAL_HEIGHT + 10) {
+                } else if (eb.y > VIRTUAL_HEIGHT + 10 || eb.y < -30 || eb.x < -35 || eb.x > VIRTUAL_WIDTH+35) {
                     enemyBullets.splice(index, 1);
                 }
             });
@@ -1692,7 +1692,7 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
                 }
                 if (e.type === 'SHIP' || e.type === 'TURRET' || e.type==='SUB' || e.type==='TANK'||e.type==='MECHA_GUN') {
                     e.shootTimer = (e.shootTimer || 0) + 1;
-                    if (e.shootTimer > (e.type==='MECHA_GUN'?105:60)) {
+                    if (e.shootTimer > (e.type==='MECHA_GUN'?105:90) && e.y>=5 && e.y<VIRTUAL_HEIGHT-90 && e.x>=0 && e.x<VIRTUAL_WIDTH) {
                         const angle = Math.atan2(player.y - e.y, player.x - e.x);
                         enemyBullets.push({
                             x: e.x, y: e.y,
@@ -1710,7 +1710,7 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
 
                 // Tiros acertando Inimigos
                 bullets.forEach((b, bIndex) => {
-                    if (Math.abs(b.x - e.x) < e.width / 2 + 2 && Math.abs(b.y - e.y) < e.height / 2 + 2) {
+                    if (Math.abs(b.x - e.x) < e.width / 2 + 7 && Math.abs(b.y - e.y) < e.height / 2 + 7) {
                         bullets.splice(bIndex, 1);
                         if(e.type==='BOSS'&&bossDefeatedThisMission) return;
                         if(e.type==='BOSS')dropBossReward(e,1);
@@ -2411,7 +2411,7 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
             if (gameState === 'PLAYING' && gamepadState.fire && timestamp - lastGamepadShot > 145) {
                 sound.init(); fireWeapon(); lastGamepadShot = timestamp;
             }
-            if (gameState === 'PLAYING' && mouseInput.fire && timestamp - lastMouseShot > 145) {
+            if (gameState === 'PLAYING' && (mouseInput.fire || keys.Space || keys.KeyZ || touchFireHeld) && timestamp - lastMouseShot > 145) {
                 sound.init(); fireWeapon(); lastMouseShot = timestamp;
             }
             if(gameState === "PLAYING") simulationClock.advance(timestamp, update);
@@ -2475,7 +2475,7 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
         window.addEventListener('keydown', e => {
             if (keys.hasOwnProperty(e.code)) { e.preventDefault(); keys[e.code] = true; }
 
-            if (e.code === 'Space' || e.code === 'KeyZ') fireWeapon();
+            if (e.code === 'Space' || e.code === 'KeyZ') { if(!e.repeat)fireWeapon(); }
             if (e.code === 'KeyX' || e.code === 'KeyF' || e.code === 'ShiftLeft') triggerBomb();
 
             if (e.code === 'KeyP' || e.code === 'Escape') {
@@ -2569,11 +2569,10 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
         }
         document.getElementById('btn-pause-touch').addEventListener('pointerdown', event => {event.preventDefault();togglePause();});
 
-        document.getElementById('btn-fire').addEventListener('touchstart', (e) => {
-            e.preventDefault();
-            sound.init();
-            fireWeapon();
-        });
+        let touchFireHeld=false;
+        const touchFireButton=document.getElementById('btn-fire');
+        touchFireButton.addEventListener('pointerdown',e=>{e.preventDefault();touchFireHeld=true;sound.init();fireWeapon();try{touchFireButton.setPointerCapture(e.pointerId)}catch(_){}});
+        for(const ev of ['pointerup','pointercancel','lostpointercapture'])touchFireButton.addEventListener(ev,()=>{touchFireHeld=false});
 
         document.getElementById('btn-bomb').addEventListener('touchstart', (e) => {
             e.preventDefault();
