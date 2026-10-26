@@ -479,7 +479,7 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
             if(!plane.price)continue;
             const opt=document.createElement('option');opt.value=key;opt.textContent=plane.name+' — '+plane.price+' pontos';planeSelect.appendChild(opt);
         }
-        function refreshWallet(){document.getElementById('plane-wallet').textContent='SALDO: '+bank+' pontos'}
+        function refreshWallet(){document.getElementById('plane-wallet').textContent='SALDO: '+bank+' pontos';const hangar=document.getElementById('settings-wallet');if(hangar)hangar.textContent='SALDO DISPONÍVEL: '+bank+' pontos'}
         refreshWallet();
         document.getElementById('buy-plane').addEventListener('click',()=>{
             const plane=aircraftCatalog.PLANES[planeSelect.value];
@@ -2026,6 +2026,15 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
         controllerDialog.style.gap='12px';
         controllerDialog.style.background='#071426';
         controllerDialog.style.scrollBehavior='auto';
+        const deadzoneInput=document.getElementById('pad-deadzone');
+        deadzoneInput.style.boxSizing='border-box';
+        deadzoneInput.style.display='block';
+        deadzoneInput.style.maxWidth='100%';
+        deadzoneInput.style.margin='4px 0 14px';
+        deadzoneInput.style.padding='0';
+        const deadzoneLabel=document.querySelector('label[for="pad-deadzone"]');
+        if(deadzoneLabel){deadzoneLabel.style.maxWidth='100%';deadzoneLabel.style.display='block'}
+
         for(const child of controllerDialog.children){child.style.width='min(100%,460px)';child.style.maxWidth='460px';child.style.marginLeft='auto';child.style.marginRight='auto';child.style.display=child.tagName==='BUTTON'?'block':child.style.display;child.style.flexShrink='0'}
         for(const id of ['music-volume','sfx-volume','sarcasm-level','pad-deadzone']){
             const el=document.getElementById(id);el.style.width='100%';el.style.minHeight='40px';el.style.touchAction='auto';el.style.accentColor='#22d3ee';
@@ -2132,6 +2141,8 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
         }
         sarcasmLevel=userPrefs.sarcasm;
         const settingsPlane=document.getElementById('settings-plane');
+        const settingsWallet=document.getElementById('settings-wallet');
+        settingsWallet.textContent='SALDO: '+bank+' pontos';
         for(const [key,plane] of Object.entries(aircraftCatalog.PLANES)){
             const opt=document.createElement('option');opt.value=key;opt.textContent=plane.name+(plane.price?' — '+plane.price+' pontos':' — grátis');settingsPlane.appendChild(opt);
         }
