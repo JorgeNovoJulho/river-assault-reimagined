@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>RiverStorm — Menu Organizado 0.5.7</title>
+    <title>RiverStorm — Hangar Premium 0.5.8</title>
     <link rel="stylesheet" href="./src/styles/tailwind.css">
     <style>
         body {
@@ -152,7 +152,7 @@
             <p class="text-xs sm:text-sm text-cyan-400 font-semibold tracking-widest mb-6">EDIÇÃO REIMAGINADA (PT-BR)</p>
 
             <p class="text-slate-300 text-sm max-w-md">20 missões • 7 aeronaves • resgates • chefes épicos</p>
-            <aside id="start-brand"><h1>RIVERSTORM</h1><p>EDIÇÃO REIMAGINADA</p><div class="brand-summary">20 missões · 7 aeronaves · pilotos exclusivos · chefes épicos</div><div class="brand-hint">Escolha a missão e a aeronave no painel ao lado. Os controles da missão permanecem sempre acessíveis.</div></aside>
+            <aside id="start-brand"><div class="brand-top"><h1><span>RIVER</span><span>STORM</span></h1><p>EDIÇÃO REIMAGINADA</p><div class="brand-summary">20 missões · 7 aeronaves · pilotos exclusivos · chefes épicos</div></div><div class="brand-feature"><strong>MISSÃO DE COMBATE</strong><p>Domine os rios, resgate aliados e enfrente os chefes dos vinte setores.</p></div><div class="brand-feature"><strong>SEU ARSENAL</strong><p>Sete aeronaves, pilotos exclusivos e habilidades conquistadas nas batalhas.</p></div><div class="brand-hint">Escolha sua aeronave no hangar e inicie a missão. Mouse, teclado e controle disponíveis.</div></aside>
             <div id="start-main" role="region" aria-label="Seleção da missão e hangar">
             <details class="w-full max-w-sm text-left rounded-xl border border-slate-600 bg-slate-900/80 px-3 py-2 text-xs">
               <summary class="cursor-pointer font-bold text-cyan-300">COMO JOGAR ▾</summary>
@@ -246,7 +246,7 @@
         <div class="rs-hud-cell"><span class="rs-label">🛡 ESCUDO <b id="hud-shield">150</b></span><div class="rs-meter"><span id="hud-shield-fill" style="background:#38bdf8;width:100%"></span></div></div>
         <div class="rs-hud-cell"><span class="rs-label">♟ RESGATES <b id="hud-rescues">0</b></span><span class="rs-label">✈ <b id="hud-plane">FALCÃO</b></span></div>
       </div>
-      <div class="rs-hud-footer"><span id="hud-version" style="color:#38bdf8;font-size:8px">HUD 0.5.7</span><span id="mission-hud">SELVA DA AURORA</span><b id="sector-hud">SETOR 1</b><span id="hud-rank">J1 SOLDADO</span></div>
+      <div class="rs-hud-footer"><span id="hud-version" style="color:#38bdf8;font-size:8px">HUD 0.5.8</span><span id="mission-hud">SELVA DA AURORA</span><b id="sector-hud">SETOR 1</b><span id="hud-rank">J1 SOLDADO</span></div>
     </section>
     <div id="rs-bottom-actions" aria-label="Opções rápidas">
       <button id="crt-toggle" type="button">CRT: LIG</button>
@@ -425,6 +425,32 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
 #start-brand .brand-summary,#start-brand .brand-hint{display:none!important}
 #start-screen:not(.hidden)>#start-main{flex:1 1 0!important;padding:6px 6px 115px!important}
 #start-screen:not(.hidden)>#start-actions{left:12px!important;right:12px!important;bottom:10px!important;width:auto!important}
+}
+</style>
+<style>
+/* Hotfix 0.5.8 — identidade forte sem cortes; comandos sempre no alcance. */
+#start-screen:not(.hidden){grid-template-columns:minmax(290px,.9fr) minmax(0,1.35fr)!important;gap:12px!important}
+#start-screen #start-brand{overflow:hidden!important;min-width:0!important;gap:14px!important;padding:20px 18px!important;justify-content:flex-start!important;background:radial-gradient(circle at 30% 8%,#25436a66,transparent 48%),linear-gradient(155deg,#102842,#071522)!important}
+#start-brand .brand-top{display:flex;flex-direction:column;gap:10px;min-width:0}
+#start-brand h1{display:flex!important;flex-direction:column!important;align-items:flex-start!important;max-width:100%!important;line-height:.87!important;white-space:normal!important;font:italic 950 clamp(38px,4.4vw,61px) system-ui!important;letter-spacing:.045em!important;color:#fbbf24!important;text-shadow:0 5px 20px #ff9d3b44}
+#start-brand h1 span{display:block;max-width:100%;overflow-wrap:normal}
+#start-brand .brand-feature{padding:13px;border:1px solid #2c5675;border-radius:12px;background:#06192b99;color:#dbeafe}
+#start-brand .brand-feature strong{display:block;margin-bottom:6px;font:850 12px system-ui;color:#67e8f9;letter-spacing:.08em}
+#start-brand .brand-feature p{margin:0;font:500 12px/1.55 system-ui;color:#c6ddef}
+#start-brand .brand-hint{margin-top:auto!important}
+#start-screen:not(.hidden)>#start-main{padding-bottom:10px!important}
+#start-screen:not(.hidden)>#start-actions{position:absolute!important;bottom:19px!important;right:22px!important;left:auto!important;width:calc((100% - 38px)*.586 - 10px)!important;max-width:none!important;box-sizing:border-box!important}
+#start-screen:not(.hidden)>#start-main{padding-bottom:127px!important}
+#start-screen #hangar-preview{min-height:180px!important}
+#start-screen #hangar-name{font-size:16px!important}
+@media(max-width:720px){
+#start-screen:not(.hidden){display:flex!important;flex-direction:column!important}
+#start-screen #start-brand{padding:8px 10px!important;gap:3px!important}
+#start-brand h1{font-size:29px!important;flex-direction:row!important;justify-content:center!important;gap:5px!important}
+#start-brand .brand-feature,#start-brand .brand-hint,#start-brand .brand-summary{display:none!important}
+#start-brand .brand-top{align-items:center;gap:3px}
+#start-screen:not(.hidden)>#start-actions{left:11px!important;right:11px!important;width:auto!important;bottom:9px!important}
+#start-screen:not(.hidden)>#start-main{padding-bottom:116px!important}
 }
 </style>
     <script src="./src/input/gamepad.js"></script>
