@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>RiverStorm — Escudo Defletor 0.7.2</title>
+    <title>RiverStorm — Investidas e Contra-ataque 0.7.3</title>
     <link rel="stylesheet" href="./src/styles/tailwind.css">
     <style>
         body {
@@ -247,7 +247,7 @@
         <div class="rs-hud-cell"><span class="rs-label">🛡 ESCUDO <b id="hud-shield">150</b></span><div class="rs-meter"><span id="hud-shield-fill" style="background:#38bdf8;width:100%"></span></div></div>
         <div class="rs-hud-cell"><span class="rs-label">♟ RESGATES <b id="hud-rescues">0</b></span><span class="rs-label">✈ <b id="hud-plane">FALCÃO</b></span></div>
       </div>
-      <div class="rs-hud-footer"><span id="hud-version" style="color:#38bdf8;font-size:8px">HUD 0.7.2</span><span id="mission-hud">SELVA DA AURORA</span><b id="sector-hud">SETOR 1</b><span id="hud-rank">J1 SOLDADO</span></div>
+      <div class="rs-hud-footer"><span id="hud-version" style="color:#38bdf8;font-size:8px">HUD 0.7.3</span><span id="mission-hud">SELVA DA AURORA</span><b id="sector-hud">SETOR 1</b><span id="hud-rank">J1 SOLDADO</span></div>
     </section>
     <div id="rs-bottom-actions" aria-label="Opções rápidas">
       <button id="crt-toggle" type="button">CRT: LIG</button>
@@ -1209,6 +1209,8 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
         skillUseButton.addEventListener('pointerdown',event=>{event.preventDefault();useBossSkill()});
         // --- HABILIDADES E PADRÕES DE TIROS DOS CHEFÕES ---
         let parryTicks=0,parryCooldown=0,parryHeld=false,parryHeldTicks=0;
+        const BOSS_STRIKES={1:'impact',3:'energy',5:'energy',7:'blade',8:'blade',9:'impact',10:'energy',12:'blade',14:'blade',16:'blade',19:'blade',20:'energy'};
+        function defendCharge(attacker){if(parryTicks<=0)return false;const precise=parryHeldTicks<=15;if(precise&&attacker?.type==='BOSS'){attacker.stunnedTicks=Math.max(attacker.stunnedTicks||0,180);attacker.parryVulnerableTicks=180;attacker.swordDash=0;attacker.swordCharge=0;createFloatingText(attacker.x,attacker.y-45,'PARRY! IMÓVEL 3 S · +50% DANO','#fef08a');addExplosion(attacker.x,attacker.y,'#fde68a',26);}else createFloatingText(player.x,player.y-35,'ESCUDO: DEFESA TOTAL','#67e8f9');addExplosion(player.x,player.y,'#67e8f9',12);return true;}
         const parryButton=document.getElementById('parry-btn');
         function activateParry(){
           if(gameState!=='PLAYING'||parryCooldown>0||parryTicks>0||player.disabledTimer>0)return;
@@ -1230,7 +1232,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
             e.shootTimer++;
             if(e.specialCount==null)e.specialCount=0;
             if(bossSkillCooldown>0)bossSkillCooldown--;
-            for(const prop of ['frozenTicks','stunnedTicks','burningTicks','shockTicks'])if(e[prop]>0)e[prop]--;
+            for(const prop of ['frozenTicks','stunnedTicks','burningTicks','shockTicks','parryVulnerableTicks'])if(e[prop]>0)e[prop]--;
             if(e.statusTicks>0){e.statusTicks--;if(++e.statusClock>=60){e.statusClock=0;const cap=e.statusBaseHp*.30;const dot=Math.max(0,Math.min(e.statusBaseHp*(e.statusRate||.01),cap-(e.statusDealt||0)));e.statusDealt=(e.statusDealt||0)+dot;e.hp=Math.max(0,e.hp-dot);createFloatingText(e.x,e.y-35,(e.statusKind==='BLEED'?'SANGRAMENTO':'VENENO')+' -'+Math.ceil(dot),e.statusKind==='BLEED'?'#fb7185':'#4ade80');if(e.hp<=0){finishBossDefeatedBySkill(e);return;}}}
             if(e.gravityTicks>0){e.gravityClock=(e.gravityClock||0)+1;if(e.gravityClock%60===0){const d=e.maxHp*(e.gravityRate||.03);e.hp=Math.max(0,e.hp-d);createFloatingText(e.x,e.y-46,'GRAVIDADE -'+Math.ceil(d),'#c4b5fd');if(e.hp<=0){finishBossDefeatedBySkill(e);return;}}e.gravityTicks--;}
             if(e.elementTicks>0){e.elementTicks--;e.elementClock=(e.elementClock||0)+1;if(e.elementClock%60===0){const d=e.maxHp*(e.elementRate||.01);e.hp=Math.max(0,e.hp-d);createFloatingText(e.x,e.y-40,e.elementKind+' -'+Math.ceil(d),BOSS_SKILLS[e.elementKind].color);if(e.hp<=0){finishBossDefeatedBySkill(e);return;}}}
@@ -1315,7 +1317,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
               }
             }
             // Investidas com espada: sinal luminoso antes do golpe e rastro de corte no avanço.
-            if(['mech','jet','insect','heli'].includes(e.bossVisual)&&e.attackTimer%420===315){
+            if(BOSS_STRIKES[sector]&&e.attackTimer%420===315){
               e.swordCharge=60;e.swordTargetX=player.x;e.swordTargetY=Math.min(player.y-72,VIRTUAL_HEIGHT*.7);
               createFloatingText(e.x,e.y-50,'⚔ INVESTIDA EM 0,75 S','#fb7185');
             }
@@ -1323,8 +1325,8 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
             if(e.swordDash>0){
               const oldX=e.x,oldY=e.y;
               e.x+=(e.swordTargetX-e.x)*.27;e.y+=(e.swordTargetY-e.y)*.27;
-              e.swordDash--;e.swordTrail={x1:oldX,y1:oldY,x2:e.x,y2:e.y,ticks:20};
-              if(Math.hypot(player.x-e.x,player.y-e.y)<46 && !e.swordHit){applyDamage(35,'INVESTIDA DE ESPADA DO BOSS');e.swordHit=true;}
+              e.swordDash--;e.swordTrail={x1:oldX,y1:oldY,x2:e.x,y2:e.y,ticks:20,kind:BOSS_STRIKES[sector]||'energy'};
+              if(Math.hypot(player.x-e.x,player.y-e.y)<55 && !e.swordHit){if(!defendCharge(e))applyDamage(35,'INVESTIDA DO BOSS');e.swordHit=true;}
               if(e.swordDash===0){e.swordHit=false;e.swordTargetY=110;}
             }
             if(missionId>4)return; // Evita empilhar ataques legados em bosses avançados.
@@ -2153,7 +2155,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
                         e.slashTimer=(e.slashTimer||0)+1;
                         if(e.slashTimer%230===175&&Math.abs(player.y-e.y)<235){e.slashWarn=45;createFloatingText(e.x,e.y-32,'⚔ CORTE EM 0,75 S','#fda4af');}
                         if(e.slashWarn>0){e.slashWarn--;if(e.slashWarn===0){e.slashDash=15;e.slashVX=Math.sign(player.x-e.x||1)*5;e.slashVY=Math.sign(player.y-e.y||1)*3.3;}}
-                        if(e.slashDash>0){e.slashDash--;e.x+=e.slashVX;e.y+=e.slashVY;e.slashArc=e.slashDash; if(!e.slashHit&&Math.hypot(e.x-player.x,e.y-player.y)<35){applyDamage(20,'ESPADA DO MECHA');e.slashHit=true;}if(e.slashDash===0)e.slashHit=false;}
+                        if(e.slashDash>0){e.slashDash--;e.x+=e.slashVX;e.y+=e.slashVY;e.slashArc=e.slashDash; if(!e.slashHit&&Math.hypot(e.x-player.x,e.y-player.y)<35){if(!defendCharge(e))applyDamage(20,'ESPADA DO MECHA');e.slashHit=true;}if(e.slashDash===0)e.slashHit=false;}
                         if(e.returning){e.y-=4.5;if(e.y< -45){e.returning=false;e.y=-45;e.reentries=(e.reentries||0)+1;}}
                         else {e.y+=player.currentScrollSpeed+(e.vy||0);if(e.y>VIRTUAL_HEIGHT-42)e.returning=true;}
                     }else e.y += player.currentScrollSpeed + (e.vy || 0);
@@ -2208,7 +2210,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
                         bullets.splice(bIndex, 1);
                         if(e.type==='BOSS'&&bossDefeatedThisMission) return;
                         if(e.type==='BOSS')dropBossReward(e,1);
-                        e.hp=Math.max(0,e.hp-(b.damage||1)*(b.iceWeak?.5:1)*(e.gravityTicks>0?2:1)*(e.type==='BOSS'&&e.dualTicks>0&&e.dualElement==='PRISM'?1+(e.dualAmp||0):1));
+                        e.hp=Math.max(0,e.hp-(b.damage||1)*(b.iceWeak?.5:1)*(e.gravityTicks>0?2:1)*(e.type==='BOSS'&&e.dualTicks>0&&e.dualElement==='PRISM'?1+(e.dualAmp||0):1)*(e.type==='BOSS'&&e.parryVulnerableTicks>0?1.5:1));
                         addExplosion(b.x, b.y, b.type==='BANK_MISSILE'?'#fb923c':'#fba518', b.type==='BANK_MISSILE'?16:4);
 
                         if (e.hp <= 0) {
@@ -2693,7 +2695,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
             });
             drawBossCompactMeters();
             for(const e of enemies){if(e.type==='MECHA_SWORD'&&(e.slashArc>0||e.slashWarn>0)){ctx.save();ctx.strokeStyle=e.slashWarn>0?'#fde68a':'#f0abfc';ctx.lineWidth=4;ctx.shadowColor='#e879f9';ctx.shadowBlur=15;ctx.beginPath();ctx.arc(e.x,e.y,e.slashWarn>0?25:34,-Math.PI*.8,Math.PI*.42);ctx.stroke();ctx.restore();if(e.slashArc>0)e.slashArc--;}}
-            for(const e of enemies){if(e.type==='BOSS'&&e.swordTrail?.ticks>0){const t=e.swordTrail;t.ticks--;ctx.save();ctx.strokeStyle='#f8fafc';ctx.shadowColor='#f472b6';ctx.shadowBlur=25;ctx.lineWidth=7;ctx.beginPath();ctx.moveTo(t.x1-20,t.y1-18);ctx.quadraticCurveTo((t.x1+t.x2)/2+22,(t.y1+t.y2)/2-27,t.x2+23,t.y2+23);ctx.stroke();ctx.strokeStyle='#fb7185';ctx.lineWidth=3;ctx.stroke();ctx.restore();}}
+            for(const e of enemies){if(e.type==='BOSS'&&e.swordTrail?.ticks>0){const t=e.swordTrail;t.ticks--;ctx.save();ctx.strokeStyle=t.kind==='blade'?'#f8fafc':t.kind==='impact'?'#fb923c':'#67e8f9';ctx.shadowColor=t.kind==='blade'?'#f472b6':t.kind==='impact'?'#ef4444':'#22d3ee';ctx.shadowBlur=25;ctx.lineWidth=7;ctx.beginPath();ctx.moveTo(t.x1-20,t.y1-18);ctx.quadraticCurveTo((t.x1+t.x2)/2+22,(t.y1+t.y2)/2-27,t.x2+23,t.y2+23);ctx.stroke();ctx.strokeStyle=t.kind==='blade'?'#fb7185':t.kind==='impact'?'#fde68a':'#a5f3fc';ctx.lineWidth=3;ctx.stroke();ctx.restore();}}
             for(const e of enemies){if(e.type!=='BOSS'||e.dualTicks<=0)continue;ctx.save();ctx.globalAlpha=.23+.1*Math.sin(missionTicks*.15);ctx.strokeStyle=e.dualElement==='PRISM'?'#fef08a':'#a78bfa';ctx.lineWidth=5;ctx.beginPath();ctx.ellipse(e.x,e.y,e.width*.6,e.height*.6,missionTicks*.02,0,Math.PI*2);ctx.stroke();ctx.restore();}
             if(parryTicks>0){ctx.save();ctx.strokeStyle='#67e8f9';ctx.lineWidth=4;ctx.shadowColor='#22d3ee';ctx.shadowBlur=18;ctx.beginPath();ctx.arc(player.x,player.y,32+Math.sin(missionTicks*.4)*3,0,Math.PI*2);ctx.stroke();ctx.restore();}
             for(const e of enemies){if(e.type==='BOSS'&&e.warningTicks>0){ctx.save();ctx.strokeStyle='#facc15';ctx.lineWidth=4;ctx.globalAlpha=.5+Math.sin(missionTicks*.4)*.5;ctx.strokeRect(e.x-e.width/2-5,e.y-e.height/2-5,e.width+10,e.height+10);ctx.restore();}}
