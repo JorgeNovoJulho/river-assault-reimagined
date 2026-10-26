@@ -61,3 +61,14 @@ test('approved compact HUD occupies bottom and preserves control ids',()=>{
    assert.equal((html.match(new RegExp('id="'+id+'"','g'))||[]).length,1);
  assert.ok(html.indexOf('id="compact-hud"')>html.indexOf('id="game-over-screen"'));
 });
+
+test('gameplay 045: dams spaced, shots held, banks targetable',()=>{
+ const html=read('index.html');
+ assert.match(html,/structureGap=1600/);
+ assert.match(html,/islandGap=580/);
+ assert.match(html,/mouseInput\.fire \|\| keys\.Space \|\| keys\.KeyZ \|\| touchFireHeld/);
+ assert.match(html,/touchFireButton\.addEventListener\('pointerdown'/);
+ assert.match(html,/e\.type === 'SHIP' \|\| e\.type === 'TURRET'/);
+ assert.match(html,/e\.y>=5 && e\.y<VIRTUAL_HEIGHT-90/);
+ assert.match(html,/HUD 0\.4\.5/);
+});
