@@ -2693,13 +2693,28 @@ function updateTerrainEvent(){
         }
 
         function drawParticles() {
-            particles.forEach(p => {
-                ctx.save();
-                ctx.globalAlpha = Math.max(0, p.life);
-                ctx.fillStyle = p.color;
-                ctx.fillRect(p.x - p.size / 2, p.y - p.size / 2, p.size, p.size);
+            const enhanced=qualitySelect.value==='enhanced',eco=qualitySelect.value==='eco';
+            for(const p of particles){
+                const alpha=Math.max(0,Math.min(1,p.life)),radius=Math.max(.7,p.size||2);
+                ctx.save();ctx.globalAlpha=alpha;
+                // Chamas e fragmentos com luz difusa limitada pela configuracao grafica.
+                if(!eco&&radius>1.4){
+                    const halo=ctx.createRadialGradient(p.x,p.y,.3,p.x,p.y,radius*(enhanced?3.8:2.5));
+                    halo.addColorStop(0,p.color);halo.addColorStop(.26,p.color);halo.addColorStop(1,'rgba(0,0,0,0)');
+                    ctx.globalAlpha=alpha*.27;ctx.fillStyle=halo;
+                    ctx.beginPath();ctx.arc(p.x,p.y,radius*(enhanced?3.8:2.5),0,Math.PI*2);ctx.fill();
+                    ctx.globalAlpha=alpha;
+                }
+                ctx.strokeStyle=p.color;ctx.lineCap='round';
+                ctx.lineWidth=Math.max(1,radius*.85);
+                const speed=Math.hypot(p.vx||0,p.vy||0),tail=Math.min(12,speed*(enhanced?2.6:1.5));
+                if(speed>.5){
+                    ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.lineTo(p.x-(p.vx||0)/speed*tail,p.y-(p.vy||0)/speed*tail);ctx.stroke();
+                }
+                ctx.fillStyle=p.color;ctx.beginPath();ctx.arc(p.x,p.y,radius*.55,0,Math.PI*2);ctx.fill();
+                if(enhanced&&radius>2){ctx.fillStyle='rgba(255,252,230,.75)';ctx.beginPath();ctx.arc(p.x,p.y,radius*.22,0,Math.PI*2);ctx.fill();}
                 ctx.restore();
-            });
+            }
         }
 
         function drawFloatingTexts() {
