@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>RiverStorm — Atualização Forçada 0.5.6</title>
+    <title>RiverStorm — Menu Organizado 0.5.7</title>
     <link rel="stylesheet" href="./src/styles/tailwind.css">
     <style>
         body {
@@ -152,6 +152,7 @@
             <p class="text-xs sm:text-sm text-cyan-400 font-semibold tracking-widest mb-6">EDIÇÃO REIMAGINADA (PT-BR)</p>
 
             <p class="text-slate-300 text-sm max-w-md">20 missões • 7 aeronaves • resgates • chefes épicos</p>
+            <aside id="start-brand"><h1>RIVERSTORM</h1><p>EDIÇÃO REIMAGINADA</p><div class="brand-summary">20 missões · 7 aeronaves · pilotos exclusivos · chefes épicos</div><div class="brand-hint">Escolha a missão e a aeronave no painel ao lado. Os controles da missão permanecem sempre acessíveis.</div></aside>
             <div id="start-main" role="region" aria-label="Seleção da missão e hangar">
             <details class="w-full max-w-sm text-left rounded-xl border border-slate-600 bg-slate-900/80 px-3 py-2 text-xs">
               <summary class="cursor-pointer font-bold text-cyan-300">COMO JOGAR ▾</summary>
@@ -245,7 +246,7 @@
         <div class="rs-hud-cell"><span class="rs-label">🛡 ESCUDO <b id="hud-shield">150</b></span><div class="rs-meter"><span id="hud-shield-fill" style="background:#38bdf8;width:100%"></span></div></div>
         <div class="rs-hud-cell"><span class="rs-label">♟ RESGATES <b id="hud-rescues">0</b></span><span class="rs-label">✈ <b id="hud-plane">FALCÃO</b></span></div>
       </div>
-      <div class="rs-hud-footer"><span id="hud-version" style="color:#38bdf8;font-size:8px">HUD 0.5.6</span><span id="mission-hud">SELVA DA AURORA</span><b id="sector-hud">SETOR 1</b><span id="hud-rank">J1 SOLDADO</span></div>
+      <div class="rs-hud-footer"><span id="hud-version" style="color:#38bdf8;font-size:8px">HUD 0.5.7</span><span id="mission-hud">SELVA DA AURORA</span><b id="sector-hud">SETOR 1</b><span id="hud-rank">J1 SOLDADO</span></div>
     </section>
     <div id="rs-bottom-actions" aria-label="Opções rápidas">
       <button id="crt-toggle" type="button">CRT: LIG</button>
@@ -398,6 +399,33 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
 #start-screen>#start-main #hangar-bars{height:auto!important}
 #start-screen>#start-main select{min-height:36px}
 @media(max-height:660px){#start-screen>p{display:none!important}#start-screen>#start-main{padding:5px!important;gap:5px!important}#start-screen>#start-actions button{min-height:40px!important}}
+</style>
+<style>
+/* RiverStorm 0.5.7: menu em grade isolada; impede conflito com estilos globais antigos. */
+#game-container:has(#start-screen:not(.hidden)){max-width:1100px!important}
+#start-screen:not(.hidden){position:absolute!important;inset:0!important;width:100%!important;height:100%!important;box-sizing:border-box!important;display:grid!important;grid-template-columns:minmax(210px,.72fr) minmax(0,1.45fr)!important;grid-template-rows:minmax(0,1fr)!important;align-items:stretch!important;justify-content:stretch!important;gap:12px!important;padding:13px!important;overflow:hidden!important;text-align:left!important}
+#start-screen:not(.hidden)>h1,#start-screen:not(.hidden)>p{display:none!important}
+#start-screen #start-brand{grid-column:1;grid-row:1;min-width:0;min-height:0;display:flex;flex-direction:column;gap:15px;justify-content:flex-start;padding:19px 13px;border:1px solid #23577a;border-radius:15px;background:linear-gradient(150deg,#0c2540,#071727)}
+#start-brand h1{margin:0;color:#fbbf24;font:900 clamp(26px,3vw,42px) system-ui;letter-spacing:.08em;font-style:italic}
+#start-brand p{margin:0;color:#7dd3fc;font:700 12px system-ui;letter-spacing:.07em}
+#start-brand .brand-summary{font-size:12px;color:#dbeafe;line-height:1.6}
+#start-brand .brand-hint{margin-top:auto;color:#94a3b8;font:600 12px system-ui;line-height:1.7}
+#start-screen:not(.hidden)>#start-main{grid-column:2!important;grid-row:1!important;display:flex!important;flex-direction:column!important;flex:initial!important;gap:9px!important;width:100%!important;max-width:none!important;min-width:0!important;min-height:0!important;overflow-y:auto!important;overflow-x:hidden!important;box-sizing:border-box!important;margin:0!important;padding:10px 10px 100px!important;background:#081c30;border:1px solid #2b607e;border-radius:14px;align-items:stretch!important}
+#start-screen #start-main>div,#start-screen #start-main>details{width:100%!important;max-width:none!important;min-width:0!important;min-height:0!important;height:auto!important;flex:none!important;box-sizing:border-box!important;margin:0!important;padding:9px!important;overflow:visible!important;border-radius:11px}
+#start-screen #start-main select{width:100%!important;box-sizing:border-box!important;min-width:0!important}
+#start-screen:not(.hidden)>#start-actions{position:absolute!important;right:23px!important;left:auto!important;bottom:20px!important;top:auto!important;width:calc((100% - 39px)*.66 - 12px)!important;max-width:none!important;min-width:0!important;box-sizing:border-box!important;display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px!important;padding:9px!important;background:#061625f5;border:1px solid #38bdf8;border-radius:13px;z-index:25!important}
+#start-screen #start-actions button{width:100%!important;min-width:0!important;max-width:none!important;min-height:45px!important;margin:0!important;font:900 12px system-ui!important;white-space:normal!important}
+#compact-hud:has(~ *){box-sizing:border-box}
+body:has(#start-screen:not(.hidden)) #compact-hud{visibility:hidden!important}
+body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!important}
+@media(max-width:720px){
+#start-screen:not(.hidden){display:flex!important;flex-direction:column!important;padding:7px!important;gap:5px!important}
+#start-screen #start-brand{flex:0 0 auto;padding:7px!important;gap:2px!important;text-align:center!important}
+#start-brand h1{font-size:23px!important}
+#start-brand .brand-summary,#start-brand .brand-hint{display:none!important}
+#start-screen:not(.hidden)>#start-main{flex:1 1 0!important;padding:6px 6px 115px!important}
+#start-screen:not(.hidden)>#start-actions{left:12px!important;right:12px!important;bottom:10px!important;width:auto!important}
+}
 </style>
     <script src="./src/input/gamepad.js"></script>
     <script src="./src/game/aircraft.js"></script>
