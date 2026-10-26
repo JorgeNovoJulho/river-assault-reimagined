@@ -1125,25 +1125,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
             strip.classList.remove('hidden');
         }
         function spawnBoss(y,confirmed=false) {
-            if(!confirmed){
-                // Transição RED ALERT -> chefe sem modal bloqueante.
-                // Equipar automaticamente uma habilidade já desbloqueada; sem alterar dano ou recarga.
-                const affinity=bossSkillForMission(sector);
-                const chosen=bossSkillUnlocked.find(key=>BOSS_SKILLS[key]?.strong===affinity)
-                  ||bossSkillUnlocked.find(key=>BOSS_SKILLS[key])||null;
-                bossSkillPending=chosen||'NONE';
-                bossSkillEquipped=chosen;
-                bossSkillCharge=chosen?BOSS_SKILLS[chosen].charges:0;
-                bossSkillCooldown=0;
-                skillPicker.classList.add('hidden');
-                skillPicker.style.display='none';
-                skillPicker.setAttribute('aria-hidden','true');
-                redAlertTicks=0;
-                redAlertTriggered=true; // mantém marca de alerta desta missão
-                gameState='PLAYING';
-                simulationClock.reset();
-                return spawnBoss(y,true);
-            }
+            if(!confirmed){openBossSkillPicker();return;}
             if(enemies.some(e=>e.type==='BOSS'))return;
             bossActive = true;
             try{playlist.beginBossTheme?.()}catch(audioError){console.warn('Trilha de chefe:',audioError)}
@@ -1232,7 +1214,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
         function openBossSkillPicker(){
           if(gameState==='BOSS_SELECT'||bossActive)return;
           gameState='BOSS_SELECT';
-          bossSkillPending='NONE'; // escolha segura: nunca bloquear o jogo por falta de poder
+          bossSkillPending=null; // requer escolha explícita, como no original
           try{playlist.pause();soundtrack.stop()}catch(error){console.warn('Áudio da seleção:',error)}
           skillPicker.classList.remove('hidden');
           skillPicker.style.display='flex';
@@ -1240,8 +1222,8 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
           skillPicker.setAttribute('aria-hidden','false');
           const options=document.getElementById('boss-skill-options');
           options.replaceChildren();
-          document.getElementById('boss-skill-confirm').disabled=false;
-          document.getElementById('boss-skill-selected').textContent='Padrão: lutar sem poder (escolha outro se quiser)';
+          document.getElementById('boss-skill-confirm').disabled=true;
+          document.getElementById('boss-skill-selected').textContent='Escolha uma habilidade ou Lutar sem poder';
           const foe=BOSS_AFFINITIES[(sector-1)%BOSS_AFFINITIES.length];
           document.getElementById('boss-skill-advice').textContent='Boss de '+BOSS_SKILLS[foe].name+' · Selecione uma habilidade ou voe sem poder.';
           for(const key of bossSkillUnlocked){
@@ -1256,7 +1238,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
         }
         let bossSelectionCommitting=false;
         function confirmBossSelection(){
-          if(gameState!=='BOSS_SELECT'||bossSelectionCommitting)return;
+          if(gameState!=='BOSS_SELECT'||bossSelectionCommitting||bossSkillPending===null)return;
           bossSelectionCommitting=true;
           try{
             const chosen=BOSS_SKILLS[bossSkillPending]?bossSkillPending:null;
@@ -1269,7 +1251,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
             gameState='PLAYING';simulationClock.reset();
             spawnBoss(0,true);
             bossActive=true;
-            redAlertTicks=0;redAlertTriggered=false;
+            redAlertTicks=0;redAlertTriggered=true;
             document.getElementById('boss-special-hud')?.classList.add('hidden');
             try{playlist.resume();if(!playlist.tracks.length&&playlist.enabled)soundtrack.start()}catch(error){console.warn('Áudio boss:',error)}
           }catch(error){
@@ -1277,7 +1259,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
             console.error('Seleção de habilidades:',error);
             skillPicker.classList.add('hidden');skillPicker.style.display='none';
             gameState='PLAYING';simulationClock.reset();
-            try{if(!bossActive)spawnBoss(0,true)}catch(bossError){console.error('Boss recovery:',bossError)}
+            try{if(!enemies.some(e=>e.type==='BOSS'))spawnBoss(0,true)}catch(bossError){console.error('Boss recovery:',bossError)}
             showGameError(error);
           }finally{bossSelectionCommitting=false}
         }
