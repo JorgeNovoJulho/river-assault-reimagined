@@ -96,6 +96,25 @@ const {chromium}=require('playwright');const {spawn}=require('node:child_process
   if(bossFlow.transitionStarted.bossActive||!bossFlow.transitionStarted.defeated||bossFlow.transitionStarted.ticks!==180||
      bossFlow.finished.sector!==6||bossFlow.finished.ticks!==0||bossFlow.finished.defeated)
      throw Error('Chefe bloqueou a transição de missão: '+JSON.stringify(bossFlow));
+  // Campaign regression: direct mission 20 must never grant a promotion.
+  const campaignFlow=await page.evaluate(()=>{
+    const startingJourney=journey,startingPoints=careerPoints;
+    gameState='PLAYING';sector=20;campaignVerified=false;
+    finishFullCampaign();
+    const direct={journey,careerPoints,title:document.querySelector('#victory-screen h2').textContent};
+    document.getElementById('victory-screen').classList.add('hidden');
+    gameState='PLAYING';sector=20;campaignVerified=true;
+    finishFullCampaign();
+    const legitimate={journey,careerPoints,title:document.querySelector('#victory-screen h2').textContent};
+    return {startingJourney,startingPoints,direct,legitimate};
+  });
+  console.log('Campaign progression:',JSON.stringify(campaignFlow));
+  if(campaignFlow.direct.journey!==campaignFlow.startingJourney||
+     campaignFlow.direct.careerPoints!==campaignFlow.startingPoints||
+     campaignFlow.legitimate.careerPoints<=campaignFlow.startingPoints||
+     campaignFlow.legitimate.journey!==Math.min(campaignFlow.startingJourney+1,15))
+     throw Error('Validação de promoção NG+ falhou: '+JSON.stringify(campaignFlow));
+
   if(errors.length)throw Error('Erros no browser: '+JSON.stringify(errors));
 
  }finally{await browser?.close();server.kill('SIGKILL');}
