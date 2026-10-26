@@ -103,6 +103,20 @@ class RiverPlaylist{
  startNewGame(){this.order=this.random?shuffle(this.tracks):[...this.tracks];this.current=-1;if(this.order.length){this.next();}else{this.onStatus('Toque em MÚSICAS e selecione seus MP3 para iniciar a trilha')}}
  next(recover=false){if(!this.enabled||!this.order.length)return; if(recover&&this.current>=this.order.length-1){this.stop();return;}this.current=(this.current+1)%this.order.length;const item=this.order[this.current];this.playItem(item)}
  playItem(item){if(this.objectURL){URL.revokeObjectURL(this.objectURL);this.objectURL=null}this.audio.pause();if(item.url){this.audio.src=item.url}else{this.objectURL=URL.createObjectURL(item.blob);this.audio.src=this.objectURL;}this.onStatus('Tocando: '+item.name);this.audio.play().catch(e=>this.onStatus('Toque em reproduzir para ativar o áudio: '+e.message))}
+ fadeTo(target,duration=850,onDone){
+  clearInterval(this.fadeTimer);const steps=20,start=this.audio.volume,delta=(target-start)/steps;let step=0;
+  this.fadeTimer=setInterval(()=>{step++;this.audio.volume=Math.max(0,Math.min(1,start+delta*step));if(step>=steps){clearInterval(this.fadeTimer);this.fadeTimer=null;if(onDone)onDone()}},duration/steps);
+ }
+ beginBossTheme(){
+  if(this.bossMode||!this.enabled)return;
+  const theme=this.tracks.find(t=>t.id==='bundled-14')||this.tracks.find(t=>/Seoul Road/i.test(t.name));
+  if(!theme){this.onStatus('Trilha Seoul Road não encontrada; mantendo música atual');return;}
+  this.bossMode=true;this.fadeTo(0,1350,()=>{if(!this.bossMode)return;this.playItem(theme);this.audio.volume=0;this.fadeTo(.38,1600)});
+ }
+ endBossTheme(){
+  if(!this.bossMode)return;this.bossMode=false;
+  this.fadeTo(0,1300,()=>{if(this.bossMode)return;this.audio.volume=0;if(this.order.length)this.next();this.fadeTo(.38,1600)});
+ }
  pause(){this.audio.pause()}
  resume(){if(this.enabled&&this.order.length)this.audio.play().catch(()=>{})}
  stop(){this.audio.pause();this.audio.removeAttribute('src');this.audio.load();if(this.objectURL)URL.revokeObjectURL(this.objectURL);this.objectURL=null}
