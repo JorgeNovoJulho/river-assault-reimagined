@@ -6,6 +6,10 @@
     <title>RiverStorm — Balanceamento de Chefes 0.8.5</title>
     <link rel="stylesheet" href="./src/styles/tailwind.css">
     <!-- Fallback mínimo para execução estática sem compilação Tailwind. -->
+    <style id="riverstorm-boss-dialogue-visibility">
+      #boss-dialogue-strip:not(.hidden){display:block!important;position:absolute;top:42px;left:50%;transform:translateX(-50%);z-index:120;pointer-events:none;max-width:92%;opacity:1}
+      #boss-dialogue-strip.hidden{display:none!important}
+    </style>
     <style id="riverstorm-overlay-safety">
       .hidden{display:none!important}
       #boss-skill-picker:not(.hidden){display:flex!important;position:absolute;inset:0;z-index:1000;align-items:center;justify-content:center;padding:12px;pointer-events:auto}
@@ -1289,6 +1293,11 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
         }
         function drawBossSkillEffect(){
           const f=bossSkillEffect;if(!f)return;
+          if(window.RiverGraphicsPreview?.mode?.()==='enhanced'&&window.RiverVisuals?.cinematicBossSkill){
+            window.RiverVisuals.cinematicBossSkill(ctx,f);
+            f.life--;if(f.life<=0)bossSkillEffect=null;
+            return;
+          }
           const alpha=Math.min(1,f.life/75),elapsed=f.max-f.life,radius=16+(elapsed%65)*.8;
           ctx.save();ctx.globalAlpha=Math.max(.05,alpha);ctx.strokeStyle=f.color;ctx.lineWidth=5;
           ctx.shadowColor=f.color;ctx.shadowBlur=17;
@@ -2226,6 +2235,11 @@ function updateTerrainEvent(){
             if (gameState !== 'PLAYING') return;
             if(!enemies.some(e=>e.type==='BOSS'))document.getElementById('boss-special-hud').classList.add('hidden');
             missionTicks++;
+            // Falas periódicas na arena, preservando as reações de dor de maior prioridade.
+            if(bossActive&&missionTicks%460===0&&!bossDefeatedThisMission&&(!bossTaunt||bossTaunt.ticks<110)){
+              const speakingBoss=enemies.find(e=>e.type==='BOSS'&&e.hp>0);
+              if(speakingBoss)showBossTaunt(speakingBoss.name||campaign.at(sector).boss);
+            }
             spawnTerrainTarget(getRiverBoundariesAt(-42).center);
             updateTerrainEvent();
             trackPilotProgress();
