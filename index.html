@@ -2065,7 +2065,11 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
                 ctx.translate(0,bob);
                 ctx.fillStyle='rgba(5,16,31,.35)';ctx.beginPath();ctx.ellipse(3,7,22,11,0,0,Math.PI*2);ctx.fill();
                 ctx.fillStyle='#f97316';ctx.beginPath();ctx.moveTo(0,-20);ctx.lineTo(15,-10);ctx.lineTo(13,13);ctx.lineTo(0,19);ctx.lineTo(-13,13);ctx.lineTo(-15,-10);ctx.closePath();ctx.fill();
-                ctx.fillStyle='#ffdf94';ctx.fillRect(-9,-9,18,21);ctx.fillStyle='#14532d';
+                // Casco com borda inflável, bancos, proa e espuma lateral: leitura de bote salva-vidas.
+                ctx.strokeStyle='#ffd4a1';ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(0,-17);ctx.bezierCurveTo(17,-11,16,13,0,16);ctx.bezierCurveTo(-16,13,-17,-11,0,-17);ctx.closePath();ctx.stroke();
+                ctx.fillStyle='#26394a';ctx.fillRect(-10,-7,20,3);ctx.fillRect(-9,5,18,3);
+                ctx.fillStyle='#ffdf94';ctx.fillRect(-9,-2,18,7);
+                ctx.fillStyle='#14532d';
                 for(let j=0;j<Math.min(4,b.soldiers);j++){const x=j%2?6:-6,y=Math.floor(j/2)*9-5;ctx.beginPath();ctx.arc(x,y,3,0,Math.PI*2);ctx.fill()}
                 ctx.fillStyle='#fff';ctx.strokeStyle='#ef4444';ctx.lineWidth=2;ctx.beginPath();ctx.arc(0,-25,12,0,Math.PI*2);ctx.fill();ctx.stroke();ctx.fillStyle='#b91c1c';ctx.font='bold 9px system-ui';ctx.textAlign='center';ctx.fillText('SOS',0,-22);
                 ctx.restore();
