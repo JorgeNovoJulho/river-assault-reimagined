@@ -41,7 +41,12 @@ function shoot(weapon,player,bullets){
  default:add();
  }
  const [damage,color]=tuning[weapon]||tuning.SINGLE;
- for(const bullet of bullets.slice(origin)){bullet.weaponId=weapon;bullet.damage=damage;bullet.color=color;bullet.visualSeed=(bullet.x*17+bullet.vx*23)%100;}
+ for(const bullet of bullets.slice(origin)){
+   bullet.weaponId=weapon;bullet.damage=damage;bullet.color=color;
+   bullet.visualSeed=(bullet.x*17+bullet.vx*23)%100;
+   bullet.trailMax=['BEAM','LASER','ROCKET','TRACKER','MISSILE'].includes(weapon)?3:2;
+   bullet.trail=[];bullet.sprite=weapon;bullet.trailWidth=weapon==='BEAM'?2.5:1.5;
+ }
 }
 global.RiverAircraft={PLANES,WEAPONS,shoot};
 })(window);
