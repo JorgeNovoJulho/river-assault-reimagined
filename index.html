@@ -513,6 +513,8 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
         let riverPoints = [];
         const segmentHeight = 10;
         let bossActive = false;
+        let missionTransitionTicks=0;
+        let bossDefeatedThisMission=false;
 
         // Entidades
         let bullets = [];
@@ -645,7 +647,7 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
 
             distance += segmentHeight;
 
-            if (missionTicks >= 90*60 && redAlertTriggered && redAlertTicks===0 && distance - missionStartDistance > campaign.at(sector).bossDistance) {
+            if (!bossDefeatedThisMission && missionTransitionTicks===0 && missionTicks >= 90*60 && redAlertTriggered && redAlertTicks===0 && distance - missionStartDistance > campaign.at(sector).bossDistance) {
                 spawnBoss(y);
                 return;
             }
@@ -1332,6 +1334,17 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
         function update() {
             if (gameState !== 'PLAYING') return;
             missionTicks++;
+            if(missionTransitionTicks>0){
+                missionTransitionTicks--;
+                if(missionTransitionTicks===0){
+                    sector=Math.min(20,sector+1);
+                    bossDefeatedThisMission=false;
+                    redAlertTriggered=false;redAlertTicks=0;missionTicks=0;missionStartDistance=distance;
+                    enemies=enemies.filter(e=>e.type!=='BOSS'&&e.y<VIRTUAL_HEIGHT*.45);
+                    enemyBullets=[];
+                    document.getElementById('mission-banner').textContent=campaign.at(sector).name;
+                }
+            }
             // Alerta 6s antes do chefe, acionado uma vez por missão.
             if(!bossActive && !redAlertTriggered && missionTicks>=84*60
                && distance-missionStartDistance>=campaign.at(sector).bossDistance*.75){
@@ -1546,8 +1559,9 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
                 bullets.forEach((b, bIndex) => {
                     if (Math.abs(b.x - e.x) < e.width / 2 + 2 && Math.abs(b.y - e.y) < e.height / 2 + 2) {
                         bullets.splice(bIndex, 1);
+                        if(e.type==='BOSS'&&bossDefeatedThisMission) return;
                         if(e.type==='BOSS')dropBossReward(e,1);
-                        e.hp--;
+                        e.hp=Math.max(0,e.hp-1);
                         addExplosion(b.x, b.y, '#fba518', 4);
 
                         if (e.hp <= 0) {
@@ -1558,14 +1572,26 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
                             kills++;
 
                             if (e.type === 'BOSS') {
-                                bossActive = false;
-                                bossTaunt={name:e.name,line:['NÃO! MEUS SISTEMAS!','ISSO NÃO ACABOU, PILOTO!','IMPOSSÍVEL! VOCÊ VENCEU?!','RETIRADA! HA... HA...'][sector%4],ticks:360};
-                                if(sector===20) {gameState='VICTORY';playlist.pause();journey++;try{localStorage.setItem('river_journey_v1',String(journey))}catch(error){}document.getElementById('rank-award').textContent='JORNADA '+journey+' · '+rankName()+' · MULTIPLICADOR x'+scoreMultiplier().toFixed(2);document.getElementById('victory-screen').classList.remove('hidden')} else {sector++;missionTicks=0;redAlertTriggered=false;redAlertTicks=0;missionStartDistance=distance;createFloatingText(e.x,e.y,'MISSÃO CONCLUÍDA!','#22c55e');document.getElementById('mission-banner').textContent=campaign.at(sector).name}
+                                if(!bossDefeatedThisMission){
+                                    bossDefeatedThisMission=true;bossActive=false;enemyBullets=[];
+                                    bossTaunt={name:e.name,line:['NÃO! MEUS SISTEMAS!','ISSO NÃO ACABOU, PILOTO!','IMPOSSÍVEL! VOCÊ VENCEU?!','RETIRADA! HA... HA...'][sector%4],ticks:175};
+                                    if(sector===20){
+                                        gameState='VICTORY';playlist.pause();journey++;
+                                        try{localStorage.setItem('river_journey_v1',String(journey))}catch(error){}
+                                        document.getElementById('rank-award').textContent='JORNADA '+journey+' · '+rankName()+' · MULTIPLICADOR x'+scoreMultiplier().toFixed(2);
+                                        document.getElementById('victory-screen').classList.remove('hidden');
+                                    } else {
+                                        missionTransitionTicks=180;
+                                        document.getElementById('mission-banner').textContent='PRÓXIMA MISSÃO: '+campaign.at(sector+1).name;
+                                        createFloatingText(e.x,e.y,'CHEFE DERROTADO!','#22c55e');
+                                    }
+                                }
                             } else {
                                 createFloatingText(e.x, e.y, `+${e.score}`, '#facc15');
                             }
 
-                            enemies.splice(eIndex, 1);
+                            const removeIndex=enemies.indexOf(e);
+                            if(removeIndex>=0)enemies.splice(removeIndex,1);
                         }
                     }
                 });
@@ -1739,6 +1765,8 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
             screenShake = 0;
             bossTaunt = null;
             bossFinalDialogue=false;
+            missionTransitionTicks=0;
+            bossDefeatedThisMission=false;
             redAlertTicks=0;
             redAlertTriggered=false;
             wingmen=[];
@@ -1985,6 +2013,15 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
             drawFloatingTexts();
             drawHUD();
             drawBossTaunt();
+            if(missionTransitionTicks>0){
+                ctx.save();ctx.fillStyle='rgba(3,16,30,.85)';ctx.fillRect(12,VIRTUAL_HEIGHT*.38,VIRTUAL_WIDTH-24,100);
+                ctx.strokeStyle='#facc15';ctx.lineWidth=3;ctx.strokeRect(12,VIRTUAL_HEIGHT*.38,VIRTUAL_WIDTH-24,100);
+                ctx.fillStyle='#fef08a';ctx.textAlign='center';ctx.font='bold 15px system-ui';
+                ctx.fillText('PRÓXIMA MISSÃO',VIRTUAL_WIDTH/2,VIRTUAL_HEIGHT*.38+34);
+                ctx.fillStyle='#fff';ctx.font='bold 18px system-ui';
+                ctx.fillText(campaign.at(Math.min(20,sector+1)).name.slice(0,32),VIRTUAL_WIDTH/2,VIRTUAL_HEIGHT*.38+66);
+                ctx.restore();
+            }
             if(redAlertTicks>0 && Math.floor(redAlertTicks/15)%2===0){
                 ctx.save();ctx.textAlign='center';ctx.fillStyle='rgba(110,0,10,.86)';
                 ctx.fillRect(15,VIRTUAL_HEIGHT*.39,VIRTUAL_WIDTH-30,90);
