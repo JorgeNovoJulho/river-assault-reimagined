@@ -824,6 +824,22 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
             e.shootTimer++;
             if(e.rewardCooldown>0)e.rewardCooldown--;
 
+            // Mechas convocados pelo chefe: uma pequena onda, com intervalo próprio.
+            if(e.attackTimer%960===0 && enemies.filter(x=>x.type==='MECHA_SWORD'||x.type==='MECHA_GUN').length<2){
+                const type=(sector+e.attackTimer/960)%2?'MECHA_SWORD':'MECHA_GUN';
+                enemies.push({type,x:e.x+(Math.random()<.5?-80:80),y:e.y+45,width:34,height:45,
+                    hp:9,maxHp:9,vx:type==='MECHA_SWORD'?2.2:1.3,vy:1.2,score:400,shootTimer:0,noDrop:true});
+            }
+            // Assinaturas especiais por chefe: EMP, relâmpagos, gravidade, fogo, gelo e investida.
+            if(e.attackTimer%390===0){
+                const pattern=(sector-1)%6;
+                if(pattern===0){player.disabledTimer=Math.max(player.disabledTimer,75);createFloatingText(player.x,player.y,'PULSO EMP','#67e8f9')}
+                else if(pattern===1){for(let n=-2;n<=2;n++)enemyBullets.push({x:e.x+n*26,y:e.y+25,vx:n*.65,vy:5.2,color:'#67e8f9'})}
+                else if(pattern===2){player.x+=(e.x-player.x)*.15;createFloatingText(player.x,player.y,'PULSO GRAVITACIONAL','#c4b5fd')}
+                else if(pattern===3||pattern===4){for(let n=-2;n<=2;n++)enemyBullets.push({x:e.x+n*20,y:e.y+28,vx:n*1.05,vy:3.8,color:pattern===3?'#fb923c':'#bae6fd'})}
+                else{e.x+=(player.x-e.x)*.3;enemyBullets.push({x:e.x,y:e.y+20,vx:0,vy:6,color:'#fef08a'})}
+            }
+
             // Troca de Padrão Principal a cada 150 frames (~2.5s)
             if (e.attackTimer % 150 === 0) {
                 e.attackPattern = (e.attackPattern + 1) % 3;
@@ -1376,6 +1392,13 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
                         score:kind==='SUB'?280:kind==='SHIP'?200:150,shootTimer:0});
                 }
             }
+            // Patrulhas mecha em turnos, no máximo duas unidades simultâneas.
+            if(!bossActive && missionTicks%415===0 && enemies.filter(e=>e.type==='MECHA_SWORD'||e.type==='MECHA_GUN').length<2){
+                const banks=getRiverBoundariesAt(35),type=(sector+Math.floor(missionTicks/415))%2?'MECHA_SWORD':'MECHA_GUN';
+                enemies.push({type,x:banks.center+(Math.random()-.5)*banks.width*.5,y:-35,width:34,height:45,
+                    hp:6+Math.floor(sector/5),maxHp:6+Math.floor(sector/5),vx:type==='MECHA_SWORD'?2:1,vy:1.25,
+                    score:340,shootTimer:0,mechaCooldown:0});
+            }
             if(screenShake>0)screenShake*=.83;
             if(hazardWaveCooldown>0)hazardWaveCooldown--;
             if(bombFlash>0)bombFlash--;
@@ -1543,9 +1566,15 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
                     if(e.type==='HELI'||e.type==='JET'||e.type==='ZIGZAG')e.y+=Math.sin(e.motion)*1.3;
                     if(e.type==='SHIP'||e.type==='SUB')e.x+=Math.sin(e.motion)*.38;
                 }
-                if (e.type === 'SHIP' || e.type === 'TURRET' || e.type==='SUB' || e.type==='TANK') {
+                if(e.type==='MECHA_SWORD'){
+                    e.meleeTick=(e.meleeTick||0)+1;
+                    if(e.meleeTick%135===0&&Math.abs(e.x-player.x)<70&&Math.abs(e.y-player.y)<85){
+                        applyDamage(24,'ESPADA MECHA');addExplosion(player.x,player.y,'#fbbf24',8);
+                    }
+                }
+                if (e.type === 'SHIP' || e.type === 'TURRET' || e.type==='SUB' || e.type==='TANK'||e.type==='MECHA_GUN') {
                     e.shootTimer = (e.shootTimer || 0) + 1;
-                    if (e.shootTimer > 60) {
+                    if (e.shootTimer > (e.type==='MECHA_GUN'?105:60)) {
                         const angle = Math.atan2(player.y - e.y, player.x - e.x);
                         enemyBullets.push({
                             x: e.x, y: e.y,
