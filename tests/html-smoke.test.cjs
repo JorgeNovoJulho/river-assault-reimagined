@@ -145,3 +145,14 @@ test('eventos: cadência específica em 20 missões e limite de inimigos do biom
  assert.match(html,/\(missionTicks\+waveOffset\)%cadence!==0/);
  assert.match(html,/if\(existing\.length>=2\)return/);
 });
+
+test('eventos de jogabilidade por bioma não congelam nave e encerram ao entrar no boss',()=>{
+ const html=fs.readFileSync('index.html','utf8');
+ const events=html.match(/const TERRAIN_EVENTS=\[([\s\S]*?)\];/);
+ assert.ok(events);
+ assert.equal((events[1].match(/\['[A-Z_]+',\d+\]/g)||[]).length,20);
+ assert.match(html,/function updateTerrainEvent\(\)/);
+ assert.match(html,/if\(bossActive\|\|missionTransitionTicks>0\)/);
+ assert.match(html,/terrainEventTicks=0;terrainEventType='';terrainEventNotice=0/);
+ assert.match(html,/player\.fuel=Math\.min\(player\.maxFuel,player\.fuel\+\.025\)/);
+});
