@@ -770,6 +770,58 @@ function detailStamp(type,variant=0){
  for(let i=0;i<6;i++){const y=-14+i*5;g.beginPath();g.moveTo(-10,y);g.lineTo(10,y);g.stroke()}
  DETAIL_CACHE.set(key,el);return el;
 }
+
+function distinctiveUnit(c,e){
+ if(!detailEnabled)return;
+ const type=e.type;
+ if(!['TANK','TURRET','SUB','HELI','JET','ZIGZAG','SHIP'].includes(type))return;
+ c.save();c.translate(e.x,e.y);
+ const plate=(pts,col,outline='#a2c2cc')=>{c.fillStyle=col;c.strokeStyle=outline;c.lineWidth=1.4;c.beginPath();pts.forEach((p,i)=>i?c.lineTo(...p):c.moveTo(...p));c.closePath();c.fill();c.stroke()};
+ const armor=c.createLinearGradient(-17,-20,20,24);armor.addColorStop(0,'#bdd4dd');armor.addColorStop(.35,'#647f90');armor.addColorStop(1,'#1c3448');
+ if(type==='TANK'){
+  // Lagartas, torre giratória, canhão e escotilhas; topo visto de cima.
+  for(const d of [-1,1]){c.fillStyle='#182431';c.fillRect(d*13-4,-16,8,35);c.fillStyle='#7c8c8f';for(let y=-13;y<19;y+=6)c.fillRect(d*13-3,y,6,2)}
+  plate([[-13,-19],[13,-19],[16,17],[-16,17]],armor);
+  plate([[-10,-10],[10,-10],[12,8],[-12,8]],'#465e6a');
+  c.save();c.rotate(Math.atan2((e.vy||0),(e.vx||0))*.12);
+  c.fillStyle='#b1c3c9';c.fillRect(-3,-29,6,24);
+  plate([[-10,-12],[10,-12],[12,4],[0,11],[-12,4]],'#506c76');
+  c.restore();
+  c.fillStyle='#172b36';c.beginPath();c.arc(0,-3,4,0,7);c.fill();
+ }else if(type==='TURRET'){
+  plate([[-13,-12],[13,-12],[16,12],[-16,12]],'#53697a');
+  c.fillStyle='#172d3d';c.beginPath();c.arc(0,0,10,0,7);c.fill();
+  c.fillStyle='#bad3da';c.fillRect(-3,-22,6,24);
+  c.fillStyle='#7897a6';c.beginPath();c.arc(0,0,6,0,7);c.fill();
+ }else if(type==='SUB'){
+  // Submarino com casco fusiforme, torre de comando, periscópio e esteira.
+  c.strokeStyle='rgba(165,234,243,.48)';c.lineWidth=2;c.beginPath();c.ellipse(2,9,21,31,0,0,7);c.stroke();
+  plate([[0,-27],[13,-12],[16,15],[8,27],[-8,27],[-16,15],[-13,-12]],armor);
+  plate([[-8,-10],[8,-10],[10,10],[-10,10]],'#3b6476');
+  c.fillStyle='#c4edf2';c.fillRect(-3,-17,6,18);
+  c.strokeStyle='#c4edf2';c.beginPath();c.moveTo(0,-20);c.lineTo(0,-29);c.lineTo(6,-29);c.stroke();
+  plate([[-25,13],[-12,8],[-10,16],[-25,21]],'#3e6574');
+  plate([[25,13],[12,8],[10,16],[25,21]],'#3e6574');
+ }else if(type==='SHIP'){
+  c.strokeStyle='rgba(175,232,245,.55)';c.beginPath();c.moveTo(-19,26);c.lineTo(-12,37);c.moveTo(19,26);c.lineTo(12,37);c.stroke();
+  plate([[0,-30],[15,-18],[20,18],[10,29],[-10,29],[-20,18],[-15,-18]],armor);
+  plate([[-11,-13],[11,-13],[12,12],[-12,12]],'#2d536a');
+  c.fillStyle='#a9d9e5';c.fillRect(-8,-10,16,6);
+  c.fillStyle='#152b3d';c.fillRect(-4,-27,8,13);
+ }else if(type==='HELI'){
+  plate([[0,-28],[11,-17],[14,11],[6,24],[3,24],[3,35],[-3,35],[-3,24],[-6,24],[-14,11],[-11,-17]],armor);
+  plate([[-8,-16],[8,-16],[7,3],[-7,3]],'#234c66');
+  c.fillStyle='#a8edfa';c.beginPath();c.ellipse(-2,-9,5,8,0,0,7);c.fill();
+  const a=(Date.now()/58)%Math.PI,cx=Math.cos(a)*21,cy=Math.sin(a)*9;
+  c.strokeStyle='rgba(206,247,255,.85)';c.lineWidth=2;c.beginPath();c.moveTo(-cx,-cy);c.lineTo(cx,cy);c.stroke();
+ }else{
+  plate([[0,-31],[12,-13],[28,20],[9,11],[0,27],[-9,11],[-28,20],[-12,-13]],armor);
+  plate([[-8,-15],[8,-15],[8,5],[-8,5]],'#27587a');
+  c.fillStyle='#c2e9fa';c.beginPath();c.ellipse(0,-9,5,7,0,0,7);c.fill();
+ }
+ c.restore();
+}
+
 function highDetailEnemy(c,e,time){
  const type=e.type||'JET';
  if(!detailEnabled||type==='BIOME_ENEMY'||type==='TANK'||type==='TURRET')return;
@@ -890,7 +942,7 @@ function draw(c,d){
  islands(c,(d.islands||[]).filter(p=>p.y+(p.height||0)>-32&&p.y-(p.height||0)<d.h+32&&p.x+(p.width||0)>-32&&p.x-(p.width||0)<d.w+32),t);
  for(const e of d.enemies||[]){
    if(e.hp<=0||e.y+(e.height||40)<-45||e.y-(e.height||40)>d.h+45||e.x+(e.width||40)<-45||e.x-(e.width||40)>d.w+45)continue;
-   enemy(c,e,t.time);highDetailEnemy(c,e,t.time);
+   enemy(c,e,t.time);highDetailEnemy(c,e,t.time);distinctiveUnit(c,e);
  }
  if(!d.invulnerable||Math.floor(Date.now()/110)%2){plane(c,d.player.x,d.player.y,d.player.aircraftType||d.aircraft,0.85);highDetailPlane(c,d.player.x,d.player.y,d.player.aircraftType||d.aircraft)}enhancedBattleLight(c,d);enhancedWeaponGlints(c,d);
 }
