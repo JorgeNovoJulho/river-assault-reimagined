@@ -416,6 +416,43 @@ const BIOME_DETAILS=[
  ['SHIPYARD','#f0bd79','⚓'],['ICE_ISLANDS','#d5f8ff','◇'],['ELECTRIC_RUINS','#8ed7ff','ϟ'],
  ['FINAL_CONFLUENCE','#fbe1a1','✷']
 ];
+// Marcos de terreno decorativos, estáveis por missão, sem criar entidades ou colisões.
+function landmark(c,d,t){
+ const sector=Math.max(1,Math.min(20,Number(d.sector)||1));
+ const w=d.w,h=d.h,spacing=sector%4===0?270:360;
+ const shift=(d.distance||0)*.38;
+ const count=d.quality==='eco'?2:d.quality==='enhanced'?5:3;
+ c.save();c.lineWidth=2;
+ for(let i=0;i<count;i++){
+   const slot=Math.floor(shift/spacing)+i;
+   const seed=sector*2003+slot*71;
+   const y=h-((shift+slot*spacing)%(h+spacing))+i*spacing*.6;
+   if(y<20||y>h-18)continue;
+   const [left,right]=bankAt(d.riverPoints,y,w);
+   const x=slot%2===0?left*.48:right+(w-right)*.52;
+   if(x<14||x>w-14)continue;
+   const size=9+hash(seed)*12;
+   c.save();c.translate(x,y);
+   c.globalAlpha=d.quality==='eco'?.36:.61;
+   c.fillStyle=t.accent;c.strokeStyle=t.accent;
+   switch((sector-1)%5){
+    case 0: // Selvas: árvores monumentais e raízes
+     c.beginPath();c.moveTo(-size*.65,0);c.lineTo(0,-size*1.5);c.lineTo(size*.65,0);c.closePath();c.fill();c.fillRect(-2,0,4,size*.65);break;
+    case 1: // Complexos militares e cidades: silhuetas industriais
+     c.strokeRect(-size*.6,-size,size*1.2,size);c.fillRect(-size*.8,-size*.85,size*.3,3);
+     c.beginPath();c.moveTo(size*.3,-size);c.lineTo(size*.3,-size*1.5);c.stroke();break;
+    case 2: // Desertos e cânions: obeliscos de pedra
+     c.beginPath();c.moveTo(-size*.45,3);c.lineTo(-size*.2,-size*1.25);c.lineTo(size*.25,-size*1.4);c.lineTo(size*.5,3);c.closePath();c.fill();break;
+    case 3: // Geleiras: cristais fraturados
+     c.beginPath();c.moveTo(0,-size*1.4);c.lineTo(size*.65,-size*.4);c.lineTo(0,size*.3);c.lineTo(-size*.6,-size*.2);c.closePath();c.stroke();break;
+    default: // Ilhas e deltas: plataformas e faróis
+     c.fillRect(-size*.55,0,size*1.1,3);c.fillRect(-size*.2,-size*.9,size*.4,size*.9);
+     c.beginPath();c.arc(0,-size,3,0,Math.PI*2);c.fill();break;
+   }
+   c.restore();
+ }
+ c.restore();
+}
 function biomeAtmosphere(c,data,t){
  const sector=Math.max(1,Math.min(20,Number(data.sector)||1)),detail=BIOME_DETAILS[sector-1];
  const {w,h,distance=0,quality='balanced',riverPoints:points}=data;
@@ -460,6 +497,16 @@ function biomeAtmosphere(c,data,t){
  }
 }
 
-function draw(c,d){const t=THEMES[((d.sector-1)%THEMES.length+THEMES.length)%THEMES.length];landscape(c,d,t);biomeAtmosphere(c,d,t);islands(c,d.islands,t);for(let e of d.enemies)enemy(c,e,t.time);if(!d.invulnerable||Math.floor(Date.now()/110)%2)plane(c,d.player.x,d.player.y,d.player.aircraftType||d.aircraft,0.85);}
+function draw(c,d){
+ const t=THEMES[((d.sector-1)%THEMES.length+THEMES.length)%THEMES.length];
+ landscape(c,d,t);landmark(c,d,t);biomeAtmosphere(c,d,t);
+ // Culling explícito: evitar traçar sprites fora da tela e preservar FPS em ondas intensas.
+ islands(c,(d.islands||[]).filter(p=>p.y+(p.height||0)>-32&&p.y-(p.height||0)<d.h+32&&p.x+(p.width||0)>-32&&p.x-(p.width||0)<d.w+32),t);
+ for(const e of d.enemies||[]){
+   if(e.hp<=0||e.y+(e.height||40)<-45||e.y-(e.height||40)>d.h+45||e.x+(e.width||40)<-45||e.x-(e.width||40)>d.w+45)continue;
+   enemy(c,e,t.time);
+ }
+ if(!d.invulnerable||Math.floor(Date.now()/110)%2)plane(c,d.player.x,d.player.y,d.player.aircraftType||d.aircraft,0.85);
+}
 root.RiverVisuals={draw,plane,enemy,THEMES,BIOME_DETAILS,drawIslands(c,items,sector){const t=THEMES[((sector-1)%THEMES.length+THEMES.length)%THEMES.length];islands(c,items,t)}};
 })(window);
