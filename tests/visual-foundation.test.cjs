@@ -64,11 +64,21 @@ test('approved compact HUD occupies bottom and preserves control ids',()=>{
 
 test('gameplay 045: dams spaced, shots held, banks targetable',()=>{
  const html=read('index.html');
- assert.match(html,/structureGap=1600/);
- assert.match(html,/islandGap=580/);
+ assert.match(html,/structureGap=2800/);
+ assert.match(html,/islandGap=720/);
  assert.match(html,/mouseInput\.fire \|\| keys\.Space \|\| keys\.KeyZ \|\| touchFireHeld/);
  assert.match(html,/touchFireButton\.addEventListener\('pointerdown'/);
  assert.match(html,/e\.type === 'SHIP' \|\| e\.type === 'TURRET'/);
  assert.match(html,/e\.y>=5 && e\.y<VIRTUAL_HEIGHT-90/);
- assert.match(html,/HUD 0\.4\.5/);
+ assert.match(html,/HUD 0\.4\.6/);
+});
+
+test('hotfix 1: pickup spacing and visual types are enforced',()=>{
+ const html=read('index.html');
+ assert.match(html,/pickupLaneClear\(200\)/);
+ assert.match(html,/pickupLaneClear\(190\)/);
+ assert.match(html,/rescueBoatsLastAt=distance/);
+ for(const type of ['BOMB','SHIELD','SPREAD','LIFE','WINGMAN'])assert.ok(html.includes(type+':{color:'));
+ assert.match(html,/mouseFireHeld/);
+ assert.match(html,/const corridor=Math.max\(96,player.width\+55\)/);
 });
