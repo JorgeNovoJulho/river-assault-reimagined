@@ -3717,5 +3717,23 @@ function updateTerrainEvent(){
             catch(error){showGameError(error);console.error(error)}
         });
     </script>
+
+    <!-- Comparador experimental: mantém toda a lógica original do jogo. -->
+    <script>
+    (function(){
+      function installPreviewControl(){
+        if(!window.RiverGraphicsPreview||document.getElementById('graphics-preview-toggle'))return;
+        const button=document.createElement('button');
+        button.id='graphics-preview-toggle';
+        button.type='button';
+        button.style.cssText='position:fixed;top:12px;right:12px;z-index:9999;background:#0b2638;color:#d6f7ff;border:1px solid #55cde5;border-radius:10px;padding:9px 12px;font:600 12px system-ui;box-shadow:0 2px 12px #0008;cursor:pointer';
+        const update=()=>button.textContent='GRÁFICOS: '+(window.RiverGraphicsPreview.mode()==='enhanced'?'NOVOS':'ORIGINAIS')+' · alternar';
+        button.addEventListener('click',()=>{const next=window.RiverGraphicsPreview.mode()==='enhanced'?'classic':'enhanced';window.RiverGraphicsPreview.setMode(next);update()});
+        update();document.body.appendChild(button);
+      }
+      if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',installPreviewControl);
+      else installPreviewControl();
+    })();
+    </script>
 </body>
 </html>
