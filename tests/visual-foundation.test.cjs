@@ -38,3 +38,14 @@ test('river graphics use deterministic current and shoreline detail without game
  assert.match(source,/bankDetails\(c,points,w,h,distance,quality,t\)/);
  assert.doesNotMatch(source.slice(source.indexOf('function waterMotion'),source.indexOf('function landscape')),/Math\.random/);
 });
+
+test('visual 03: dam and bridge share a traversable opening',()=>{
+ const html=read('index.html');
+ assert.match(html,/const passage=Math.max\(player.width\+50/);
+ assert.match(html,/Math.abs\(player.x-p.x\)<p.opening\/2-player.width\/2/);
+ assert.match(html,/PASSAGEM/);
+ assert.match(html,/function drawStructures\(/);
+ const renderer=read('src/render/scene2d5.js');
+ assert.match(renderer,/drawIslands\(c,items,sector\)/);
+ assert.match(renderer,/const icy=\/ÁRTICO/);
+});
