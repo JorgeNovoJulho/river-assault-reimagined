@@ -797,6 +797,65 @@ function detailStamp(type,variant=0){
  DETAIL_CACHE.set(key,el);return el;
 }
 
+
+/* Nova Geração: sprites de detalhes cacheados por categoria para evitar
+   reconstrução das formas de veículos a cada frame. Hitboxes permanecem oficiais. */
+const VEHICLE_ATLAS=new Map();
+function vehicleAtlas(type){
+ if(VEHICLE_ATLAS.has(type))return VEHICLE_ATLAS.get(type);
+ const size=128,canvas=document.createElement('canvas');canvas.width=size;canvas.height=size;
+ const c=canvas.getContext('2d');c.translate(64,64);
+ const grad=c.createLinearGradient(-40,-45,38,46);
+ grad.addColorStop(0,'#f1f8fb');grad.addColorStop(.2,'#a3bfcb');grad.addColorStop(.56,'#516b7e');grad.addColorStop(1,'#132c3e');
+ function panel(pts,fill=grad){c.beginPath();pts.forEach((p,i)=>i?c.lineTo(p[0],p[1]):c.moveTo(p[0],p[1]));c.closePath();c.fillStyle=fill;c.fill();c.strokeStyle='#c2d4dc';c.lineWidth=1.7;c.stroke()}
+ if(type==='TANK'){
+  for(const sign of [-1,1]){c.fillStyle='#17232d';c.fillRect(sign*29-8,-34,14,69);for(let y=-30;y<33;y+=9){c.fillStyle='#889eaa';c.fillRect(sign*29-7,y,12,3)}}
+  panel([[-30,-37],[30,-37],[32,35],[-32,35]]);
+  panel([[-21,-21],[21,-21],[22,23],[-22,23]],'#415969');
+  c.fillStyle='#bed6df';c.fillRect(-5,-55,10,46);panel([[-17,-15],[17,-15],[20,11],[0,24],[-20,11]],'#506b7e');
+  c.fillStyle='#172d3a';c.beginPath();c.arc(0,0,8,0,7);c.fill();
+ }else if(type==='SUB'){
+  panel([[0,-53],[22,-34],[28,23],[15,49],[-15,49],[-28,23],[-22,-34]]);
+  panel([[-14,-18],[14,-18],[14,20],[-14,20]],'#2b556c');
+  c.fillStyle='#d1edf1';c.fillRect(-5,-30,10,25);
+  c.strokeStyle='#baf3ff';c.lineWidth=4;c.beginPath();c.moveTo(0,-27);c.lineTo(0,-44);c.lineTo(10,-44);c.stroke();
+  panel([[-43,27],[-24,19],[-18,34],[-43,42]],'#416a77');panel([[43,27],[24,19],[18,34],[43,42]],'#416a77');
+ }else if(type==='HELI'){
+  panel([[0,-46],[18,-29],[22,19],[9,37],[4,38],[4,53],[-4,53],[-4,38],[-9,37],[-22,19],[-18,-29]]);
+  panel([[-14,-33],[14,-33],[12,8],[-12,8]],'#224862');c.fillStyle='#a6e5f4';c.beginPath();c.ellipse(-3,-18,7,12,-.3,0,7);c.fill();
+  for(const side of [-1,1])panel([[side*19,-2],[side*32,0],[side*29,31],[side*18,24]],'#496979');
+ }else if(type==='SHIP'){
+  panel([[0,-55],[24,-34],[31,25],[16,48],[-16,48],[-31,25],[-24,-34]]);
+  panel([[-20,-32],[20,-32],[18,29],[-18,29]],'#4b7184');
+  panel([[-12,-20],[12,-20],[13,12],[-13,12]],'#1b4961');
+  c.fillStyle='#bce9f5';c.fillRect(-9,-16,18,7);
+  c.fillStyle='#203849';c.fillRect(-6,-47,12,20);
+ }else if(type==='JET'||type==='ZIGZAG'){
+  panel([[0,-54],[15,-26],[49,23],[23,18],[13,38],[0,25],[-13,38],[-23,18],[-49,23],[-15,-26]]);
+  panel([[-11,-31],[0,-43],[11,-31],[9,4],[-9,4]],'#245578');
+  c.fillStyle='#a4ebff';c.beginPath();c.ellipse(0,-20,6,11,0,0,7);c.fill();
+ }else if(type==='TURRET'){
+  panel([[-31,-31],[31,-31],[35,30],[-35,30]],'#567080');
+  c.fillStyle='#253b50';c.beginPath();c.arc(0,0,22,0,7);c.fill();
+  c.fillStyle='#cbe1e8';c.fillRect(-5,-51,10,53);
+  c.fillStyle='#819dac';c.beginPath();c.arc(0,0,12,0,7);c.fill();
+ }
+ VEHICLE_ATLAS.set(type,canvas);return canvas;
+}
+function drawAtlasVehicle(c,e){
+ if(!detailEnabled)return;
+ const type=e.type;
+ if(!['TANK','TURRET','SUB','HELI','JET','ZIGZAG','SHIP'].includes(type))return;
+ const w=type==='SUB'?47:type==='TANK'?39:type==='HELI'?39:type==='SHIP'?43:type==='TURRET'?30:38;
+ const h=type==='SUB'?59:type==='TANK'?42:type==='HELI'?43:type==='SHIP'?54:type==='TURRET'?30:42;
+ c.save();c.globalAlpha=.94;c.drawImage(vehicleAtlas(type),e.x-w/2,e.y-h/2,w,h);
+ if(type==='HELI'){
+  const rot=Date.now()*.06;c.strokeStyle='rgba(208,247,255,.83)';c.lineWidth=2;
+  c.beginPath();c.moveTo(e.x-Math.cos(rot)*24,e.y-Math.sin(rot)*8);c.lineTo(e.x+Math.cos(rot)*24,e.y+Math.sin(rot)*8);c.stroke();
+ }
+ c.restore();
+}
+
 function distinctiveUnit(c,e){
  if(!detailEnabled)return;
  const type=e.type;
@@ -968,7 +1027,7 @@ function draw(c,d){
  islands(c,(d.islands||[]).filter(p=>p.y+(p.height||0)>-32&&p.y-(p.height||0)<d.h+32&&p.x+(p.width||0)>-32&&p.x-(p.width||0)<d.w+32),t);
  for(const e of d.enemies||[]){
    if(e.hp<=0||e.y+(e.height||40)<-45||e.y-(e.height||40)>d.h+45||e.x+(e.width||40)<-45||e.x-(e.width||40)>d.w+45)continue;
-   enemy(c,e,t.time);highDetailEnemy(c,e,t.time);distinctiveUnit(c,e);
+   enemy(c,e,t.time);highDetailEnemy(c,e,t.time);drawAtlasVehicle(c,e);
  }
  if(!d.invulnerable||Math.floor(Date.now()/110)%2){plane(c,d.player.x,d.player.y,d.player.aircraftType||d.aircraft,0.85);highDetailPlane(c,d.player.x,d.player.y,d.player.aircraftType||d.aircraft)}enhancedBattleLight(c,d);enhancedWeaponGlints(c,d);
 }
