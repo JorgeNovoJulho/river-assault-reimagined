@@ -2494,8 +2494,8 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
                 if(w.ttl<=0)continue;
                 const guided=['TRACKER','MISSILE','ROCKET','PRECISION','MULTI'].includes(player.weapon);
                 const turbo=['BEAM','LASER','PULSE'].includes(player.weapon);
-                for(const angle of [-5.8,5.8]){
-                    bullets.push({x:player.x+w.side*36,y:player.y+10,vx:angle,speed:turbo?11:8,
+                for(const direction of [-1,1]){
+                    bullets.push({x:player.x+w.side*36,y:player.y+10,vx:w.side*5.8,speed:direction*(turbo?11:8),
                         type:guided?'MISSILE':turbo?'LASER':'SINGLE',color:guided?'#fbbf24':turbo?'#67e8f9':'#a7f3d0'});
                 }
             }
