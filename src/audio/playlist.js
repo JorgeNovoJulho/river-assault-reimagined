@@ -80,7 +80,15 @@ function shuffle(arr){const copy=[...arr];for(let i=copy.length-1;i>0;i--){const
 class RiverPlaylist{
  constructor(opts={}){this.audio=new Audio();this.audio.preload='auto';this.audio.loop=false;this.audio.volume=.38;this.tracks=[];this.order=[];this.current=-1;this.enabled=true;this.loading=false;this.onStatus=opts.onStatus||(()=>{});this.objectURL=null;this.random=true;this.customOrder=[];try{this.random=localStorage.getItem('river_playlist_random')!=='false';this.customOrder=JSON.parse(localStorage.getItem('river_playlist_order')||'[]')}catch(e){}this.audio.addEventListener('ended',()=>this.next());this.audio.addEventListener('error',()=>{this.onStatus('Faixa indisponível; passando para próxima');this.next(true)});}
  async load(){let rows=[];try{const db=await openDB();rows=await transaction(db,'readonly',s=>s.getAll())}catch(e){this.onStatus('Biblioteca local indisponível; verificando faixas oficiais')}try{const bundled=await Promise.all(PRESET.map(async item=>{
-       try{const res=await fetch(item.url,{method:'HEAD',cache:'force-cache'});return res.ok?{...item,bundled:true}:null}catch(e){return null}
+       try{
+         const url=new URL(item.url,document.baseURI).href;
+         let res=await fetch(url,{method:'HEAD',cache:'no-cache'});
+         if(!res.ok && [403,405,501].includes(res.status)){
+           res=await fetch(url,{method:'GET',cache:'force-cache'});
+           if(res.body && res.body.cancel)res.body.cancel().catch(()=>{});
+         }
+         return res.ok?{...item,url,bundled:true}:null;
+       }catch(e){return null}
      }));
      this.tracks=[...bundled.filter(Boolean),...rows.map(x=>({id:x.id,name:x.name,blob:x.blob}))];
      this.tracks.sort((a,b)=>{const x=this.customOrder.indexOf(a.id),y=this.customOrder.indexOf(b.id);return (x<0?999:x)-(y<0?999:y)});}catch(e){this.onStatus('Armazenamento local indisponível: '+e.message)}return this.tracks.length}
