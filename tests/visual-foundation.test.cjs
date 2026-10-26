@@ -347,3 +347,15 @@ test('mapas: marcos ambientais com cinco famílias, deslocamento e baixo custo',
  assert.match(render,/landscape\(c,d,t\);landmark\(c,d,t\);biomeAtmosphere\(c,d,t\)/);
  assert.match(render,/d\.quality==='eco'\?2/);
 });
+
+test('20 missões possuem clima, horário, iluminação e detalhes dedicados',()=>{
+ const render=read('src/render/scene2d5.js');
+ const climates=render.match(/const CLIMATE=\[([\s\S]*?)\n \];/);
+ assert.ok(climates,'climas de missão ausentes');
+ assert.equal((climates[1].match(/\['[^']+','[^']+','[^']+'\]/g)||[]).length,20);
+ assert.match(render,/const dayGlow=/);
+ assert.match(render,/weather==='blizzard'/);
+ assert.match(render,/weather==='sand'/);
+ assert.match(render,/weather==='lightning'/);
+ assert.match(render,/quality==='eco'\?12/);
+});
