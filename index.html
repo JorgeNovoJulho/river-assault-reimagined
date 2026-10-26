@@ -3337,7 +3337,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
             enterGameplay();
             if(gameState!=='PLAYING')return;
             score=Math.max(0,Number(c.score)||0);kills=Math.max(0,Number(c.kills)||0);lives=Math.max(1,Number(c.lives)||3);
-            continues=Math.max(0,Number(c.continues)||0);earnedPoints=Math.max(0,Number(c.earnedPoints)||0);campaignVerified=Boolean(c.verifiedRun&&c.journey===journey);
+            continues=Math.max(0,Number(c.continues)||0);earnedPoints=Math.max(0,Number(c.earnedPoints)||0);campaignVerified=Boolean(c.verifiedRun&&c.journey===journey);if(campaignVerified){pilotProfile.lastSequentialMission=Math.max(0,c.sector-1);savePilotProfile()}
         });
         updateContinueButton();
         document.getElementById('pause-settings-btn').addEventListener('click',()=>showControllerSettings(true));
