@@ -1147,7 +1147,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
         }
         function drawBossSkillEffect(){
           const f=bossSkillEffect;if(!f)return;
-          const alpha=Math.min(1,f.life/75),elapsed=f.max-f.life,radius=15+(elapsed%65)*2;
+          const alpha=Math.min(1,f.life/75),elapsed=f.max-f.life,radius=16+(elapsed%65)*.8;
           ctx.save();ctx.globalAlpha=Math.max(.05,alpha);ctx.strokeStyle=f.color;ctx.lineWidth=5;
           ctx.shadowColor=f.color;ctx.shadowBlur=17;
           ctx.beginPath();ctx.arc(f.x,f.y,radius,0,Math.PI*2);ctx.stroke();
@@ -1178,7 +1178,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
           if(kind==='LIGHTNING')boss.stunnedTicks=600;
           if(kind==='FIRE')boss.burningTicks=600;
           boss.hp=Math.max(0,boss.hp-damage);
-          bossTaunt={name:boss.name,line:advantage?'COMO DESCOBRIU MINHA FRAQUEZA?! '+skill.name.toUpperCase()+'!':'HA! '+skill.name.toUpperCase()+' MAL ME AFETA! MINHA FRAQUEZA É '+BOSS_SKILLS[foe].name.toUpperCase()+'!',ticks:300};
+          bossTaunt={name:boss.name,line:advantage?'COMO DESCOBRIU MINHA FRAQUEZA?! '+skill.name.toUpperCase()+'!':'HA! '+skill.name.toUpperCase()+' MAL ME AFETA! MINHA FRAQUEZA É '+(Object.values(BOSS_SKILLS).find(v=>v.strong===foe)?.name||'ELEMENTO OPOSTO').toUpperCase()+'!',ticks:300};
           dropBossReward(boss,damage);
           addExplosion(boss.x,boss.y,skill.color,32);
           playBossSkillEffect(kind,boss,damage,skill.color);
