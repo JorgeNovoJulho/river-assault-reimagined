@@ -1189,7 +1189,12 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
           try{localStorage.setItem('river_boss_skills_v1',JSON.stringify(bossSkillUnlocked))}catch(e){}
           createFloatingText(VIRTUAL_WIDTH/2,150,'PODER '+BOSS_SKILLS[key].name.toUpperCase()+' LIBERADO',BOSS_SKILLS[key].color);
         }
-        function clearBossArenaEffects(){bossSkillEffect=null;skillTrajectories=[];bossSkillCooldown=0;bossSkillCharge=0;bossSkillPending=null;bossSkillEquipped=null;bossSkillEffect=null;bossActive=false;enemyBullets=[];}
+        function clearBossArenaEffects(){
+          // Nenhum estado temporário da arena deve contaminar a missão seguinte.
+          bossSkillEffect=null;skillTrajectories=[];bossSkillCooldown=0;bossSkillCharge=0;
+          bossSkillPending=null;bossSkillEquipped=null;bossActive=false;enemyBullets=[];
+          for(const e of enemies){if(e.type!=='BOSS')continue;e.dualTicks=0;e.gravityTicks=0;e.frozenTicks=0;e.stunnedTicks=0;e.statusTicks=0;e.swordCharge=0;e.slashWarn=0;}
+        }
         function finishBossDefeatedBySkill(e){
           if(bossDefeatedThisMission)return;
           e.hp=0;bossDefeatedThisMission=true;clearBossArenaEffects();
@@ -2276,8 +2281,6 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
             bullets.forEach((b, index) => {
                 b.y -= b.speed;
                 if (b.vx) b.x += b.vx;
-                if(b.trail&&b.trailMax){b.trail.unshift({x:b.x,y:b.y});if(b.trail.length>b.trailMax+1)b.trail.length=b.trailMax+1;}
-
                 if (b.type === 'MISSILE'||b.type==='REFLECTED') {
                     // Steering 2D: busca alvos vivos, limita curva e mantém velocidade estável.
                     // O movimento base acontece antes; ajustar a direção para o próximo quadro.
@@ -2299,7 +2302,14 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
                     }
                 }
 
-                if (b.y < -25 || b.y > VIRTUAL_HEIGHT+25 || b.x < -25 || b.x > VIRTUAL_WIDTH+25) bullets.splice(index, 1);
+                if(b.trail&&b.trailMax){
+                    // Registrar o ponto após o steering; descartar traços com salto abrupto.
+                    const last=b.trail[0];
+                    if(last&&Math.hypot(last.x-b.x,last.y-b.y)>30)b.trail.length=0;
+                    b.trail.unshift({x:b.x,y:b.y});
+                    if(b.trail.length>b.trailMax+1)b.trail.length=b.trailMax+1;
+                }
+                if (!Number.isFinite(b.x)||!Number.isFinite(b.y)||b.y < -25 || b.y > VIRTUAL_HEIGHT+25 || b.x < -25 || b.x > VIRTUAL_WIDTH+25) bullets.splice(index, 1);
             });
 
             // Tiros Inimigos
