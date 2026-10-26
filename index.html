@@ -401,6 +401,9 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
         let screenShake = 0;
         let bossTaunt = null;
         let bossFinalDialogue=false;
+        let redAlertTicks=0;
+        let redAlertTriggered=false;
+        let bossWarningDistance=0;
         let wingmen=[];
         let bossDropPhase=0;
         let previousPlayerPosition=null;
@@ -774,11 +777,13 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
         }
         function spawnBoss(y) {
             bossActive = true;
+            redAlertTicks=0;
             const mission=campaign.at(sector);
             showBossTaunt(mission.boss);
             const bossConfig = {...BOSS_TYPES[mission.bossPattern],name:mission.boss,hp:mission.bossHp,score:1000+sector*240};
             const cycleMultiplier = 1 + Math.floor((sector - 1) / BOSS_TYPES.length) * 0.4;
-            const calculatedHp = Math.round(bossConfig.hp * cycleMultiplier);
+            // Boss é confronto prolongado; escala por dificuldade, missão e jornada.
+            const calculatedHp = Math.round((360+mission.difficulty*110+sector*27)*cycleMultiplier*Math.pow(1.16,journey-1));
 
             enemies.push({
                 type: 'BOSS',
@@ -1320,6 +1325,13 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
         function update() {
             if (gameState !== 'PLAYING') return;
             missionTicks++;
+            // Alerta 6s antes do chefe, acionado uma vez por missão.
+            if(!bossActive && !redAlertTriggered && missionTicks>=84*60
+               && distance-missionStartDistance>=campaign.at(sector).bossDistance*.82){
+                redAlertTriggered=true;redAlertTicks=360;
+                try{window.RiverSFX?.alert?.()}catch(e){}
+            }
+            if(redAlertTicks>0)redAlertTicks--;
             for(let i=wingmen.length-1;i>=0;i--){
                 const w=wingmen[i];
                 if(w.ttl>0)w.ttl--;
@@ -1541,7 +1553,7 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
                             if (e.type === 'BOSS') {
                                 bossActive = false;
                                 bossTaunt={name:e.name,line:['NÃO! MEUS SISTEMAS!','ISSO NÃO ACABOU, PILOTO!','IMPOSSÍVEL! VOCÊ VENCEU?!','RETIRADA! HA... HA...'][sector%4],ticks:360};
-                                if(sector===20) {gameState='VICTORY';playlist.pause();journey++;try{localStorage.setItem('river_journey_v1',String(journey))}catch(error){}document.getElementById('rank-award').textContent='JORNADA '+journey+' · '+rankName()+' · MULTIPLICADOR x'+scoreMultiplier().toFixed(2);document.getElementById('victory-screen').classList.remove('hidden')} else {sector++;missionTicks=0;missionStartDistance=distance;createFloatingText(e.x,e.y,'MISSÃO CONCLUÍDA!','#22c55e');document.getElementById('mission-banner').textContent=campaign.at(sector).name}
+                                if(sector===20) {gameState='VICTORY';playlist.pause();journey++;try{localStorage.setItem('river_journey_v1',String(journey))}catch(error){}document.getElementById('rank-award').textContent='JORNADA '+journey+' · '+rankName()+' · MULTIPLICADOR x'+scoreMultiplier().toFixed(2);document.getElementById('victory-screen').classList.remove('hidden')} else {sector++;missionTicks=0;redAlertTriggered=false;redAlertTicks=0;missionStartDistance=distance;createFloatingText(e.x,e.y,'MISSÃO CONCLUÍDA!','#22c55e');document.getElementById('mission-banner').textContent=campaign.at(sector).name}
                             } else {
                                 createFloatingText(e.x, e.y, `+${e.score}`, '#facc15');
                             }
@@ -1720,6 +1732,8 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
             screenShake = 0;
             bossTaunt = null;
             bossFinalDialogue=false;
+            redAlertTicks=0;
+            redAlertTriggered=false;
             wingmen=[];
             bossDropPhase=0;
             previousPlayerPosition=null;
@@ -1821,7 +1835,7 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
             enemyBullets=[];
             enemies.forEach(e=>{
                 if(e.type==='BOSS')dropBossReward(e,16);
-                e.hp-=e.type==='BOSS'?16:999;
+                e.hp-=e.type==='BOSS'?10:999;
                 addExplosion(e.x,e.y,'#ffb347',20);
             });
             for(let i=enemies.length-1;i>=0;i--){
@@ -1964,6 +1978,16 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
             drawFloatingTexts();
             drawHUD();
             drawBossTaunt();
+            if(redAlertTicks>0 && Math.floor(redAlertTicks/15)%2===0){
+                ctx.save();ctx.textAlign='center';ctx.fillStyle='rgba(110,0,10,.86)';
+                ctx.fillRect(15,VIRTUAL_HEIGHT*.39,VIRTUAL_WIDTH-30,90);
+                ctx.strokeStyle='#ff4b4b';ctx.lineWidth=3;ctx.strokeRect(15,VIRTUAL_HEIGHT*.39,VIRTUAL_WIDTH-30,90);
+                ctx.font='900 30px system-ui';ctx.fillStyle='#ffea49';
+                ctx.fillText('RED ALERT',VIRTUAL_WIDTH/2,VIRTUAL_HEIGHT*.39+39);
+                ctx.font='bold 16px system-ui';ctx.fillStyle='#fff';
+                ctx.fillText('INIMIGO PODEROSO!',VIRTUAL_WIDTH/2,VIRTUAL_HEIGHT*.39+69);
+                ctx.restore();
+            }
             if(bombFlash>0){ctx.fillStyle='rgba(255,246,215,'+(bombFlash/13*.4)+')';ctx.fillRect(0,0,VIRTUAL_WIDTH,VIRTUAL_HEIGHT)}
             ctx.restore();
         }
@@ -2169,7 +2193,15 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
             }
             if(gameState === "PLAYING") simulationClock.advance(timestamp, update);
             else simulationClock.reset();
-            render();
+            // A simulação mantém 60 passos/s; o desenho se adapta ao desempenho real.
+            const quality=localStorage.getItem('river_quality')||'eco';
+            const renderInterval=quality==='eco'&&gameLoop.slowDevice?1000/30:1000/60;
+            if(timestamp-(gameLoop.lastRender||0)>=renderInterval){
+                const start=performance.now();render();gameLoop.lastRender=timestamp;
+                const ms=performance.now()-start;
+                gameLoop.avgRender=gameLoop.avgRender==null?ms:gameLoop.avgRender*.93+ms*.07;
+                gameLoop.slowDevice=gameLoop.avgRender>17;
+            }
             } catch(error) {
                 console.error('River Assault runtime:',error);
                 showGameError(error);
