@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>RiverStorm — Boss HUD Fix 0.4.8</title>
+    <title>RiverStorm — Habilidades 0.4.9</title>
     <link rel="stylesheet" href="./src/styles/tailwind.css">
     <style>
         body {
@@ -87,6 +87,17 @@
     <!-- Moldura Principal do Jogo -->
     <div id="game-container" class="relative crt-effect rounded-lg overflow-hidden border-4 border-slate-700 bg-black max-w-xl w-full flex-1 max-h-[800px]">
         <canvas id="gameCanvas" class="w-full h-full block"></canvas>
+<div id="boss-skill-picker" class="hidden absolute inset-0 z-40 flex flex-col items-center justify-center p-3" style="background:rgba(2,9,23,.95);color:#e2e8f0" role="dialog" aria-modal="true" aria-label="Escolher habilidade de boss">
+  <div style="width:100%;max-width:420px;padding:17px;border:2px solid #38bdf8;border-radius:15px;background:linear-gradient(#102944,#061224);box-shadow:0 0 35px #38bdf844">
+   <h2 style="color:#fde68a;text-align:center;font-weight:900;font-size:19px">⚡ ARSENAL DOS CHEFES</h2>
+   <p id="boss-skill-advice" style="text-align:center;font-size:12px;margin:9px 0">Escolha um poder para esta batalha.</p>
+   <div id="boss-skill-options" style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;max-height:45vh;overflow-y:auto"></div>
+   <p id="boss-skill-selected" style="min-height:24px;text-align:center;color:#67e8f9;font-size:12px;margin:10px 0"></p>
+   <button id="boss-skill-confirm" type="button" disabled style="display:block;width:100%;background:#d97706;border-radius:8px;padding:10px;color:#081226;font-weight:900">CONFIRMAR E ENFRENTAR BOSS</button>
+  </div>
+ </div>
+ <button id="boss-skill-use" type="button" class="hidden absolute bottom-16 right-2 z-20" style="background:#312e81;border:2px solid #a78bfa;color:white;padding:9px;border-radius:10px;font:bold 11px monospace">⚡ PODER [C]</button>
+
     <div id="boss-dialogue-strip" aria-live="polite" class="hidden absolute top-0 left-1/2 -translate-x-1/2 z-20 pointer-events-none" style="width:min(92%,450px);min-height:0;max-height:unset;padding:6px 10px;font-size:12px;box-sizing:border-box;flex:0 0 auto;width:min(100%,960px);min-height:80px;max-height:94px;overflow:hidden;background:#0d1c34;border:2px solid #d69e34;border-radius:12px;padding:12px 16px;text-align:center;line-height:1.4;font-size:clamp(14px,2.9vw,18px);box-shadow:0 3px 14px #0007"><b id="boss-dialogue-name" style="display:block;color:#fbbf24"></b><span id="boss-dialogue-text" style="color:#fff"></span></div>
 
         <div id="controller-settings" class="hidden absolute inset-0 bg-slate-950/95 z-50 p-4 overflow-auto text-sm" role="dialog" aria-modal="true" aria-label="Configuração do controle">
@@ -213,7 +224,7 @@
         <div class="rs-hud-cell"><span class="rs-label">🛡 ESCUDO <b id="hud-shield">150</b></span><div class="rs-meter"><span id="hud-shield-fill" style="background:#38bdf8;width:100%"></span></div></div>
         <div class="rs-hud-cell"><span class="rs-label">♟ RESGATES <b id="hud-rescues">0</b></span><span class="rs-label">✈ <b id="hud-plane">FALCÃO</b></span></div>
       </div>
-      <div class="rs-hud-footer"><span id="hud-version" style="color:#38bdf8;font-size:8px">HUD 0.4.8</span><span id="mission-hud">SELVA DA AURORA</span><b id="sector-hud">SETOR 1</b><span id="hud-rank">J1 SOLDADO</span></div>
+      <div class="rs-hud-footer"><span id="hud-version" style="color:#38bdf8;font-size:8px">HUD 0.4.9</span><span id="mission-hud">SELVA DA AURORA</span><b id="sector-hud">SETOR 1</b><span id="hud-rank">J1 SOLDADO</span></div>
     </section>
     <div id="rs-bottom-actions" aria-label="Opções rápidas">
       <button id="crt-toggle" type="button">CRT: LIG</button>
@@ -847,7 +858,8 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
             }
             strip.classList.remove('hidden');
         }
-        function spawnBoss(y) {
+        function spawnBoss(y,confirmed=false) {
+            if(!confirmed){openBossSkillPicker();return;}
             bossActive = true;
             redAlertTicks=0;
             const mission=campaign.at(sector);
@@ -860,6 +872,7 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
             enemies.push({
                 type: 'BOSS',
                 bossSubType: mission.bossPattern,
+                skillAffinity:BOSS_AFFINITIES[(mission.bossPattern||0)%6],
                 bossId: sector,
                 bossVisual: mission.bossVisual,
                 biome: mission.biome,
@@ -883,10 +896,80 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
             });
         }
 
+        // Bloco 3: arsenal compartilhado por todas as aeronaves e persistido entre missões.
+        const BOSS_SKILLS={
+          EMP:{icon:'⬡',name:'Pulso EMP',color:'#22d3ee',damage:70,charges:3,cooldown:540,strong:'GRAVITY'},
+          LIGHTNING:{icon:'⚡',name:'Raio',color:'#fde047',damage:80,charges:3,cooldown:480,strong:'EMP'},
+          GRAVITY:{icon:'◉',name:'Gravidade',color:'#c4b5fd',damage:35,charges:2,cooldown:660,strong:'LIGHTNING'},
+          ICE:{icon:'❄',name:'Gelo',color:'#93c5fd',damage:75,charges:3,cooldown:520,strong:'FIRE'},
+          FIRE:{icon:'🔥',name:'Fogo',color:'#fb923c',damage:75,charges:3,cooldown:520,strong:'ICE'},
+          BLEED:{icon:'⚔',name:'Sangramento',color:'#fb7185',damage:50,charges:2,cooldown:600,strong:'BLEED'}
+        };
+        const BOSS_AFFINITIES=['EMP','LIGHTNING','GRAVITY','ICE','FIRE','BLEED'];
+        let bossSkillUnlocked=[];
+        try{bossSkillUnlocked=JSON.parse(localStorage.getItem('river_boss_skills_v1')||'[]').filter(k=>BOSS_SKILLS[k])}catch(e){}
+        let bossSkillEquipped=null,bossSkillCharge=0,bossSkillCooldown=0,bossSkillPending=null;
+        const skillPicker=document.getElementById('boss-skill-picker');
+        const skillUseButton=document.getElementById('boss-skill-use');
+        function unlockBossSkill(key){
+          if(!BOSS_SKILLS[key]||bossSkillUnlocked.includes(key))return;
+          bossSkillUnlocked.push(key);
+          try{localStorage.setItem('river_boss_skills_v1',JSON.stringify(bossSkillUnlocked))}catch(e){}
+          createFloatingText(VIRTUAL_WIDTH/2,150,'PODER '+BOSS_SKILLS[key].name.toUpperCase()+' LIBERADO',BOSS_SKILLS[key].color);
+        }
+        function openBossSkillPicker(){
+          gameState='BOSS_SELECT';bossSkillPending=null;skillPicker.classList.remove('hidden');
+          const options=document.getElementById('boss-skill-options');
+          options.replaceChildren();
+          document.getElementById('boss-skill-confirm').disabled=true;
+          const foe=BOSS_AFFINITIES[(campaign.at(sector).bossPattern||0)%6];
+          document.getElementById('boss-skill-advice').textContent='Boss de '+BOSS_SKILLS[foe].name+' · Selecione uma habilidade ou voe sem poder.';
+          for(const key of bossSkillUnlocked){
+            const info=BOSS_SKILLS[key],button=document.createElement('button');
+            button.type='button';button.style.cssText='background:#0b2036;border:2px solid '+info.color+';border-radius:9px;padding:12px 6px;color:white;text-align:center;cursor:pointer';
+            button.innerHTML='<strong style="font-size:25px;color:'+info.color+'">'+info.icon+'</strong><br><b>'+info.name+'</b><br><small>'+info.charges+' usos · '+Math.round(info.cooldown/60)+'s</small>';
+            button.addEventListener('click',()=>{bossSkillPending=key;document.getElementById('boss-skill-selected').textContent='Equipado: '+info.name+(info.strong===foe?' · FRAQUEZA DO BOSS!':'');document.getElementById('boss-skill-confirm').disabled=false;});
+            options.appendChild(button);
+          }
+          const none=document.createElement('button');none.textContent='✈ LUTAR SEM PODER';none.type='button';none.style.cssText='grid-column:1/-1;color:#cbd5e1;padding:8px;border:1px solid #64748b;border-radius:8px';
+          none.addEventListener('click',()=>{bossSkillPending='NONE';document.getElementById('boss-skill-selected').textContent='Sem poder nesta batalha';document.getElementById('boss-skill-confirm').disabled=false});options.appendChild(none);
+        }
+        document.getElementById('boss-skill-confirm').addEventListener('click',()=>{
+          if(bossSkillPending===null)return;
+          bossSkillEquipped=bossSkillPending==='NONE'?null:bossSkillPending;
+          bossSkillCharge=bossSkillEquipped?BOSS_SKILLS[bossSkillEquipped].charges:0;
+          bossSkillCooldown=0;skillPicker.classList.add('hidden');gameState='PLAYING';simulationClock.reset();
+          spawnBoss(0,true);
+        });
+        function useBossSkill(){
+          if(gameState!=='PLAYING'||!bossActive||!bossSkillEquipped||bossSkillCharge<=0||bossSkillCooldown>0)return;
+          const boss=enemies.find(e=>e.type==='BOSS'&&e.hp>0);if(!boss)return;
+          const kind=bossSkillEquipped,skill=BOSS_SKILLS[kind],foe=boss.skillAffinity;
+          const advantage=skill.strong===foe;
+          let damage=kind==='BLEED'?(advantage?100:50):(advantage?100:skill.damage);
+          if(boss.gravityTicks>0)damage*=2;
+          if(kind==='GRAVITY'){boss.gravityTicks=180;boss.y=Math.min(VIRTUAL_HEIGHT*.32,boss.y+24);}
+          if(kind==='BLEED'){boss.bleeding=true;boss.bleedClock=0;}
+          if(kind==='ICE')boss.frozenTicks=180;
+          if(kind==='EMP')boss.specialCharge=0;
+          if(kind==='LIGHTNING')boss.stunnedTicks=35;
+          if(kind==='FIRE')boss.burningTicks=120;
+          boss.hp=Math.max(1,boss.hp-damage);
+          dropBossReward(boss,damage);
+          addExplosion(boss.x,boss.y,skill.color,18);
+          bossRobotVoice(boss,true);
+          createFloatingText(boss.x,boss.y-35,skill.icon+' -'+damage,skill.color);
+          bossSkillCharge--;bossSkillCooldown=skill.cooldown;
+        }
+        skillUseButton.addEventListener('pointerdown',event=>{event.preventDefault();useBossSkill()});
         // --- HABILIDADES E PADRÕES DE TIROS DOS CHEFÕES ---
         function updateBossAttacks(e) {
             e.attackTimer++;
             e.shootTimer++;
+            if(bossSkillCooldown>0)bossSkillCooldown--;
+            for(const prop of ['gravityTicks','frozenTicks','stunnedTicks','burningTicks'])if(e[prop]>0)e[prop]--;
+            if(e.bleeding && ++e.bleedClock>=180){e.bleedClock=0;e.hp=Math.max(1,e.hp-2);createFloatingText(e.x,e.y-35,'SANGRAMENTO -2','#fb7185')}
+            if(e.stunnedTicks>0)return;
             if(e.rewardCooldown>0)e.rewardCooldown--;
 
             // Mechas convocados pelo chefe: uma pequena onda, com intervalo próprio.
@@ -1433,6 +1516,9 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
             if (gameState !== 'PLAYING') return;
             if(!enemies.some(e=>e.type==='BOSS'))document.getElementById('boss-special-hud').classList.add('hidden');
             missionTicks++;
+            const skillActive=!!(bossActive&&bossSkillEquipped);
+            skillUseButton.classList.toggle('hidden',!skillActive);
+            if(skillActive)skillUseButton.textContent=BOSS_SKILLS[bossSkillEquipped].icon+' '+bossSkillCharge+' · '+(bossSkillCooldown>0?Math.ceil(bossSkillCooldown/60)+'s':'PRONTO')+' [C]';
             if(player.effectTimer>0){player.effectTimer--;if(player.effectTimer===0)player.effectType='';}
             if(missionTransitionTicks>0){
                 missionTransitionTicks--;
@@ -1721,7 +1807,7 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
                         bullets.splice(bIndex, 1);
                         if(e.type==='BOSS'&&bossDefeatedThisMission) return;
                         if(e.type==='BOSS')dropBossReward(e,1);
-                        e.hp=Math.max(0,e.hp-(b.iceWeak?.5:1));
+                        e.hp=Math.max(0,e.hp-(b.iceWeak?.5:1)*(e.gravityTicks>0?2:1));
                         addExplosion(b.x, b.y, '#fba518', 4);
 
                         if (e.hp <= 0) {
@@ -1736,6 +1822,7 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
                             if (e.type === 'BOSS') {
                                 if(!bossDefeatedThisMission){
                                     bossDefeatedThisMission=true;bossActive=false;enemyBullets=[];
+                                    unlockBossSkill(e.skillAffinity);bossSkillEquipped=null;skillUseButton.classList.add('hidden');
                                     if(sector<20)writeCheckpoint(sector+1);else {try{localStorage.removeItem(CHECKPOINT_KEY)}catch(err){}}
                                     bossTaunt={name:e.name,line:['NÃO! MEUS SISTEMAS!','ISSO NÃO ACABOU, PILOTO!','IMPOSSÍVEL! VOCÊ VENCEU?!','RETIRADA! HA... HA...'][sector%4],ticks:175};
                                     if(sector===20){
@@ -1917,6 +2004,8 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
             lives=3;
             continues=1;
             bossActive = false;
+            bossSkillEquipped=null;bossSkillCharge=0;bossSkillCooldown=0;
+            skillPicker.classList.add('hidden');skillUseButton.classList.add('hidden');
 
             player.x = VIRTUAL_WIDTH / 2;
             player.y = VIRTUAL_HEIGHT - 100;
@@ -2509,6 +2598,7 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
             if (keys.hasOwnProperty(e.code)) { e.preventDefault(); keys[e.code] = true; }
 
             if (e.code === 'Space' || e.code === 'KeyZ') { if(!e.repeat)fireWeapon(); }
+            if(e.code==='KeyC'&&!e.repeat){e.preventDefault();useBossSkill()}
             if (e.code === 'KeyX' || e.code === 'KeyF' || e.code === 'ShiftLeft') triggerBomb();
 
             if (e.code === 'KeyP' || e.code === 'Escape') {
