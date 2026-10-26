@@ -1178,18 +1178,15 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
           ctx.fillText(f.kind+' -'+f.damage,f.x,f.y-radius-14);ctx.restore();
           f.life--;if(f.life<=0)bossSkillEffect=null;
         }
-        let swordRushCooldown=0;
+        let swordRushCooldown=0,swordRushTarget=null,swordRushFrames=0;
         function activateSwordRush(){
           if(gameState!=='PLAYING'||bossActive||swordRushCooldown>0)return;
           const target=enemies.filter(e=>e.hp>0&&e.type!=='BOSS').sort((a,b)=>Math.hypot(a.x-player.x,a.y-player.y)-Math.hypot(b.x-player.x,b.y-player.y))[0];
           if(!target)return;
-          swordRushCooldown=240;
+          swordRushCooldown=240;swordRushTarget=target;swordRushFrames=18;
+          player.invulnerable=Math.max(player.invulnerable,22);
           launchSkillTrajectory('BLEED',player.x,player.y,target.x,target.y,'#f8fafc');
-          addExplosion(target.x,target.y,'#f472b6',24);
-          createFloatingText(target.x,target.y-32,'CORTE FATAL','#fef08a');
-          target.hp=0;
-          score+=awardEnemyPoints(target.score||100);kills++;
-          enemies=enemies.filter(e=>e!==target);
+          createFloatingText(player.x,player.y-35,'INVESTIDA DE ESPADA','#fef08a');
         }
         function useBossSkill(){
           if(gameState!=='PLAYING'||!bossActive||!bossSkillEquipped||bossSkillCharge<=0||bossSkillCooldown>0)return;
@@ -2051,6 +2048,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
             if(parryPrecisionTicks>0)parryPrecisionTicks--;
             if(parryCooldown>0)parryCooldown--;
             if(swordRushCooldown>0)swordRushCooldown--;
+            if(swordRushFrames>0){const target=swordRushTarget;swordRushFrames--;if(target&&target.hp>0){player.x+=(target.x-player.x)*.24;player.y+=(target.y-player.y)*.24;player.invulnerable=Math.max(player.invulnerable,3);if(swordRushFrames===0||Math.hypot(target.x-player.x,target.y-player.y)<22){addExplosion(target.x,target.y,'#f472b6',24);createFloatingText(target.x,target.y-32,'CORTE FATAL','#fef08a');target.hp=0;score+=awardEnemyPoints(target.score||100);kills++;enemies=enemies.filter(e=>e!==target);swordRushFrames=0;}}else swordRushFrames=0;if(swordRushFrames===0)swordRushTarget=null;}
             skillUseButton.textContent=bossActive?'⚡ PODER [C]':'⚔ INVESTIDA [C] '+(swordRushCooldown>0?Math.ceil(swordRushCooldown/60)+'s':'PRONTO');
             skillUseButton.classList.remove('hidden');
             parryButton.textContent=parryTicks>0?'🛡 ESCUDO '+Math.max(1,Math.ceil((360-parryHeldTicks)/60))+'s':parryCooldown>0?'🛡 '+Math.ceil(parryCooldown/60)+'s':'🛡 PARRY [V]';
@@ -2451,7 +2449,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
             lives=3;
             continues=10;
             bossActive = false;
-            parryTicks=0;parryCooldown=0;parryHeld=false;parryHeldTicks=0;parryPrecisionTicks=0;swordRushCooldown=0;skillTrajectories=[];
+            parryTicks=0;parryCooldown=0;parryHeld=false;parryHeldTicks=0;parryPrecisionTicks=0;swordRushCooldown=0;swordRushTarget=null;swordRushFrames=0;skillTrajectories=[];
             bossSkillEquipped=null;bossSkillCharge=0;bossSkillCooldown=0;bossSkillEffect=null;
             skillPicker.classList.add('hidden');skillUseButton.classList.add('hidden');
 
