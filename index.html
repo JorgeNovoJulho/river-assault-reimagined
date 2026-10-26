@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>RiverStorm — Bosses Táticos 0.6.6</title>
+    <title>RiverStorm — Inimigos dos 20 Biomas 0.6.7</title>
     <link rel="stylesheet" href="./src/styles/tailwind.css">
     <style>
         body {
@@ -246,7 +246,7 @@
         <div class="rs-hud-cell"><span class="rs-label">🛡 ESCUDO <b id="hud-shield">150</b></span><div class="rs-meter"><span id="hud-shield-fill" style="background:#38bdf8;width:100%"></span></div></div>
         <div class="rs-hud-cell"><span class="rs-label">♟ RESGATES <b id="hud-rescues">0</b></span><span class="rs-label">✈ <b id="hud-plane">FALCÃO</b></span></div>
       </div>
-      <div class="rs-hud-footer"><span id="hud-version" style="color:#38bdf8;font-size:8px">HUD 0.6.6</span><span id="mission-hud">SELVA DA AURORA</span><b id="sector-hud">SETOR 1</b><span id="hud-rank">J1 SOLDADO</span></div>
+      <div class="rs-hud-footer"><span id="hud-version" style="color:#38bdf8;font-size:8px">HUD 0.6.7</span><span id="mission-hud">SELVA DA AURORA</span><b id="sector-hud">SETOR 1</b><span id="hud-rank">J1 SOLDADO</span></div>
     </section>
     <div id="rs-bottom-actions" aria-label="Opções rápidas">
       <button id="crt-toggle" type="button">CRT: LIG</button>
@@ -947,6 +947,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
             if(!bossActive && missionTicks%1150===0 && pickupLaneClear(220) && powerups.length<3){
                 powerups.push({x:center,y,type:'BANK_MISSILE',color:'#fb923c',label:'ASAS'});
             }
+            spawnBiomeEnemy(center,sector);
             // Inimigos com Spawn Constante
             const hazards=[...enemies,...structures,...islands,...rescueBoats,...fuelDepots];
             const clearLane=hazards.every(e=>Math.abs(e.y-y)>115);
@@ -1744,6 +1745,82 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
             });
         }
 
+
+        // Uma espécie exclusiva por missão; ataques, movimentos e assinaturas visuais próprios.
+        const BIOME_ENEMIES=[{id:'TUCANO',name:'Drone Tucano',color:'#06b6d4',motion:'arc',attack:'burst',sector:1},
+{id:'CRANE',name:'Guindaste Aranha',color:'#f59e0b',motion:'side',attack:'bomb',sector:2},
+{id:'SCORPION',name:'Escorpião Blindado',color:'#d97706',motion:'zig',attack:'mine',sector:3},
+{id:'ALLIGATOR',name:'Jacaré do Pântano',color:'#22c55e',motion:'lurk',attack:'lunge',sector:4},
+{id:'CORSAIR',name:'Lancha Corsária',color:'#ef4444',motion:'flank',attack:'burst',sector:5},
+{id:'WALRUS',name:'Morsa de Ferro',color:'#a5f3fc',motion:'dive',attack:'ice',sector:6},
+{id:'MANTIS',name:'Louva-a-Deus Mecânico',color:'#84cc16',motion:'jump',attack:'blade',sector:7},
+{id:'MOTOJET',name:'Motojet Neon',color:'#f472b6',motion:'zig',attack:'plasma',sector:8},
+{id:'SALAMANDER',name:'Salamandra Ígnea',color:'#fb923c',motion:'lurk',attack:'fire',sector:9},
+{id:'EAGLE',name:'Águia Robótica',color:'#eab308',motion:'arc',attack:'dive',sector:10},
+{id:'DREDGER',name:'Dragadora Pirata',color:'#d4a017',motion:'slow',attack:'mine',sector:11},
+{id:'HOVERCAR',name:'Carro Voador de Combate',color:'#a855f7',motion:'lane',attack:'rocket',sector:12},
+{id:'PIRANHA',name:'Piranha Mecânica',color:'#4ade80',motion:'swarm',attack:'lunge',sector:13},
+{id:'ICE_RAY',name:'Raia Glacial',color:'#bfdbfe',motion:'sine',attack:'ice',sector:14},
+{id:'BEETLE',name:'Besouro da Areia',color:'#f59e0b',motion:'burrow',attack:'bomb',sector:15},
+{id:'PRISM_WASP',name:'Vespa Prismática',color:'#c084fc',motion:'hover',attack:'laser',sector:16},
+{id:'WELDER',name:'Robô Soldador',color:'#f97316',motion:'jump',attack:'fire',sector:17},
+{id:'NARWHAL',name:'Narval Blindado',color:'#7dd3fc',motion:'dive',attack:'lunge',sector:18},
+{id:'EEL',name:'Enguia de Plasma',color:'#38bdf8',motion:'sine',attack:'plasma',sector:19},
+{id:'HYBRID_HUNTER',name:'Caçador Híbrido',color:'#f43f5e',motion:'phase',attack:'tri',sector:20}];
+        function playBiomeEnemySound(e,hit=false){
+          try{
+            const Audio=window.AudioContext||window.webkitAudioContext;
+            if(!Audio)return;
+            const ac=window.RiverBiomeAudio||(window.RiverBiomeAudio=new Audio());
+            if(ac.state==='suspended')ac.resume();
+            const now=ac.currentTime;
+            if(now-(playBiomeEnemySound.last||0)<.18)return;
+            playBiomeEnemySound.last=now;
+            const o=ac.createOscillator(),g=ac.createGain();
+            const frequencies={lunge:105,blade:250,ice:580,plasma:430,rocket:190,fire:160,mine:85,bomb:95,burst:320,laser:780,dive:370,tri:510};
+            o.type=['plasma','laser','ice'].includes(e.biomeAttack)?'sine': 'sawtooth';
+            o.frequency.setValueAtTime(hit?95:(frequencies[e.biomeAttack]||280)+e.biomeSector*7,now);
+            o.frequency.exponentialRampToValueAtTime(hit?50:150,now+.17);
+            g.gain.setValueAtTime(.001,now);g.gain.exponentialRampToValueAtTime(hit?.09:.035,now+.015);g.gain.exponentialRampToValueAtTime(.001,now+.19);
+            o.connect(g);g.connect(ac.destination);o.start(now);o.stop(now+.2);
+          }catch(error){}
+        }
+        function updateBiomeEnemy(e){
+          e.biomeAge=(e.biomeAge||0)+1;
+          const age=e.biomeAge,m=e.biomeMotion,banks=getRiverBoundariesAt(e.y);
+          const center=banks.center,room=Math.max(20,banks.width*.27);
+          if(m==='arc')e.x=center+Math.sin(age*.022)*room;
+          else if(m==='side'||m==='flank')e.x+=Math.sin(age*.019)*1.8;
+          else if(m==='zig'||m==='lane')e.x=center+Math.sin(age*.034)*room;
+          else if(m==='lurk'||m==='burrow')e.y+=Math.sin(age*.042)*1.2;
+          else if(m==='dive')e.y+=Math.sin(age*.032)*2.5;
+          else if(m==='jump')e.y+=Math.max(0,Math.sin(age*.045))*1.7;
+          else if(m==='swarm')e.x+=Math.sin(age*.055+e.biomeSector)*2.6;
+          else if(m==='sine')e.x=center+Math.sin(age*.028)*room*.8;
+          else if(m==='hover')e.y+=Math.sin(age*.09)*.7;
+          else if(m==='slow')e.vy=.05;
+          else if(m==='phase'){e.x=center+Math.sin(age*.013)*room;e.y+=Math.sin(age*.029)*1.2}
+          e.x=Math.max(e.width/2+3,Math.min(VIRTUAL_WIDTH-e.width/2-3,e.x));
+          e.biomeShoot=(e.biomeShoot||0)+1;
+          const cooldown=e.biomeAttack==='tri'?95:e.biomeAttack==='lunge'?155:130;
+          if(e.biomeShoot>=cooldown && e.y>30 && e.y<VIRTUAL_HEIGHT-115){
+            e.biomeShoot=0;const dx=player.x-e.x,dy=player.y-e.y,len=Math.max(1,Math.hypot(dx,dy));
+            const speed=['rocket','plasma','laser'].includes(e.biomeAttack)?4.4:3.3;
+            const count=e.biomeAttack==='tri'?3:e.biomeAttack==='burst'?2:1;
+            for(let n=0;n<count;n++)enemyBullets.push({x:e.x+(n-(count-1)/2)*9,y:e.y+12,vx:dx/len*speed+(n-(count-1)/2)*.75,vy:dy/len*speed,color:e.biomeColor,isMissile:e.biomeAttack==='rocket'||e.biomeAttack==='mine'});
+            createFloatingText(e.x,e.y-30,e.biomeAttack.toUpperCase(),e.biomeColor);
+            playBiomeEnemySound(e);
+          }
+        }
+        function spawnBiomeEnemy(center,level){
+          if(bossActive||missionTicks%360!==0)return;
+          const existing=enemies.filter(e=>e.type==='BIOME_ENEMY'&&e.y<VIRTUAL_HEIGHT&&e.y>-60);
+          if(existing.length>=2)return;
+          const def=BIOME_ENEMIES[(sector-1)%20];
+          enemies.push({type:'BIOME_ENEMY',biomeId:def.id,biomeName:def.name,biomeColor:def.color,biomeMotion:def.motion,biomeAttack:def.attack,biomeSector:def.sector,
+            x:center+(Math.random()-.5)*70,y:-48,width:def.id==='HOVERCAR'?42:34,height:def.id==='ALLIGATOR'?42:34,
+            vx:0,vy:.35,hp:4+Math.floor(sector/5),maxHp:4+Math.floor(sector/5),score:350+sector*15,shootTimer:0});
+        }
         function update() {
             if (gameState !== 'PLAYING') return;
             if(!enemies.some(e=>e.type==='BOSS'))document.getElementById('boss-special-hud').classList.add('hidden');
@@ -1989,6 +2066,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
 
                     updateBossAttacks(e);
                 } else {
+                    if(e.type==='BIOME_ENEMY')updateBiomeEnemy(e);
                     if(e.type==='MEGAZORD'){e.y=155+Math.sin(missionTicks/40)*35;e.x+=Math.sin(missionTicks/65)*2.4;}
                     if(e.type==='MECHA_SWORD'){
                         if(e.returning){e.y-=4.5;if(e.y< -45){e.returning=false;e.y=-45;e.reentries=(e.reentries||0)+1;}}
