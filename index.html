@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>RiverStorm — Elementos Balanceados 0.6.4</title>
+    <title>RiverStorm — Habilidades Aprovadas 0.6.5</title>
     <link rel="stylesheet" href="./src/styles/tailwind.css">
     <style>
         body {
@@ -246,7 +246,7 @@
         <div class="rs-hud-cell"><span class="rs-label">🛡 ESCUDO <b id="hud-shield">150</b></span><div class="rs-meter"><span id="hud-shield-fill" style="background:#38bdf8;width:100%"></span></div></div>
         <div class="rs-hud-cell"><span class="rs-label">♟ RESGATES <b id="hud-rescues">0</b></span><span class="rs-label">✈ <b id="hud-plane">FALCÃO</b></span></div>
       </div>
-      <div class="rs-hud-footer"><span id="hud-version" style="color:#38bdf8;font-size:8px">HUD 0.6.4</span><span id="mission-hud">SELVA DA AURORA</span><b id="sector-hud">SETOR 1</b><span id="hud-rank">J1 SOLDADO</span></div>
+      <div class="rs-hud-footer"><span id="hud-version" style="color:#38bdf8;font-size:8px">HUD 0.6.5</span><span id="mission-hud">SELVA DA AURORA</span><b id="sector-hud">SETOR 1</b><span id="hud-rank">J1 SOLDADO</span></div>
     </section>
     <div id="rs-bottom-actions" aria-label="Opções rápidas">
       <button id="crt-toggle" type="button">CRT: LIG</button>
@@ -1169,7 +1169,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
           const boss=enemies.find(e=>e.type==='BOSS'&&e.hp>0);if(!boss)return;
           const kind=bossSkillEquipped,skill=BOSS_SKILLS[kind],foe=boss.skillAffinity;
           const advantage=skill.strong===foe;
-          let damage=advantage?Math.round(skill.damage*2.8):Math.max(6,Math.round(skill.damage*.35));
+          let damage=kind==='EMP'?0:(advantage?Math.round(skill.damage*2.8):Math.max(6,Math.round(skill.damage*.35)));
           if(boss.gravityTicks>0)damage*=2;
           if(kind==='GRAVITY'){boss.gravityTicks=180;boss.gravityRate=advantage?.06:.03;boss.gravityClock=0;boss.y=Math.min(VIRTUAL_HEIGHT*.32,boss.y+24);}
           if(kind==='BLEED'||kind==='POISON'){boss.statusKind=kind;boss.statusTicks=600;boss.statusClock=0;boss.statusBaseHp=boss.maxHp;boss.statusRate=(kind==='BLEED'?.015:.01)*(advantage?2:1);boss.statusDealt=boss.statusDealt||0;}
@@ -1194,9 +1194,9 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
             e.attackTimer++;
             e.shootTimer++;
             if(bossSkillCooldown>0)bossSkillCooldown--;
-            for(const prop of ['gravityTicks','frozenTicks','stunnedTicks','burningTicks'])if(e[prop]>0)e[prop]--;
+            for(const prop of ['frozenTicks','stunnedTicks','burningTicks','shockTicks'])if(e[prop]>0)e[prop]--;
             if(e.statusTicks>0){e.statusTicks--;if(++e.statusClock>=60){e.statusClock=0;const cap=e.statusBaseHp*.30;const dot=Math.max(0,Math.min(e.statusBaseHp*(e.statusRate||.01),cap-(e.statusDealt||0)));e.statusDealt=(e.statusDealt||0)+dot;e.hp=Math.max(0,e.hp-dot);createFloatingText(e.x,e.y-35,(e.statusKind==='BLEED'?'SANGRAMENTO':'VENENO')+' -'+Math.ceil(dot),e.statusKind==='BLEED'?'#fb7185':'#4ade80');if(e.hp<=0){finishBossDefeatedBySkill(e);return;}}}
-            if(e.gravityTicks>0){e.gravityClock=(e.gravityClock||0)+1;if(e.gravityClock%60===0){const d=e.maxHp*(e.gravityRate||.03);e.hp=Math.max(0,e.hp-d);createFloatingText(e.x,e.y-46,'GRAVIDADE -'+Math.ceil(d),'#c4b5fd');if(e.hp<=0){finishBossDefeatedBySkill(e);return;}}}
+            if(e.gravityTicks>0){e.gravityClock=(e.gravityClock||0)+1;if(e.gravityClock%60===0){const d=e.maxHp*(e.gravityRate||.03);e.hp=Math.max(0,e.hp-d);createFloatingText(e.x,e.y-46,'GRAVIDADE -'+Math.ceil(d),'#c4b5fd');if(e.hp<=0){finishBossDefeatedBySkill(e);return;}}e.gravityTicks--;}
             if(e.elementTicks>0){e.elementTicks--;e.elementClock=(e.elementClock||0)+1;if(e.elementClock%60===0){const d=e.maxHp*(e.elementRate||.01);e.hp=Math.max(0,e.hp-d);createFloatingText(e.x,e.y-40,e.elementKind+' -'+Math.ceil(d),BOSS_SKILLS[e.elementKind].color);if(e.hp<=0){finishBossDefeatedBySkill(e);return;}}}
             if(e.stunnedTicks>0)return;
             if(e.rewardCooldown>0)e.rewardCooldown--;
