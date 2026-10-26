@@ -1048,30 +1048,24 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
         }
 
         function drawPowerups() {
-            powerups.forEach(p => {
-                ctx.save();
-                ctx.translate(p.x, p.y);
-
-                const pulse = Math.sin(Date.now() / 150) * 3;
-                ctx.fillStyle = p.color;
-                if(p.type==='BOMB'||p.type==='LIFE'){
-                    const outer=14+Math.abs(pulse)*.35,inner=outer*.48;
-                    ctx.beginPath();
-                    for(let k=0;k<10;k++){const a=-Math.PI/2+k*Math.PI/5,r=k%2?inner:outer;const x=Math.cos(a)*r,y=Math.sin(a)*r;if(!k)ctx.moveTo(x,y);else ctx.lineTo(x,y)}
-                    ctx.closePath();ctx.fill();
-                }else ctx.fillRect(-12-pulse/2,-12-pulse/2,24+pulse,24+pulse);
-
-                ctx.fillStyle = '#0f172a';
-                if(!['BOMB','LIFE'].includes(p.type))ctx.fillRect(-9,-9,18,18);
-
-                ctx.fillStyle = p.color;
-                ctx.font = 'black 10px monospace';
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
-                ctx.fillText(p.label, 0, 1);
-
+            const styles={
+                BOMB:{color:'#fb923c',icon:'B',label:'BOM'},
+                SHIELD:{color:'#22d3ee',icon:'◆',label:'SHD'},
+                SPREAD:{color:'#facc15',icon:'✦',label:'3X'},
+                LIFE:{color:'#f43f5e',icon:'♥',label:'VID'},
+                WINGMAN:{color:'#c084fc',icon:'▲',label:'DRN'},
+                DRONE:{color:'#c084fc',icon:'▲',label:'DRN'}
+            };
+            for(const p of powerups){
+                const st=styles[p.type]||{color:p.color||'#facc15',icon:p.label||'★',label:p.type.slice(0,3)};
+                ctx.save();ctx.translate(p.x,p.y);
+                const pulse=1+Math.sin(Date.now()/260)*.06;ctx.scale(pulse,pulse);
+                ctx.fillStyle='rgba(3,15,30,.85)';ctx.strokeStyle=st.color;ctx.lineWidth=3;
+                ctx.beginPath();ctx.roundRect(-14,-14,28,28,6);ctx.fill();ctx.stroke();
+                ctx.fillStyle=st.color;ctx.font='bold 19px system-ui';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(st.icon,0,-2);
+                ctx.fillStyle='#f8fafc';ctx.font='bold 8px monospace';ctx.fillText(st.label,0,20);
                 ctx.restore();
-            });
+            }
         }
 
         function drawBullets() {
@@ -1397,7 +1391,7 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
                 ctx.fillStyle='#f97316';ctx.beginPath();ctx.moveTo(0,-20);ctx.lineTo(15,-10);ctx.lineTo(13,13);ctx.lineTo(0,19);ctx.lineTo(-13,13);ctx.lineTo(-15,-10);ctx.closePath();ctx.fill();
                 ctx.fillStyle='#ffdf94';ctx.fillRect(-9,-9,18,21);ctx.fillStyle='#14532d';
                 for(let j=0;j<Math.min(4,b.soldiers);j++){const x=j%2?6:-6,y=Math.floor(j/2)*9-5;ctx.beginPath();ctx.arc(x,y,3,0,Math.PI*2);ctx.fill()}
-                ctx.fillStyle='#fff';ctx.font='bold 9px system-ui';ctx.textAlign='center';ctx.fillText('SOS',0,-25);
+                ctx.fillStyle='#fff';ctx.strokeStyle='#ef4444';ctx.lineWidth=2;ctx.beginPath();ctx.arc(0,-25,12,0,Math.PI*2);ctx.fill();ctx.stroke();ctx.fillStyle='#b91c1c';ctx.font='bold 9px system-ui';ctx.textAlign='center';ctx.fillText('SOS',0,-22);
                 ctx.restore();
             }
         }
