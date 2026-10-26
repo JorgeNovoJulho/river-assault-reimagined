@@ -105,3 +105,17 @@ test('visuais especiais têm comprimento limitado e rastro curto',()=>{
  assert.match(aircraft,/bullet\.trailMax=\[/);
  assert.doesNotMatch(html,/const wide=w==='BEAM'\?9/);
 });
+
+test('rastro é registrado após a correção de direção e não aceita saltos ou NaN',()=>{
+ const html=fs.readFileSync('index.html','utf8');
+ const update=html.slice(html.indexOf('bullets.forEach((b, index)'),html.indexOf('// Tiros Inimigos',html.indexOf('bullets.forEach((b, index)')));
+ assert.ok(update.indexOf("if (b.type === 'MISSILE'")<update.indexOf('b.trail.unshift('));
+ assert.match(update,/Math\.hypot\(last\.x-b\.x,last\.y-b\.y\)>30/);
+ assert.match(update,/!Number\.isFinite\(b\.x\)/);
+});
+test('final da arena limpa projéteis e estados temporários do chefe',()=>{
+ const html=fs.readFileSync('index.html','utf8');
+ assert.match(html,/function clearBossArenaEffects\(/);
+ assert.match(html,/bossSkillEffect=null;skillTrajectories=\[\]/);
+ assert.match(html,/e\.dualTicks=0;e\.gravityTicks=0/);
+});
