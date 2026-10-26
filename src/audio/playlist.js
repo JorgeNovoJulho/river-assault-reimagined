@@ -81,13 +81,21 @@ class RiverPlaylist{
  constructor(opts={}){this.audio=new Audio();this.audio.preload='auto';this.audio.loop=false;this.audio.volume=.38;this.tracks=[];this.order=[];this.current=-1;this.enabled=true;this.loading=false;this.started=false;this.failedTracks=new Set();this.onStatus=opts.onStatus||(()=>{});this.objectURL=null;this.random=true;this.customOrder=[];try{this.random=localStorage.getItem('river_playlist_random')!=='false';this.customOrder=JSON.parse(localStorage.getItem('river_playlist_order')||'[]')}catch(e){}this.audio.addEventListener('ended',()=>this.next());this.audio.addEventListener('error',()=>{const item=this.order[this.current];if(item)this.failedTracks.add(item.id);this.onStatus('Faixa indisponível; procurando outra');this.next(true)});}
  async load(){let rows=[];this.loading=true;try{const db=await openDB();rows=await transaction(db,'readonly',s=>s.getAll())}catch(e){this.onStatus('Biblioteca local indisponível; verificando faixas oficiais')}try{const bundled=await Promise.all(PRESET.map(async item=>{
        try{
-         const url=new URL(item.url,document.baseURI).href;
-         let res=await fetch(url,{method:'HEAD',cache:'no-cache'});
-         if(!res.ok && [403,405,501].includes(res.status)){
-           res=await fetch(url,{method:'GET',cache:'force-cache'});
-           if(res.body && res.body.cancel)res.body.cancel().catch(()=>{});
+         // Vite publica public/ na raiz; GitHub/GitHack serve a pasta literalmente.
+         // Detectar ambas as estruturas permite tocar as mesmas 14 faixas nos dois ambientes.
+         const candidates=[item.url,item.url.replace(/^\.\/music\//,'./public/music/')];
+         for(const candidate of candidates){
+           const url=new URL(candidate,document.baseURI).href;
+           try{
+             let res=await fetch(url,{method:'HEAD',cache:'no-cache'});
+             if(!res.ok && [403,405,501].includes(res.status)){
+               res=await fetch(url,{method:'GET',cache:'force-cache'});
+               if(res.body && res.body.cancel)res.body.cancel().catch(()=>{});
+             }
+             if(res.ok)return {...item,url,bundled:true};
+           }catch(error){/* testar caminho alternativo */}
          }
-         return res.ok?{...item,url,bundled:true}:null;
+         return null;
        }catch(e){return null}
      }));
      this.tracks=[...bundled.filter(Boolean),...rows.map(x=>({id:x.id,name:x.name,blob:x.blob}))];
