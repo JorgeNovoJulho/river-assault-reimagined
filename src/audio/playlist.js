@@ -78,8 +78,8 @@ function openDB(){return new Promise((resolve,reject)=>{if(!global.indexedDB)ret
 function transaction(db,mode,action){return new Promise((resolve,reject)=>{const tx=db.transaction(STORE,mode),request=action(tx.objectStore(STORE));request.onsuccess=()=>resolve(request.result);request.onerror=()=>reject(request.error);tx.oncomplete=()=>db.close();tx.onerror=()=>reject(tx.error)})}
 function shuffle(arr){const copy=[...arr];for(let i=copy.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[copy[i],copy[j]]=[copy[j],copy[i]]}return copy}
 class RiverPlaylist{
- constructor(opts={}){this.audio=new Audio();this.audio.preload='auto';this.audio.loop=false;this.audio.volume=.38;this.tracks=[];this.order=[];this.current=-1;this.enabled=true;this.loading=false;this.onStatus=opts.onStatus||(()=>{});this.objectURL=null;this.random=true;this.customOrder=[];try{this.random=localStorage.getItem('river_playlist_random')!=='false';this.customOrder=JSON.parse(localStorage.getItem('river_playlist_order')||'[]')}catch(e){}this.audio.addEventListener('ended',()=>this.next());this.audio.addEventListener('error',()=>{this.onStatus('Faixa indisponível; passando para próxima');this.next(true)});}
- async load(){let rows=[];try{const db=await openDB();rows=await transaction(db,'readonly',s=>s.getAll())}catch(e){this.onStatus('Biblioteca local indisponível; verificando faixas oficiais')}try{const bundled=await Promise.all(PRESET.map(async item=>{
+ constructor(opts={}){this.audio=new Audio();this.audio.preload='auto';this.audio.loop=false;this.audio.volume=.38;this.tracks=[];this.order=[];this.current=-1;this.enabled=true;this.loading=false;this.started=false;this.failedTracks=new Set();this.onStatus=opts.onStatus||(()=>{});this.objectURL=null;this.random=true;this.customOrder=[];try{this.random=localStorage.getItem('river_playlist_random')!=='false';this.customOrder=JSON.parse(localStorage.getItem('river_playlist_order')||'[]')}catch(e){}this.audio.addEventListener('ended',()=>this.next());this.audio.addEventListener('error',()=>{const item=this.order[this.current];if(item)this.failedTracks.add(item.id);this.onStatus('Faixa indisponível; procurando outra');this.next(true)});}
+ async load(){let rows=[];this.loading=true;try{const db=await openDB();rows=await transaction(db,'readonly',s=>s.getAll())}catch(e){this.onStatus('Biblioteca local indisponível; verificando faixas oficiais')}try{const bundled=await Promise.all(PRESET.map(async item=>{
        try{
          const url=new URL(item.url,document.baseURI).href;
          let res=await fetch(url,{method:'HEAD',cache:'no-cache'});
@@ -91,7 +91,7 @@ class RiverPlaylist{
        }catch(e){return null}
      }));
      this.tracks=[...bundled.filter(Boolean),...rows.map(x=>({id:x.id,name:x.name,blob:x.blob}))];
-     this.tracks.sort((a,b)=>{const x=this.customOrder.indexOf(a.id),y=this.customOrder.indexOf(b.id);return (x<0?999:x)-(y<0?999:y)});}catch(e){this.onStatus('Armazenamento local indisponível: '+e.message)}return this.tracks.length}
+     this.tracks.sort((a,b)=>{const x=this.customOrder.indexOf(a.id),y=this.customOrder.indexOf(b.id);return (x<0?999:x)-(y<0?999:y)});}catch(e){this.onStatus('Armazenamento local indisponível: '+e.message)}this.loading=false;this.onReady?.(this.tracks.length);return this.tracks.length}
  async importFiles(files){const accepted=Array.from(files||[]).filter(f=>/^audio\//.test(f.type)||/\.(mp3|ogg|opus|m4a|wav)$/i.test(f.name));if(!accepted.length)return 0;
  let saved=0;
  for(let i=0;i<accepted.length;i++){const f=accepted[i];if(f.size>45*1024*1024)continue;const id='local-'+f.name+'-'+f.size;await transactionKeepOpenWorkaround(id,f);saved++}
@@ -100,9 +100,12 @@ class RiverPlaylist{
  setRandom(value){this.random=!!value;try{localStorage.setItem('river_playlist_random',String(this.random))}catch(e){}}
  move(id,delta){const index=this.tracks.findIndex(x=>x.id===id),next=index+delta;if(index<0||next<0||next>=this.tracks.length)return;[this.tracks[index],this.tracks[next]]=[this.tracks[next],this.tracks[index]];this.customOrder=this.tracks.map(t=>t.id);try{localStorage.setItem('river_playlist_order',JSON.stringify(this.customOrder))}catch(e){}}
  preview(id){const item=this.tracks.find(x=>x.id===id);if(item){this.order=[item];this.current=0;this.playItem(item)}}
- startNewGame(){this.bossMode=false;this.audio.loop=false;const missionTracks=this.tracks.filter(t=>t.id!=='bundled-14'&&!/Seoul Road/i.test(t.name));this.order=this.random?shuffle(missionTracks):[...missionTracks];this.current=-1;if(this.order.length){this.next();}else{this.onStatus('Toque em MÚSICAS e selecione seus MP3 para iniciar a trilha')}}
- next(recover=false){if(!this.enabled||!this.order.length||this.bossMode)return; if(recover&&this.current>=this.order.length-1){this.stop();return;}this.current=(this.current+1)%this.order.length;const item=this.order[this.current];this.playItem(item)}
- playItem(item){if(this.objectURL){URL.revokeObjectURL(this.objectURL);this.objectURL=null}this.audio.pause();if(item.url){this.audio.src=item.url}else{this.objectURL=URL.createObjectURL(item.blob);this.audio.src=this.objectURL;}this.onStatus('Tocando: '+item.name);this.audio.play().catch(e=>this.onStatus('Toque em reproduzir para ativar o áudio: '+e.message))}
+ startNewGame(){this.started=true;this.failedTracks.clear();this.bossMode=false;this.audio.loop=false;const missionTracks=this.tracks.filter(t=>t.id!=='bundled-14'&&!/Seoul Road/i.test(t.name));this.order=this.random?shuffle(missionTracks):[...missionTracks];this.current=-1;if(this.order.length){this.next();}else{this.onStatus('Toque em MÚSICAS e selecione seus MP3 para iniciar a trilha')}}
+ next(recover=false){if(!this.enabled||!this.order.length||this.bossMode)return;
+ let tries=0;do{this.current=(this.current+1)%this.order.length;tries++}while(tries<=this.order.length&&this.failedTracks.has(this.order[this.current].id));
+ if(tries>this.order.length){this.onStatus('Nenhuma faixa reproduzível. Ativando trilha sintetizada.');this.stop();this.onUnavailable?.();return}
+ const item=this.order[this.current];this.playItem(item)}
+ playItem(item){if(this.objectURL){URL.revokeObjectURL(this.objectURL);this.objectURL=null}this.audio.pause();if(item.url){this.audio.src=item.url}else{this.objectURL=URL.createObjectURL(item.blob);this.audio.src=this.objectURL;}this.onStatus('Tocando: '+item.name);this.audio.play().catch(e=>{if(e.name==='NotAllowedError'){this.onStatus('Clique em MÚSICA para liberar a reprodução');return}this.failedTracks.add(item.id);this.onStatus('Erro na faixa: '+item.name);this.next(true)})}
  fadeTo(target,duration=850,onDone){
   clearInterval(this.fadeTimer);const steps=20,start=this.audio.volume,delta=(target-start)/steps;let step=0;
   this.fadeTimer=setInterval(()=>{step++;this.audio.volume=Math.max(0,Math.min(1,start+delta*step));if(step>=steps){clearInterval(this.fadeTimer);this.fadeTimer=null;if(onDone)onDone()}},duration/steps);
@@ -118,7 +121,7 @@ class RiverPlaylist{
   this.fadeTo(0,1300,()=>{if(this.bossMode)return;this.audio.volume=0;if(this.order.length)this.next();this.fadeTo(.38,1600)});
  }
  pause(){this.audio.pause()}
- resume(){if(this.enabled&&this.order.length)this.audio.play().catch(()=>{})}
+ resume(){if(!this.enabled)return;if(this.order.length&&!this.audio.src)this.next();else if(this.order.length)this.audio.play().catch(()=>{});else this.onUnavailable?.()}
  stop(){this.audio.pause();this.audio.removeAttribute('src');this.audio.load();if(this.objectURL)URL.revokeObjectURL(this.objectURL);this.objectURL=null}
  toggle(){this.enabled=!this.enabled;if(!this.enabled)this.pause();else this.resume();return this.enabled}
  getName(){return this.order[this.current]?.name||'Nenhuma música'}
