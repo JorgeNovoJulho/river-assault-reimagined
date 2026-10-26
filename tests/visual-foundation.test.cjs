@@ -70,7 +70,7 @@ test('gameplay 045: dams spaced, shots held, banks targetable',()=>{
  assert.match(html,/touchFireButton\.addEventListener\('pointerdown'/);
  assert.match(html,/e\.type === 'SHIP' \|\| e\.type === 'TURRET'/);
  assert.match(html,/e\.y>=5 && e\.y<VIRTUAL_HEIGHT-90/);
- assert.match(html,/HUD 0\.5\.8/);
+ assert.match(html,/HUD 0\.5\.9/);
 });
 
 test('hotfix 1: pickup spacing and visual types are enforced',()=>{
@@ -131,7 +131,7 @@ test('visual phase 04: all twenty missions have deterministic biome atmosphere',
  assert.match(renderer,/BIOME_DETAILS,/);
  assert.match(renderer,/c\.save\(\);c\.translate\(x,y\);c\.scale\(scale,scale\)/);
  assert.match(renderer,/c\.restore\(\);/);
- assert.match(html,/HUD 0\.5\.8/);
+ assert.match(html,/HUD 0\.5\.9/);
  assert.match(campaign,/"id": 20/);
  const codes=renderer.match(/\['[A-Z_]+','#[A-Fa-f0-9]+','[^']+'\]/g)||[];
  assert.equal(codes.length,20);
@@ -150,7 +150,7 @@ test('visual 05: all seven player aircraft and key enemy types render unique det
  assert.match(scene,/function enemyDetails\(/);
  assert.match(scene,/aircraftDetails\(c,style,trim\)/);
  assert.match(scene,/enemyDetails\(c,e\)/);
- assert.match(read('index.html'),/HUD 0\.5\.8/);
+ assert.match(read('index.html'),/HUD 0\.5\.9/);
 });
 
 test('visual hangar 052: selected planes, portraits, pilot miniatures, visible silhouettes',()=>{
@@ -161,7 +161,7 @@ test('visual hangar 052: selected planes, portraits, pilot miniatures, visible s
  assert.match(html,/function renderHangar\(/);
  assert.match(html,/renderHangar\(\);/);
  assert.match(html,/window\.RiverVisuals/);
- assert.match(html,/HUD 0\.5\.8/);
+ assert.match(html,/HUD 0\.5\.9/);
  for(const plane of ['falcao','vespa','cometa','fenix','helicoptero','disco','titan'])
    assert.match(html,new RegExp(plane+":\\["));
  for(const enemy of ['MECHA_SWORD','MECHA_GUN','TANK','TURRET','BOSS']) assert.ok(renderer.includes(enemy));
@@ -174,7 +174,7 @@ test('hangar 053: scrollable menu preserves previews on short displays',()=>{
  assert.match(html,/id="pilot-portrait"/);
  assert.match(html,/id="pilot-body"/);
  assert.match(html,/id="hangar-stats"/);
- assert.match(html,/HUD 0\.5\.8/);
+ assert.match(html,/HUD 0\.5\.9/);
 });
 
 test('hangar 054: commands outside scrollable hangar and attribute bars',()=>{
@@ -183,7 +183,7 @@ test('hangar 054: commands outside scrollable hangar and attribute bars',()=>{
  assert.match(html,/#start-actions\{display:grid!important/);
  assert.match(html,/#start-screen>div:not\(#start-actions\)/);
  for(const id of ['start-btn','menu-settings-btn','hangar-speed-bar','hangar-shield-bar','hangar-range-bar','hangar-fire-bar'])assert.ok(html.includes('id="'+id+'"'));
- assert.match(html,/HUD 0\.5\.8/);
+ assert.match(html,/HUD 0\.5\.9/);
 });
 
 test('menu 055: single scroll region prevents giant mission and quality cards',()=>{
@@ -192,7 +192,7 @@ test('menu 055: single scroll region prevents giant mission and quality cards',(
  assert.match(html,/#start-screen>#start-main>div/);
  assert.match(html,/#start-screen>#start-main\{display:flex!important/);
  assert.match(html,/#start-screen>#start-actions\{flex:0 0 auto!important/);
- assert.match(html,/HUD 0\.5\.8/);
+ assert.match(html,/HUD 0\.5\.9/);
 });
 
 test('deployment 056: build-id fingerprint and verifiable published version',()=>{
@@ -205,7 +205,7 @@ test('deployment 056: build-id fingerprint and verifiable published version',()=
  assert.match(vite,/\.split\('src="\.\/\+'/);
  assert.match(workflow,/build-info\.json/);
  assert.match(workflow,/scene2d5\.js\?build=\$GITHUB_SHA/);
- assert.match(html,/HUD 0\.5\.8/);
+ assert.match(html,/HUD 0\.5\.9/);
 });
 
 test('menu 057: desktop columns, mobile single-column and combat HUD hidden',()=>{
@@ -216,7 +216,7 @@ test('menu 057: desktop columns, mobile single-column and combat HUD hidden',()=
  assert.match(html,/body:has\(#start-screen:not\(\.hidden\)\) #compact-hud/);
  assert.match(html,/body:has\(#start-screen:not\(\.hidden\)\) #rs-bottom-actions/);
  assert.match(html,/@media\(max-width:720px\)/);
- assert.match(html,/HUD 0\.5\.8/);
+ assert.match(html,/HUD 0\.5\.9/);
 });
 
 test('menu 058: uncropped two-line title and useful sidebar panels',()=>{
@@ -224,5 +224,17 @@ test('menu 058: uncropped two-line title and useful sidebar panels',()=>{
  assert.match(html,/<h1><span>RIVER<\/span><span>STORM<\/span><\/h1>/);
  assert.match(html,/brand-feature/);
  assert.match(html,/#start-brand h1 span/);
- assert.match(html,/HUD 0\.5\.8/);
+ assert.match(html,/HUD 0\.5\.9/);
+});
+
+test('combat 059: boss skill animations, synthesized audio and varied enemy waves',()=>{
+ const html=read('index.html');
+ assert.match(html,/function playBossSkillEffect\(/);
+ assert.match(html,/function drawBossSkillEffect\(/);
+ assert.match(html,/drawBossSkillEffect\(\);/);
+ assert.match(html,/boss\.hp=Math\.max\(0,boss\.hp-damage\)/);
+ assert.match(html,/e\.attackTimer%850===0/);
+ assert.match(html,/missionTicks%550===0/);
+ assert.match(html,/const roster=\['SUB','SHIP','JET','HELI','ZIGZAG','TANK','TURRET'\]/);
+ assert.match(html,/HUD 0\.5\.9/);
 });
