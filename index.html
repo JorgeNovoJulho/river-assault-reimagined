@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>RiverStorm — Hangar Visível 0.5.3</title>
+    <title>RiverStorm — Hangar Redesign 0.5.4</title>
     <link rel="stylesheet" href="./src/styles/tailwind.css">
     <style>
         body {
@@ -182,12 +182,18 @@
                 <div class="flex items-center gap-2 mt-2"><button id="buy-plane" type="button" class="bg-emerald-700 rounded-lg p-2 text-xs font-bold">DESBLOQUEAR AVIÃO</button><span id="plane-wallet" class="text-yellow-300 text-xs"></span></div>
                 <p id="plane-status" class="text-amber-200 text-xs"></p>
                 <p id="playlist-status" class="text-emerald-300 text-xs mt-2" aria-live="polite">Músicas: carregando biblioteca local...</p>
+                <div id="hangar-bars" aria-label="Atributos da aeronave">
+ <div class="hangar-bar-row"><span>VELOCIDADE</span><div class="hangar-bar-track"><i id="hangar-speed-bar"></i></div><b id="hangar-speed-label"></b></div>
+ <div class="hangar-bar-row"><span>BLINDAGEM</span><div class="hangar-bar-track"><i id="hangar-shield-bar"></i></div><b id="hangar-shield-label"></b></div>
+ <div class="hangar-bar-row"><span>AUTONOMIA</span><div class="hangar-bar-track"><i id="hangar-range-bar"></i></div><b id="hangar-range-label"></b></div>
+ <div class="hangar-bar-row"><span>ARMAMENTO</span><div class="hangar-bar-track"><i id="hangar-fire-bar"></i></div><b id="hangar-fire-label"></b></div>
+</div>
                 <p id="plane-weapons" class="text-cyan-300 text-xs mt-2"></p>
             </div>
-            <button id="menu-settings-btn" type="button" class="rounded-xl border border-cyan-500 bg-slate-800 text-cyan-100 px-6 py-3 font-bold">⚙ CONFIGURAÇÕES / HANGAR</button>
+            <div id="start-actions" aria-label="Comandos principais"><button id="menu-settings-btn" type="button" class="rounded-xl border border-cyan-500 bg-slate-800 text-cyan-100 px-6 py-3 font-bold">⚙ CONFIGURAÇÕES / HANGAR</button>
             <button id="start-btn" class="arcade-btn bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-lg px-8 py-3 rounded-lg uppercase tracking-wider cursor-pointer">
-                INICIAR JOGO
-            </button>
+                INICIAR MISSÃO
+            </button></div>
         </div>
 
         <!-- Tela de Pausa -->
@@ -237,7 +243,7 @@
         <div class="rs-hud-cell"><span class="rs-label">🛡 ESCUDO <b id="hud-shield">150</b></span><div class="rs-meter"><span id="hud-shield-fill" style="background:#38bdf8;width:100%"></span></div></div>
         <div class="rs-hud-cell"><span class="rs-label">♟ RESGATES <b id="hud-rescues">0</b></span><span class="rs-label">✈ <b id="hud-plane">FALCÃO</b></span></div>
       </div>
-      <div class="rs-hud-footer"><span id="hud-version" style="color:#38bdf8;font-size:8px">HUD 0.5.3</span><span id="mission-hud">SELVA DA AURORA</span><b id="sector-hud">SETOR 1</b><span id="hud-rank">J1 SOLDADO</span></div>
+      <div class="rs-hud-footer"><span id="hud-version" style="color:#38bdf8;font-size:8px">HUD 0.5.4</span><span id="mission-hud">SELVA DA AURORA</span><b id="sector-hud">SETOR 1</b><span id="hud-rank">J1 SOLDADO</span></div>
     </section>
     <div id="rs-bottom-actions" aria-label="Opções rápidas">
       <button id="crt-toggle" type="button">CRT: LIG</button>
@@ -350,6 +356,32 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
 #start-screen #pilot-portrait{height:96px!important}
 #start-screen #pilot-body{height:69px!important}
 @media(max-height:750px){#start-screen{overflow-y:auto!important;justify-content:flex-start!important}#start-screen #hangar-preview{min-height:216px!important}}
+</style>
+<style>
+#start-screen{display:flex!important;flex-direction:column!important;overflow:hidden!important;justify-content:flex-start!important;gap:7px!important;padding:10px!important;font-family:system-ui,'Segoe UI',sans-serif!important}
+#start-screen>h1{font-family:system-ui,'Segoe UI',sans-serif!important;letter-spacing:.11em;font-weight:950!important;font-size:clamp(22px,5vw,34px)!important;flex-shrink:0}
+#start-screen>p{flex-shrink:0;margin:0!important}
+#start-screen>div:not(#start-actions){flex:1 1 auto!important;min-height:0!important;overflow-y:auto!important;overflow-x:hidden!important;scrollbar-width:thin;width:100%!important;max-width:480px!important;padding:6px 7px!important;border-radius:13px;background:linear-gradient(150deg,#10233a,#071523);border:1px solid #285778}
+#start-screen #hangar-preview{min-height:184px!important;gap:7px!important;border-radius:12px!important;box-shadow:inset 0 0 22px #0e416533}
+#start-screen #hangar-plane{height:110px!important}
+#start-screen #pilot-portrait{height:82px!important;width:75px!important}
+#start-screen #pilot-body{height:52px!important;width:50px!important}
+#start-actions{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px!important;flex:0 0 auto!important;width:100%;max-width:480px!important;padding:8px!important;background:linear-gradient(#10263c,#061325);border:1px solid #38bdf8;border-radius:13px;box-shadow:0 -5px 18px #0009;position:relative;z-index:8}
+#start-actions button{display:flex;align-items:center;justify-content:center;min-width:0;width:100%!important;min-height:44px!important;font-weight:900!important;font-size:12px!important;letter-spacing:.02em;border-radius:9px;padding:8px!important;margin:0!important}
+#start-btn{background:linear-gradient(110deg,#f59e0b,#fcd34d)!important;color:#091521!important}
+#menu-settings-btn{background:#15354c!important;color:#d9f2ff!important}
+#continue-mission-btn:not(.hidden){background:#047857!important;color:white!important}
+#continue-mission-btn.hidden{display:none!important}
+#hangar-bars{margin-top:8px;display:grid;gap:5px;padding:7px;background:#071728;border:1px solid #24465c;border-radius:10px}
+.hangar-bar-row{display:grid;grid-template-columns:87px minmax(0,1fr)65px;align-items:center;gap:6px;text-align:left;font:800 10px system-ui;color:#d6eaff}
+.hangar-bar-row b{font-size:10px;text-align:right;color:#fde68a}
+.hangar-bar-track{height:10px;border-radius:8px;background:#1c3449;overflow:hidden}
+.hangar-bar-track i{display:block;height:100%;width:0;border-radius:8px;transition:width .2s ease}
+#hangar-speed-bar{background:linear-gradient(90deg,#0284c7,#67e8f9)}
+#hangar-shield-bar{background:linear-gradient(90deg,#15803d,#4ade80)}
+#hangar-range-bar{background:linear-gradient(90deg,#d97706,#facc15)}
+#hangar-fire-bar{background:linear-gradient(90deg,#be123c,#fb7185)}
+@media(max-height:640px){#start-screen{padding:5px!important;gap:3px!important}#start-screen>h1{font-size:21px!important}#start-actions button{min-height:38px!important}}
 </style>
     <script src="./src/input/gamepad.js"></script>
     <script src="./src/game/aircraft.js"></script>
@@ -623,6 +655,8 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
           pilotDraw('pilot-portrait',false);pilotDraw('pilot-body',true);
           document.getElementById('hangar-name').textContent=conf.name;
           document.getElementById('pilot-name').textContent=pilot[0];
+          const metrics=[['speed',conf.speed,10,conf.speed.toFixed(1)],['shield',conf.shieldMultiplier||1,1.7,(conf.shieldMultiplier||1).toFixed(1)+'×'],['range',1/conf.fuel,26,(1/conf.fuel).toFixed(0)],['fire',conf.weapons.length,6,String(conf.weapons.length)+' tipos']];
+          for(const [id,value,max,label] of metrics){document.getElementById('hangar-'+id+'-bar').style.width=Math.min(100,Math.max(5,value/max*100))+'%';document.getElementById('hangar-'+id+'-label').textContent=label;}
           document.getElementById('hangar-stats').textContent='VEL '+conf.speed+'  ·  CONSUMO '+(conf.fuel*100).toFixed(1)+'  ·  ARMA INICIAL '+aircraftCatalog.WEAPONS[conf.weapons[0]];
         }
         function refreshPlaneChoice() {
