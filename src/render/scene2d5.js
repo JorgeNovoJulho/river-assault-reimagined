@@ -239,10 +239,21 @@ function islands(c,items,t){
     if(i===0)c.moveTo(x,y);else c.lineTo(x,y);
   }
   c.closePath();c.fill();c.stroke();
-  if(p.width>42)tree(c,-p.width*.13,-3,.6,t,t.time==='night');
+  // Orla arenosa/pedregosa, rochas e vegetação coerentes com o bioma.
+  c.strokeStyle='rgba(244,238,198,.48)';c.lineWidth=2;
+  c.beginPath();c.ellipse(0,1,rx*.78,ry*.7,0,0,Math.PI*2);c.stroke();
+  const icy=/ÁRTICO|GLACIAL|FIORDE/.test(t.name);
+  const desert=/DESERTO|OÁSIS/.test(t.name);
+  const industrial=/CIDADE|INDUSTRIAL|ESTALEIRO|RUÍNAS/.test(t.name);
+  for(let i=0;i<3;i++){
+    const x=(hash(n*19+i*13)-.5)*rx*1.4,y=(hash(n*41+i*7)-.5)*ry*1.35;
+    c.fillStyle=icy?'#e1f1f7':desert?'#bca07b':industrial?'#566f83':'#627b6b';
+    c.beginPath();c.ellipse(x,y,3+i%2,2+i%3,.2,0,Math.PI*2);c.fill();
+  }
+  if(p.width>42&&!icy&&!industrial&&!desert)tree(c,-p.width*.13,-3,.6,t,t.time==='night');
   c.restore();
  }
 }
 function draw(c,d){const t=THEMES[((d.sector-1)%THEMES.length+THEMES.length)%THEMES.length];landscape(c,d,t);islands(c,d.islands,t);for(let e of d.enemies)enemy(c,e,t.time);if(!d.invulnerable||Math.floor(Date.now()/110)%2)plane(c,d.player.x,d.player.y,d.aircraft,1);}
-root.RiverVisuals={draw,plane,enemy,THEMES};
+root.RiverVisuals={draw,plane,enemy,THEMES,drawIslands(c,items,sector){const t=THEMES[((sector-1)%THEMES.length+THEMES.length)%THEMES.length];islands(c,items,t)}};
 })(window);
