@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>RiverStorm — Parry e Trajetórias 0.7.1</title>
+    <title>RiverStorm — Escudo Defletor 0.7.2</title>
     <link rel="stylesheet" href="./src/styles/tailwind.css">
     <style>
         body {
@@ -247,7 +247,7 @@
         <div class="rs-hud-cell"><span class="rs-label">🛡 ESCUDO <b id="hud-shield">150</b></span><div class="rs-meter"><span id="hud-shield-fill" style="background:#38bdf8;width:100%"></span></div></div>
         <div class="rs-hud-cell"><span class="rs-label">♟ RESGATES <b id="hud-rescues">0</b></span><span class="rs-label">✈ <b id="hud-plane">FALCÃO</b></span></div>
       </div>
-      <div class="rs-hud-footer"><span id="hud-version" style="color:#38bdf8;font-size:8px">HUD 0.7.1</span><span id="mission-hud">SELVA DA AURORA</span><b id="sector-hud">SETOR 1</b><span id="hud-rank">J1 SOLDADO</span></div>
+      <div class="rs-hud-footer"><span id="hud-version" style="color:#38bdf8;font-size:8px">HUD 0.7.2</span><span id="mission-hud">SELVA DA AURORA</span><b id="sector-hud">SETOR 1</b><span id="hud-rank">J1 SOLDADO</span></div>
     </section>
     <div id="rs-bottom-actions" aria-label="Opções rápidas">
       <button id="crt-toggle" type="button">CRT: LIG</button>
@@ -1041,7 +1041,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
             enemies.push({
                 type: 'BOSS',
                 bossSubType: mission.bossPattern,
-                skillAffinity:BOSS_AFFINITIES[(sector-1)%BOSS_AFFINITIES.length],
+                skillAffinity:bossSkillForMission(sector),
                 bossId: sector,
                 bossVisual: mission.bossVisual,
                 biome: mission.biome,
@@ -1079,6 +1079,9 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
           SHADOW:{icon:'◈',name:'Sombra Abissal',color:'#a78bfa',damage:0,charges:3,cooldown:600,strong:'PRISM'}
         };
         const BOSS_AFFINITIES=['EMP','LIGHTNING','GRAVITY','ICE','FIRE','BLEED','POISON','PRISM','SHADOW'];
+        // Assinatura imutável de cada chefe em sua missão, inclusive repetições intencionais.
+        const MISSION_BOSS_SKILLS=['EMP','LIGHTNING','GRAVITY','ICE','FIRE','BLEED','POISON','PRISM','SHADOW','LIGHTNING','GRAVITY','SHADOW','POISON','ICE','EMP','PRISM','FIRE','BLEED','LIGHTNING','SHADOW'];
+        const bossSkillForMission=mission=>MISSION_BOSS_SKILLS[Math.max(0,Math.min(19,(mission||1)-1))];
         let bossSkillUnlocked=[];
         try{bossSkillUnlocked=JSON.parse(localStorage.getItem('river_boss_skills_v1')||'[]').filter(k=>BOSS_SKILLS[k])}catch(e){}
         let bossSkillEquipped=null,bossSkillCharge=0,bossSkillCooldown=0,bossSkillPending=null;
@@ -1205,14 +1208,15 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
         }
         skillUseButton.addEventListener('pointerdown',event=>{event.preventDefault();useBossSkill()});
         // --- HABILIDADES E PADRÕES DE TIROS DOS CHEFÕES ---
-        let parryTicks=0,parryCooldown=0;
+        let parryTicks=0,parryCooldown=0,parryHeld=false,parryHeldTicks=0;
         const parryButton=document.getElementById('parry-btn');
         function activateParry(){
           if(gameState!=='PLAYING'||parryCooldown>0||parryTicks>0||player.disabledTimer>0)return;
-          parryTicks=34;parryCooldown=210;createFloatingText(player.x,player.y-38,'ESCUDO REFLETOR','#67e8f9');
+          parryTicks=15;parryCooldown=240;parryHeldTicks=0;createFloatingText(player.x,player.y-38,'ESCUDO REFLETOR','#67e8f9');
           try{window.RiverSFX?.shield?.()}catch(error){}
         }
-        parryButton.addEventListener('pointerdown',event=>{event.preventDefault();activateParry()});
+        parryButton.addEventListener('pointerdown',event=>{event.preventDefault();parryHeld=true;parryButton.setPointerCapture?.(event.pointerId);activateParry()});
+        for(const eventName of ['pointerup','pointercancel','lostpointercapture'])parryButton.addEventListener(eventName,()=>{parryHeld=false});
         function reflectBossSpecial(boss){
           createFloatingText(player.x,player.y-45,'PARRY PERFEITO!','#67e8f9');
           if(boss)launchSkillTrajectory('PRISM',player.x,player.y,boss.x,boss.y,'#67e8f9');
@@ -1258,7 +1262,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
                 e.specialCharge=0;e.specialCount++;
                 if(parryTicks>0){launchSkillTrajectory(e.skillAffinity,e.x,e.y,player.x,player.y,BOSS_SKILLS[e.skillAffinity]?.color||'#a78bfa');reflectBossSpecial(e);return;}
                 launchSkillTrajectory(e.skillAffinity,e.x,e.y,player.x,player.y,BOSS_SKILLS[e.skillAffinity]?.color||'#a78bfa');
-                const pattern=(sector-1)%BOSS_AFFINITIES.length;
+                const pattern=BOSS_AFFINITIES.indexOf(e.skillAffinity);
                 if(pattern===0){player.disabledTimer=300;player.effectType='EMP';player.effectTimer=300; sound.playEmpSound();document.getElementById('game-container').classList.add('emp-flash');setTimeout(()=>document.getElementById('game-container').classList.remove('emp-flash'),300);createFloatingText(player.x,player.y,'EMP · 5 S','#67e8f9')}
                 else if(pattern===1){player.effectType='LIGHTNING';player.effectTimer=600;for(let n=-2;n<=2;n++)enemyBullets.push({x:e.x+n*26,y:e.y+25,vx:n*.65,vy:5.2,color:'#67e8f9'})}
                 else if(pattern===2){player.effectType='GRAVITY';player.effectTimer=180;player.gravityDamageRate=.03;player.x+=(e.x-player.x)*.15;createFloatingText(player.x,player.y,'PULSO GRAVITACIONAL','#c4b5fd')}
@@ -1311,11 +1315,11 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
               }
             }
             // Investidas com espada: sinal luminoso antes do golpe e rastro de corte no avanço.
-            if((e.bossVisual==='mech'||e.bossVisual==='jet')&&e.attackTimer%600===490){
-              e.swordCharge=45;e.swordTargetX=player.x;e.swordTargetY=Math.min(player.y-72,VIRTUAL_HEIGHT*.7);
+            if(['mech','jet','insect','heli'].includes(e.bossVisual)&&e.attackTimer%420===315){
+              e.swordCharge=60;e.swordTargetX=player.x;e.swordTargetY=Math.min(player.y-72,VIRTUAL_HEIGHT*.7);
               createFloatingText(e.x,e.y-50,'⚔ INVESTIDA EM 0,75 S','#fb7185');
             }
-            if(e.swordCharge>0){e.swordCharge--;if(e.swordCharge===0){e.swordDash=22;e.swordStartX=e.x;e.swordStartY=e.y;}}
+            if(e.swordCharge>0){e.swordCharge--;if(e.swordCharge===0){e.swordDash=30;e.swordStartX=e.x;e.swordStartY=e.y;}}
             if(e.swordDash>0){
               const oldX=e.x,oldY=e.y;
               e.x+=(e.swordTargetX-e.x)*.27;e.y+=(e.swordTargetY-e.y)*.27;
@@ -2022,7 +2026,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
             }
 
             if (player.invulnerable > 0) player.invulnerable--;
-            if(parryTicks>0)parryTicks--;
+            if(parryTicks>0){parryHeldTicks++;if(parryHeld&&parryHeldTicks<180)parryTicks=Math.min(180-parryHeldTicks,15);else parryTicks--;if(parryHeldTicks>=180)parryTicks=0;}
             if(parryCooldown>0)parryCooldown--;
             parryButton.textContent=parryTicks>0?'🛡 REFLETINDO':parryCooldown>0?'🛡 '+Math.ceil(parryCooldown/60)+'s':'🛡 PARRY [V]';
 
@@ -2108,7 +2112,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
                 eb.x += eb.vx + (eb.waveStyle===2?Math.sin(missionTicks*.12+(eb.phase||0))*.45:0);
                 eb.y += eb.vy;
 
-                if(parryTicks>0&&Math.hypot(eb.x-player.x,eb.y-player.y)<53){enemyBullets.splice(index,1);const boss=enemies.find(e=>e.type==='BOSS'&&e.hp>0),target=boss||enemies.find(e=>e.hp>0);const tx=target?.x??eb.x,ty=target?.y??0,dx=tx-eb.x,dy=ty-eb.y,len=Math.max(1,Math.hypot(dx,dy));bullets.push({x:eb.x,y:eb.y,vx:dx/len*11,speed:-dy/len*11,type:'REFLECTED',color:eb.color||'#67e8f9',damage:12,reflected:true});addExplosion(eb.x,eb.y,'#67e8f9',8);createFloatingText(player.x,player.y-40,'REFLETIDO!','#67e8f9');return;}
+                if(parryTicks>0&&Math.hypot(eb.x-player.x,eb.y-player.y)<53){enemyBullets.splice(index,1);const boss=enemies.find(e=>e.type==='BOSS'&&e.hp>0),target=boss||enemies.find(e=>e.hp>0);const tx=target?.x??eb.x,ty=target?.y??0,dx=tx-eb.x,dy=ty-eb.y,len=Math.max(1,Math.hypot(dx,dy));bullets.push({x:eb.x,y:eb.y,vx:dx/len*11,speed:-dy/len*11,type:'REFLECTED',color:'#22f7c4',damage:50,reflected:true});addExplosion(eb.x,eb.y,'#67e8f9',8);createFloatingText(player.x,player.y-40,'REFLETIDO!','#67e8f9');return;}
                 const hitWingman=wingmen.find(w=>Math.hypot(eb.x-(player.x+w.side*36),eb.y-(player.y+10))<14);
                 if(hitWingman){
                     enemyBullets.splice(index,1);
@@ -2134,7 +2138,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
                     else if(e.stunnedTicks>0){} // EMP: imóvel
                     else if(e.gravityTicks>0){e.x+=(player.x-e.x)*.085;e.y+=(Math.max(95,player.y-180)-e.y)*.08;}
                     else if(e.frozenTicks>0){e.x+=(player.x-e.x)*.007;}
-                    else {const phase=Math.floor(e.maneuverTime/130)%4;const targetX=phase===0?VIRTUAL_WIDTH*.3:phase===1?VIRTUAL_WIDTH*.7:phase===2?player.x:VIRTUAL_WIDTH*.5;const targetY=phase===0?105:phase===1?155:phase===2?125:95;e.x+=(targetX-e.x)*.016;e.y+=(targetY-e.y)*.012;}
+                    else if(e.swordDash>0){}else {const phase=Math.floor(e.maneuverTime/155)%5;const targetX=[VIRTUAL_WIDTH*.25,VIRTUAL_WIDTH*.76,player.x,VIRTUAL_WIDTH*.44,VIRTUAL_WIDTH*.65][phase];const targetY=[85,205,155,245,110][phase];e.x+=(targetX-e.x)*.025;e.y+=(targetY-e.y)*.028;}
 
                     const minX = e.width / 2 + 10;
                     const maxX = VIRTUAL_WIDTH - e.width / 2 - 10;
@@ -2402,7 +2406,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
             lives=3;
             continues=10;
             bossActive = false;
-            parryTicks=0;parryCooldown=0;skillTrajectories=[];
+            parryTicks=0;parryCooldown=0;parryHeld=false;parryHeldTicks=0;skillTrajectories=[];
             bossSkillEquipped=null;bossSkillCharge=0;bossSkillCooldown=0;bossSkillEffect=null;
             skillPicker.classList.add('hidden');skillUseButton.classList.add('hidden');
 
@@ -2918,6 +2922,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
             gamepadState = physicalGamepad.poll();
             const parryPadPressed=!!physicalGamepad.lastButtons[4];
             if(parryPadPressed&&!gameLoop.parryPadPrev&&gameState==='PLAYING')activateParry();
+            if(parryPadPressed)parryHeld=true;else if(gameLoop.parryPadPrev)parryHeld=false;
             gameLoop.parryPadPrev=parryPadPressed;
             const status = gamepadState.connected ? 'Controle: '+physicalGamepad.name.slice(0,35) : 'Controle: não conectado';
             if (status !== lastControllerStatus) {
@@ -3033,7 +3038,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
 
             if (e.code === 'Space' || e.code === 'KeyZ') { if(!e.repeat)fireWeapon(); }
             if(e.code==='KeyC'&&!e.repeat){e.preventDefault();useBossSkill()}
-            if(e.code==='KeyV'&&!e.repeat){e.preventDefault();activateParry()}
+            if(e.code==='KeyV'&&!e.repeat){e.preventDefault();parryHeld=true;activateParry()}
             if (e.code === 'KeyX' || e.code === 'KeyF' || e.code === 'ShiftLeft') triggerBomb();
 
             if (e.code === 'KeyP' || e.code === 'Escape') {
