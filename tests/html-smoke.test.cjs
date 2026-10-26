@@ -137,3 +137,11 @@ test('ao avançar de missão efeitos hostis de boss são removidos',()=>{
  assert.match(transition,/bossTaunt=null;bossFinalDialogue=false;screenShake=0/);
  assert.match(transition,/b\.type!=='REFLECTED'&&b\.type!=='BANK_MISSILE'/);
 });
+
+test('eventos: cadência específica em 20 missões e limite de inimigos do bioma',()=>{
+ const html=fs.readFileSync('index.html','utf8');
+ assert.match(html,/const cadence=\[360,420,390,330,300,450/);
+ assert.match(html,/\(sector-1\)%20\]/);
+ assert.match(html,/\(missionTicks\+waveOffset\)%cadence!==0/);
+ assert.match(html,/if\(existing\.length>=2\)return/);
+});
