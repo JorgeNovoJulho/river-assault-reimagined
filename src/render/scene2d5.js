@@ -137,6 +137,68 @@ function landscape(c,data,t){
  // Vinheta leve preservando visibilidade dos alvos noturnos.
  if(t.time==='night'){c.fillStyle='rgba(5,10,30,.16)';c.fillRect(0,0,w,h);c.fillStyle='rgba(255,220,143,'+(.1+beat*.09)+')';for(let y=26;y<h;y+=130){let b=bankAt(points,y,w);c.beginPath();c.arc(b[0]-6,y,10,0,Math.PI*2);c.fill();c.beginPath();c.arc(b[1]+6,y,10,0,Math.PI*2);c.fill()}}
 }
+
+/* Parte 05: peças vetoriais leves, identificação de cada nave e inimigo.
+ * Desenho apenas: colisões, armas, velocidades e desbloqueios são intocados. */
+const AIRCRAFT_MARKS={falcao:['F','#f87171'],vespa:['V','#fbbf24'],cometa:['C','#38bdf8'],fenix:['X','#f472b6'],helicoptero:['A','#60a5fa'],disco:['D','#c4b5fd'],titan:['T','#bef264']};
+function aircraftDetails(c,style,trim){
+ const mark=AIRCRAFT_MARKS[style]||AIRCRAFT_MARKS.falcao;
+ c.save();
+ c.lineWidth=1.4;c.strokeStyle='rgba(205,238,255,.9)';
+ // Microplacas simétricas; nacelas e motores identificáveis à distância.
+ for(const side of [-1,1]){
+   const span=style==='disco'?23:style==='titan'?24:style==='fenix'?19:style==='cometa'?15:17;
+   c.strokeRect(side*span-3,4,6,5);
+   c.fillStyle=trim;c.fillRect(side*span-2,7,4,4);
+   c.beginPath();c.moveTo(side*5,0);c.lineTo(side*(span-5),5);c.stroke();
+ }
+ c.fillStyle='#071726';c.beginPath();c.arc(0,1,5,0,Math.PI*2);c.fill();
+ c.fillStyle=mark[1];c.font='bold 7px monospace';c.textAlign='center';c.textBaseline='middle';c.fillText(mark[0],0,1);
+ if(style==='helicoptero'){
+   c.strokeStyle='#bdeafa';c.lineWidth=2;c.beginPath();c.moveTo(-20,-10);c.lineTo(20,-10);c.stroke();
+   c.fillStyle='#94a3b8';c.fillRect(-21,-7,5,3);c.fillRect(16,-7,5,3);
+ }else if(style==='disco'){
+   for(let k=0;k<6;k++){const a=k*Math.PI/3+Date.now()/850;c.fillStyle=k%2?'#67e8f9':'#f0abfc';c.beginPath();c.arc(Math.cos(a)*25,Math.sin(a)*12,2,0,Math.PI*2);c.fill()}
+ }else if(style==='fenix'){
+   c.strokeStyle='#f9a8d4';c.beginPath();c.moveTo(-15,8);c.lineTo(-26,1);c.moveTo(15,8);c.lineTo(26,1);c.stroke();
+ }else if(style==='titan'){
+   c.fillStyle='#1f2937';c.fillRect(-25,12,10,5);c.fillRect(15,12,10,5);
+ }
+ c.restore();
+}
+function enemyDetails(c,e){
+ const type=e.type||'JET',phase=Date.now()/170;
+ c.save();c.lineWidth=1.4;
+ if(type==='MECHA_SWORD'||type==='MECHA_GUN'||type==='MEGAZORD'){
+   const sword=type==='MECHA_SWORD'||type==='MEGAZORD';
+   c.fillStyle='#182334';c.fillRect(-9,-15,18,15);
+   c.fillStyle=sword?'#e879f9':'#fbbf24';c.fillRect(-6,-11,4,3);c.fillRect(2,-11,4,3);
+   c.strokeStyle='#93c5fd';c.strokeRect(-11,-17,22,30);
+   c.strokeStyle='#475569';c.beginPath();c.moveTo(-9,8);c.lineTo(-15,16);c.moveTo(9,8);c.lineTo(15,16);c.stroke();
+   if(sword){
+     const sway=Math.sin(phase)*3;
+     c.strokeStyle='#67e8f9';c.lineWidth=3;c.beginPath();c.moveTo(20,7);c.lineTo(29+sway,-29);c.stroke();
+   }else{
+     c.fillStyle='#111827';c.fillRect(12,-10,17,9);
+     for(let i=0;i<3;i++){c.fillStyle='#fbbf24';c.fillRect(27,-9+i*3,4,2)}
+   }
+ }else if(type==='TANK'||type==='TURRET'){
+   c.strokeStyle='#a3a3a3';c.beginPath();c.arc(0,0,type==='TANK'?7:9,0,Math.PI*2);c.stroke();
+   c.fillStyle='#ffdd86';c.fillRect(-2,-12,4,3);
+ }else if(type==='SHIP'||type==='SUB'){
+   c.strokeStyle='#a9d3e5';c.beginPath();c.moveTo(-7,-12);c.lineTo(0,-16);c.lineTo(7,-12);c.stroke();
+   c.fillStyle='#38bdf8';c.fillRect(-3,-4,6,3);
+ }else if(type==='HELI'){
+   c.fillStyle='#fde68a';c.fillRect(-2,-14,4,3);
+ }else if(type==='JET'||type==='ZIGZAG'){
+   c.strokeStyle='#fecdd3';c.beginPath();c.moveTo(-11,6);c.lineTo(-4,-2);c.moveTo(11,6);c.lineTo(4,-2);c.stroke();
+ }else if(type==='BOSS'){
+   c.fillStyle='rgba(255,244,184,.65)';
+   for(let k=-1;k<=1;k++)c.fillRect(k*12-2,4,4,3);
+ }
+ c.restore();
+}
+
 function plane(c,x,y,style='falcao',size=1){
  const colors={falcao:['#c7e2ec','#df4a42','#263e59'],vespa:['#e8be57','#f79430','#453b49'],cometa:['#7bdcf7','#3782df','#25386e'],fenix:['#f9a8d4','#db2777','#701a75'],titan:['#d9f99d','#65a30d','#365314'],helicoptero:['#93c5fd','#2563eb','#183153'],disco:['#d8b4fe','#8b5cf6','#312e81']};
  const [body,trim,dark]=colors[style]||colors.falcao;
@@ -165,6 +227,7 @@ function plane(c,x,y,style='falcao',size=1){
    c.fillStyle='#fbbf24';c.fillRect(-4,9,8,8);
  }
  c.fillStyle='#fbba5a';poly(c,[-5,13,0,23,5,13],'#ff984f');
+ aircraftDetails(c,style,trim);
  c.restore();
 }
 function enemy(c,e,time){
@@ -223,6 +286,7 @@ function enemy(c,e,time){
 }
  else{poly(c,[-15,-9,-5,-6,0,-20,5,-6,15,-9,13,8,5,6,0,16,-5,6,-13,8],'#9b4d6e');poly(c,[-3,-15,0,-23,3,-15,3,10,-3,10],'#d1a5b5');poly(c,[-3,-8,0,-14,3,-8,0,-2],'#7dd3fc')}
  if(time==='night'){c.fillStyle='#ffd581';c.beginPath();c.arc(-5,7,2,0,7);c.arc(5,7,2,0,7);c.fill()}
+ enemyDetails(c,e);
  c.restore();
  // HP e recarga dos bosses são desenhados uma única vez em drawEnemies().
 }
