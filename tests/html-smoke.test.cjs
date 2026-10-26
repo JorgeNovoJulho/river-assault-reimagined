@@ -163,9 +163,9 @@ test('20 missões possuem alvos secundários destrutíveis e recompensas em rota
  assert.ok(names);
  assert.equal((names[1].match(/'[^']+'/g)||[]).length,20);
  assert.match(html,/function spawnTerrainTarget\(center\)/);
- assert.match(html,/secondaryTargetsDestroyed%2===0\?-1:1/);
+ assert.match(html,/Math\.floor\(missionTicks\/840\)%2===0\?-1:1/);
  assert.match(html,/terrainObstacle:true/);
- assert.match(html,/if\(e\.terrainObstacle\)return/);
+ assert.match(html,/if\(e\.terrainObstacle\)\{e\.x\+=/);
  assert.match(html,/if\(e\.terrainObstacle\)\{/);
  assert.match(html,/ROTA EXTRA \+ RECOMPENSA!/);
 });
