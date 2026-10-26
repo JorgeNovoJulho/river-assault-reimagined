@@ -1137,7 +1137,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
         function spawnBoss(y,confirmed=false) {
             if(!confirmed){openBossSkillPicker();return;}
             bossActive = true;
-            playlist.beginBossTheme?.();
+            try{playlist.beginBossTheme?.()}catch(audioError){console.warn('Áudio do chefe:',audioError)}
             redAlertTicks=0;
             const mission=campaign.at(sector);
             showBossTaunt(mission.boss);
@@ -1238,11 +1238,30 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
           none.addEventListener('click',()=>{bossSkillPending='NONE';document.getElementById('boss-skill-selected').textContent='Sem poder nesta batalha';document.getElementById('boss-skill-confirm').disabled=false});options.appendChild(none);
         }
         document.getElementById('boss-skill-confirm').addEventListener('click',()=>{
-          if(bossSkillPending===null)return;
-          bossSkillEquipped=bossSkillPending==='NONE'?null:bossSkillPending;
-          bossSkillCharge=bossSkillEquipped?BOSS_SKILLS[bossSkillEquipped].charges:0;
-          bossSkillCooldown=0;skillPicker.classList.add('hidden');gameState='PLAYING';simulationClock.reset();
-          spawnBoss(0,true);
+          if(gameState!=='BOSS_SELECT'||bossSkillPending===null)return;
+          const confirm=document.getElementById('boss-skill-confirm');
+          confirm.disabled=true;
+          try{
+            bossSkillEquipped=bossSkillPending==='NONE'?null:bossSkillPending;
+            bossSkillCharge=bossSkillEquipped?BOSS_SKILLS[bossSkillEquipped].charges:0;
+            bossSkillCooldown=0;
+            // Uma falha musical nunca pode impedir o surgimento do chefe.
+            // Instalar chefe primeiro; somente depois voltar ao estado PLAYING.
+            spawnBoss(0,true);
+            if(!enemies.some(e=>e.type==='BOSS'))throw new Error('Boss não foi criado');
+            skillPicker.classList.add('hidden');
+            skillPicker.style.display='none';
+            skillPicker.setAttribute('aria-hidden','true');
+            redAlertTicks=0;
+            gameState='PLAYING';simulationClock.reset();
+            try{playlist.resume()}catch(audioError){console.warn('Trilha de batalha:',audioError)}
+          }catch(error){
+            console.error('Falha na transição RED ALERT / chefe',error);
+            gameState='BOSS_SELECT';simulationClock.reset();
+            skillPicker.classList.remove('hidden');skillPicker.style.display='flex';
+            confirm.disabled=false;
+            try{showGameError(error)}catch(_){}
+          }
         });
 
         // Animação real do poder (não somente partículas genéricas).
