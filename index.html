@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>RiverStorm — Mísseis Inteligentes 0.8.3</title>
+    <title>RiverStorm — Balanceamento de Chefes 0.8.5</title>
     <link rel="stylesheet" href="./src/styles/tailwind.css">
     <style>
         body {
@@ -685,7 +685,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
         function grantEnemyXP(enemy){
           if(!enemy||enemy.xpGranted)return;
           enemy.xpGranted=true;
-          const reward=enemy.type==='BOSS'?500+sector*30:Math.max(10,Math.round((enemy.score||100)*.20));
+          const reward=enemy.type==='BOSS'?130+sector*8:Math.max(2,Math.round((enemy.score||100)*.035));
           const previous=pilotLevel;
           pilotXP=Math.min(XP_CAP,pilotXP+reward);
           pilotLevel=window.RiverPilotProgress.levelFor(pilotXP);
@@ -1132,7 +1132,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
             const bossConfig = {...BOSS_TYPES[mission.bossPattern],name:mission.boss,hp:mission.bossHp,score:1000+sector*240};
             const cycleMultiplier = 1 + Math.floor((sector - 1) / BOSS_TYPES.length) * 0.4;
             // Boss é confronto prolongado; escala por dificuldade, missão e jornada.
-            const calculatedHp = Math.round((360+mission.difficulty*110+sector*27)*cycleMultiplier*Math.pow(1.16,journey-1)*1.20*1.20);
+            const calculatedHp = Math.round((540+mission.difficulty*160+sector*38)*cycleMultiplier*Math.pow(1.16,journey-1)*1.20*1.20);
 
             enemies.push({
                 type: 'BOSS',
@@ -1189,9 +1189,10 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
           try{localStorage.setItem('river_boss_skills_v1',JSON.stringify(bossSkillUnlocked))}catch(e){}
           createFloatingText(VIRTUAL_WIDTH/2,150,'PODER '+BOSS_SKILLS[key].name.toUpperCase()+' LIBERADO',BOSS_SKILLS[key].color);
         }
+        function clearBossArenaEffects(){bossSkillEffect=null;skillTrajectories=[];bossSkillCooldown=0;bossSkillCharge=0;bossSkillPending=null;bossSkillEquipped=null;bossSkillEffect=null;bossActive=false;enemyBullets=[];}
         function finishBossDefeatedBySkill(e){
           if(bossDefeatedThisMission)return;
-          e.hp=0;bossDefeatedThisMission=true;bossActive=false;enemyBullets=[];
+          e.hp=0;bossDefeatedThisMission=true;clearBossArenaEffects();
           playlist.endBossTheme?.();
           unlockBossSkill(e.skillAffinity);bossSkillEquipped=null;skillUseButton.classList.add('hidden');
           addExplosion(e.x,e.y,'#ef4444',45);sound.playExplosion(true);
@@ -1292,10 +1293,11 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
           const boss=enemies.find(e=>e.type==='BOSS'&&e.hp>0);if(!boss)return;
           const kind=bossSkillEquipped,skill=BOSS_SKILLS[kind],foe=boss.skillAffinity;
           const advantage=skill.strong===foe;
-          let damage=kind==='EMP'||kind==='PRISM'||kind==='SHADOW'?0:(advantage?Math.round(skill.damage*2.8):Math.max(6,Math.round(skill.damage*.35)));
+          let damage=kind==='EMP'||kind==='PRISM'||kind==='SHADOW'?0:(advantage?Math.round(skill.damage*1.55):Math.max(4,Math.round(skill.damage*.28)));
           if(boss.gravityTicks>0)damage*=2;
-          if(boss.parryVulnerableTicks>0)damage*=1.5;
-          if(kind==='PRISM'||kind==='SHADOW'){const base=boss.maxHp*.03;damage=base;boss.dualElement=kind;boss.dualTicks=600;boss.dualClock=0;boss.dualRate=advantage?.01:.005;boss.dualAdvantage=advantage;boss.dualCount=0;boss.dualAmp=kind==='PRISM'?(advantage?.5:.25):0;boss.dualSlow=kind==='SHADOW'?(advantage?.5:.3):0;
+          if(boss.parryVulnerableTicks>0)damage*=1.25;
+          damage=Math.min(damage,boss.maxHp*(advantage?.075:.025));
+          if(kind==='PRISM'||kind==='SHADOW'){const base=boss.maxHp*.012;damage=base;boss.dualElement=kind;boss.dualTicks=600;boss.dualClock=0;boss.dualRate=advantage?.003:.0015;boss.dualAdvantage=advantage;boss.dualCount=0;boss.dualAmp=kind==='PRISM'?(advantage?.5:.25):0;boss.dualSlow=kind==='SHADOW'?(advantage?.5:.3):0;
             if(kind==='PRISM'){for(let i=-3;i<=3;i++){const x=boss.x+i*12;addExplosion(x,boss.y-10-i%2*7,i%2?'#67e8f9':'#fde68a',5);}createFloatingText(boss.x,boss.y-50,'REFRAÇÃO +'+Math.round(boss.dualAmp*100)+'%','#fef08a')}
             else{for(let i=-1;i<=1;i++){const x=boss.x+i*22;addExplosion(x,boss.y+15,'#a78bfa',6)}createFloatingText(boss.x,boss.y-50,'LANÇAS ABISSAIS','#a78bfa')}
             damage+=boss.maxHp*.02; // fragmentos ou lanças: 2% adicional, total 5%
@@ -1576,6 +1578,26 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
                 ctx.save();
                 ctx.translate(b.x, b.y);
 
+                if(b.weaponId&&b.weaponId!=='SINGLE'&&b.type!=='REFLECTED'){
+                    const time=missionTicks*.2+(b.visualSeed||0),c=b.color||'#67e8f9';
+                    ctx.save();ctx.strokeStyle=c;ctx.fillStyle=c;ctx.shadowColor=c;ctx.shadowBlur=18;ctx.lineWidth=2.5;
+                    const w=b.weaponId;
+                    if(['LASER','BEAM','NEEDLE','PRECISION'].includes(w)){
+                      const wide=w==='BEAM'?9:w==='PRECISION'?4:2;
+                      ctx.fillRect(-wide/2,-24,wide,40);ctx.globalAlpha=.5;ctx.fillRect(-wide*1.5,-16,wide*3,26);
+                    }else if(['MISSILE','TRACKER','ROCKET','MULTI'].includes(w)){
+                      ctx.rotate(Math.atan2(b.vx||0,-(b.speed||7)));
+                      ctx.beginPath();ctx.moveTo(0,-16);ctx.lineTo(6,5);ctx.lineTo(0,2);ctx.lineTo(-6,5);ctx.closePath();ctx.fill();
+                      ctx.fillStyle='#ffdf80';ctx.beginPath();ctx.moveTo(-3,6);ctx.lineTo(0,17+Math.sin(time)*3);ctx.lineTo(3,6);ctx.fill();
+                    }else if(['PULSE','CIRCLE','SPREAD'].includes(w)){
+                      ctx.rotate(time*.25);for(let r=4;r<16;r+=6){ctx.beginPath();ctx.arc(0,0,r,0,Math.PI*2);ctx.stroke();}
+                    }else if(['TRIDENT','DIAGONAL','HYBRID'].includes(w)){
+                      ctx.beginPath();ctx.moveTo(0,-16);ctx.lineTo(-9,9);ctx.lineTo(0,4);ctx.lineTo(9,9);ctx.closePath();ctx.fill();
+                    }else{
+                      ctx.rotate(time*.18);for(let i=0;i<8;i++){let ang=i*Math.PI/4,r=i%2?4:13;ctx.lineTo(Math.cos(ang)*r,Math.sin(ang)*r);}ctx.closePath();ctx.fill();
+                    }
+                    ctx.restore();ctx.restore();return;
+                }
                 if(b.type==='REFLECTED'){ctx.save();ctx.rotate(Math.atan2(b.vx,-b.speed));ctx.shadowColor=b.color;ctx.shadowBlur=15;ctx.fillStyle=b.dodgeReflect?'#ff4dd8':'#f8fafc';ctx.beginPath();if(b.dodgeReflect){for(let i=0;i<8;i++){const a=i*Math.PI/4,r=i%2?5:16;ctx.lineTo(Math.cos(a)*r,Math.sin(a)*r);} }else{ctx.moveTo(0,-14);ctx.lineTo(6,8);ctx.lineTo(0,5);ctx.lineTo(-6,8);}ctx.closePath();ctx.fill();ctx.restore();} else if (b.type === 'BANK_MISSILE') { ctx.rotate(b.angle||0);ctx.shadowBlur=14;ctx.shadowColor='#fb923c';ctx.fillStyle='#f8fafc';ctx.fillRect(-3,-10,6,18);ctx.fillStyle='#ef4444';ctx.beginPath();ctx.moveTo(-3,-10);ctx.lineTo(0,-19);ctx.lineTo(3,-10);ctx.fill();ctx.fillStyle='#fbbf24';ctx.fillRect(-2,8,4,11); } else if (b.type === 'LASER') {
                     ctx.fillStyle = b.color || '#06b6d4';
                     ctx.fillRect(-2, -12, 4, 24);
@@ -2045,6 +2067,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
                     sector=Math.min(20,sector+1);writeCheckpoint(sector);
                     player.bombs=3;document.getElementById('bomb-count-touch').textContent='(3)';bombsPickedThisMission=0;
                     bossDefeatedThisMission=false;
+                    clearBossArenaEffects();
                     redAlertTriggered=false;redAlertTicks=0;missionTicks=0;missionStartDistance=distance;
                     playlist.endBossTheme?.();
                     enemies=enemies.filter(e=>e.type!=='BOSS'&&e.y<VIRTUAL_HEIGHT*.45);
@@ -2399,7 +2422,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
                         bullets.splice(bIndex, 1);
                         if(e.type==='BOSS'&&bossDefeatedThisMission) return;
                         if(e.type==='BOSS')dropBossReward(e,1);
-                        e.hp=Math.max(0,e.hp-(b.damage||1)*(b.reflected?1:pilotBonus().damage)*(b.iceWeak?.5:1)*(e.gravityTicks>0?2:1)*(e.type==='BOSS'&&e.dualTicks>0&&e.dualElement==='PRISM'?1+(e.dualAmp||0):1)*(e.type==='BOSS'&&e.parryVulnerableTicks>0?1.5:1));
+                        e.hp=Math.max(0,e.hp-(e.type==='BOSS'?Math.min(e.maxHp*.012,(b.damage||1)*(b.reflected?1:pilotBonus().damage)*(b.iceWeak?.5:1)*(e.gravityTicks>0?1.3:1)*(e.dualTicks>0&&e.dualElement==='PRISM'?1+Math.min(.25,e.dualAmp||0):1)*(e.parryVulnerableTicks>0?1.25:1)):(b.damage||1)*(b.reflected?1:pilotBonus().damage)*(b.iceWeak?.5:1)*(e.gravityTicks>0?2:1)));
                         addExplosion(b.x, b.y, b.type==='BANK_MISSILE'?'#fb923c':'#fba518', b.type==='BANK_MISSILE'?16:4);
 
                         if (e.hp <= 0) {
@@ -2413,7 +2436,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
 
                             if (e.type === 'BOSS') {
                                 if(!bossDefeatedThisMission){
-                                    bossDefeatedThisMission=true;bossActive=false;enemyBullets=[];
+                                    bossDefeatedThisMission=true;clearBossArenaEffects();
                                     unlockBossSkill(e.skillAffinity);bossSkillEquipped=null;skillUseButton.classList.add('hidden');
                                     recordSequentialMission();
                                     if(sector<20)writeCheckpoint(sector+1);else {try{localStorage.removeItem(CHECKPOINT_KEY)}catch(err){}}
