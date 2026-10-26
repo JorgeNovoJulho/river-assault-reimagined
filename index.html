@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>RiverStorm — Boss HUD 0.4.7</title>
+    <title>RiverStorm — Boss HUD Fix 0.4.8</title>
     <link rel="stylesheet" href="./src/styles/tailwind.css">
     <style>
         body {
@@ -213,7 +213,7 @@
         <div class="rs-hud-cell"><span class="rs-label">🛡 ESCUDO <b id="hud-shield">150</b></span><div class="rs-meter"><span id="hud-shield-fill" style="background:#38bdf8;width:100%"></span></div></div>
         <div class="rs-hud-cell"><span class="rs-label">♟ RESGATES <b id="hud-rescues">0</b></span><span class="rs-label">✈ <b id="hud-plane">FALCÃO</b></span></div>
       </div>
-      <div class="rs-hud-footer"><span id="hud-version" style="color:#38bdf8;font-size:8px">HUD 0.4.7</span><span id="mission-hud">SELVA DA AURORA</span><b id="sector-hud">SETOR 1</b><span id="hud-rank">J1 SOLDADO</span></div>
+      <div class="rs-hud-footer"><span id="hud-version" style="color:#38bdf8;font-size:8px">HUD 0.4.8</span><span id="mission-hud">SELVA DA AURORA</span><b id="sector-hud">SETOR 1</b><span id="hud-rank">J1 SOLDADO</span></div>
     </section>
     <div id="rs-bottom-actions" aria-label="Opções rápidas">
       <button id="crt-toggle" type="button">CRT: LIG</button>
@@ -835,7 +835,7 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
             const bucket=bossLines[(sector+Math.floor(missionTicks/250))%bossLines.length];
             const line=bucket[Math.floor(missionTicks/310)%bucket.length];
             bossTaunt={name,line,ticks:Math.max(250,390-sarcasmLevel*18)};
-            try{window.RiverVoice?.chirp()}catch(e){}
+            bossRobotVoice(enemies.find(e=>e.type==='BOSS'),false);
         }
         function drawBossTaunt(){
             const strip=document.getElementById('boss-dialogue-strip');
@@ -2006,7 +2006,7 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
                     dropBossReward(e,16);
                     bossTaunt={name:e.name,line:['AAAAAH! DANO CRÍTICO!','NÃO! ESSA BOMBA ATRAVESSOU MINHA BLINDAGEM!','ARGH! SISTEMAS EM COLAPSO!'][Math.floor(Math.random()*3)],ticks:170};
                     createFloatingText(e.x,e.y,'DANO MASSIVO!','#ff6b6b');
-                    try{window.RiverVoice?.chirp()}catch(err){}
+                    bossRobotVoice(e,true);
                 }
                 e.hp=e.type==='BOSS'?Math.max(1,e.hp-10):e.hp-999;
                 addExplosion(e.x,e.y,'#ffb347',20);
@@ -2132,6 +2132,42 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
             document.getElementById('game-over-screen').classList.remove('hidden');
         }
 
+        // HUD real: sobre a cena do renderizador RiverVisuals, nunca sobre o casco.
+        function drawBossCompactMeters(){
+            for(const e of enemies){
+                if(e.type!=='BOSS'||e.hp<=0)continue;
+                const width=80,y=e.y-e.height/2-34,left=Math.max(8,Math.min(VIRTUAL_WIDTH-width-8,e.x-width/2));
+                const hp=Math.max(0,Math.min(1,e.hp/e.maxHp));
+                const charge=Math.max(0,Math.min(1,(e.specialCharge||0)/(e.specialCooldown||900)));
+                ctx.save();ctx.fillStyle='rgba(3,12,25,.82)';ctx.fillRect(left-2,y-2,width+4,15);
+                ctx.fillStyle='#1c3347';ctx.fillRect(left,y,width,5);ctx.fillRect(left,y+9,width,3);
+                ctx.fillStyle=hp>.5?'#4ade80':hp>.25?'#facc15':'#fb7185';ctx.fillRect(left,y,width*hp,5);
+                ctx.fillStyle=charge>=.99?'#f87171':'#67e8f9';ctx.fillRect(left,y+9,width*charge,3);
+                ctx.restore();
+            }
+        }
+        function bossRobotVoice(boss,injured=false){
+            try{
+                const ctxAudio=window.RiverBossAudio||(window.RiverBossAudio=new (window.AudioContext||window.webkitAudioContext)());
+                if(ctxAudio.state==='suspended')ctxAudio.resume();
+                const now=ctxAudio.currentTime;
+                if(now-(bossRobotVoice.last||0)<(injured?.22:1.8))return;
+                bossRobotVoice.last=now;
+                const variant=Math.max(0,(boss?.bossId||sector)-1)%6;
+                const duration=injured?.53:.31;
+                const osc=ctxAudio.createOscillator(),sub=ctxAudio.createOscillator(),gain=ctxAudio.createGain(),filter=ctxAudio.createBiquadFilter();
+                filter.type='lowpass';filter.frequency.value=injured?820:600+variant*65;
+                osc.type=variant%2?'sawtooth':'square';sub.type='triangle';
+                osc.frequency.setValueAtTime(injured?145+variant*12:95+variant*19,now);
+                osc.frequency.exponentialRampToValueAtTime(injured?43:65,now+duration);
+                sub.frequency.setValueAtTime(injured?60:48+variant*5,now);
+                sub.frequency.exponentialRampToValueAtTime(31,now+duration);
+                gain.gain.setValueAtTime(.0001,now);gain.gain.exponentialRampToValueAtTime(injured?.075:.03,now+.025);
+                gain.gain.exponentialRampToValueAtTime(.0001,now+duration);
+                osc.connect(filter);sub.connect(filter);filter.connect(gain);gain.connect(ctxAudio.destination);
+                osc.start(now);sub.start(now);osc.stop(now+duration+.01);sub.stop(now+duration+.01);
+            }catch(error){console.warn('Boss voice unavailable',error)}
+        }
         // --- RENDERIZAÇÃO PRINCIPAL ---
         function render() {
             beginLogicalFrame();
@@ -2142,6 +2178,7 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
                 sector, aircraft:selectedPlane, distance, invulnerable:player.invulnerable,
                 quality:qualitySelect.value
             });
+            drawBossCompactMeters();
             drawFuelDepots();
             drawStructures();
             drawBombs();
@@ -2405,7 +2442,7 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
             if (gameState === 'PLAYING' && gamepadState.fire && timestamp - lastGamepadShot > 145) {
                 sound.init(); fireWeapon(); lastGamepadShot = timestamp;
             }
-            if (gameState === 'PLAYING' && (mouseInput.fire || mouseFireHeld || keys.Space || keys.KeyZ || touchFireHeld) && timestamp - lastMouseShot > 145) {
+            if (gameState === 'PLAYING' && (mouseInput.fire || mouseFireHeld || keys.Space || keys.KeyZ || touchFireHeld) && timestamp - lastMouseShot > 115) {
                 sound.init(); fireWeapon(); lastMouseShot = timestamp;
             }
             if(gameState === "PLAYING") simulationClock.advance(timestamp, update);
@@ -2441,17 +2478,17 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
         resizeCanvas();
 
         // --- MOUSE: mover para pilotar, botão esquerdo atira, direito lança bomba.
-        canvas.addEventListener('pointermove', e => {
-            if (e.pointerType !== 'mouse') return;
+        window.addEventListener('pointermove', e => {
+            if (e.pointerType !== 'mouse' || (e.target!==canvas && !mouseFireHeld)) return;
             const bounds = canvas.getBoundingClientRect();
             mouseInput.active = true;
-            mouseInput.x = ((e.clientX - bounds.left) / bounds.width) * VIRTUAL_WIDTH;
-            mouseInput.y = ((e.clientY - bounds.top) / bounds.height) * VIRTUAL_HEIGHT;
+            mouseInput.x = Math.max(0,Math.min(VIRTUAL_WIDTH,((e.clientX - bounds.left) / bounds.width) * VIRTUAL_WIDTH));
+            mouseInput.y = Math.max(55,Math.min(VIRTUAL_HEIGHT-60,((e.clientY - bounds.top) / bounds.height) * VIRTUAL_HEIGHT));
             const vertical = (e.clientY - bounds.top) / bounds.height;
             mouseInput.up = false;
             mouseInput.down = false;
         });
-        canvas.addEventListener('pointerleave', () => {mouseInput.active=false;mouseInput.fire=false;mouseInput.up=false;mouseInput.down=false;});
+        canvas.addEventListener('pointerleave', () => {if(!mouseFireHeld)mouseInput.active=false;mouseInput.up=false;mouseInput.down=false;});
         let mouseFireHeld=false;
         window.addEventListener('mousedown',e=>{if(e.button===0 && gameState==='PLAYING' && (e.target===canvas || e.target===document.getElementById('game-container'))){mouseFireHeld=true;mouseInput.fire=true;}});
         canvas.addEventListener('pointerdown', e => {
