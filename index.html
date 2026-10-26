@@ -607,7 +607,9 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
         // Estado do Jogo
         const CHECKPOINT_KEY='riverstorm_mission_checkpoint_v1';
         function writeCheckpoint(nextSector){
-            const checkpoint={version:2,sector:Math.max(1,Math.min(20,nextSector)),score,kills,lives:Math.max(1,lives),continues,selectedPlane,earnedPoints,journey,verifiedRun:campaignVerified&&(nextSector===sector||nextSector===sector+1)};
+            // Uma missão escolhida pelo menu não pode substituir o progresso legítimo.
+            if(!campaignVerified||(nextSector!==sector&&nextSector!==sector+1))return false;
+            const checkpoint={version:2,sector:Math.max(1,Math.min(20,nextSector)),score,kills,lives:Math.max(1,lives),continues,selectedPlane,earnedPoints,journey,verifiedRun:true};
             try{localStorage.setItem(CHECKPOINT_KEY,JSON.stringify(checkpoint));updateContinueButton();return true}catch(err){console.warn('Checkpoint indisponível',err);return false}
         }
         function readCheckpoint(){try{const c=JSON.parse(localStorage.getItem(CHECKPOINT_KEY)||'null');return c&&c.version===2&&c.verifiedRun===true&&Number.isInteger(c.sector)&&c.sector>=1&&c.sector<=20&&c.journey===journey?c:null}catch(e){return null}}
