@@ -31,6 +31,46 @@ function bankAt(points,y,w){for(let i=0;i<points.length-1;i++){let a=points[i],b
 function riverPath(c,points){if(points.length<2)return false;c.beginPath();c.moveTo(points[0].center-points[0].width/2,points[0].y);for(let p of points)c.lineTo(p.center-p.width/2,p.y);for(let i=points.length-1;i>=0;i--){let p=points[i];c.lineTo(p.center+p.width/2,p.y)}c.closePath();return true}
 function tree(c,x,y,s,t,night){c.save();c.translate(x,y);c.scale(s,s);c.fillStyle='rgba(1,12,20,.27)';c.beginPath();c.ellipse(4,6,12,5,0,0,Math.PI*2);c.fill();c.fillStyle='#42372d';c.fillRect(-2,-3,4,12);c.fillStyle=t.foliage;poly(c,[-11,2,-7,-8,1,-19,10,-6,12,3],t.foliage);poly(c,[-6,-2,0,-17,6,-2],night?'#277264':'#51a07a');c.restore()}
 function building(c,x,y,s,night){c.save();c.translate(x,y);c.scale(s,s);c.fillStyle='rgba(0,0,0,.28)';c.fillRect(-7,3,21,18);poly(c,[-10,0,0,-9,10,0,0,9],'#152a3e');c.fillStyle='#486276';c.fillRect(-10,0,20,21);c.fillStyle='#263e50';c.fillRect(4,0,6,21);if(night){c.fillStyle='#ffd68e';for(let i=-7;i<=3;i+=7)for(let j=4;j<20;j+=8)c.fillRect(i,j,3,3)}c.restore()}
+// RiverStorm Fase 02: efeitos determinísticos, ligados à distância percorrida.
+function waterMotion(c,points,w,h,distance,quality,t){
+ if(!riverPath(c,points))return;
+ c.save();c.clip();
+ const step=quality==='eco'?76:quality==='enhanced'?35:51;
+ const travel=distance*.42,phase=((travel%step)+step)%step;
+ for(let y=-step+phase;y<h+step;y+=step){
+   const banks=bankAt(points,y,w),span=banks[1]-banks[0];
+   if(span<35)continue;
+   for(let lane=1;lane<=(quality==='eco'?2:quality==='enhanced'?5:3);lane++){
+     const seed=Math.floor((y-phase)/step)*17+lane*83;
+     const x=banks[0]+span*(lane/(quality==='eco'?3:quality==='enhanced'?6:4));
+     const dx=(hash(seed)-.5)*Math.min(span*.12,18);
+     const len=8+hash(seed+4)*17;
+     c.strokeStyle=lane%2?'rgba(210,252,255,.15)':'rgba(6,26,44,.19)';
+     c.lineWidth=lane%2?1.4:2.1;
+     c.beginPath();c.moveTo(x+dx-len*.5,y-4);c.quadraticCurveTo(x+dx,y,x+dx+len*.5,y-2);c.stroke();
+   }
+ }
+ c.restore();
+}
+function bankDetails(c,points,w,h,distance,quality,t){
+ const step=quality==='eco'?95:quality==='enhanced'?39:62;
+ const phase=((distance*.8%step)+step)%step;
+ for(let y=-step+phase;y<h+step;y+=step){
+   const banks=bankAt(points,y,w);
+   for(const side of [-1,1]){
+     const edge=side<0?banks[0]:banks[1],outside=edge+side*13;
+     if(outside<4||outside>w-4)continue;
+     const seed=Math.floor((y-phase)/step)*19+(side<0?3:7);
+     if(hash(seed)>.42){
+       c.fillStyle=hash(seed+2)>.5?'rgba(21,40,46,.53)':'rgba(188,198,168,.36)';
+       c.beginPath();c.ellipse(outside+side*5,y,4+hash(seed+1)*5,2+hash(seed+3)*4,hash(seed+6)*.8,0,Math.PI*2);c.fill();
+     }else if(quality!=='eco'){
+       c.strokeStyle=t.foliage;c.lineWidth=2;
+       c.beginPath();c.moveTo(outside,y+6);c.lineTo(outside-2,y-6);c.moveTo(outside,y+3);c.lineTo(outside+side*5,y-4);c.stroke();
+     }
+   }
+ }
+}
 function landscape(c,data,t){
  let {w,h,riverPoints:points,distance=0,quality='balanced'}=data;
  ground(c,w,h,t);
@@ -69,6 +109,8 @@ function landscape(c,data,t){
    }
  }
  c.save();if(riverPath(c,points)){c.clip();c.strokeStyle='rgba(205,249,244,.12)';c.lineWidth=1;for(let y=(distance*.26)%35;y<h;y+=35){let b=bankAt(points,y,w);let x=lerp(b[0],b[1],.17+hash(y|0)*.66);c.beginPath();c.ellipse(x,y,12,2,-.2,0,Math.PI);c.stroke()}}c.restore();
+ waterMotion(c,points,w,h,distance,quality,t);
+ bankDetails(c,points,w,h,distance,quality,t);
  // Clima por missão: neblina, chuva, inverno e tempo aberto, legível em telas pequenas.
  const mission=Math.max(1,Math.min(20,data.sector||1));
  const weather=['sun','mist','rain','sun','sun','snow','rain','mist','sun','snow','sun','rain','mist','snow','sun','mist','rain','snow','rain','sun'][(mission-1)%20];
