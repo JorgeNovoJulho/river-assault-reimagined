@@ -174,3 +174,14 @@ test('clima altera movimento dos inimigos sem afetar chefes e objetivos destrut�
  assert.match(html,/!e\.terrainObstacle&&terrainEventTicks>0/);
  assert.match(html,/CROSSWIND','SANDSTORM','ICE/);
 });
+
+test('objetivos secundários exibem progresso, têm três estágios e rotas alternadas',()=>{
+ const html=fs.readFileSync('index.html','utf8');
+ assert.match(html,/Math\.floor\(missionTicks\/840\)%2===0\?-1:1/);
+ assert.match(html,/terrainStage:3,terrainLane:lane/);
+ assert.match(html,/const stage=Math\.max\(1,Math\.ceil\(3\*e\.hp\/Math\.max\(1,e\.maxHp\)\)\)/);
+ assert.match(html,/ALVO EXTRA /);
+ assert.match(html,/target\.hp\/target\.maxHp/);
+ assert.match(html,/Sprites de alvos destrutíveis em três estados/);
+ assert.match(html,/screenShake=0;secondaryTargetsDestroyed=0/);
+});
