@@ -3031,6 +3031,24 @@ function updateTerrainEvent(){
                 sector, aircraft:player.aircraftType||selectedPlane, distance, invulnerable:player.invulnerable,
                 quality:qualitySelect.value
             });
+            // Sprites de alvos destrutíveis em três estados; formas variam por bioma.
+            for(const target of enemies){
+              if(!target.terrainObstacle||target.hp<=0||target.y< -30||target.y>VIRTUAL_HEIGHT+30)continue;
+              const stage=Math.max(1,Math.ceil(3*target.hp/Math.max(1,target.maxHp)));
+              ctx.save();ctx.translate(target.x,target.y);
+              const color=stage===3?'#38bdf8':stage===2?'#fbbf24':'#f87171';
+              ctx.lineWidth=2;ctx.strokeStyle=color;ctx.fillStyle='#243447';
+              ctx.fillRect(-16,-13,32,26);ctx.strokeRect(-16,-13,32,26);
+              ctx.beginPath();
+              if(sector%4===0){ctx.arc(0,0,9,0,Math.PI*2);}
+              else if(sector%4===1){ctx.moveTo(-12,8);ctx.lineTo(0,-12);ctx.lineTo(12,8);ctx.closePath();}
+              else if(sector%4===2){ctx.rect(-10,-9,20,18);}
+              else{ctx.moveTo(-12,0);ctx.lineTo(0,-11);ctx.lineTo(12,0);ctx.lineTo(0,11);ctx.closePath();}
+              ctx.stroke();
+              if(stage<3){ctx.beginPath();ctx.moveTo(-13,-10);ctx.lineTo(4,1);ctx.lineTo(-2,11);ctx.stroke();}
+              if(stage===1){ctx.beginPath();ctx.moveTo(12,-9);ctx.lineTo(2,0);ctx.lineTo(13,8);ctx.stroke();}
+              ctx.restore();
+            }
             // Sinalização da rota de bonificação e progresso do objetivo secundário.
             const target=enemies.find(e=>e.terrainObstacle&&e.hp>0);
             if(target){
