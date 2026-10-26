@@ -112,7 +112,7 @@ const {chromium}=require('playwright');const {spawn}=require('node:child_process
   if(campaignFlow.direct.journey!==campaignFlow.startingJourney||
      campaignFlow.direct.careerPoints!==campaignFlow.startingPoints||
      campaignFlow.legitimate.careerPoints<=campaignFlow.startingPoints||
-     campaignFlow.legitimate.journey!==Math.min(campaignFlow.startingJourney+1,15))
+     campaignFlow.legitimate.journey!==Math.min(campaignFlow.startingJourney+1,16))
      throw Error('Validação de promoção NG+ falhou: '+JSON.stringify(campaignFlow));
 
   if(errors.length)throw Error('Erros no browser: '+JSON.stringify(errors));
