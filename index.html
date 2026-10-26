@@ -1217,6 +1217,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
           try{playlist.pause();soundtrack.stop()}catch(error){console.warn('Áudio da seleção:',error)}
           skillPicker.classList.remove('hidden');
           skillPicker.style.display='flex';
+          skillPicker.style.pointerEvents='auto';
           skillPicker.setAttribute('aria-hidden','false');
           const options=document.getElementById('boss-skill-options');
           options.replaceChildren();
@@ -1248,6 +1249,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
             skillPicker.setAttribute('aria-hidden','true');
             gameState='PLAYING';simulationClock.reset();
             spawnBoss(0,true);
+            bossActive=true;
             try{playlist.resume();if(!playlist.tracks.length&&playlist.enabled)soundtrack.start()}catch(error){console.warn('Áudio boss:',error)}
           }catch(error){
             // Nunca prender o piloto em um modal sem possibilidade de recuperar.
@@ -1257,6 +1259,19 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
           }finally{bossSelectionCommitting=false}
         }
         document.getElementById('boss-skill-confirm').addEventListener('click',confirmBossSelection);
+        // Falhas de UI/foco não podem transformar o pré-chefe em um estado sem saída.
+        const bossSkillSkip=document.createElement('button');
+        bossSkillSkip.type='button';bossSkillSkip.id='boss-skill-skip';
+        bossSkillSkip.textContent='CONTINUAR SEM HABILIDADE';
+        bossSkillSkip.style.cssText='margin-top:12px;background:#0b2535;color:#ddf9ff;border:1px solid #67e8f9;border-radius:8px;padding:12px;font-weight:bold;cursor:pointer';
+        bossSkillSkip.addEventListener('click',()=>{bossSkillPending='NONE';confirmBossSelection()});
+        skillPicker.querySelector('div')?.appendChild(bossSkillSkip);
+        window.addEventListener('keydown',event=>{
+          if(gameState==='BOSS_SELECT'&&(event.code==='Enter'||event.code==='Escape')){
+            event.preventDefault();confirmBossSelection();
+          }
+        },true);
+
         skillPicker.addEventListener('keydown',event=>{
           if(event.key==='Enter'||event.key==='Escape'){event.preventDefault();confirmBossSelection()}
         });
