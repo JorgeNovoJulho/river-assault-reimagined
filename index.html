@@ -2873,7 +2873,7 @@ function updateTerrainEvent(){
             document.getElementById('mission-banner').textContent=campaign.at(sector).name;
             gameState = 'PLAYING';
             simulationClock.reset();
-            try{playlist.startNewGame();if(!playlist.tracks.length&&playlist.enabled)soundtrack.start();else soundtrack.stop()}catch(error){console.warn('Playlist indisponível:',error);soundtrack.start()}
+            try{if(playlist.enabled){playlist.startNewGame();if(!playlist.tracks.length)soundtrack.start();else soundtrack.stop()}else soundtrack.stop()}catch(error){console.warn('Playlist indisponível:',error);if(playlist.enabled)soundtrack.start()}
         }
 
         function fireBankMissiles(){
@@ -3366,7 +3366,14 @@ function updateTerrainEvent(){
         const playlist=new window.RiverPlaylist({onStatus:(message)=>{
             const status=document.getElementById('playlist-status');if(status)status.textContent=message;
         }});
-        playlist.load();
+        const playlistReady=playlist.load().catch(error=>{console.warn('Biblioteca musical:',error);return 0});
+        playlist.onReady=(count)=>{
+          if(gameState!=='PLAYING'||!playlist.enabled)return;
+          if(count){soundtrack.stop();playlist.startNewGame()}
+          else soundtrack.start();
+        };
+        playlist.onUnavailable=()=>{if(gameState==='PLAYING'&&playlist.enabled)soundtrack.start()};
+
         document.getElementById('music-library').addEventListener('click',()=>document.getElementById('music-upload').click());
         document.getElementById('music-upload').addEventListener('change',async event=>{
             await playlist.importFiles(event.target.files);event.target.value='';renderPlaylistItems();
@@ -3430,7 +3437,7 @@ function updateTerrainEvent(){
         document.getElementById('music-toggle').addEventListener('click',()=>{
             const on=playlist.toggle();
             if(!on)soundtrack.stop();
-            else if(gameState==='PLAYING'&&!playlist.tracks.length)soundtrack.start();
+            else if(gameState==='PLAYING'){if(playlist.tracks.length){soundtrack.stop();playlist.resume()}else soundtrack.start()}
             document.getElementById('music-toggle').textContent='MÚSICA: '+(on?'LIG':'DES');
         });
         let lastGameError='';
@@ -3673,7 +3680,7 @@ function updateTerrainEvent(){
         document.getElementById('pause-settings-btn').addEventListener('click',()=>showControllerSettings(true));
         function togglePause() {
             if (gameState === 'PLAYING') {gameState='PAUSED'; playlist.pause();soundtrack.stop(); document.getElementById('pause-screen').classList.remove('hidden');}
-            else if (gameState === 'PAUSED') {gameState='PLAYING'; playlist.resume();if(!playlist.tracks.length)soundtrack.start(); document.getElementById('pause-screen').classList.add('hidden');}
+            else if (gameState === 'PAUSED') {gameState='PLAYING'; playlist.resume();if(!playlist.tracks.length&&playlist.enabled)soundtrack.start(); document.getElementById('pause-screen').classList.add('hidden');}
         }
         document.getElementById('btn-pause-touch').addEventListener('pointerdown', event => {event.preventDefault();togglePause();});
 
@@ -3696,7 +3703,7 @@ function updateTerrainEvent(){
 
         document.getElementById('resume-btn').addEventListener('click', () => {
             gameState = 'PLAYING';
-            playlist.resume();
+            playlist.resume();if(!playlist.tracks.length&&playlist.enabled)soundtrack.start();
             document.getElementById('pause-screen').classList.add('hidden');
         });
 
