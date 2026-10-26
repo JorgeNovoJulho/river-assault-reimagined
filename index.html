@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>RiverStorm — Combate Ajustado 0.4.5</title>
+    <title>RiverStorm — Hotfix 1 0.4.6</title>
     <link rel="stylesheet" href="./src/styles/tailwind.css">
     <style>
         body {
@@ -213,7 +213,7 @@
         <div class="rs-hud-cell"><span class="rs-label">🛡 ESCUDO <b id="hud-shield">150</b></span><div class="rs-meter"><span id="hud-shield-fill" style="background:#38bdf8;width:100%"></span></div></div>
         <div class="rs-hud-cell"><span class="rs-label">♟ RESGATES <b id="hud-rescues">0</b></span><span class="rs-label">✈ <b id="hud-plane">FALCÃO</b></span></div>
       </div>
-      <div class="rs-hud-footer"><span id="hud-version" style="color:#38bdf8;font-size:8px">HUD 0.4.5</span><span id="mission-hud">SELVA DA AURORA</span><b id="sector-hud">SETOR 1</b><span id="hud-rank">J1 SOLDADO</span></div>
+      <div class="rs-hud-footer"><span id="hud-version" style="color:#38bdf8;font-size:8px">HUD 0.4.6</span><span id="mission-hud">SELVA DA AURORA</span><b id="sector-hud">SETOR 1</b><span id="hud-rank">J1 SOLDADO</span></div>
     </section>
     <div id="rs-bottom-actions" aria-label="Opções rápidas">
       <button id="crt-toggle" type="button">CRT: LIG</button>
@@ -592,6 +592,7 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
         let structures = [];
         let fuelSpawnAt = -99999;
         let bombsPickedThisMission = 0;
+        let rescueBoatsLastAt=-99999;
         let structureLastDistance=-99999;
         let islandLastDistance=-99999;
         let obstacleLastType='';
@@ -723,30 +724,34 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
             // Microsequências desenhadas por área: ilhotas, recifes, ilhas longas e corredores.
             const level=campaign.at(sector);
             // Ilhas garantidas a intervalos regulares e posicionadas próximas a uma margem.
-            const islandGap=580+(sector%3)*110;
+            const islandGap=720+(sector%3)*130;
             if(islands.length<3 && distance-islandLastDistance>=islandGap &&
                !structures.some(o=>Math.abs(o.y-y)<110)){
                 const shape=(obstacleSequence+level.hazardSet)%5;
                 const islandWidth=Math.min(102,Math.max(54,width*.28));
                 const islandHeight=68+shape*13;
-                const side=obstacleSequence%2===0?-1:1;
-                const offset=side*(width/2-islandWidth/2-10);
-                islands.push({x:center+offset,y,width:islandWidth,height:islandHeight,shape});
+                const side=obstacleSequence%4===3?0:(obstacleSequence%2===0?-1:1);
+                const corridor=Math.max(96,player.width+55);
+                const safeWidth=Math.min(islandWidth,Math.max(40,width-2*corridor));
+                const offset=side===0?0:side*(width/2-safeWidth/2-10);
+                islands.push({x:center+offset,y,width:safeWidth,height:islandHeight,shape});
                 islandLastDistance=distance;obstacleLastType='ISLAND';obstacleSequence++;
             }
 
+            const pickupLaneClear=(gap)=>[...powerups,...rescueBoats,...fuelDepots,...structures,...islands].every(o=>Math.abs(o.y-y)>gap);
             // Botes civis com soldados: voar perto realiza resgate, sem disparar.
-            if (rescueBoats.length < 3 && !islands.some(o=>Math.abs(o.y-y)<105) && !structures.some(o=>Math.abs(o.y-y)<105) && Math.random() < .075) {
-                rescueBoats.push({x:leftBank+30+Math.random()*(width-60),y,soldiers:2+Math.floor(Math.random()*4),phase:Math.random()*6.28});
+            if (rescueBoats.length < 2 && distance-(rescueBoatsLastAt||-99999)>820 && pickupLaneClear(200) && Math.random() < .06) {
+                rescueBoats.push({x:leftBank+30+Math.random()*(width-60),y,soldiers:2+Math.floor(Math.random()*4),phase:Math.random()*6.28});rescueBoatsLastAt=distance;
             }
 
             // Pontos estratégicos de combustível; resgates e armas não são bloqueados.
-            if (distance - fuelSpawnAt >= 650 && Math.random() < .2) trySpawnFuel(center,y,width,false);
-            const structureGap=1600+((sector*173+obstacleSequence*97)%650);
+            if (distance - fuelSpawnAt >= 850 && pickupLaneClear(200) && Math.random() < .12) trySpawnFuel(center,y,width,false);
+            const structureGap=2800+((sector*211+obstacleSequence*133)%800);
             if(structures.length<1 && distance-structureLastDistance>structureGap &&
-               distance-islandLastDistance>260 && missionTicks>360 &&
-               !islands.some(o=>Math.abs(o.y-y)<180) &&
-               !rescueBoats.some(o=>Math.abs(o.y-y)<90)){
+               distance-islandLastDistance>350 && missionTicks>520 &&
+               !islands.some(o=>Math.abs(o.y-y)<220) &&
+               !rescueBoats.some(o=>Math.abs(o.y-y)<200) &&
+               !powerups.some(o=>Math.abs(o.y-y)<180)){
                 const type=obstacleSequence%3===0?'BRIDGE':'DAM';
                 const passage=Math.max(player.width+50,Math.min(width*.46,112+level.difficulty*12));
                 structures.push({type,x:center,y,width:width+30,height:type==='BRIDGE'?22:35,
@@ -754,14 +759,14 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
                     hp:type==='BRIDGE'?18:35,maxHp:type==='BRIDGE'?18:35});
                 structureLastDistance=distance;obstacleLastType=type;obstacleSequence++;
             }
-            if(bombsPickedThisMission < 5 && Math.random()<.028 && !powerups.some(p=>p.type==='BOMB')){
+            if(bombsPickedThisMission < 5 && pickupLaneClear(190) && Math.random()<.018 && !powerups.some(p=>p.type==='BOMB')){
                 powerups.push({x:center+(Math.random()-.5)*(width-65),y,type:'BOMB',label:'B+',color:'#f59e0b'});
             }
 
-            if(player.shield<player.maxShield*.55 && !powerups.some(p=>p.type==='SHIELD') && Math.random()<.045 && !structures.some(o=>Math.abs(o.y-y)<95)){
+            if(player.shield<player.maxShield*.55 && pickupLaneClear(190) && !powerups.some(p=>p.type==='SHIELD') && Math.random()<.025){
                 powerups.push({x:center+(Math.random()-.5)*Math.max(25,width-85),y,type:'SHIELD',color:'#22d3ee',label:'S+'});
             }
-            if(missionTicks%270===0 && powerups.filter(p=>p.type!=='BOMB').length<2 && Math.random()<.55){
+            if(missionTicks%390===0 && pickupLaneClear(190) && powerups.filter(p=>p.type!=='BOMB').length<2 && Math.random()<.4){
                 powerups.push({x:center+(Math.random()-.5)*Math.max(25,width-95),y,type:'SPREAD',color:'#fbbf24',label:'3X'});
             }
             // Inimigos com Spawn Constante
@@ -2411,7 +2416,7 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
             if (gameState === 'PLAYING' && gamepadState.fire && timestamp - lastGamepadShot > 145) {
                 sound.init(); fireWeapon(); lastGamepadShot = timestamp;
             }
-            if (gameState === 'PLAYING' && (mouseInput.fire || keys.Space || keys.KeyZ || touchFireHeld) && timestamp - lastMouseShot > 145) {
+            if (gameState === 'PLAYING' && (mouseInput.fire || mouseFireHeld || keys.Space || keys.KeyZ || touchFireHeld) && timestamp - lastMouseShot > 145) {
                 sound.init(); fireWeapon(); lastMouseShot = timestamp;
             }
             if(gameState === "PLAYING") simulationClock.advance(timestamp, update);
@@ -2458,6 +2463,8 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
             mouseInput.down = false;
         });
         canvas.addEventListener('pointerleave', () => {mouseInput.active=false;mouseInput.fire=false;mouseInput.up=false;mouseInput.down=false;});
+        let mouseFireHeld=false;
+        window.addEventListener('mousedown',e=>{if(e.button===0 && gameState==='PLAYING' && (e.target===canvas || e.target===document.getElementById('game-container'))){mouseFireHeld=true;mouseInput.fire=true;}});
         canvas.addEventListener('pointerdown', e => {
             if (e.pointerType !== 'mouse') return;
             e.preventDefault();
@@ -2465,9 +2472,9 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
             if (e.button === 0) {mouseInput.fire=true;fireWeapon();}
             if (e.button === 2) triggerBomb();
         });
-        window.addEventListener('pointerup', e => {if(e.pointerType==='mouse' && e.button===0) mouseInput.fire=false;});
+        window.addEventListener('pointerup', e => {if(e.pointerType==='mouse' && e.button===0){mouseInput.fire=false;mouseFireHeld=false;}});
         window.addEventListener('blur', () => {
-            mouseInput.active=false;mouseInput.fire=false;mouseInput.up=false;mouseInput.down=false;
+            mouseInput.active=false;mouseInput.fire=false;mouseFireHeld=false;mouseInput.up=false;mouseInput.down=false;
             Object.keys(keys).forEach(key => keys[key] = false);
         });
         canvas.addEventListener('contextmenu', e => e.preventDefault());
