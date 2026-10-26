@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>RiverStorm — HUD Compacto 0.4.3</title>
+    <title>RiverStorm — HUD Inferior 0.4.4</title>
     <link rel="stylesheet" href="./src/styles/tailwind.css">
     <style>
         body {
@@ -85,9 +85,9 @@
 <body class="h-screen w-screen flex flex-col items-center justify-center p-2 sm:p-4">
 
     <!-- Moldura Principal do Jogo -->
-    <div id="boss-dialogue-strip" aria-live="polite" class="hidden" style="box-sizing:border-box;flex:0 0 auto;width:min(100%,960px);min-height:80px;max-height:94px;overflow:hidden;background:#0d1c34;border:2px solid #d69e34;border-radius:12px;padding:12px 16px;text-align:center;line-height:1.4;font-size:clamp(14px,2.9vw,18px);box-shadow:0 3px 14px #0007"><b id="boss-dialogue-name" style="display:block;color:#fbbf24"></b><span id="boss-dialogue-text" style="color:#fff"></span></div>
     <div id="game-container" class="relative crt-effect rounded-lg overflow-hidden border-4 border-slate-700 bg-black max-w-xl w-full flex-1 max-h-[800px]">
         <canvas id="gameCanvas" class="w-full h-full block"></canvas>
+    <div id="boss-dialogue-strip" aria-live="polite" class="hidden absolute top-0 left-1/2 -translate-x-1/2 z-20 pointer-events-none" style="width:min(92%,450px);min-height:0;max-height:unset;padding:6px 10px;font-size:12px;box-sizing:border-box;flex:0 0 auto;width:min(100%,960px);min-height:80px;max-height:94px;overflow:hidden;background:#0d1c34;border:2px solid #d69e34;border-radius:12px;padding:12px 16px;text-align:center;line-height:1.4;font-size:clamp(14px,2.9vw,18px);box-shadow:0 3px 14px #0007"><b id="boss-dialogue-name" style="display:block;color:#fbbf24"></b><span id="boss-dialogue-text" style="color:#fff"></span></div>
 
         <div id="controller-settings" class="hidden absolute inset-0 bg-slate-950/95 z-50 p-4 overflow-auto text-sm" role="dialog" aria-modal="true" aria-label="Configuração do controle">
             <h2 class="text-xl font-bold text-cyan-300 mb-2">CONFIGURAR CONTROLE</h2>
@@ -213,7 +213,7 @@
         <div class="rs-hud-cell"><span class="rs-label">🛡 ESCUDO <b id="hud-shield">150</b></span><div class="rs-meter"><span id="hud-shield-fill" style="background:#38bdf8;width:100%"></span></div></div>
         <div class="rs-hud-cell"><span class="rs-label">♟ RESGATES <b id="hud-rescues">0</b></span><span class="rs-label">✈ <b id="hud-plane">FALCÃO</b></span></div>
       </div>
-      <div class="rs-hud-footer"><span id="mission-hud">SELVA DA AURORA</span><b id="sector-hud">SETOR 1</b><span id="hud-rank">J1 SOLDADO</span></div>
+      <div class="rs-hud-footer"><span id="hud-version" style="color:#38bdf8;font-size:8px">HUD 0.4.4</span><span id="mission-hud">SELVA DA AURORA</span><b id="sector-hud">SETOR 1</b><span id="hud-rank">J1 SOLDADO</span></div>
     </section>
     <div id="rs-bottom-actions" aria-label="Opções rápidas">
       <button id="crt-toggle" type="button">CRT: LIG</button>
@@ -226,7 +226,7 @@
     </div>
 
     <style>
-      #game-container{min-height:180px}
+      #game-container{min-height:180px} #boss-dialogue-strip{box-shadow:0 5px 12px #000a!important} #boss-special-hud{top:60px!important}
       #mission-banner{display:none!important}
       #compact-hud{box-sizing:border-box;width:100%;max-width:920px;flex:0 0 auto;background:linear-gradient(#0b2842,#071326);border:2px solid #3d8faf;border-radius:7px;padding:4px 6px;color:#e4f7ff;box-shadow:inset 0 0 0 1px #163a5c;font:700 clamp(9px,1.15vw,12px) monospace}
       .rs-hud-grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:3px}
