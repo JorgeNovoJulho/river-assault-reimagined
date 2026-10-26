@@ -359,3 +359,11 @@ test('20 missões possuem clima, horário, iluminação e detalhes dedicados',()
  assert.match(render,/weather==='lightning'/);
  assert.match(render,/quality==='eco'\?12/);
 });
+
+test('clima permanece pré-alocado e período é informado ao piloto',()=>{
+ const render=read('src/render/scene2d5.js');
+ assert.ok(render.indexOf('const CLIMATE=[')<render.indexOf('function landscape(c,data,t)'), 'tabela climática não deve ser alocada por quadro');
+ assert.match(render,/const periodNames=/);
+ assert.match(render,/const weatherNames=/);
+ assert.match(render,/periodNames\[climate\[2\]\]/);
+});
