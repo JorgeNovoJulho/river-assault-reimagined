@@ -224,7 +224,7 @@ function enemy(c,e,time){
  else{poly(c,[-15,-9,-5,-6,0,-20,5,-6,15,-9,13,8,5,6,0,16,-5,6,-13,8],'#9b4d6e');poly(c,[-3,-15,0,-23,3,-15,3,10,-3,10],'#d1a5b5');poly(c,[-3,-8,0,-14,3,-8,0,-2],'#7dd3fc')}
  if(time==='night'){c.fillStyle='#ffd581';c.beginPath();c.arc(-5,7,2,0,7);c.arc(5,7,2,0,7);c.fill()}
  c.restore();
- if(e.maxHp>1){c.fillStyle='#122535';c.fillRect(e.x-e.width/2,e.y-e.height/2-9,e.width,5);c.fillStyle='#7cf0ca';c.fillRect(e.x-e.width/2,e.y-e.height/2-9,e.width*Math.max(0,e.hp/e.maxHp),5)}
+ // HP e recarga dos bosses são desenhados uma única vez em drawEnemies().
 }
 function islands(c,items,t){
  for(let p of items){
