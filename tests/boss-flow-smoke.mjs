@@ -1,26 +1,35 @@
 import { chromium } from 'playwright';
+import { mkdir } from 'node:fs/promises';
+
+await mkdir('test-results',{recursive:true});
 const browser=await chromium.launch({headless:true});
 const page=await browser.newPage({viewport:{width:900,height:900}});
 const errors=[];
-page.on('pageerror',e=>errors.push(e.message));
-await page.goto('http://127.0.0.1:4173/',{waitUntil:'domcontentloaded'});
-await page.waitForTimeout(800);
-const start=page.locator('#start-btn');
-if(!await start.isVisible())throw Error('Botão iniciar não está visível');
-await start.click();
-await page.waitForTimeout(300);
-const state=await page.evaluate(()=>window.eval('gameState'));
-if(state!=='PLAYING')throw Error('Partida não iniciou: '+state+' / '+errors.join(', '));
-await page.evaluate(()=>window.eval('spawnBoss(-40)'));
-await page.waitForTimeout(200);
-const modal=page.locator('#boss-skill-picker');
-if(!await modal.isVisible())throw Error('Painel de habilidades não apareceu');
-if(await page.evaluate(()=>window.eval('gameState'))!=='BOSS_SELECT')throw Error('Não pausou na escolha');
-await page.getByText('LUTAR SEM PODER',{exact:false}).first().click();
-await page.locator('#boss-skill-confirm').click();
-await page.waitForTimeout(250);
-const result=await page.evaluate(()=>({state:window.eval('gameState'),bosses:window.eval("enemies.filter(e=>e.type==='BOSS').length")}));
-if(result.state!=='PLAYING'||result.bosses!==1)throw Error('Confirmação não iniciou chefe: '+JSON.stringify(result)+' / '+errors.join(', '));
-if(errors.length)throw Error('Exceções de runtime: '+errors.join('; '));
-console.log('PASS: start -> skill picker -> select -> boss game state',result);
-await browser.close();
+page.on('pageerror',error=>errors.push(error.message));
+try {
+  await page.addInitScript(()=>{
+    localStorage.setItem('river_boss_skills_v1',JSON.stringify(['EMP','ICE']));
+  });
+  await page.goto('http://127.0.0.1:4173/',{waitUntil:'domcontentloaded'});
+  await page.locator('#start-btn').waitFor({state:'visible',timeout:15000});
+  await page.locator('#start-btn').click();
+  await page.waitForFunction(()=>window.eval('gameState')==='PLAYING',{timeout:10000});
+  await page.evaluate(()=>window.eval('spawnBoss(-40)'));
+  await page.locator('#boss-skill-picker').waitFor({state:'visible',timeout:5000});
+  if(await page.evaluate(()=>window.eval('gameState'))!=='BOSS_SELECT')throw Error('A simulação não pausou na escolha');
+  // A seleção deve equipar a habilidade que o jogador escolheu.
+  await page.locator('#boss-skill-options button').filter({hasText:'Pulso EMP'}).click();
+  await page.locator('#boss-skill-confirm').click();
+  await page.waitForFunction(()=>window.eval("gameState==='PLAYING' && enemies.some(e=>e.type==='BOSS')"),{timeout:10000});
+  const snapshot=await page.evaluate(()=>window.eval("({state:gameState,bosses:enemies.filter(e=>e.type==='BOSS').length,skill:bossSkillEquipped,charges:bossSkillCharge})"));
+  if(snapshot.bosses!==1||snapshot.skill!=='EMP'||snapshot.charges<=0)throw Error('Boss ou habilidade incorretos: '+JSON.stringify(snapshot));
+  if(errors.length)throw Error('Erros JavaScript: '+errors.join('; '));
+  console.log('PASS: RED ALERT / habilidade selecionada / chefe ativo',snapshot);
+} catch(error) {
+  await page.screenshot({path:'test-results/boss-flow-failure.png',fullPage:true}).catch(()=>{});
+  console.error(error);
+  console.error('Page exceptions:',errors);
+  process.exitCode=1;
+} finally {
+  await browser.close();
+}
