@@ -199,6 +199,31 @@ function enemyDetails(c,e){
  c.restore();
 }
 
+function distinctAircraft(c,style){
+ const cfg={
+ falcao:{wing:30,nose:31,tail:13,primary:'#ef4444',outline:'#fee2e2',shape:0},
+ vespa:{wing:23,nose:23,tail:20,primary:'#f59e0b',outline:'#fef08a',shape:1},
+ cometa:{wing:18,nose:39,tail:10,primary:'#0ea5e9',outline:'#e0f2fe',shape:2},
+ fenix:{wing:37,nose:29,tail:20,primary:'#ec4899',outline:'#fbcfe8',shape:3},
+ helicoptero:{wing:33,nose:16,tail:29,primary:'#2563eb',outline:'#bfdbfe',shape:4},
+ disco:{wing:33,nose:15,tail:13,primary:'#8b5cf6',outline:'#f5d0fe',shape:5},
+ titan:{wing:39,nose:24,tail:26,primary:'#84cc16',outline:'#d9f99d',shape:6}
+ }[style]||{wing:30,nose:31,tail:13,primary:'#ef4444',outline:'#fee2e2',shape:0};
+ c.save();c.lineWidth=2.5;c.strokeStyle=cfg.outline;c.fillStyle=cfg.primary;
+ if(cfg.shape===5){c.beginPath();c.ellipse(0,0,34,22,0,0,Math.PI*2);c.fill();c.stroke();c.fillStyle='#c4b5fd';c.beginPath();c.ellipse(0,-3,17,12,0,0,Math.PI*2);c.fill()}
+ else if(cfg.shape===4){c.fillRect(-13,-18,26,38);c.fillStyle='#93c5fd';c.fillRect(-7,-15,14,20);c.strokeStyle='#e0f2fe';c.lineWidth=5;c.beginPath();c.moveTo(-42,-16);c.lineTo(42,-16);c.stroke();c.lineWidth=2;c.beginPath();c.moveTo(-27,3);c.lineTo(27,3);c.stroke()}
+ else {
+   let pts=cfg.shape===3?[-39,-9,-22,-18,-9,-10,0,-30,9,-10,22,-18,39,-9,28,11,12,7,0,21,-12,7,-28,11]:
+     cfg.shape===6?[-40,-14,-23,-14,-11,-10,0,-26,11,-10,23,-14,40,-14,40,23,19,20,10,17,-10,17,-19,20,-40,23]:
+     cfg.shape===2?[-20,22,-10,-13,0,-43,10,-13,20,22,8,13,0,19,-8,13]:
+     cfg.shape===1?[-24,-6,-14,-14,0,-24,14,-14,24,-6,36,20,13,12,0,17,-13,12,-36,20]:
+     [-32,15,-23,-9,-11,-9,0,-34,11,-9,23,-9,32,15,11,13,0,19,-11,13];
+   poly(c,pts,cfg.primary);c.beginPath();c.moveTo(pts[0],pts[1]);for(let k=2;k<pts.length;k+=2)c.lineTo(pts[k],pts[k+1]);c.closePath();c.stroke();
+ }
+ c.fillStyle='#082032';c.beginPath();c.ellipse(0,-6,5,10,0,0,Math.PI*2);c.fill();
+ c.fillStyle='#67e8f9';c.fillRect(-3,-10,6,8);c.fillStyle=cfg.outline;c.fillRect(-9,13,6,5);c.fillRect(3,13,6,5);
+ c.restore();
+}
 function plane(c,x,y,style='falcao',size=1){
  const colors={falcao:['#c7e2ec','#df4a42','#263e59'],vespa:['#e8be57','#f79430','#453b49'],cometa:['#7bdcf7','#3782df','#25386e'],fenix:['#f9a8d4','#db2777','#701a75'],titan:['#d9f99d','#65a30d','#365314'],helicoptero:['#93c5fd','#2563eb','#183153'],disco:['#d8b4fe','#8b5cf6','#312e81']};
  const [body,trim,dark]=colors[style]||colors.falcao;
@@ -251,6 +276,7 @@ function plane(c,x,y,style='falcao',size=1){
  }
  c.fillStyle='#fbba5a';poly(c,[-5,13,0,23,5,13],'#ff984f');
  aircraftDetails(c,style,trim);
+ distinctAircraft(c,style);
  c.restore();
 }
 function enemy(c,e,time){
@@ -397,6 +423,6 @@ function biomeAtmosphere(c,data,t){
  }
 }
 
-function draw(c,d){const t=THEMES[((d.sector-1)%THEMES.length+THEMES.length)%THEMES.length];landscape(c,d,t);biomeAtmosphere(c,d,t);islands(c,d.islands,t);for(let e of d.enemies)enemy(c,e,t.time);if(!d.invulnerable||Math.floor(Date.now()/110)%2)plane(c,d.player.x,d.player.y,d.aircraft,1);}
+function draw(c,d){const t=THEMES[((d.sector-1)%THEMES.length+THEMES.length)%THEMES.length];landscape(c,d,t);biomeAtmosphere(c,d,t);islands(c,d.islands,t);for(let e of d.enemies)enemy(c,e,t.time);if(!d.invulnerable||Math.floor(Date.now()/110)%2)plane(c,d.player.x,d.player.y,d.player.aircraftType||d.aircraft,1.12);}
 root.RiverVisuals={draw,plane,enemy,THEMES,BIOME_DETAILS,drawIslands(c,items,sector){const t=THEMES[((sector-1)%THEMES.length+THEMES.length)%THEMES.length];islands(c,items,t)}};
 })(window);
