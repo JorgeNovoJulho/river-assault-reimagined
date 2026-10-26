@@ -62,3 +62,14 @@ test('bosses usam HP ampliado, alerta e tempo minimo de batalha',()=>{
   assert.match(html,/redAlertTicks===0/);
   assert.match(html,/missionTicks >= 90\*60/);
 });
+
+test('recompensas, mechas e transição estão no jogo',()=>{
+ const html=fs.readFileSync('index.html','utf8');
+ assert.match(html,/player\.bombs=3;document\.getElementById\('bomb-count-touch'\)/);
+ assert.match(html,/p\.type==='LIFE'/);
+ assert.match(html,/p\.type==='FUEL'/);
+ assert.match(html,/type==='MECHA_SWORD'/);
+ assert.match(html,/type==='MECHA_GUN'/);
+ assert.match(html,/e\.attackTimer%960===0/);
+ assert.match(html,/missionTransitionTicks=180/);
+});
