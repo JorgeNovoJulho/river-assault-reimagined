@@ -1211,10 +1211,17 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
           if(sector===20){finishFullCampaign();}else{missionTransitionTicks=180;document.getElementById('mission-banner').textContent='PRÓXIMA MISSÃO: '+campaign.at(sector+1).name;createFloatingText(e.x,e.y,'CHEFE DERROTADO!','#22c55e')}
         }
         function openBossSkillPicker(){
-          gameState='BOSS_SELECT';bossSkillPending=null;skillPicker.classList.remove('hidden');
+          if(gameState==='BOSS_SELECT')return;
+          gameState='BOSS_SELECT';
+          bossSkillPending='NONE'; // escolha segura: nunca bloquear o jogo por falta de poder
+          try{playlist.pause();soundtrack.stop()}catch(error){console.warn('Áudio da seleção:',error)}
+          skillPicker.classList.remove('hidden');
+          skillPicker.style.display='flex';
+          skillPicker.setAttribute('aria-hidden','false');
           const options=document.getElementById('boss-skill-options');
           options.replaceChildren();
-          document.getElementById('boss-skill-confirm').disabled=true;
+          document.getElementById('boss-skill-confirm').disabled=false;
+          document.getElementById('boss-skill-selected').textContent='Padrão: lutar sem poder (escolha outro se quiser)';
           const foe=BOSS_AFFINITIES[(sector-1)%BOSS_AFFINITIES.length];
           document.getElementById('boss-skill-advice').textContent='Boss de '+BOSS_SKILLS[foe].name+' · Selecione uma habilidade ou voe sem poder.';
           for(const key of bossSkillUnlocked){
@@ -1227,13 +1234,33 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
           const none=document.createElement('button');none.textContent='✈ LUTAR SEM PODER';none.type='button';none.style.cssText='grid-column:1/-1;color:#cbd5e1;padding:8px;border:1px solid #64748b;border-radius:8px';
           none.addEventListener('click',()=>{bossSkillPending='NONE';document.getElementById('boss-skill-selected').textContent='Sem poder nesta batalha';document.getElementById('boss-skill-confirm').disabled=false});options.appendChild(none);
         }
-        document.getElementById('boss-skill-confirm').addEventListener('click',()=>{
-          if(bossSkillPending===null)return;
-          bossSkillEquipped=bossSkillPending==='NONE'?null:bossSkillPending;
-          bossSkillCharge=bossSkillEquipped?BOSS_SKILLS[bossSkillEquipped].charges:0;
-          bossSkillCooldown=0;skillPicker.classList.add('hidden');gameState='PLAYING';simulationClock.reset();
-          spawnBoss(0,true);
+        let bossSelectionCommitting=false;
+        function confirmBossSelection(){
+          if(gameState!=='BOSS_SELECT'||bossSelectionCommitting)return;
+          bossSelectionCommitting=true;
+          try{
+            const chosen=BOSS_SKILLS[bossSkillPending]?bossSkillPending:null;
+            bossSkillEquipped=chosen;
+            bossSkillCharge=chosen?BOSS_SKILLS[chosen].charges:0;
+            bossSkillCooldown=0;
+            skillPicker.classList.add('hidden');
+            skillPicker.style.display='none';
+            skillPicker.setAttribute('aria-hidden','true');
+            gameState='PLAYING';simulationClock.reset();
+            spawnBoss(0,true);
+            try{playlist.resume();if(!playlist.tracks.length&&playlist.enabled)soundtrack.start()}catch(error){console.warn('Áudio boss:',error)}
+          }catch(error){
+            // Nunca prender o piloto em um modal sem possibilidade de recuperar.
+            console.error('Seleção de habilidades:',error);
+            skillPicker.classList.add('hidden');skillPicker.style.display='none';
+            gameState='PLAYING';simulationClock.reset();showGameError(error);
+          }finally{bossSelectionCommitting=false}
+        }
+        document.getElementById('boss-skill-confirm').addEventListener('click',confirmBossSelection);
+        skillPicker.addEventListener('keydown',event=>{
+          if(event.key==='Enter'||event.key==='Escape'){event.preventDefault();confirmBossSelection()}
         });
+
 
         // Animação real do poder (não somente partículas genéricas).
         let bossSkillEffect=null;
@@ -2830,7 +2857,7 @@ function updateTerrainEvent(){
             bossActive = false;
             parryTicks=0;parryCooldown=0;parryHeld=false;parryHeldTicks=0;parryPrecisionTicks=0;swordRushCooldown=0;swordRushTarget=null;swordRushFrames=0;skillTrajectories=[];
             bossSkillEquipped=null;bossSkillCharge=0;bossSkillCooldown=0;bossSkillEffect=null;
-            skillPicker.classList.add('hidden');skillUseButton.classList.add('hidden');
+            skillPicker.classList.add('hidden');skillPicker.style.display='none';skillUseButton.classList.add('hidden');
 
             player.x = VIRTUAL_WIDTH / 2;
             player.y = VIRTUAL_HEIGHT - 100;
