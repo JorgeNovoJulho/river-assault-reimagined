@@ -13,14 +13,14 @@ try {
   await page.goto('http://127.0.0.1:4173/',{waitUntil:'domcontentloaded'});
   await page.locator('#start-btn').waitFor({state:'visible',timeout:15000});
   await page.locator('#start-btn').click();
-  await page.waitForFunction(()=>window.eval('gameState')==='PLAYING',{timeout:10000});
+  await page.waitForFunction(()=>window.eval('gameState')==='PLAYING',null,{timeout:10000});
   await page.evaluate(()=>window.eval('spawnBoss(-40)'));
   await page.locator('#boss-skill-picker').waitFor({state:'visible',timeout:5000});
   if(await page.evaluate(()=>window.eval('gameState'))!=='BOSS_SELECT')throw Error('A simulação não pausou na escolha');
   // A seleção deve equipar a habilidade que o jogador escolheu.
   await page.locator('#boss-skill-options button').filter({hasText:'Pulso EMP'}).click();
   await page.locator('#boss-skill-confirm').click();
-  await page.waitForFunction(()=>window.eval("gameState==='PLAYING' && enemies.some(e=>e.type==='BOSS')"),{timeout:10000});
+  await page.waitForFunction(()=>window.eval("gameState==='PLAYING' && enemies.some(e=>e.type==='BOSS')"),null,{timeout:10000});
   const snapshot=await page.evaluate(()=>window.eval("({state:gameState,bosses:enemies.filter(e=>e.type==='BOSS').length,skill:bossSkillEquipped,charges:bossSkillCharge})"));
   if(snapshot.bosses!==1||snapshot.skill!=='EMP'||snapshot.charges<=0)throw Error('Boss ou habilidade incorretos: '+JSON.stringify(snapshot));
   if(errors.length)throw Error('Erros JavaScript: '+errors.join('; '));
