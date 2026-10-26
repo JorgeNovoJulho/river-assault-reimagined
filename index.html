@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>RiverStorm — Habilidades Aprovadas 0.6.5</title>
+    <title>RiverStorm — Bosses Táticos 0.6.6</title>
     <link rel="stylesheet" href="./src/styles/tailwind.css">
     <style>
         body {
@@ -246,7 +246,7 @@
         <div class="rs-hud-cell"><span class="rs-label">🛡 ESCUDO <b id="hud-shield">150</b></span><div class="rs-meter"><span id="hud-shield-fill" style="background:#38bdf8;width:100%"></span></div></div>
         <div class="rs-hud-cell"><span class="rs-label">♟ RESGATES <b id="hud-rescues">0</b></span><span class="rs-label">✈ <b id="hud-plane">FALCÃO</b></span></div>
       </div>
-      <div class="rs-hud-footer"><span id="hud-version" style="color:#38bdf8;font-size:8px">HUD 0.6.5</span><span id="mission-hud">SELVA DA AURORA</span><b id="sector-hud">SETOR 1</b><span id="hud-rank">J1 SOLDADO</span></div>
+      <div class="rs-hud-footer"><span id="hud-version" style="color:#38bdf8;font-size:8px">HUD 0.6.6</span><span id="mission-hud">SELVA DA AURORA</span><b id="sector-hud">SETOR 1</b><span id="hud-rank">J1 SOLDADO</span></div>
     </section>
     <div id="rs-bottom-actions" aria-label="Opções rápidas">
       <button id="crt-toggle" type="button">CRT: LIG</button>
@@ -1751,7 +1751,8 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
             const skillActive=!!(bossActive&&bossSkillEquipped);
             skillUseButton.classList.toggle('hidden',!skillActive);
             if(skillActive)skillUseButton.textContent=BOSS_SKILLS[bossSkillEquipped].icon+' '+bossSkillCharge+' · '+(bossSkillCooldown>0?Math.ceil(bossSkillCooldown/60)+'s':'PRONTO')+' [C]';
-            if(player.effectTimer>0){player.effectTimer--;if((player.effectType==='POISON'||player.effectType==='BLEED')&&player.effectTimer%60===0)applyDamage(player.effectType==='POISON'?3:5,player.effectType);if(player.effectType==='GRAVITY'&&player.effectTimer%60===0)applyDamage(player.maxShield*.03,'GRAVIDADE');if(player.effectType==='FIRE'&&player.effectTimer%60===0)applyDamage(player.maxShield*.01,'QUEIMADURA');if(player.effectType==='ICE'&&player.effectTimer%60===0)applyDamage(player.maxShield*.01,'CONGELAMENTO');if(player.effectType==='LIGHTNING'&&player.effectTimer%60===0)applyDamage(player.maxShield*.01,'CHOQUE');if(player.effectTimer===0)player.effectType='';}
+            if(player.effectTimer>0){player.effectTimer--;if((player.effectType==='POISON'||player.effectType==='BLEED')&&player.effectTimer%60===0)applyDamage(player.effectType==='POISON'?3:5,player.effectType);if(player.effectType==='GRAVITY'&&player.effectTimer>0){const boss=enemies.find(e=>e.type==='BOSS');if(boss){player.x+=(boss.x-player.x)*.11;player.y+=(Math.min(VIRTUAL_HEIGHT-65,boss.y+145)-player.y)*.08;}}
+            if(player.effectType==='GRAVITY'&&player.effectTimer%60===0)applyDamage(player.maxShield*.03,'GRAVIDADE');if(player.effectType==='FIRE'&&player.effectTimer%60===0)applyDamage(player.maxShield*.01,'QUEIMADURA');if(player.effectType==='ICE'&&player.effectTimer%60===0)applyDamage(player.maxShield*.01,'CONGELAMENTO');if(player.effectType==='LIGHTNING'&&player.effectTimer%60===0)applyDamage(player.maxShield*.01,'CHOQUE');if(player.effectTimer===0)player.effectType='';}
             if(missionTransitionTicks>0){
                 missionTransitionTicks--;
                 if(missionTransitionTicks===0){
@@ -1974,8 +1975,12 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
             // Lógica e Colisão com Inimigos
             enemies.forEach((e, eIndex) => {
                 if (e.type === 'BOSS') {
-                    e.y = 110;
-                    e.x += (player.x - e.x) * 0.035;
+                    e.maneuverTime=(e.maneuverTime||0)+1;
+                    if(e.bombKnockback>0){e.bombKnockback--;e.y=Math.max(65,e.y-2.5);e.x+=Math.sin(e.bombKnockback*1.5)*4;}
+                    else if(e.stunnedTicks>0){} // EMP: imóvel
+                    else if(e.gravityTicks>0){e.x+=(player.x-e.x)*.085;e.y+=(Math.max(95,player.y-180)-e.y)*.08;}
+                    else if(e.frozenTicks>0){e.x+=(player.x-e.x)*.007;}
+                    else {const phase=Math.floor(e.maneuverTime/200)%4;const targetX=phase===0?VIRTUAL_WIDTH*.3:phase===1?VIRTUAL_WIDTH*.7:phase===2?player.x:VIRTUAL_WIDTH*.5;const targetY=phase===0?105:phase===1?155:phase===2?125:95;e.x+=(targetX-e.x)*.016;e.y+=(targetY-e.y)*.012;}
 
                     const minX = e.width / 2 + 10;
                     const maxX = VIRTUAL_WIDTH - e.width / 2 - 10;
@@ -2303,7 +2308,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
                 }
             }
             try{window.RiverSFX?.weapon(player.weapon)}catch(e){}
-            if(player.effectType==='ICE'&&player.effectTimer>0&&missionTicks%3!==0)return;
+            if(player.effectType==='ICE'&&player.effectTimer>0&&missionTicks%2!==0)return;
             const previousCount=bullets.length;
             if(player.weapon==='BANK_MISSILE')fireBankMissiles();else aircraftCatalog.shoot(player.weapon,player,bullets);
             if(player.effectType==='ICE'&&player.effectTimer>0)bullets.slice(previousCount).forEach(b=>{b.vy=(b.vy||-8)*.55;b.vx=(b.vx||0)*.65;b.iceWeak=true});
@@ -2337,7 +2342,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
                     dropBossReward(e,16);
                     bossTaunt={name:e.name,line:['AAAAAH! DANO CRÍTICO!','NÃO! ESSA BOMBA ATRAVESSOU MINHA BLINDAGEM!','ARGH! SISTEMAS EM COLAPSO!'][Math.floor(Math.random()*3)],ticks:170};
                     createFloatingText(e.x,e.y,'DANO MASSIVO!','#ff6b6b');
-                    bossRobotVoice(e,true);
+                    bossRobotVoice(e,true);e.bombKnockback=38;e.stunnedTicks=Math.max(e.stunnedTicks||0,20);
                 }
                 e.hp=e.type==='BOSS'?Math.max(1,e.hp-10):e.hp-999;
                 addExplosion(e.x,e.y,'#ffb347',20);
@@ -2484,7 +2489,8 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
                 const charge=Math.max(0,Math.min(1,(e.specialCharge||0)/(e.specialCooldown||900)));
                 ctx.save();ctx.fillStyle='rgba(3,12,25,.82)';ctx.fillRect(left-2,y-2,width+4,15);
                 ctx.fillStyle='#1c3347';ctx.fillRect(left,y,width,5);ctx.fillRect(left,y+9,width,3);
-                ctx.fillStyle=hp>.5?'#4ade80':hp>.25?'#facc15':'#fb7185';ctx.fillRect(left,y,width*hp,5);
+                ctx.fillStyle=hp>.6?'#4ade80':hp>.3?'#facc15':'#ef4444';ctx.fillRect(left,y,width*hp,5);
+                if(hp<.45){ctx.strokeStyle='#ef4444';ctx.lineWidth=3;ctx.globalAlpha=.4+(1-hp)*.5;ctx.strokeRect(e.x-e.width/2,e.y-e.height/2,e.width,e.height);ctx.globalAlpha=1;}
                 ctx.fillStyle=charge>=.99?'#f87171':'#67e8f9';ctx.fillRect(left,y+9,width*charge,3);
                 ctx.restore();
             }
