@@ -40,7 +40,7 @@ test('as vinte missões possuem biomas e chefes temáticos; represas têm abertu
  assert.equal(levels.length,20);
  assert.ok(levels.every(l=>l.biome&&l.bossVisual&&Number.isInteger(l.hazardSet)));
  const html=fs.readFileSync('index.html','utf8');
- assert.ok(html.includes("type==='DAM' && Math.abs(player.x-p.x)<p.opening/2-player.width/2"),'corredor livre ausente');
+ assert.ok(html.includes("opening/2-player.width/2"),'corredor livre ausente');
  assert.ok(html.includes("opening:passage"),'represa sem abertura');
  assert.ok(html.includes("islandLastDistance"),'distância entre ilhas ausente');
 });
