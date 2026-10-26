@@ -127,3 +127,12 @@ test('projéteis são percorridos em ordem inversa evitando pular tiros removido
  assert.match(html,/!Number\.isFinite\(eb\.x\)/);
  assert.match(html,/dodgeReflect:rollFrames>0\}\);addExplosion[\s\S]*?continue;/);
 });
+
+test('ao avançar de missão efeitos hostis de boss são removidos',()=>{
+ const html=fs.readFileSync('index.html','utf8');
+ const transition=html.slice(html.indexOf('if(missionTransitionTicks>0)'),html.indexOf('// Alerta 6s antes do chefe'));
+ assert.match(transition,/clearBossArenaEffects\(\)/);
+ assert.match(transition,/player\.effectType='';player\.effectTimer=0;player\.disabledTimer=0/);
+ assert.match(transition,/bossTaunt=null;bossFinalDialogue=false;screenShake=0/);
+ assert.match(transition,/b\.type!=='REFLECTED'&&b\.type!=='BANK_MISSILE'/);
+});
