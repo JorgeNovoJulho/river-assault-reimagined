@@ -1137,7 +1137,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
         function spawnBoss(y,confirmed=false) {
             if(!confirmed){openBossSkillPicker();return;}
             bossActive = true;
-            try{playlist.beginBossTheme?.()}catch(audioError){console.warn('Áudio do chefe:',audioError)}
+            try{if(!playlist.bossMode)playlist.beginBossTheme?.()}catch(audioError){console.warn('Áudio do chefe:',audioError)}
             redAlertTicks=0;
             const mission=campaign.at(sector);
             showBossTaunt(mission.boss);
@@ -2261,6 +2261,7 @@ function updateTerrainEvent(){
             if(!bossActive && !redAlertTriggered && missionTicks>=84*60
                && distance-missionStartDistance>=campaign.at(sector).bossDistance*.75){
                 redAlertTriggered=true;redAlertTicks=360;
+                try{playlist.beginBossTheme?.()}catch(e){console.warn('Trilha RED ALERT:',e)}
                 try{window.RiverSFX?.alert?.()}catch(e){}
             }
             if(redAlertTicks>0)redAlertTicks--;
@@ -2902,7 +2903,7 @@ function updateTerrainEvent(){
             document.getElementById('mission-banner').textContent=campaign.at(sector).name;
             gameState = 'PLAYING';
             simulationClock.reset();
-            try{playlist.startNewGame();if(!playlist.tracks.length&&playlist.enabled)soundtrack.start();else soundtrack.stop()}catch(error){console.warn('Playlist indisponível:',error);soundtrack.start()}
+            try{soundtrack.stop();playlist.startNewGame()}catch(error){console.warn('Playlist indisponível:',error)}
         }
 
         function fireBankMissiles(){
@@ -3078,7 +3079,7 @@ function updateTerrainEvent(){
             // Mantém a mesma aeronave que foi utilizada antes da perda das vidas.
             selectedPlane=player.aircraftType||selectedPlane;
             gameState='PLAYING';simulationClock.reset();playlist.resume();
-            if(!playlist.tracks.length&&playlist.enabled)soundtrack.start();
+            
         }
         function gameOver(reason) {
             gameState = 'GAMEOVER';
@@ -3459,7 +3460,7 @@ function updateTerrainEvent(){
         document.getElementById('music-toggle').addEventListener('click',()=>{
             const on=playlist.toggle();
             if(!on)soundtrack.stop();
-            else if(gameState==='PLAYING'&&!playlist.tracks.length)soundtrack.start();
+            
             document.getElementById('music-toggle').textContent='MÚSICA: '+(on?'LIG':'DES');
         });
         let lastGameError='';
@@ -3702,7 +3703,7 @@ function updateTerrainEvent(){
         document.getElementById('pause-settings-btn').addEventListener('click',()=>showControllerSettings(true));
         function togglePause() {
             if (gameState === 'PLAYING') {gameState='PAUSED'; playlist.pause();soundtrack.stop(); document.getElementById('pause-screen').classList.remove('hidden');}
-            else if (gameState === 'PAUSED') {gameState='PLAYING'; playlist.resume();if(!playlist.tracks.length)soundtrack.start(); document.getElementById('pause-screen').classList.add('hidden');}
+            else if (gameState === 'PAUSED') {gameState='PLAYING'; playlist.resume(); document.getElementById('pause-screen').classList.add('hidden');}
         }
         document.getElementById('btn-pause-touch').addEventListener('pointerdown', event => {event.preventDefault();togglePause();});
 
