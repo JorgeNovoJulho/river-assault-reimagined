@@ -1106,6 +1106,34 @@ function mechArticulation(c,e){
  c.restore();
 }
 
+function cinematicBossSkill(c,f){
+ if(!f)return;
+ const age=f.max-f.life, life=Math.max(0,Math.min(1,f.life/75)), pulse=.5+.5*Math.sin(age*.19);
+ const rgb={EMP:'#70e8ff',LIGHTNING:'#aff9ff',ICE:'#b5edff',FIRE:'#ff9a4d',BLEED:'#ff5278',POISON:'#92f770',PRISM:'#e8acff',SHADOW:'#ac8cff',GRAVITY:'#86a4ff'};
+ const color=rgb[f.kind]||f.color||'#8feeff',radius=26+Math.min(74,age*.62),t=age*.036;
+ c.save();c.translate(f.x,f.y);c.globalAlpha=life;
+ const halo=c.createRadialGradient(0,0,3,0,0,radius*1.55);
+ halo.addColorStop(0,'rgba(255,255,255,.80)');halo.addColorStop(.18,color);halo.addColorStop(.45,color+'55');halo.addColorStop(1,'rgba(0,0,0,0)');
+ c.globalCompositeOperation='lighter';c.fillStyle=halo;c.beginPath();c.arc(0,0,radius*1.55,0,Math.PI*2);c.fill();
+ c.shadowColor=color;c.shadowBlur=14;c.strokeStyle=color;
+ if(f.kind==='EMP'||f.kind==='LIGHTNING'){
+  for(let k=0;k<5;k++){
+   const a=k*Math.PI*2/5+t;c.lineWidth=2.3+(k%2);
+   c.beginPath();c.moveTo(Math.cos(a)*9,Math.sin(a)*9);
+   for(let j=1;j<=7;j++){const d=radius*j/7,twist=Math.sin(j*8.4+age*.35+k)*8;c.lineTo(Math.cos(a)*d+Math.cos(a+Math.PI/2)*twist,Math.sin(a)*d+Math.sin(a+Math.PI/2)*twist)}
+   c.stroke();
+  }
+ }else if(f.kind==='GRAVITY'||f.kind==='SHADOW'||f.kind==='PRISM'){
+  for(let k=0;k<3;k++){c.save();c.rotate(t*(k%2?1:-1)+k*1.1);c.lineWidth=1.8;c.beginPath();c.ellipse(0,0,radius*(.75+k*.12),radius*(.27+k*.07),0,0,Math.PI*2);c.stroke();c.restore()}
+ }else{
+  for(let k=0;k<18;k++){
+   const a=k*2.39996+t*(k%2?1:-1),d=radius*(.25+.65*((k*7%19)/19));
+   c.fillStyle=k%3===0?'#ffffff':color;c.beginPath();c.arc(Math.cos(a)*d,Math.sin(a)*d,1.5+(k%4)*.7+pulse,0,Math.PI*2);c.fill();
+  }
+  if(f.kind==='ICE'){c.lineWidth=2;c.beginPath();c.arc(0,0,radius*.72,0,Math.PI*2);c.stroke()}
+ }
+ c.restore();
+}
 function draw(c,d){
  const t=THEMES[((d.sector-1)%THEMES.length+THEMES.length)%THEMES.length];
  landscape(c,d,t);terrainSignature(c,d,t);landmark(c,d,t);mapSetPieces(c,d,t);biomeAtmosphere(c,d,t);enhancedWorld(c,d,t);
@@ -1117,5 +1145,5 @@ function draw(c,d){
  }
  if(!d.invulnerable||Math.floor(Date.now()/110)%2){plane(c,d.player.x,d.player.y,d.player.aircraftType||d.aircraft,0.85);highDetailPlane(c,d.player.x,d.player.y,d.player.aircraftType||d.aircraft)}enhancedBattleLight(c,d);enhancedWeaponGlints(c,d);
 }
-root.RiverVisuals={draw,plane,enemy,THEMES,BIOME_DETAILS,drawIslands(c,items,sector){const t=THEMES[((sector-1)%THEMES.length+THEMES.length)%THEMES.length];islands(c,items,t)}};
+root.RiverVisuals={cinematicBossSkill,draw,plane,enemy,THEMES,BIOME_DETAILS,drawIslands(c,items,sector){const t=THEMES[((sector-1)%THEMES.length+THEMES.length)%THEMES.length];islands(c,items,t)}};
 })(window);
