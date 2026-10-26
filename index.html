@@ -2028,7 +2028,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
             if (player.invulnerable > 0) player.invulnerable--;
             if(parryTicks>0){parryHeldTicks++;if(parryHeld&&parryHeldTicks<180)parryTicks=Math.min(180-parryHeldTicks,15);else parryTicks--;if(parryHeldTicks>=180)parryTicks=0;}
             if(parryCooldown>0)parryCooldown--;
-            parryButton.textContent=parryTicks>0?'🛡 REFLETINDO':parryCooldown>0?'🛡 '+Math.ceil(parryCooldown/60)+'s':'🛡 PARRY [V]';
+            parryButton.textContent=parryTicks>0?'🛡 ESCUDO '+Math.max(1,Math.ceil((180-parryHeldTicks)/60))+'s':parryCooldown>0?'🛡 '+Math.ceil(parryCooldown/60)+'s':'🛡 PARRY [V]';
 
             // Armas especiais usam disparos disponíveis, não tempo em quadros.
 
@@ -3053,6 +3053,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
         });
 
         window.addEventListener('keyup', e => {
+            if(e.code==='KeyV')parryHeld=false;
             if (keys.hasOwnProperty(e.code)) keys[e.code] = false;
         });
 
