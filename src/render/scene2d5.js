@@ -291,6 +291,26 @@ function drawBiomeEnemy(c,e){
    if(id==='CRANE'){c.beginPath();c.moveTo(8,-10);c.lineTo(29,-29);c.lineTo(29,2);c.stroke()}
    if(id==='WELDER'){c.fillStyle='#fb923c';c.fillRect(12,0,17,5)}
  }
+ // Assinaturas visuais de cada bioma: cabeças, armas, fuselagens e efeitos distintos.
+ if(id==='ALLIGATOR'){c.fillStyle='#166534';c.fillRect(-13,-20,26,14);c.fillStyle='#e2e8f0';for(let i=-2;i<=2;i++)c.fillRect(i*5,-6,2,5);}
+ else if(id==='HOVERCAR'){c.fillStyle='#0f172a';c.fillRect(-20,4,40,14);c.fillStyle='#22d3ee';c.fillRect(-21,13,8,5);c.fillRect(13,13,8,5);c.fillStyle='#f472b6';c.fillRect(-7,-12,14,4);}
+ else if(id==='TUCANO'){c.fillStyle='#f97316';c.beginPath();c.moveTo(0,-27);c.lineTo(12,-23);c.lineTo(0,-17);c.closePath();c.fill();c.fillStyle='#22d3ee';c.fillRect(-22,5,9,3);c.fillRect(13,5,9,3);}
+ else if(id==='SCORPION'){c.strokeStyle='#fbbf24';c.lineWidth=5;c.beginPath();c.moveTo(0,14);c.bezierCurveTo(23,27,27,-10,5,-29);c.stroke();c.fillStyle='#fde68a';c.fillRect(-18,9,10,7);c.fillRect(8,9,10,7);}
+ else if(id==='WALRUS'){c.strokeStyle='#e0f2fe';c.lineWidth=3;c.beginPath();c.moveTo(-5,-20);c.lineTo(-7,-33);c.moveTo(5,-20);c.lineTo(7,-33);c.stroke();}
+ else if(id==='MANTIS'){c.strokeStyle='#a3e635';c.lineWidth=5;c.beginPath();c.moveTo(-10,-6);c.lineTo(-26,-20);c.lineTo(-17,-30);c.moveTo(10,-6);c.lineTo(26,-20);c.lineTo(17,-30);c.stroke();}
+ else if(id==='CORSAIR'||id==='DREDGER'){c.fillStyle='#475569';c.fillRect(-13,-20,26,13);c.fillStyle='#fbbf24';c.fillRect(-4,-23,8,10);c.strokeStyle='#f8fafc';c.beginPath();c.moveTo(-18,15);c.lineTo(0,26);c.lineTo(18,15);c.stroke();}
+ else if(id==='MOTOJET'){c.fillStyle='#f472b6';c.fillRect(-26,12,12,4);c.fillRect(14,12,12,4);c.fillStyle='#67e8f9';c.fillRect(-4,-25,8,16);}
+ else if(id==='SALAMANDER'){c.fillStyle='#f97316';for(let i=-2;i<=2;i++){c.beginPath();c.moveTo(i*6,12);c.lineTo(i*6+3,26+Math.sin(age*.2+i)*4);c.lineTo(i*6+6,12);c.fill();}}
+ else if(id==='EAGLE'){c.fillStyle='#facc15';c.beginPath();c.moveTo(-30,1);c.lineTo(-9,-18);c.lineTo(-13,15);c.closePath();c.fill();c.beginPath();c.moveTo(30,1);c.lineTo(9,-18);c.lineTo(13,15);c.closePath();c.fill();}
+ else if(id==='PIRANHA'){c.fillStyle='#e2e8f0';c.beginPath();c.moveTo(-9,-18);c.lineTo(0,-26);c.lineTo(9,-18);c.fill();for(let i=0;i<4;i++)c.fillRect(-7+i*5,10,3,5);}
+ else if(id==='ICE_RAY'){c.fillStyle='#bfdbfe';c.beginPath();c.moveTo(-30,0);c.quadraticCurveTo(0,-34,30,0);c.lineTo(0,18);c.closePath();c.fill();}
+ else if(id==='BEETLE'){c.strokeStyle='#fed7aa';c.beginPath();c.moveTo(0,-19);c.lineTo(0,18);c.moveTo(-10,-10);c.lineTo(-21,-22);c.moveTo(10,-10);c.lineTo(21,-22);c.stroke();}
+ else if(id==='WELDER'){c.fillStyle='#f97316';for(let i=0;i<4;i++){const x=13+i*6,y=7+Math.sin(age*.27+i)*7;c.fillRect(x,y,3,3);}}
+ else if(id==='NARWHAL'){c.strokeStyle='#e0f2fe';c.lineWidth=5;c.beginPath();c.moveTo(0,-25);c.lineTo(0,-45);c.stroke();}
+ else if(id==='EEL'){c.strokeStyle='#67e8f9';c.lineWidth=2;c.beginPath();c.moveTo(-9,-12);c.lineTo(-18,-23);c.lineTo(-9,-26);c.moveTo(9,8);c.lineTo(18,20);c.stroke();}
+ else if(id==='PRISM_WASP'){c.strokeStyle='#f0abfc';c.beginPath();c.moveTo(-24,-10);c.lineTo(-33,-22);c.moveTo(24,-10);c.lineTo(33,-22);c.stroke();}
+ else if(id==='CRANE'){c.strokeStyle='#fde68a';c.lineWidth=3;c.beginPath();c.moveTo(-17,13);c.lineTo(-28,26);c.moveTo(17,13);c.lineTo(28,26);c.stroke();}
+ else if(id==='HYBRID_HUNTER'){c.fillStyle='#fda4af';c.fillRect(-24,-4,8,23);c.fillRect(16,-4,8,23);c.fillStyle='#67e8f9';c.fillRect(-9,-12,18,7);}
  c.fillStyle=light;c.beginPath();c.arc(-4,-8,2.3,0,Math.PI*2);c.arc(4,-8,2.3,0,Math.PI*2);c.fill();
  c.globalAlpha=.3+Math.sin(age*.12)*.14;c.strokeStyle=light;c.beginPath();c.ellipse(0,0,23,27,0,0,Math.PI*2);c.stroke();
  c.restore();
