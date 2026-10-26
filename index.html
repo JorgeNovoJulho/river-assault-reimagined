@@ -988,10 +988,15 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
 
                 const pulse = Math.sin(Date.now() / 150) * 3;
                 ctx.fillStyle = p.color;
-                ctx.fillRect(-12 - pulse / 2, -12 - pulse / 2, 24 + pulse, 24 + pulse);
+                if(p.type==='BOMB'||p.type==='LIFE'){
+                    const outer=14+Math.abs(pulse)*.35,inner=outer*.48;
+                    ctx.beginPath();
+                    for(let k=0;k<10;k++){const a=-Math.PI/2+k*Math.PI/5,r=k%2?inner:outer;const x=Math.cos(a)*r,y=Math.sin(a)*r;if(!k)ctx.moveTo(x,y);else ctx.lineTo(x,y)}
+                    ctx.closePath();ctx.fill();
+                }else ctx.fillRect(-12-pulse/2,-12-pulse/2,24+pulse,24+pulse);
 
                 ctx.fillStyle = '#0f172a';
-                ctx.fillRect(-9, -9, 18, 18);
+                if(!['BOMB','LIFE'].includes(p.type))ctx.fillRect(-9,-9,18,18);
 
                 ctx.fillStyle = p.color;
                 ctx.font = 'black 10px monospace';
@@ -1338,6 +1343,7 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
                 missionTransitionTicks--;
                 if(missionTransitionTicks===0){
                     sector=Math.min(20,sector+1);
+                    player.bombs=3;document.getElementById('bomb-count-touch').textContent='(3)';bombsPickedThisMission=0;
                     bossDefeatedThisMission=false;
                     redAlertTriggered=false;redAlertTicks=0;missionTicks=0;missionStartDistance=distance;
                     enemies=enemies.filter(e=>e.type!=='BOSS'&&e.y<VIRTUAL_HEIGHT*.45);
@@ -1565,7 +1571,9 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
                         addExplosion(b.x, b.y, '#fba518', 4);
 
                         if (e.hp <= 0) {
-                            if(!e.noDrop)spawnPowerupCheck(e.x, e.y);
+                            if(e.type==='BOSS' && sector%3===0 && Math.random()<.6){
+                                powerups.push({x:e.x,y:e.y+25,type:'LIFE',color:'#60a5fa',label:'★'});
+                            }else if(!e.noDrop && e.type!=='BOSS')spawnPowerupCheck(e.x,e.y);
                             addExplosion(e.x, e.y, '#ef4444', e.type === 'BOSS' ? 45 : 15);
                             sound.playExplosion(e.type === 'BOSS');
                             score += awardEnemyPoints(e.score);
@@ -1612,6 +1620,10 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
                     }else if(p.type==='REPAIR'){
                         if(!wingmen.length)wingmen=[-1,1].map(side=>({side,hp:75,maxHp:75,ttl:900,detach:0}));
                         else wingmen.forEach(w=>{w.hp=w.maxHp;w.ttl=900;w.detach=0});
+                    }else if(p.type==='LIFE'){
+                        lives=Math.min(9,lives+1);createFloatingText(player.x,player.y,'VIDA EXTRA!','#60a5fa');
+                    }else if(p.type==='FUEL'){
+                        player.fuel=Math.min(player.maxFuel,player.fuel+45);
                     }else if(p.type==='SHIELD'){
                         player.shield=Math.min(player.maxShield,player.shield+60);
                         try{window.RiverSFX?.collect()}catch(e){}
@@ -1623,7 +1635,7 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
                         player.specialShots = 50;
                     }
                     sound.playPowerupSound();
-                    if(p.type!=='SHIELD'&&p.type!=='BOMB')createFloatingText(player.x, player.y, `ARMA: ${aircraftCatalog.WEAPONS[player.weapon]}!`, p.color);
+                    if(!['SHIELD','BOMB','LIFE','FUEL','DRONES','REPAIR'].includes(p.type))createFloatingText(player.x, player.y, `ARMA: ${aircraftCatalog.WEAPONS[player.weapon]}!`, p.color);
                     powerups.splice(pIndex, 1);
                 } else if (p.y > VIRTUAL_HEIGHT + 30) {
                     powerups.splice(pIndex, 1);
@@ -1906,8 +1918,9 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
             if(next>=previous || e.rewardCooldown>0)return;
             e.rewardMark=next;
             e.rewardCooldown=210+Math.floor(Math.random()*190);
-            const kind=Math.random()<.55?'SHIELD':['LASER','MISSILE','SPREAD'][Math.floor(Math.random()*3)];
-            powerups.push({x:e.x+(Math.random()-.5)*75,y:e.y+45,type:kind,color:kind==='SHIELD'?'#22d3ee':'#a78bfa',label:kind==='SHIELD'?'S+':'W+'});
+            const picks=['SHIELD','SHIELD','LASER','MISSILE','SPREAD','DRONES','FUEL','REPAIR'];
+            const kind=picks[Math.floor(Math.random()*picks.length)];
+            powerups.push({x:e.x+(Math.random()-.5)*75,y:e.y+45,type:kind,color:kind==='SHIELD'?'#22d3ee':kind==='FUEL'?'#4ade80':'#a78bfa',label:{SHIELD:'S+',FUEL:'GAS',DRONES:'2A',REPAIR:'R+'}[kind]||'W+'});
             createFloatingText(e.x,e.y,'ITEM LIBERADO!','#67e8f9');
         }
         function spawnPowerupCheck(x, y) {
