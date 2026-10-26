@@ -14,7 +14,7 @@ const {chromium}=require('playwright');const {spawn}=require('node:child_process
   const errors=[];page.on('pageerror',e=>errors.push(e.message));
   await page.goto('http://127.0.0.1:4173/',{waitUntil:'domcontentloaded',timeout:20000});
   // Confirma que os scripts globais NÃO estão ausentes no pacote de produção.
-  for (const key of ['RiverGamepadInput','RiverAircraft','RiverClock','RiverCampaign','RiverVisuals','RiverMusic','RiverPlaylist']) {
+  for (const key of ['RiverGamepadInput','RiverAircraft','RiverClock','RiverPilotProgress','RiverCampaign','RiverVisuals','RiverMusic','RiverPlaylist']) {
     const ok = await page.evaluate(k => !!window[k],key);
     if(!ok) throw Error('Script ausente no BUILD: '+key);
   }
