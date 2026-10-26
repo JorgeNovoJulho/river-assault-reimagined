@@ -1211,7 +1211,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
           if(sector===20){finishFullCampaign();}else{missionTransitionTicks=180;document.getElementById('mission-banner').textContent='PRÓXIMA MISSÃO: '+campaign.at(sector+1).name;createFloatingText(e.x,e.y,'CHEFE DERROTADO!','#22c55e')}
         }
         function openBossSkillPicker(){
-          if(gameState==='BOSS_SELECT')return;
+          if(gameState==='BOSS_SELECT'||bossActive)return;
           gameState='BOSS_SELECT';
           bossSkillPending='NONE'; // escolha segura: nunca bloquear o jogo por falta de poder
           try{playlist.pause();soundtrack.stop()}catch(error){console.warn('Áudio da seleção:',error)}
@@ -1250,12 +1250,16 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
             gameState='PLAYING';simulationClock.reset();
             spawnBoss(0,true);
             bossActive=true;
+            redAlertTicks=0;redAlertTriggered=false;
+            document.getElementById('boss-special-hud')?.classList.add('hidden');
             try{playlist.resume();if(!playlist.tracks.length&&playlist.enabled)soundtrack.start()}catch(error){console.warn('Áudio boss:',error)}
           }catch(error){
             // Nunca prender o piloto em um modal sem possibilidade de recuperar.
             console.error('Seleção de habilidades:',error);
             skillPicker.classList.add('hidden');skillPicker.style.display='none';
-            gameState='PLAYING';simulationClock.reset();showGameError(error);
+            gameState='PLAYING';simulationClock.reset();
+            try{if(!bossActive)spawnBoss(0,true)}catch(bossError){console.error('Boss recovery:',bossError)}
+            showGameError(error);
           }finally{bossSelectionCommitting=false}
         }
         document.getElementById('boss-skill-confirm').addEventListener('click',confirmBossSelection);
@@ -2281,6 +2285,7 @@ function updateTerrainEvent(){
                 try{window.RiverSFX?.alert?.()}catch(e){}
             }
             if(redAlertTicks>0)redAlertTicks--;
+            if(gameState==='BOSS_SELECT'||bossActive)redAlertTicks=0;
             for(let i=wingmen.length-1;i>=0;i--){
                 const w=wingmen[i];
                 if(w.ttl>0)w.ttl--;
