@@ -2068,7 +2068,10 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
           }
         }
         function spawnBiomeEnemy(center,level){
-          if(bossActive||missionTicks%360!==0)return;
+          // Ritmos diferentes por bioma: patrulhas, emboscadas, ondas e intervalos de calmaria.
+          const cadence=[360,420,390,330,300,450,270,420,330,390,315,360,300,450,375,285,405,420,345,300][(sector-1)%20];
+          const waveOffset=(sector*37)%cadence;
+          if(bossActive||(missionTicks+waveOffset)%cadence!==0)return;
           const existing=enemies.filter(e=>e.type==='BIOME_ENEMY'&&e.y<VIRTUAL_HEIGHT&&e.y>-60);
           if(existing.length>=2)return;
           const def=BIOME_ENEMIES[(sector-1)%20];
