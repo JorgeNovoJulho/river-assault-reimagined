@@ -96,6 +96,17 @@ const {chromium}=require('playwright');const {spawn}=require('node:child_process
   if(bossFlow.transitionStarted.bossActive||!bossFlow.transitionStarted.defeated||bossFlow.transitionStarted.ticks!==180||
      bossFlow.finished.sector!==6||bossFlow.finished.ticks!==0||bossFlow.finished.defeated)
      throw Error('Chefe bloqueou a transição de missão: '+JSON.stringify(bossFlow));
+  const checkpointFlow=await page.evaluate(()=>{
+    const prevSector=sector,prevVerified=campaignVerified;
+    sector=7;campaignVerified=true;writeCheckpoint(8);
+    const good=readCheckpoint(),raw=localStorage.getItem(CHECKPOINT_KEY);
+    sector=20;campaignVerified=false;
+    const rejected=writeCheckpoint(20),stillStored=localStorage.getItem(CHECKPOINT_KEY);
+    sector=prevSector;campaignVerified=prevVerified;
+    return {good:good?.sector,rejected,unchanged:raw===stillStored};
+  });
+  if(checkpointFlow.good!==8||checkpointFlow.rejected!==false||!checkpointFlow.unchanged)
+    throw Error('Checkpoint legítimo sobrescrito por missão avulsa: '+JSON.stringify(checkpointFlow));
   // Campaign regression: direct mission 20 must never grant a promotion.
   const campaignFlow=await page.evaluate(()=>{
     const startingJourney=journey,startingPoints=careerPoints;
