@@ -10,7 +10,7 @@ test('XP: começa no nível zero e chega ao nível máximo 100',()=>{
 });
 test('XP: níveis crescentes e limite de pontos',()=>{
  const p=progress();for(let l=0;l<100;l++){assert.ok(p.threshold(l+1)>p.threshold(l));assert.equal(p.levelFor(p.threshold(l)),l);}
- assert.equal(p.cap(Infinity),0);assert.equal(p.cap(p.threshold(100)+100000),p.threshold(100));
+ assert.equal(p.cap(Infinity),p.threshold(100));assert.equal(p.cap(p.threshold(100)+100000),p.threshold(100));
 });
 test('XP: bônus graduais de dano, resistência e combustível',()=>{
  const p=progress(),a=p.bonus(0),b=p.bonus(50),c=p.bonus(100);
