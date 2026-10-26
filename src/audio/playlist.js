@@ -111,10 +111,10 @@ class RiverPlaylist{
   if(this.bossMode||!this.enabled)return;
   const theme=this.tracks.find(t=>t.id==='bundled-14')||this.tracks.find(t=>/Seoul Road/i.test(t.name));
   if(!theme){this.onStatus('Trilha Seoul Road não encontrada; mantendo música atual');return;}
-  this.bossMode=true;this.fadeTo(0,1350,()=>{if(!this.bossMode)return;this.playItem(theme);this.audio.volume=0;this.fadeTo(.38,1600)});
+  this.bossMode=true;this.audio.loop=true;this.fadeTo(0,1350,()=>{if(!this.bossMode)return;this.playItem(theme);this.audio.volume=0;this.fadeTo(.38,1600)});
  }
  endBossTheme(){
-  if(!this.bossMode)return;this.bossMode=false;
+  if(!this.bossMode)return;this.bossMode=false;this.audio.loop=false;
   this.fadeTo(0,1300,()=>{if(this.bossMode)return;this.audio.volume=0;if(this.order.length)this.next();this.fadeTo(.38,1600)});
  }
  pause(){this.audio.pause()}
