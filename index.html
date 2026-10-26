@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>River Assault — Playtest 0.3.1</title>
+    <title>RiverStorm — Playtest 0.3.2</title>
     <link rel="stylesheet" href="./src/styles/tailwind.css">
     <style>
         body {
@@ -144,10 +144,14 @@
             ⚠ SISTEMAS DESATIVADOS POR EMP! ⚠
         </div>
 
+        <div id="boss-special-hud" class="hidden absolute top-9 left-1/2 -translate-x-1/2 z-20 pointer-events-none" style="width:min(82%,310px);padding:7px 10px;background:#08172fe8;border:1px solid #22d3ee;border-radius:9px;color:white;font:bold 11px monospace;box-shadow:0 2px 12px #000a">
+          <div style="display:flex;justify-content:space-between;gap:10px"><span id="boss-special-name">ESPECIAL DO CHEFE</span><span id="boss-special-status">CARREGANDO</span></div>
+          <div style="height:9px;background:#273449;border-radius:7px;overflow:hidden;margin-top:5px"><div id="boss-special-fill" style="width:0%;height:100%;background:linear-gradient(90deg,#0891b2,#67e8f9)"></div></div>
+        </div>
         <!-- Telas de Interface Overlay -->
         <!-- Tela Inicial / Menu Principal -->
         <div id="start-screen" class="absolute inset-0 bg-black/90 flex flex-col items-center justify-center p-6 text-center z-30">
-            <h1 class="text-3xl sm:text-5xl font-extrabold text-amber-500 tracking-wider mb-2 italic drop-shadow-[0_4px_8px_rgba(245,158,11,0.5)]">RIVER ASSAULT</h1>
+            <h1 class="text-3xl sm:text-5xl font-extrabold text-amber-500 tracking-wider mb-2 italic drop-shadow-[0_4px_8px_rgba(245,158,11,0.5)]">RIVERSTORM</h1>
             <p class="text-xs sm:text-sm text-cyan-400 font-semibold tracking-widest mb-6">EDIÇÃO REIMAGINADA (PT-BR)</p>
 
             <p class="text-slate-300 text-sm max-w-md">20 missões • 7 aeronaves • resgates • chefes épicos</p>
@@ -669,7 +673,7 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
             const islandGap=[180,250,310][(level.hazardSet+obstacleSequence)%3];
             if(islands.length<3 && distance-islandLastDistance>islandGap &&
                distance-structureLastDistance>220 && !structures.some(o=>Math.abs(o.y-y)<180) &&
-               !rescueBoats.some(o=>Math.abs(o.y-y)<100) && Math.random()<.8){
+               !rescueBoats.some(o=>Math.abs(o.y-y)<100) && Math.random()<.96){
                 let shape=(obstacleSequence+level.hazardSet)%5;
                 const islandWidth=Math.min(width*.34,shape===1?73:shape===3?64:90);
                 const offset=shape===2 ? width*.16 : shape===4 ? -width*.17 :(Math.random()-.5)*width*.22;
@@ -692,11 +696,11 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
 
             // Pontos estratégicos de combustível; resgates e armas não são bloqueados.
             if (distance - fuelSpawnAt >= 650 && Math.random() < .2) trySpawnFuel(center,y,width,false);
-            const structureGap=710+((sector*173+obstacleSequence*97)%390);
+            const structureGap=420+((sector*173+obstacleSequence*97)%230);
             if(structures.length<1 && distance-structureLastDistance>structureGap &&
-               distance-islandLastDistance>260 && missionTicks>240 &&
+               distance-islandLastDistance>260 && missionTicks>180 &&
                !islands.some(o=>Math.abs(o.y-y)<175) &&
-               !rescueBoats.some(o=>Math.abs(o.y-y)<135) && Math.random()<.19){
+               !rescueBoats.some(o=>Math.abs(o.y-y)<135) && Math.random()<.75){
                 const type=obstacleLastType==='DAM'?'BRIDGE':
                     obstacleLastType==='BRIDGE'?'DAM':(Math.random()<.32?'BRIDGE':'DAM');
                 const passage=type==='DAM'?Math.max(player.width+42,Math.min(width*.45,105+level.difficulty*12)):0;
@@ -822,6 +826,8 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
                 shootTimer: 0,
                 attackPattern: 0,
                 attackTimer: 0,
+                specialCharge: 0,
+                specialCooldown: mission.bossPattern===0 ? 1500 : 1050,
                 laserCharging: false,
                 laserTimer: 0
             });
@@ -840,11 +846,19 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
                     hp:9,maxHp:9,vx:type==='MECHA_SWORD'?2.2:1.3,vy:1.2,score:400,shootTimer:0,noDrop:true});
             }
             // Assinaturas especiais por chefe: EMP, relâmpagos, gravidade, fogo, gelo e investida.
-            const abilityCooldown=sector%6===1?1200:900;
-            e.specialCooldown=abilityCooldown;
-            if(e.attackTimer>=abilityCooldown && e.attackTimer%abilityCooldown===0){
+            // Um único relógio de recarga para todos os especiais; nunca usar dois EMP em paralelo.
+            const abilityCooldown=e.specialCooldown || 1050;
+            e.specialCharge=Math.min(abilityCooldown,(e.specialCharge||0)+1);
+            const hud=document.getElementById('boss-special-hud');
+            hud.classList.remove('hidden');
+            const fraction=e.specialCharge/abilityCooldown;
+            document.getElementById('boss-special-fill').style.width=Math.round(fraction*100)+'%';
+            document.getElementById('boss-special-name').textContent=(e.bossSubType===0?'EMP':'ESPECIAL')+' · '+e.name;
+            document.getElementById('boss-special-status').textContent=fraction>=1?'PRONTO':'RECARGA '+Math.round(fraction*100)+'%';
+            if(e.specialCharge>=abilityCooldown && player.disabledTimer<=0){
+                e.specialCharge=0;
                 const pattern=(sector-1)%6;
-                if(pattern===0){player.disabledTimer=Math.max(player.disabledTimer,24);createFloatingText(player.x,player.y,'INTERFERÊNCIA EMP · 0,4 S','#67e8f9')}
+                if(pattern===0){player.disabledTimer=18; sound.playEmpSound();document.getElementById('game-container').classList.add('emp-flash');setTimeout(()=>document.getElementById('game-container').classList.remove('emp-flash'),300);createFloatingText(player.x,player.y,'EMP · 0,3 S','#67e8f9')}
                 else if(pattern===1){for(let n=-2;n<=2;n++)enemyBullets.push({x:e.x+n*26,y:e.y+25,vx:n*.65,vy:5.2,color:'#67e8f9'})}
                 else if(pattern===2){player.x+=(e.x-player.x)*.15;createFloatingText(player.x,player.y,'PULSO GRAVITACIONAL','#c4b5fd')}
                 else if(pattern===3||pattern===4){for(let n=-2;n<=2;n++)enemyBullets.push({x:e.x+n*20,y:e.y+28,vx:n*1.05,vy:3.8,color:pattern===3?'#fb923c':'#bae6fd'})}
@@ -889,14 +903,8 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
                         enemyBullets.push({ x: e.x, y: e.y + 20, vx: vx * 2, vy: 3.2, color: '#ef4444' });
                     });
                 } else if (e.attackPattern === 2 && e.shootTimer % 110 === 0) {
-                    // HABILIDADE EXCLUSIVA: ONDA DE EMP (PARALISA AÇÕES DO JOGADOR)
-                    sound.playEmpSound();
-                    player.disabledTimer = 90; // 1.5 segundos paralisado
-                    const container = document.getElementById('game-container');
-                    container.classList.add('emp-flash');
-                    setTimeout(() => container.classList.remove('emp-flash'), 300);
-                    document.getElementById('emp-warning').classList.remove('hidden');
-                    createFloatingText(e.x, e.y, 'SISTEMA PARALISADO!', '#06b6d4');
+                    // Padrão normal sem EMP: apenas projéteis telegrafados.
+                    [-1.2,0,1.2].forEach(vx=>enemyBullets.push({x:e.x,y:e.y+20,vx,vy:3.3,color:'#22d3ee'}));
                 }
             }
 
@@ -1365,6 +1373,7 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
 
         function update() {
             if (gameState !== 'PLAYING') return;
+            if(!enemies.some(e=>e.type==='BOSS'))document.getElementById('boss-special-hud').classList.add('hidden');
             missionTicks++;
             if(missionTransitionTicks>0){
                 missionTransitionTicks--;
@@ -1404,8 +1413,8 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
                 }
             }
             // Patrulhas mecha em turnos, no máximo duas unidades simultâneas.
-            if(!bossActive && missionTicks%285===0 && enemies.filter(e=>e.type==='MECHA_SWORD'||e.type==='MECHA_GUN').length<2){
-                const banks=getRiverBoundariesAt(35),type=(Math.floor(missionTicks/285)%2===0)?'MECHA_GUN':'MECHA_SWORD';
+            if(!bossActive && missionTicks%210===0 && enemies.filter(e=>e.type==='MECHA_SWORD'||e.type==='MECHA_GUN').length<2){
+                const banks=getRiverBoundariesAt(35),type=(Math.floor(missionTicks/210)%2===0)?'MECHA_GUN':'MECHA_SWORD';
                 enemies.push({type,x:banks.center+(Math.random()-.5)*banks.width*.5,y:-35,width:34,height:45,
                     hp:6+Math.floor(sector/5),maxHp:6+Math.floor(sector/5),vx:type==='MECHA_SWORD'?2:1,vy:1.25,
                     score:340,shootTimer:0,mechaCooldown:0});
@@ -1566,7 +1575,7 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
                     updateBossAttacks(e);
                 } else {
                     if(e.type==='MECHA_SWORD'){
-                        if(e.returning){e.y-=3.2;if(e.y< -45)e.returning=false;}
+                        if(e.returning){e.y-=4.5;if(e.y< -45){e.returning=false;e.y=-45;e.reentries=(e.reentries||0)+1;}}
                         else {e.y+=player.currentScrollSpeed+(e.vy||0);if(e.y>VIRTUAL_HEIGHT-42)e.returning=true;}
                     }else e.y += player.currentScrollSpeed + (e.vy || 0);
                     if(e.type==='TANK'){const edge=getRiverBoundariesAt(e.y);e.x=e.bankSide<0?edge.leftBank-18:edge.rightBank+18;}
@@ -1579,7 +1588,7 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
                     if(e.x < banks.leftBank+e.width/2+4 || e.x > banks.rightBank-e.width/2-4)e.vx=-(e.vx||1.2);
                     if(e.type==='HELI'||e.type==='JET'||e.type==='ZIGZAG')e.y+=Math.sin(e.motion)*1.3;
                     if(e.type==='SHIP'||e.type==='SUB')e.x+=Math.sin(e.motion)*.38;
-                    if(e.type==='SUB'){e.x+=(e.vx||2.4)*.9;e.vy=0;}
+                    if(e.type==='SUB'){e.x+=(e.vx||2.4)*.9;e.vy=-player.currentScrollSpeed;}
                 }
                 if(e.type==='MECHA_SWORD'){
                     e.meleeTick=(e.meleeTick||0)+1;
