@@ -8,6 +8,8 @@ test('HTML contém área de jogo, controles e interface de seleção',()=>{
   assert.ok(html.includes('id="'+id+'"'),id+' ausente');
  }
  assert.ok(html.includes('src="./src/game/clock.js"'));
+ assert.ok(html.includes('src="./src/game/pilot-progress.js"'));
+ assert.ok(fs.readFileSync('vite.config.js','utf8').includes("'src/game/pilot-progress.js'"));
  assert.ok(html.includes('src="./src/game/aircraft.js"'));
 });
 test('script principal tem sintaxe JavaScript válida',()=>{
