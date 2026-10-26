@@ -1,0 +1,20 @@
+name: RiverStorm boss flow smoke
+on:
+  push:
+    branches: [full-game-graphics-integration]
+  workflow_dispatch:
+jobs:
+  boss-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm ci
+      - run: npm run build
+      - run: npm install --no-save playwright
+      - run: npx playwright install --with-deps chromium
+      - run: npm run preview -- --host 127.0.0.1 --port 4173 > /tmp/riverstorm-preview.log 2>&1 &
+      - run: node tests/boss-flow-smoke.mjs
