@@ -917,6 +917,22 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
           try{localStorage.setItem('river_boss_skills_v1',JSON.stringify(bossSkillUnlocked))}catch(e){}
           createFloatingText(VIRTUAL_WIDTH/2,150,'PODER '+BOSS_SKILLS[key].name.toUpperCase()+' LIBERADO',BOSS_SKILLS[key].color);
         }
+        function finishBossDefeatedBySkill(e){
+          if(bossDefeatedThisMission)return;
+          e.hp=0;bossDefeatedThisMission=true;bossActive=false;enemyBullets=[];
+          unlockBossSkill(e.skillAffinity);bossSkillEquipped=null;skillUseButton.classList.add('hidden');
+          addExplosion(e.x,e.y,'#ef4444',45);sound.playExplosion(true);
+          score+=awardEnemyPoints(e.score);kills++;
+          enemies=enemies.filter(enemy=>enemy!==e);
+          if(sector<20)writeCheckpoint(sector+1);else try{localStorage.removeItem(CHECKPOINT_KEY)}catch(err){}
+          bossTaunt={name:e.name,line:'MEUS SISTEMAS... DERROTADOS!',ticks:175};
+          if(sector===20){
+            gameState='VICTORY';playlist.pause();journey++;
+            try{localStorage.setItem('river_journey_v1',String(journey))}catch(err){}
+            document.getElementById('rank-award').textContent='JORNADA '+journey+' · '+rankName()+' · MULTIPLICADOR x'+scoreMultiplier().toFixed(2);
+            document.getElementById('victory-screen').classList.remove('hidden');
+          }else{missionTransitionTicks=180;document.getElementById('mission-banner').textContent='PRÓXIMA MISSÃO: '+campaign.at(sector+1).name;createFloatingText(e.x,e.y,'CHEFE DERROTADO!','#22c55e')}
+        }
         function openBossSkillPicker(){
           gameState='BOSS_SELECT';bossSkillPending=null;skillPicker.classList.remove('hidden');
           const options=document.getElementById('boss-skill-options');
@@ -954,12 +970,13 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
           if(kind==='EMP')boss.specialCharge=0;
           if(kind==='LIGHTNING')boss.stunnedTicks=35;
           if(kind==='FIRE')boss.burningTicks=120;
-          boss.hp=Math.max(1,boss.hp-damage);
+          boss.hp=Math.max(0,boss.hp-damage);
           dropBossReward(boss,damage);
           addExplosion(boss.x,boss.y,skill.color,18);
           bossRobotVoice(boss,true);
           createFloatingText(boss.x,boss.y-35,skill.icon+' -'+damage,skill.color);
           bossSkillCharge--;bossSkillCooldown=skill.cooldown;
+          if(boss.hp<=0)finishBossDefeatedBySkill(boss);
         }
         skillUseButton.addEventListener('pointerdown',event=>{event.preventDefault();useBossSkill()});
         // --- HABILIDADES E PADRÕES DE TIROS DOS CHEFÕES ---
@@ -968,7 +985,7 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
             e.shootTimer++;
             if(bossSkillCooldown>0)bossSkillCooldown--;
             for(const prop of ['gravityTicks','frozenTicks','stunnedTicks','burningTicks'])if(e[prop]>0)e[prop]--;
-            if(e.bleeding && ++e.bleedClock>=180){e.bleedClock=0;e.hp=Math.max(1,e.hp-2);createFloatingText(e.x,e.y-35,'SANGRAMENTO -2','#fb7185')}
+            if(e.bleeding && ++e.bleedClock>=180){e.bleedClock=0;e.hp=Math.max(0,e.hp-2);createFloatingText(e.x,e.y-35,'SANGRAMENTO -2','#fb7185');if(e.hp<=0){finishBossDefeatedBySkill(e);return}}
             if(e.stunnedTicks>0)return;
             if(e.rewardCooldown>0)e.rewardCooldown--;
 
