@@ -2041,7 +2041,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
           }catch(error){}
         }
         function updateBiomeEnemy(e){
-          if(e.terrainObstacle)return; // Objetivo destrutível: sem ataques ou IA de perseguição.
+          if(e.terrainObstacle){e.x+=Math.sin(missionTicks*.035+sector)*.12;return;} // Alvo sem disparos.
           e.biomeAge=(e.biomeAge||0)+1;
           const age=e.biomeAge,m=e.biomeMotion,banks=getRiverBoundariesAt(e.y);
           const center=banks.center,room=Math.max(20,banks.width*.27);
@@ -2094,14 +2094,14 @@ const TERRAIN_OBJECTS=['RAIZ','CONTAINER','ROCHA','TRONCO','BOIA','GELO','TORRE'
 function spawnTerrainTarget(center){
   if(bossActive||missionTransitionTicks>0||missionTicks%840!==0)return;
   if(enemies.some(e=>e.terrainObstacle&&e.hp>0))return;
-  const lane=secondaryTargetsDestroyed%2===0?-1:1;
+  const lane=Math.floor(missionTicks/840)%2===0?-1:1;
   const boundaries=getRiverBoundariesAt(-42);
-  const clearance=Math.max(40,Math.min(90,boundaries.width*.22));
+  const clearance=Math.max(40,Math.min(90,boundaries.width*.30));
   const x=Math.max(35,Math.min(VIRTUAL_WIDTH-35,center+lane*clearance));
   const def=BIOME_ENEMIES[(sector-1)%20];
   enemies.push({type:'BIOME_ENEMY',terrainObstacle:true,terrainName:TERRAIN_OBJECTS[(sector-1)%20],
     biomeId:def.id,biomeColor:def.color,biomeMotion:'slow',biomeAttack:'none',biomeSector:sector,
-    x,y:-40,width:35,height:32,vx:0,vy:1.05,hp:12+sector,maxHp:12+sector,
+    x,y:-40,width:35,height:32,vx:0,vy:1.05,hp:12+sector,maxHp:12+sector,terrainStage:3,terrainLane:lane,
     score:190+sector*12,noDrop:true});
   createFloatingText(x,65,'OBJETIVO EXTRA: DESTRUIR '+TERRAIN_OBJECTS[(sector-1)%20],'#fde68a');
 }
@@ -2163,7 +2163,7 @@ function updateTerrainEvent(){
                     if(['EMP','GRAVITY','ICE','POISON','BLEED','PRISM','SHADOW','FIRE','LIGHTNING'].includes(player.effectType)){
                         player.effectType='';player.effectTimer=0;player.disabledTimer=0;
                     }
-                    bossTaunt=null;bossFinalDialogue=false;screenShake=0;
+                    bossTaunt=null;bossFinalDialogue=false;screenShake=0;secondaryTargetsDestroyed=0;
                     // Os projéteis da arena encerrada não podem atingir a missão seguinte.
                     bullets=bullets.filter(b=>b.type!=='REFLECTED'&&b.type!=='BANK_MISSILE');
                     redAlertTriggered=false;redAlertTicks=0;missionTicks=0;missionStartDistance=distance;
@@ -2449,6 +2449,13 @@ function updateTerrainEvent(){
                     updateBossAttacks(e);
                 } else {
                     if(e.type==='BIOME_ENEMY')updateBiomeEnemy(e);
+                    if(e.terrainObstacle){
+                      const stage=Math.max(1,Math.ceil(3*e.hp/Math.max(1,e.maxHp)));
+                      if(stage<e.terrainStage){
+                        e.terrainStage=stage;addExplosion(e.x,e.y,'#fbbf24',4);
+                        createFloatingText(e.x,e.y-22,'ESTRUTURA DANIFICADA','#fde68a');
+                      }
+                    }
                     if(!e.terrainObstacle&&terrainEventTicks>0&&['CROSSWIND','SANDSTORM','ICE'].includes(terrainEventType)){
                         e.x=Math.max((e.width||32)/2,Math.min(VIRTUAL_WIDTH-(e.width||32)/2,e.x+Math.sin(missionTicks*.07+e.y*.03)*.6));
                     }
@@ -3024,6 +3031,16 @@ function updateTerrainEvent(){
                 sector, aircraft:player.aircraftType||selectedPlane, distance, invulnerable:player.invulnerable,
                 quality:qualitySelect.value
             });
+            // Sinalização da rota de bonificação e progresso do objetivo secundário.
+            const target=enemies.find(e=>e.terrainObstacle&&e.hp>0);
+            if(target){
+              ctx.save();ctx.fillStyle='rgba(8,18,36,.75)';ctx.fillRect(9,48,230,34);
+              ctx.font='bold 10px monospace';ctx.fillStyle='#fde68a';
+              ctx.fillText('ALVO EXTRA '+(secondaryTargetsDestroyed+1)+' · '+target.terrainName,17,61);
+              ctx.fillStyle='#334155';ctx.fillRect(17,67,194,6);
+              ctx.fillStyle='#fbbf24';ctx.fillRect(17,67,194*Math.max(0,target.hp/target.maxHp),6);
+              ctx.restore();
+            }
             drawBossCompactMeters();
             for(const e of enemies){if(e.type==='MECHA_SWORD'&&(e.slashArc>0||e.slashWarn>0)){ctx.save();ctx.strokeStyle=e.slashWarn>0?'#fde68a':'#f0abfc';ctx.lineWidth=4;ctx.shadowColor='#e879f9';ctx.shadowBlur=15;ctx.beginPath();ctx.arc(e.x,e.y,e.slashWarn>0?25:34,-Math.PI*.8,Math.PI*.42);ctx.stroke();ctx.restore();if(e.slashArc>0)e.slashArc--;}}
             for(const e of enemies){if(e.type==='BOSS'&&e.swordTrail?.ticks>0){const t=e.swordTrail;t.ticks--;ctx.save();ctx.strokeStyle=t.kind==='blade'?'#f8fafc':t.kind==='impact'?'#fb923c':'#67e8f9';ctx.shadowColor=t.kind==='blade'?'#f472b6':t.kind==='impact'?'#ef4444':'#22d3ee';ctx.shadowBlur=25;ctx.lineWidth=7;ctx.beginPath();ctx.moveTo(t.x1-20,t.y1-18);ctx.quadraticCurveTo((t.x1+t.x2)/2+22,(t.y1+t.y2)/2-27,t.x2+23,t.y2+23);ctx.stroke();ctx.strokeStyle=t.kind==='blade'?'#fb7185':t.kind==='impact'?'#fde68a':'#a5f3fc';ctx.lineWidth=3;ctx.stroke();ctx.restore();}}
