@@ -113,15 +113,51 @@ function landscape(c,data,t){
  bankDetails(c,points,w,h,distance,quality,t);
  // Clima por missão: neblina, chuva, inverno e tempo aberto, legível em telas pequenas.
  const mission=Math.max(1,Math.min(20,data.sector||1));
- const weather=['sun','mist','rain','sun','sun','snow','rain','mist','sun','snow','sun','rain','mist','snow','sun','mist','rain','snow','rain','sun'][(mission-1)%20];
- if(weather==='mist'){
-   const fog=c.createLinearGradient(0,0,0,h);fog.addColorStop(0,'rgba(225,239,241,.17)');fog.addColorStop(.55,'rgba(196,215,221,.08)');fog.addColorStop(1,'rgba(213,239,244,.21)');c.fillStyle=fog;c.fillRect(0,0,w,h);
- }else if(weather==='rain'||weather==='snow'){
-   const amount=quality==='eco'?28:quality==='enhanced'?76:62;
-   c.strokeStyle=weather==='rain'?'rgba(171,214,255,.34)':'rgba(255,255,255,.6)';
-   c.lineWidth=weather==='rain'?1:2;
-   const phase=(Date.now()/(weather==='rain'?7:21))%h;
-   for(let k=0;k<amount;k++){const x=hash(k*33+mission)*w,y=(hash(k*13+mission)*h+phase*(.3+hash(k*9)))%h;c.beginPath();c.moveTo(x,y);c.lineTo(x+(weather==='rain'?7:2),y+(weather==='rain'?17:3));c.stroke()}
+ // Direção de arte individual das vinte operações, com ciclo de iluminação por distância.
+ const CLIMATE=[
+  ['aurora','mist','dawn'],['harbor','drizzle','night'],['dunes','sand','noon'],['mangrove','mist','dusk'],
+  ['atolls','breeze','sunset'],['fjord','snow','twilight'],['rainforest','storm','afternoon'],['megacity','neon','night'],
+  ['volcano','ash','dusk'],['alpine','snow','morning'],['golden','breeze','golden'],['neon','rain','night'],
+  ['delta','storm','dawn'],['blizzard','blizzard','twilight'],['oasis','sand','sunset'],['biolume','mist','midnight'],
+  ['shipyard','drizzle','morning'],['icebergs','snow','noon'],['ruins','lightning','night'],['confluence','storm','sunset']
+ ];
+ const climate=CLIMATE[mission-1],weather=climate[1];
+ const cycle=((distance*.00012+mission*.071)%1+1)%1;
+ // Transição suave entre duas iluminações por operação; o céu nunca obstrui tiros e HUD.
+ const dayGlow=(Math.sin(cycle*Math.PI*2-Math.PI*.5)+1)*.5;
+ const darkness=climate[2]==='night'||climate[2]==='midnight'?.16:climate[2]==='twilight'?.11:.045;
+ c.fillStyle='rgba(4,12,30,'+(darkness+(.10*(1-dayGlow))).toFixed(3)+')';c.fillRect(0,0,w,h);
+ if(quality!=='eco'){
+   const light=c.createLinearGradient(0,0,w,h);
+   light.addColorStop(0,climate[2]==='sunset'||climate[2]==='golden'?'rgba(255,143,62,.14)':climate[2]==='dawn'?'rgba(255,192,128,.12)':'rgba(118,188,255,.04)');
+   light.addColorStop(1,'rgba(12,36,73,0)');c.fillStyle=light;c.fillRect(0,0,w,h);
+ }
+
+ if(['mist','sand','ash'].includes(weather)){
+   const tint=weather==='sand'?'rgba(237,181,99,':'rgba(202,218,230,';
+   const opacity=weather==='sand'?.09:weather==='ash'?.11:.13;
+   c.fillStyle=tint+opacity+')';c.fillRect(0,0,w,h);
+   if(quality!=='eco'){
+     const n=weather==='sand'?23:weather==='ash'?18:13;
+     for(let k=0;k<n;k++){const x=(hash(k*41+mission)*w+distance*(weather==='sand'?.4:.1))%w,y=(hash(k*73+mission)*h+distance*.12)%h;
+       c.fillStyle=tint+(.10+hash(k+mission)*.11)+')';c.fillRect(x,y,weather==='sand'?9:3,1);}
+   }
+ }else if(['rain','drizzle','storm','snow','blizzard','lightning','breeze'].includes(weather)){
+   const wet=['rain','drizzle','storm','lightning'].includes(weather);
+   const flakes=['snow','blizzard'].includes(weather);
+   const amount=quality==='eco'?12:quality==='enhanced'?55:32;
+   const count=weather==='drizzle'?Math.floor(amount*.5):weather==='blizzard'?Math.floor(amount*1.3):amount;
+   c.strokeStyle=wet?'rgba(177,221,255,.32)':flakes?'rgba(248,255,255,.62)':'rgba(255,229,173,.18)';
+   c.lineWidth=flakes?1.8:1;
+   const t=Date.now(),wind=weather==='storm'||weather==='blizzard'?13:weather==='breeze'?7:4;
+   for(let k=0;k<count;k++){
+     const x=(hash(k*33+mission)*w+t*(weather==='breeze'?.008:.003)+k*wind)%w;
+     const y=(hash(k*13+mission)*h+t*(flakes?.025:wet?.08:.015)*(0.3+hash(k*9)))%h;
+     c.beginPath();c.moveTo(x,y);c.lineTo(x+wind,y+(flakes?4:wet?13:2));c.stroke();
+   }
+   if(weather==='lightning'&&quality!=='eco'&&Math.floor((distance+mission*19)/460)%7===0){
+     c.fillStyle='rgba(183,218,255,.07)';c.fillRect(0,0,w,h);
+   }
  }
  // Perfil Aprimorado: reflexos discretos limitados ao canal, sem afetar colisões.
  if(quality==='enhanced'&&riverPath(c,points)){
