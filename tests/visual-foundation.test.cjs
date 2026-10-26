@@ -367,3 +367,13 @@ test('clima permanece pré-alocado e período é informado ao piloto',()=>{
  assert.match(render,/const weatherNames=/);
  assert.match(render,/periodNames\[climate\[2\]\]/);
 });
+
+test('20 mapas têm set pieces específicos com limite de custo por perfil',()=>{
+ const render=read('src/render/scene2d5.js');
+ const match=render.match(/const MAP_FEATURES=\[([\s\S]*?)\];/);
+ assert.ok(match,'catálogo de estruturas de mapas ausente');
+ assert.equal((match[1].match(/'[^']+'/g)||[]).length,20);
+ assert.match(render,/function mapSetPieces\(c,d,t\)/);
+ assert.match(render,/d\.quality==='eco'\?2:d\.quality==='enhanced'\?6:4/);
+ assert.match(render,/mapSetPieces\(c,d,t\);biomeAtmosphere\(c,d,t\)/);
+});
