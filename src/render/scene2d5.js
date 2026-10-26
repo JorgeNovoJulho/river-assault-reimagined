@@ -282,7 +282,7 @@ function biomeAtmosphere(c,data,t){
    const x=side<0?Math.max(8,bank[0]*(.15+.55*hash(seed+4))):w-Math.max(8,(w-bank[1])*(.15+.55*hash(seed+4)));
    const scale=.62+hash(seed+8)*.9;
    c.globalAlpha=quality==='eco'?.4:.55+hash(seed+11)*.22;
-   c.translate(x,y);c.scale(scale,scale);
+   c.save();c.translate(x,y);c.scale(scale,scale);
    c.strokeStyle=detail[1];c.fillStyle=detail[1];c.lineWidth=1.6;
    if([1,7,11,16,18].includes(sector-1)){
      c.strokeRect(-7,-6,14,12);c.beginPath();c.moveTo(-11,8);c.lineTo(11,8);c.stroke();
@@ -299,7 +299,7 @@ function biomeAtmosphere(c,data,t){
      c.beginPath();c.moveTo(-8,7);c.lineTo(0,-10);c.lineTo(8,7);c.stroke();
      c.beginPath();c.moveTo(0,-8);c.lineTo(0,8);c.stroke();
    }
-   c.setTransform(1,0,0,1,0,0);
+   c.restore();
  }
  c.restore();
  // Emblema de ambientação discreto que confirma visualmente o cenário carregado.
