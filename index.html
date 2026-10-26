@@ -610,7 +610,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
             const checkpoint={version:2,sector:Math.max(1,Math.min(20,nextSector)),score,kills,lives:Math.max(1,lives),continues,selectedPlane,earnedPoints,journey,verifiedRun:campaignVerified&&(nextSector===sector||nextSector===sector+1)};
             try{localStorage.setItem(CHECKPOINT_KEY,JSON.stringify(checkpoint));updateContinueButton();return true}catch(err){console.warn('Checkpoint indisponível',err);return false}
         }
-        function readCheckpoint(){try{const c=JSON.parse(localStorage.getItem(CHECKPOINT_KEY)||'null');return c&&c.version===2&&c.verifiedRun===true&&Number.isInteger(c.sector)&&c.sector>=1&&c.sector<=20?c:null}catch(e){return null}}
+        function readCheckpoint(){try{const c=JSON.parse(localStorage.getItem(CHECKPOINT_KEY)||'null');return c&&c.version===2&&c.verifiedRun===true&&Number.isInteger(c.sector)&&c.sector>=1&&c.sector<=20&&c.journey===journey?c:null}catch(e){return null}}
         function updateContinueButton(){const b=document.getElementById('continue-mission-btn');if(b){const c=readCheckpoint();b.classList.toggle('hidden',!c);if(c)b.textContent='CONTINUAR MISSÃO '+c.sector;}}
         const PROFILE_KEY='riverstorm_pilot_profile_v1';
         let pilotProfile={nickname:'',photo:'',playSeconds:0,planeSeconds:{},bestByJourney:{},lastSequentialMission:0};
@@ -847,7 +847,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
         let lastEnemyDistance=-99999;
         let journey=1;
         const RANKS=['Soldado de Primeira Classe','Cabo','Terceiro-Sargento','Segundo-Sargento','Primeiro-Sargento','Suboficial','Aspirante a Oficial','Segundo-Tenente','Primeiro-Tenente','Capitão','Major','Tenente-Coronel','Coronel','Brigadeiro','Major-Brigadeiro','Tenente-Brigadeiro'];
-        try{journey=Math.max(1,Number(localStorage.getItem('river_journey_v1')||1))}catch(e){}
+        try{journey=Math.min(RANKS.length,Math.max(1,Math.floor(Number(localStorage.getItem('river_journey_v1')||1)||1)))}catch(e){}
         const rankName=()=>RANKS[Math.min(journey-1,RANKS.length-1)];
         const scoreMultiplier=()=>Math.pow(1.1,journey-1);
         function finishFullCampaign(){
