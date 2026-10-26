@@ -2528,6 +2528,8 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
                 quality:qualitySelect.value
             });
             drawBossCompactMeters();
+            for(const e of enemies){if(e.type==='BOSS'&&e.stunnedTicks>0){ctx.save();ctx.globalAlpha=.28+.19*Math.sin(missionTicks*.2);ctx.fillStyle='#a855f7';ctx.beginPath();ctx.ellipse(e.x,e.y,e.width*.57,e.height*.58,0,0,Math.PI*2);ctx.fill();ctx.restore();}}
+            if(player.disabledTimer>0&&player.effectType==='EMP'){ctx.save();ctx.globalAlpha=.3+.2*Math.sin(missionTicks*.2);ctx.fillStyle='#a855f7';ctx.beginPath();ctx.ellipse(player.x,player.y,23,28,0,0,Math.PI*2);ctx.fill();ctx.restore();}
             for(const e of enemies){if(e.type!=='BOSS'||e.statusTicks<=0)continue;ctx.save();ctx.globalAlpha=.34;ctx.fillStyle=e.statusKind==='POISON'?'#4ade80':'#fb233a';ctx.beginPath();ctx.ellipse(e.x,e.y,e.width*.55,e.height*.56,0,0,Math.PI*2);ctx.fill();ctx.restore();}
             drawFuelDepots();
             drawStructures();
