@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>RiverStorm — Playtest 0.3.5</title>
+    <title>RiverStorm — Fundação Visual 0.4.0</title>
     <link rel="stylesheet" href="./src/styles/tailwind.css">
     <style>
         body {
@@ -161,7 +161,7 @@
             </details>
 
             <div class="w-full max-w-sm mb-2 text-left"><label for="level-select" class="text-xs text-amber-400 font-bold">MISSÃO PARA TESTE</label><select id="level-select" class="w-full bg-slate-800 text-white border border-slate-600 p-2 rounded"></select><p id="level-summary" class="text-xs text-cyan-200 mt-1"></p></div>
-            <div class="w-full max-w-sm mb-2 text-left"><label for="quality-select" class="text-xs text-cyan-300">QUALIDADE VISUAL</label><select id="quality-select" class="w-full bg-slate-800 text-white border border-slate-600 p-2 rounded"><option value="eco">Econômico — celulares antigos</option><option value="balanced">Equilibrado — mais detalhes</option></select></div>
+            <div class="w-full max-w-sm mb-2 text-left"><label for="quality-select" class="text-xs text-cyan-300">QUALIDADE VISUAL</label><select id="quality-select" class="w-full bg-slate-800 text-white border border-slate-600 p-2 rounded"><option value="eco">Econômico — celulares antigos</option><option value="balanced">Equilibrado — mais detalhes</option><option value="enhanced">Aprimorado — PC e celulares rápidos</option></select></div>
             <div class="w-full max-w-sm mb-4 text-left">
                 <label for="plane-select" class="text-amber-400 block text-xs mb-2 font-bold">ESCOLHA SEU AVIÃO</label>
                 <select id="plane-select" class="w-full p-3 bg-slate-800 text-white rounded border border-cyan-500">
@@ -412,7 +412,16 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
 
         // --- MOTOR DO JOGO E VARIÁVEIS ---
         const canvas = document.getElementById('gameCanvas');
-        const ctx = canvas.getContext('2d');
+        const ctx = canvas.getContext('2d',{alpha:false,desynchronized:true});
+        // Coordenadas de jogo constantes, independentemente do DPR e do tamanho da tela.
+        const visualProfile={
+            eco:{dprMax:1,glow:0,particles:.55},
+            balanced:{dprMax:1.5,glow:.5,particles:.85},
+            enhanced:{dprMax:2,glow:1,particles:1}
+        };
+        function activeVisualProfile(){return visualProfile[document.getElementById('quality-select')?.value]||visualProfile.eco}
+        function beginLogicalFrame(){ctx.setTransform(canvas.width/VIRTUAL_WIDTH,0,0,canvas.height/VIRTUAL_HEIGHT,0,0);ctx.imageSmoothingEnabled=true}
+        let lastBackingWidth=0,lastBackingHeight=0;
 
         const VIRTUAL_WIDTH = 400;
         const VIRTUAL_HEIGHT = 600;
@@ -489,8 +498,8 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
         ];
 
         const qualitySelect=document.getElementById('quality-select');
-        try{qualitySelect.value=localStorage.getItem('river_quality')||'eco'}catch(e){}
-        qualitySelect.addEventListener('change',()=>{try{localStorage.setItem('river_quality',qualitySelect.value)}catch(e){}});
+        try{const value=localStorage.getItem('river_quality');qualitySelect.value=visualProfile[value]?value:'eco'}catch(e){}
+        qualitySelect.addEventListener('change',()=>{try{localStorage.setItem('river_quality',qualitySelect.value)}catch(e){}resizeCanvas();});
         const campaign=window.RiverCampaign;
         const levelSelector=document.getElementById('level-select');
         const levelSummary=document.getElementById('level-summary');
@@ -2139,12 +2148,13 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
 
         // --- RENDERIZAÇÃO PRINCIPAL ---
         function render() {
+            beginLogicalFrame();
             ctx.save();
             if(screenShake>0)ctx.translate((Math.random()-.5)*screenShake,(Math.random()-.5)*screenShake);
             window.RiverVisuals.draw(ctx,{
                 w: VIRTUAL_WIDTH, h: VIRTUAL_HEIGHT, riverPoints, islands, enemies, player,
                 sector, aircraft:selectedPlane, distance, invulnerable:player.invulnerable,
-                quality:localStorage.getItem('river_quality') || 'eco'
+                quality:qualitySelect.value
             });
             drawFuelDepots();
             drawStructures();
@@ -2445,8 +2455,13 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
         }
 
         function resizeCanvas() {
-            canvas.width = VIRTUAL_WIDTH;
-            canvas.height = VIRTUAL_HEIGHT;
+            const density=Math.min(activeVisualProfile().dprMax,Math.max(1,window.devicePixelRatio||1));
+            const nextWidth=Math.round(VIRTUAL_WIDTH*density);
+            const nextHeight=Math.round(VIRTUAL_HEIGHT*density);
+            if(nextWidth===lastBackingWidth&&nextHeight===lastBackingHeight)return;
+            canvas.width=nextWidth;canvas.height=nextHeight;
+            lastBackingWidth=nextWidth;lastBackingHeight=nextHeight;
+            beginLogicalFrame();
         }
 
         window.addEventListener('resize', resizeCanvas);
