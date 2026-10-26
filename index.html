@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>RiverStorm — Investida e Ricochete 0.7.6</title>
+    <title>RiverStorm — Escudo e Rolagem 0.7.7</title>
     <link rel="stylesheet" href="./src/styles/tailwind.css">
     <style>
         body {
@@ -157,7 +157,7 @@
             <div id="start-main" role="region" aria-label="Seleção da missão e hangar">
             <details class="w-full max-w-sm text-left rounded-xl border border-slate-600 bg-slate-900/80 px-3 py-2 text-xs">
               <summary class="cursor-pointer font-bold text-cyan-300">COMO JOGAR ▾</summary>
-              <p class="mt-2 leading-relaxed text-slate-200">Setas/WASD ou mouse: pilotar. Clique esquerdo ou Espaço: atirar. Clique direito ou F: bomba. P/Esc: pausa. No celular: joystick e botões inferiores.</p>
+              <p class="mt-2 leading-relaxed text-slate-200">Setas/WASD ou mouse: pilotar. Q/E: rolagem evasiva. C: investida/poder. V: escudo/parry. Clique esquerdo ou Espaço: atirar. Clique direito ou F: bomba. P/Esc: pausa. No celular: joystick e botões inferiores.</p>
             </details>
 
             <div class="w-full max-w-sm mb-2 text-left"><label for="level-select" class="text-xs text-amber-400 font-bold">MISSÃO PARA TESTE</label><select id="level-select" class="w-full bg-slate-800 text-white border border-slate-600 p-2 rounded"></select><p id="level-summary" class="text-xs text-cyan-200 mt-1"></p></div>
@@ -287,6 +287,8 @@
         <button id="btn-bomb" class="touch-action bomb-action">BOMBA <span id="bomb-count-touch">(3)</span></button>
         <button id="btn-fire" class="touch-action fire-action">TIRO</button>
         <button id="btn-pause-touch" class="touch-action pause-action">PAUSA</button>
+        <button id="btn-roll-left" type="button" aria-label="Rolagem evasiva à esquerda" style="min-height:38px;background:#075985;border:2px solid #67e8f9;border-radius:9px;color:white;font-weight:900">↶ ESQUIVA</button>
+        <button id="btn-roll-right" type="button" aria-label="Rolagem evasiva à direita" style="min-height:38px;background:#075985;border:2px solid #67e8f9;border-radius:9px;color:white;font-weight:900">ESQUIVA ↷</button>
       </div>
     </div>
     <style>
@@ -1036,7 +1038,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
             const bossConfig = {...BOSS_TYPES[mission.bossPattern],name:mission.boss,hp:mission.bossHp,score:1000+sector*240};
             const cycleMultiplier = 1 + Math.floor((sector - 1) / BOSS_TYPES.length) * 0.4;
             // Boss é confronto prolongado; escala por dificuldade, missão e jornada.
-            const calculatedHp = Math.round((360+mission.difficulty*110+sector*27)*cycleMultiplier*Math.pow(1.16,journey-1)*1.20);
+            const calculatedHp = Math.round((360+mission.difficulty*110+sector*27)*cycleMultiplier*Math.pow(1.16,journey-1)*1.20*1.20);
 
             enemies.push({
                 type: 'BOSS',
@@ -1179,6 +1181,13 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
           f.life--;if(f.life<=0)bossSkillEffect=null;
         }
         let swordRushCooldown=0,swordRushTarget=null,swordRushFrames=0;
+        let rollFrames=0,rollCooldown=0,rollDirection=0,rollSpin=0;
+        function activateRoll(direction){
+          if(gameState!=='PLAYING'||player.disabledTimer>0||rollFrames>0||rollCooldown>0)return;
+          rollDirection=direction<0?-1:1;rollFrames=18;rollCooldown=48;rollSpin=0;
+          player.invulnerable=Math.max(player.invulnerable,18);
+          createFloatingText(player.x,player.y-34,rollDirection<0?'ROLAGEM ◀':'ROLAGEM ▶','#67e8f9');
+        }
         function activateSwordRush(){
           if(gameState!=='PLAYING'||bossActive||swordRushCooldown>0)return;
           const target=enemies.filter(e=>e.hp>0&&e.type!=='BOSS').sort((a,b)=>Math.hypot(a.x-player.x,a.y-player.y)-Math.hypot(b.x-player.x,b.y-player.y))[0];
@@ -1228,7 +1237,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
           if(gameState!=='PLAYING')return;
           if(parryTicks>0){parryPrecisionTicks=15;createFloatingText(player.x,player.y-38,'PARRY!','#fef08a');return;}
           if(parryCooldown>0||player.disabledTimer>0)return;
-          parryTicks=15;parryPrecisionTicks=15;parryCooldown=600;parryHeldTicks=0;createFloatingText(player.x,player.y-38,'ESCUDO REFLETOR','#67e8f9');
+          parryTicks=360;parryPrecisionTicks=15;parryCooldown=600;parryHeldTicks=0;createFloatingText(player.x,player.y-38,'ESCUDO REFLETOR','#67e8f9');
           try{window.RiverSFX?.shield?.()}catch(error){}
         }
         parryButton.addEventListener('pointerdown',event=>{event.preventDefault();parryHeld=true;parryButton.setPointerCapture?.(event.pointerId);activateParry()});
@@ -1918,7 +1927,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
             if(!enemies.some(e=>e.type==='BOSS'))document.getElementById('boss-special-hud').classList.add('hidden');
             missionTicks++;
             const skillActive=!!(bossActive&&bossSkillEquipped);
-            skillUseButton.classList.toggle('hidden',!skillActive);
+            skillUseButton.classList.remove('hidden');
             if(skillActive)skillUseButton.textContent=BOSS_SKILLS[bossSkillEquipped].icon+' '+bossSkillCharge+' · '+(bossSkillCooldown>0?Math.ceil(bossSkillCooldown/60)+'s':'PRONTO')+' [C]';
             if(player.effectTimer>0){player.effectTimer--;if((player.effectType==='POISON'||player.effectType==='BLEED')&&player.effectTimer%60===0)applyDamage(player.effectType==='POISON'?3:5,player.effectType);if(player.effectType==='GRAVITY'&&player.effectTimer>0){const boss=enemies.find(e=>e.type==='BOSS');if(boss){player.x+=(boss.x-player.x)*.11;player.y+=(Math.min(VIRTUAL_HEIGHT-65,boss.y+145)-player.y)*.08;}}
             if(player.effectType==='GRAVITY'&&player.effectTimer%60===0)applyDamage(player.maxShield*.03,'GRAVIDADE');if((player.effectType==='PRISM'||player.effectType==='SHADOW')&&player.effectTimer%60===0)applyDamage(player.maxShield*.005,player.effectType);
@@ -2044,14 +2053,16 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
             }
 
             if (player.invulnerable > 0) player.invulnerable--;
-            if(parryTicks>0){parryHeldTicks++;if(parryHeld&&parryHeldTicks<360)parryTicks=Math.max(1,360-parryHeldTicks);else parryTicks--;if(parryHeldTicks>=360)parryTicks=0;}
+            if(parryTicks>0){parryHeldTicks++;parryTicks--;}
+            if(rollCooldown>0)rollCooldown--;
+            if(rollFrames>0){rollFrames--;rollSpin=(18-rollFrames)/18*Math.PI*2;player.x=Math.max(24,Math.min(VIRTUAL_WIDTH-24,player.x+rollDirection*9));player.invulnerable=Math.max(player.invulnerable,2);}
             if(parryPrecisionTicks>0)parryPrecisionTicks--;
             if(parryCooldown>0)parryCooldown--;
             if(swordRushCooldown>0)swordRushCooldown--;
             if(swordRushFrames>0){const target=swordRushTarget;swordRushFrames--;if(target&&target.hp>0){player.x+=(target.x-player.x)*.24;player.y+=(target.y-player.y)*.24;player.invulnerable=Math.max(player.invulnerable,3);if(swordRushFrames===0||Math.hypot(target.x-player.x,target.y-player.y)<22){addExplosion(target.x,target.y,'#f472b6',24);createFloatingText(target.x,target.y-32,'CORTE FATAL','#fef08a');target.hp=0;score+=awardEnemyPoints(target.score||100);kills++;enemies=enemies.filter(e=>e!==target);swordRushFrames=0;}}else swordRushFrames=0;if(swordRushFrames===0)swordRushTarget=null;}
             skillUseButton.textContent=bossActive?'⚡ PODER [C]':'⚔ INVESTIDA [C] '+(swordRushCooldown>0?Math.ceil(swordRushCooldown/60)+'s':'PRONTO');
             skillUseButton.classList.remove('hidden');
-            parryButton.textContent=parryTicks>0?'🛡 ESCUDO '+Math.max(1,Math.ceil((360-parryHeldTicks)/60))+'s':parryCooldown>0?'🛡 '+Math.ceil(parryCooldown/60)+'s':'🛡 PARRY [V]';
+            parryButton.textContent=parryTicks>0?'🛡 ESCUDO '+Math.max(1,Math.ceil(parryTicks/60))+'s':parryCooldown>0?'🛡 '+Math.ceil(parryCooldown/60)+'s':'🛡 PARRY [V]';
 
             // Armas especiais usam disparos disponíveis, não tempo em quadros.
 
@@ -2153,6 +2164,25 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
                 }
             });
 
+            // Escudo cinético: contato arremessa inimigos e ricochetes causam colisões entre si.
+            if(parryTicks>0){for(const e of enemies){
+              if(e.hp<=0||e.type==='BOSS'||Math.hypot(e.x-player.x,e.y-player.y)>53)continue;
+              const dx=e.x-player.x,dy=e.y-player.y,d=Math.max(1,Math.hypot(dx,dy));
+              e.reflectVX=dx/d*11;e.reflectVY=dy/d*11;e.reflectTicks=28;e.hp-=Math.max(1,(e.maxHp||e.hp)*.25);
+              addExplosion(e.x,e.y,'#67e8f9',7);
+            }}
+            for(let i=0;i<enemies.length;i++){
+              const a=enemies[i];if(!a.reflectTicks||a.hp<=0)continue;
+              a.x+=a.reflectVX;a.y+=a.reflectVY;a.reflectTicks--;
+              for(let j=0;j<enemies.length;j++){
+                if(i===j)continue;const b=enemies[j];if(b.hp<=0||b.type==='BOSS'||Math.hypot(a.x-b.x,a.y-b.y)>(a.width+b.width)*.38)continue;
+                if(a.reflectHits?.includes(b))continue;
+                (a.reflectHits??=[]).push(b);
+                const damage=Math.max(1,(a.maxHp||4)*.25);a.hp-=damage;b.hp-=damage;
+                b.reflectVX=(b.x-a.x>=0?1:-1)*8;b.reflectVY=(b.y-a.y>=0?1:-1)*7;b.reflectTicks=18;
+                createFloatingText(b.x,b.y-20,'COLISÃO!','#fef08a');addExplosion(b.x,b.y,'#fb923c',10);
+              }
+            }
             // Lógica e Colisão com Inimigos
             enemies.forEach((e, eIndex) => {
                 if (e.type === 'BOSS') {
@@ -2964,6 +2994,14 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
             if(gameState!=='PLAYING'&&!controllerMenuOpen)gameLoop.lastMenuFrame=timestamp;
             gamepadState = physicalGamepad.poll();
             const parryPadPressed=!!physicalGamepad.lastButtons[4];
+            const rollLeftPad=!!physicalGamepad.lastButtons[6],rollRightPad=!!physicalGamepad.lastButtons[7];
+            if(gameState==='PLAYING'&&!controllerMenuOpen){
+              if(rollLeftPad&&!gameLoop.rollLeftPrev)activateRoll(-1);
+              if(rollRightPad&&!gameLoop.rollRightPrev)activateRoll(1);
+              if(physicalGamepad.lastButtons[2]&&!gameLoop.skillPadPrev){if(bossActive)useBossSkill();else activateSwordRush();}
+            }
+            gameLoop.rollLeftPrev=rollLeftPad;gameLoop.rollRightPrev=rollRightPad;
+            gameLoop.skillPadPrev=!!physicalGamepad.lastButtons[2];
             if(parryPadPressed&&!gameLoop.parryPadPrev&&gameState==='PLAYING')activateParry();
             if(parryPadPressed)parryHeld=true;else if(gameLoop.parryPadPrev)parryHeld=false;
             gameLoop.parryPadPrev=parryPadPressed;
@@ -3082,6 +3120,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
             if (e.code === 'Space' || e.code === 'KeyZ') { if(!e.repeat)fireWeapon(); }
             if(e.code==='KeyC'&&!e.repeat){e.preventDefault();if(bossActive)useBossSkill();else activateSwordRush()}
             if(e.code==='KeyV'&&!e.repeat){e.preventDefault();parryHeld=true;activateParry()}
+            if((e.code==='KeyQ'||e.code==='KeyE')&&!e.repeat){e.preventDefault();activateRoll(e.code==='KeyQ'?-1:1)}
             if (e.code === 'KeyX' || e.code === 'KeyF' || e.code === 'ShiftLeft') triggerBomb();
 
             if (e.code === 'KeyP' || e.code === 'Escape') {
@@ -3108,6 +3147,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
             btn.addEventListener('touchend', (e) => { e.preventDefault(); keys[keyName] = false; });
         };
 
+        for(const [id,dir] of [['btn-roll-left',-1],['btn-roll-right',1]])document.getElementById(id).addEventListener('pointerdown',e=>{e.preventDefault();activateRoll(dir)});
         // Joystick analógico com pointer capture e zona morta; converte em comandos existentes.
         const joystick = document.getElementById('virtual-joystick');
         const knob = document.getElementById('joystick-knob');
