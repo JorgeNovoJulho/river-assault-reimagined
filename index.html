@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>RiverStorm — Obstáculos Visuais 0.4.2</title>
+    <title>RiverStorm — HUD Compacto 0.4.3</title>
     <link rel="stylesheet" href="./src/styles/tailwind.css">
     <style>
         body {
@@ -83,20 +83,6 @@
 
 </head>
 <body class="h-screen w-screen flex flex-col items-center justify-center p-2 sm:p-4">
-
-    <!-- Barra de Informações Superior -->
-    <div class="w-full max-w-xl flex justify-between items-center mb-2 px-2 text-xs sm:text-sm font-bold tracking-wider text-slate-300">
-        <div>RECORDE: <span id="hi-score-text" class="text-yellow-400">000000</span></div>
-        <div class="flex items-center gap-3">
-            <button id="crt-toggle" class="bg-slate-800 hover:bg-slate-700 text-xs px-2 py-1 rounded border border-slate-600 transition">CRT: LIG</button>
-            <button id="controller-settings-btn" class="bg-slate-800 hover:bg-slate-700 text-xs px-2 py-1 rounded border border-slate-600">CONFIGURAÇÕES</button>
-            <button id="track-next" class="bg-slate-800 hover:bg-slate-700 text-xs px-2 py-1 rounded border border-slate-600">PRÓXIMA</button>
-            <button id="music-library" class="bg-slate-800 hover:bg-slate-700 text-xs px-2 py-1 rounded border border-slate-600">MÚSICAS</button>
-            <input id="music-upload" class="hidden" type="file" accept=".mp3,.ogg,.wav,.m4a,audio/*" multiple>
-            <button id="music-toggle" class="bg-slate-800 hover:bg-slate-700 text-xs px-2 py-1 rounded border border-slate-600">MÚSICA: LIG</button>
-            <button id="sound-toggle" class="bg-slate-800 hover:bg-slate-700 text-xs px-2 py-1 rounded border border-slate-600 transition">SOM: LIG</button>
-        </div>
-    </div>
 
     <!-- Moldura Principal do Jogo -->
     <div id="boss-dialogue-strip" aria-live="polite" class="hidden" style="box-sizing:border-box;flex:0 0 auto;width:min(100%,960px);min-height:80px;max-height:94px;overflow:hidden;background:#0d1c34;border:2px solid #d69e34;border-radius:12px;padding:12px 16px;text-align:center;line-height:1.4;font-size:clamp(14px,2.9vw,18px);box-shadow:0 3px 14px #0007"><b id="boss-dialogue-name" style="display:block;color:#fbbf24"></b><span id="boss-dialogue-text" style="color:#fff"></span></div>
@@ -217,6 +203,47 @@
         </div>
     </div>
 
+    <!-- HUD compacto unificado: fora do Canvas para preservar toda a área de combate. -->
+    <section id="compact-hud" aria-label="Painel de combate RiverStorm">
+      <div class="rs-hud-grid">
+        <div class="rs-hud-cell rs-score"><span class="rs-label">🏆 RECORDE <b id="hi-score-text" class="rs-yellow">000000</b></span><span class="rs-label">◎ PONTOS <b id="hud-score" class="rs-yellow">000000</b></span></div>
+        <div class="rs-hud-cell"><span class="rs-label">🎯 ARMA <b id="hud-weapon" class="rs-yellow">SINGLE</b></span><span class="rs-label">TIROS <b id="hud-shots">0</b></span></div>
+        <div class="rs-hud-cell"><span class="rs-label">💣 BOMBAS <b id="hud-bombs" class="rs-yellow">3 / 5</b></span><span class="rs-label">♥ VIDAS <b id="hud-lives">3</b></span></div>
+        <div class="rs-hud-cell"><span class="rs-label">⛽ GAS <b id="hud-fuel">100%</b></span><div class="rs-meter"><span id="hud-fuel-fill" style="background:#22c55e;width:100%"></span></div></div>
+        <div class="rs-hud-cell"><span class="rs-label">🛡 ESCUDO <b id="hud-shield">150</b></span><div class="rs-meter"><span id="hud-shield-fill" style="background:#38bdf8;width:100%"></span></div></div>
+        <div class="rs-hud-cell"><span class="rs-label">♟ RESGATES <b id="hud-rescues">0</b></span><span class="rs-label">✈ <b id="hud-plane">FALCÃO</b></span></div>
+      </div>
+      <div class="rs-hud-footer"><span id="mission-hud">SELVA DA AURORA</span><b id="sector-hud">SETOR 1</b><span id="hud-rank">J1 SOLDADO</span></div>
+    </section>
+    <div id="rs-bottom-actions" aria-label="Opções rápidas">
+      <button id="crt-toggle" type="button">CRT: LIG</button>
+      <button id="controller-settings-btn" type="button">⚙ CONTROLE</button>
+      <button id="track-next" type="button">⏭</button>
+      <button id="music-library" type="button">♫ MÚSICAS</button>
+      <input id="music-upload" class="hidden" type="file" accept=".mp3,.opus,.ogg,.wav,.m4a,audio/*" multiple>
+      <button id="music-toggle" type="button">MÚS: LIG</button>
+      <button id="sound-toggle" type="button">SOM: LIG</button>
+    </div>
+
+    <style>
+      #game-container{min-height:180px}
+      #mission-banner{display:none!important}
+      #compact-hud{box-sizing:border-box;width:100%;max-width:920px;flex:0 0 auto;background:linear-gradient(#0b2842,#071326);border:2px solid #3d8faf;border-radius:7px;padding:4px 6px;color:#e4f7ff;box-shadow:inset 0 0 0 1px #163a5c;font:700 clamp(9px,1.15vw,12px) monospace}
+      .rs-hud-grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:3px}
+      .rs-hud-cell{min-width:0;display:flex;flex-direction:column;justify-content:space-evenly;padding:3px 5px;background:#09192e;border:1px solid #28567e;border-radius:4px;min-height:38px}
+      .rs-label{display:flex;justify-content:space-between;gap:4px;white-space:nowrap;overflow:hidden;font-size:inherit}
+      .rs-label b{color:#7dd3fc;text-overflow:ellipsis;overflow:hidden}
+      .rs-label .rs-yellow,.rs-yellow{color:#facc15!important}
+      .rs-meter{height:5px;background:#20384b;border:1px solid #47677b;border-radius:2px;overflow:hidden;margin-top:4px}
+      .rs-meter span{display:block;height:100%}
+      .rs-hud-footer{display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:21px;margin-top:3px;padding:1px 6px;border:1px solid #224e73;border-radius:4px;font-size:inherit}
+      #sector-hud{color:#67e8f9}
+      #hud-rank{color:#fde68a}
+      #rs-bottom-actions{display:flex;align-items:center;justify-content:center;gap:3px;flex-wrap:wrap;max-width:920px;width:100%;flex:0 0 auto}
+      #rs-bottom-actions button{background:#0d263b;color:#ccecff;border:1px solid #2e6788;border-radius:4px;padding:3px 7px;font:700 10px monospace;cursor:pointer}
+      #rs-bottom-actions button:focus-visible{outline:2px solid #facc15}
+      @media(max-width:650px){#compact-hud{font-size:8px}.rs-hud-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.rs-hud-cell{min-height:29px;padding:2px 4px}.rs-hud-footer{font-size:8px}#rs-bottom-actions button{font-size:9px;padding:2px 5px}}
+    </style>
     <!-- Controle adaptado para telas móveis: joystick à esquerda / ações à direita -->
     <div id="touch-controls" class="touch-layout" aria-label="Controles de toque">
       <div id="virtual-joystick" class="joystick-zone" aria-label="Alavanca virtual" role="group">
@@ -1801,59 +1828,22 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
             });
         }
 
-        function drawHUD() {
-            const fuelPercent = Math.max(0, player.fuel / player.maxFuel);
-            ctx.fillStyle='#fef08a';ctx.font='bold 11px system-ui';ctx.textAlign='left';
-            ctx.fillStyle='#bbf7d0';ctx.font='bold 11px system-ui';ctx.textAlign='right';ctx.fillText('RESGATADOS: '+rescuedSoldiers+' · VIDAS: '+lives,VIRTUAL_WIDTH-15,54);ctx.textAlign='left';
-            ctx.fillStyle = 'rgba(15, 23, 42, 0.85)';
-            ctx.fillRect(10, VIRTUAL_HEIGHT - 32, 140, 22);
-            ctx.strokeStyle = '#475569';
-            ctx.strokeRect(10, VIRTUAL_HEIGHT - 32, 140, 22);
-
-            ctx.fillStyle = fuelPercent > 0.4 ? '#22c55e' : (fuelPercent > 0.2 ? '#eab308' : '#ef4444');
-            ctx.fillRect(14, VIRTUAL_HEIGHT - 28, 132 * fuelPercent, 14);
-
-            ctx.fillStyle = '#ffffff';
-            ctx.font = 'bold 10px monospace';
-            ctx.textAlign = 'left';
-            ctx.fillText(`GAS: ${Math.ceil(player.fuel)}%`, 18, VIRTUAL_HEIGHT - 17);
-            ctx.fillStyle='rgba(15,23,42,.9)';ctx.fillRect(10,VIRTUAL_HEIGHT-59,140,21);
-            ctx.strokeStyle='#f59e0b';ctx.strokeRect(10,VIRTUAL_HEIGHT-59,140,21);
-            ctx.fillStyle='#fde68a';ctx.font='bold 11px system-ui';ctx.fillText('BOMBAS  '+player.bombs+' / 5',18,VIRTUAL_HEIGHT-45);
-            ctx.fillStyle='#facc15';ctx.font='bold 12px system-ui';ctx.fillText('ARMA: '+player.weapon+' | '+(player.specialShots||0)+' TIROS',12,72);
-
-            const shieldPercent = Math.max(0, player.shield / player.maxShield);
-            ctx.fillStyle = 'rgba(15, 23, 42, 0.85)';
-            ctx.fillRect(160, VIRTUAL_HEIGHT - 32, 120, 22);
-            ctx.strokeStyle = '#475569';
-            ctx.strokeRect(160, VIRTUAL_HEIGHT - 32, 120, 22);
-
-            ctx.fillStyle = shieldPercent > 0.5 ? '#38bdf8' : (shieldPercent > 0.25 ? '#f59e0b' : '#ef4444');
-            ctx.fillRect(164, VIRTUAL_HEIGHT - 28, 112 * shieldPercent, 14);
-
-            ctx.fillStyle = '#ffffff';
-            ctx.font = 'bold 10px monospace';
-            ctx.fillText(`ESCUDO: ${Math.ceil(player.shield)}`, 168, VIRTUAL_HEIGHT - 17);
-            // Mesma linha: escudo à esquerda, patente compacta à direita.
-            ctx.fillStyle='rgba(9,26,45,.93)';ctx.fillRect(286,VIRTUAL_HEIGHT-32,104,22);
-            ctx.strokeStyle='#eab308';ctx.strokeRect(286,VIRTUAL_HEIGHT-32,104,22);
-            ctx.font='bold 9px system-ui';ctx.fillStyle='#fde68a';
-            ctx.fillText('J'+journey+' '+rankName().slice(0,15),291,VIRTUAL_HEIGHT-18);
-
-
-            ctx.fillStyle = 'rgba(15, 23, 42, 0.85)';
-            ctx.fillRect(10, 10, VIRTUAL_WIDTH - 20, 26);
-            ctx.strokeStyle = '#334155';
-            ctx.strokeRect(10, 10, VIRTUAL_WIDTH - 20, 26);
-
-            ctx.fillStyle = '#facc15';
-            ctx.font = 'bold 12px monospace';
-            ctx.textAlign = 'left';
-            ctx.fillText(`PONTOS: ${String(score).padStart(6, '0')}`, 18, 27);
-
-            ctx.fillStyle = '#38bdf8';
-            ctx.textAlign = 'right';
-            ctx.fillText(`SETOR ${sector}`, VIRTUAL_WIDTH - 18, 27);
+        function drawHUD(){
+            const set=(id,value)=>{const el=document.getElementById(id);if(el && el.textContent!==String(value))el.textContent=String(value)};
+            set('hud-score',String(score).padStart(6,'0'));
+            set('hud-weapon',player.weapon);
+            set('hud-shots',player.specialShots||0);
+            set('hud-bombs',player.bombs+' / 5');
+            set('hud-lives',lives);
+            set('hud-fuel',Math.max(0,Math.ceil(player.fuel))+'%');
+            set('hud-shield',Math.max(0,Math.ceil(player.shield)));
+            set('hud-rescues',rescuedSoldiers);
+            set('hud-plane',aircraftCatalog.PLANES[selectedPlane].name);
+            set('mission-hud',campaign.at(sector).name.toUpperCase());
+            set('sector-hud','SETOR '+sector);
+            set('hud-rank','J'+journey+' '+rankName().slice(0,16));
+            document.getElementById('hud-fuel-fill').style.width=Math.max(0,Math.min(100,player.fuel))+'%';
+            document.getElementById('hud-shield-fill').style.width=Math.max(0,Math.min(100,player.shield/player.maxShield*100))+'%';
         }
 
         function applyDamage(amount, reason) {
