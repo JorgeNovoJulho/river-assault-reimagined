@@ -70,7 +70,7 @@ test('gameplay 045: dams spaced, shots held, banks targetable',()=>{
  assert.match(html,/touchFireButton\.addEventListener\('pointerdown'/);
  assert.match(html,/e\.type === 'SHIP' \|\| e\.type === 'TURRET'/);
  assert.match(html,/e\.y>=5 && e\.y<VIRTUAL_HEIGHT-90/);
- assert.match(html,/HUD 0\.7\.5/);
+ assert.match(html,/HUD 0\.7\.6/);
 });
 
 test('hotfix 1: pickup spacing and visual types are enforced',()=>{
@@ -131,7 +131,7 @@ test('visual phase 04: all twenty missions have deterministic biome atmosphere',
  assert.match(renderer,/BIOME_DETAILS,/);
  assert.match(renderer,/c\.save\(\);c\.translate\(x,y\);c\.scale\(scale,scale\)/);
  assert.match(renderer,/c\.restore\(\);/);
- assert.match(html,/HUD 0\.7\.5/);
+ assert.match(html,/HUD 0\.7\.6/);
  assert.match(campaign,/"id": 20/);
  const codes=renderer.match(/\['[A-Z_]+','#[A-Fa-f0-9]+','[^']+'\]/g)||[];
  assert.equal(codes.length,20);
@@ -150,7 +150,7 @@ test('visual 05: all seven player aircraft and key enemy types render unique det
  assert.match(scene,/function enemyDetails\(/);
  assert.match(scene,/aircraftDetails\(c,style,trim\)/);
  assert.match(scene,/enemyDetails\(c,e\)/);
- assert.match(read('index.html'),/HUD 0\.7\.5/);
+ assert.match(read('index.html'),/HUD 0\.7\.6/);
 });
 
 test('visual hangar 052: selected planes, portraits, pilot miniatures, visible silhouettes',()=>{
@@ -161,7 +161,7 @@ test('visual hangar 052: selected planes, portraits, pilot miniatures, visible s
  assert.match(html,/function renderHangar\(/);
  assert.match(html,/renderHangar\(\);/);
  assert.match(html,/window\.RiverVisuals/);
- assert.match(html,/HUD 0\.7\.5/);
+ assert.match(html,/HUD 0\.7\.6/);
  for(const plane of ['falcao','vespa','cometa','fenix','helicoptero','disco','titan'])
    assert.match(html,new RegExp(plane+":\\["));
  for(const enemy of ['MECHA_SWORD','MECHA_GUN','TANK','TURRET','BOSS']) assert.ok(renderer.includes(enemy));
@@ -174,7 +174,7 @@ test('hangar 053: scrollable menu preserves previews on short displays',()=>{
  assert.match(html,/id="pilot-portrait"/);
  assert.match(html,/id="pilot-body"/);
  assert.match(html,/id="hangar-stats"/);
- assert.match(html,/HUD 0\.7\.5/);
+ assert.match(html,/HUD 0\.7\.6/);
 });
 
 test('hangar 054: commands outside scrollable hangar and attribute bars',()=>{
@@ -183,7 +183,7 @@ test('hangar 054: commands outside scrollable hangar and attribute bars',()=>{
  assert.match(html,/#start-actions\{display:grid!important/);
  assert.match(html,/#start-screen>div:not\(#start-actions\)/);
  for(const id of ['start-btn','menu-settings-btn','hangar-speed-bar','hangar-shield-bar','hangar-range-bar','hangar-fire-bar'])assert.ok(html.includes('id="'+id+'"'));
- assert.match(html,/HUD 0\.7\.5/);
+ assert.match(html,/HUD 0\.7\.6/);
 });
 
 test('menu 055: single scroll region prevents giant mission and quality cards',()=>{
@@ -192,7 +192,7 @@ test('menu 055: single scroll region prevents giant mission and quality cards',(
  assert.match(html,/#start-screen>#start-main>div/);
  assert.match(html,/#start-screen>#start-main\{display:flex!important/);
  assert.match(html,/#start-screen>#start-actions\{flex:0 0 auto!important/);
- assert.match(html,/HUD 0\.7\.5/);
+ assert.match(html,/HUD 0\.7\.6/);
 });
 
 test('deployment 056: build-id fingerprint and verifiable published version',()=>{
@@ -205,7 +205,7 @@ test('deployment 056: build-id fingerprint and verifiable published version',()=
  assert.match(vite,/\.split\('src="\.\/\+'/);
  assert.match(workflow,/build-info\.json/);
  assert.match(workflow,/scene2d5\.js\?build=\$GITHUB_SHA/);
- assert.match(html,/HUD 0\.7\.5/);
+ assert.match(html,/HUD 0\.7\.6/);
 });
 
 test('menu 057: desktop columns, mobile single-column and combat HUD hidden',()=>{
@@ -216,7 +216,7 @@ test('menu 057: desktop columns, mobile single-column and combat HUD hidden',()=
  assert.match(html,/body:has\(#start-screen:not\(\.hidden\)\) #compact-hud/);
  assert.match(html,/body:has\(#start-screen:not\(\.hidden\)\) #rs-bottom-actions/);
  assert.match(html,/@media\(max-width:720px\)/);
- assert.match(html,/HUD 0\.7\.5/);
+ assert.match(html,/HUD 0\.7\.6/);
 });
 
 test('menu 058: uncropped two-line title and useful sidebar panels',()=>{
@@ -224,7 +224,7 @@ test('menu 058: uncropped two-line title and useful sidebar panels',()=>{
  assert.match(html,/<h1><span>RIVER<\/span><span>STORM<\/span><\/h1>/);
  assert.match(html,/brand-feature/);
  assert.match(html,/#start-brand h1 span/);
- assert.match(html,/HUD 0\.7\.5/);
+ assert.match(html,/HUD 0\.7\.6/);
 });
 
 test('combat 059: boss skill animations, synthesized audio and varied enemy waves',()=>{
@@ -236,7 +236,7 @@ test('combat 059: boss skill animations, synthesized audio and varied enemy wave
  assert.match(html,/e\.attackTimer%850===0/);
  assert.match(html,/missionTicks%550===0/);
  assert.match(html,/const roster=\['SUB','SHIP','JET','HELI','ZIGZAG','TANK','TURRET'\]/);
- assert.match(html,/HUD 0\.7\.5/);
+ assert.match(html,/HUD 0\.7\.6/);
 });
 
 test('aircraft and missiles 061: active model, weapons and powerup integration',()=>{
@@ -251,7 +251,7 @@ test('aircraft and missiles 061: active model, weapons and powerup integration',
  assert.match(html,/b\.damage\|\|1/);
  assert.match(html,/boss\.gravityTicks=600/);
  assert.match(html,/continues=10/);
- assert.match(html,/HUD 0\.7\.5/);
+ assert.match(html,/HUD 0\.7\.6/);
 });
 
 test('aircraft 062: seven distinct silhouettes visible in game and pickups accessible',()=>{
@@ -266,7 +266,7 @@ test('aircraft 062: seven distinct silhouettes visible in game and pickups acces
  assert.match(html,/missionTicks%1150===0/);
  assert.match(html,/player\.specialShots = 100/);
  assert.match(html,/continues=10/);
- assert.match(html,/HUD 0\.7\.5/);
+ assert.match(html,/HUD 0\.7\.6/);
 });
 
 test('063: save aircraft preference, poison and bleed counter-elements',()=>{
@@ -281,7 +281,7 @@ test('063: save aircraft preference, poison and bleed counter-elements',()=>{
  assert.match(html,/COMO DESCOBRIU MINHA FRAQUEZA/);
  assert.match(html,/Object\.values\(BOSS_SKILLS\)\.find/);
  assert.match(render,/player\.aircraftType\|\|d\.aircraft,0\.85/);
- assert.match(html,/HUD 0\.7\.5/);
+ assert.match(html,/HUD 0\.7\.6/);
 });
 
 test('064: horizontal wing rockets, diagonal drones, capped status and EMP immunity to DOT',()=>{
@@ -293,7 +293,7 @@ test('064: horizontal wing rockets, diagonal drones, capped status and EMP immun
  assert.match(html,/cap=e\.statusBaseHp\*\.30/);
  assert.match(html,/boss\.gravityRate=advantage\?\.06:\.03/);
  assert.match(html,/boss\.stunnedTicks=300/);
- assert.match(html,/HUD 0\.7\.5/);
+ assert.match(html,/HUD 0\.7\.6/);
 });
 
 test('065 approved EMP has no damage and gravity ticks full 3 seconds',()=>{
@@ -304,7 +304,7 @@ test('065 approved EMP has no damage and gravity ticks full 3 seconds',()=>{
  assert.match(html,/e\.gravityClock%60===0/);
  assert.match(html,/boss\.gravityRate=advantage\?\.06:\.03/);
  assert.match(html,/cap=e\.statusBaseHp\*\.30/);
- assert.match(html,/HUD 0\.7\.5/);
+ assert.match(html,/HUD 0\.7\.6/);
 });
 
 test('boss 066: restrained EMP, 50 percent frozen firing, choreography and explosive knockback',()=>{
@@ -314,7 +314,7 @@ test('boss 066: restrained EMP, 50 percent frozen firing, choreography and explo
  assert.match(html,/e\.bombKnockback=38/);
  assert.match(html,/e\.stunnedTicks>0/);
  assert.match(html,/ctx\.fillStyle='#a855f7'/);
- assert.match(html,/HUD 0\.7\.5/);
+ assert.match(html,/HUD 0\.7\.6/);
 });
 
 test('067: all twenty mission enemies spawn and use their own render and attack',()=>{
@@ -325,7 +325,7 @@ test('067: all twenty mission enemies spawn and use their own render and attack'
  assert.match(html,/function updateBiomeEnemy\(/);
  assert.match(html,/function playBiomeEnemySound\(/);
  assert.match(render,/function drawBiomeEnemy\(/);
- assert.match(html,/HUD 0\.7\.5/);
+ assert.match(html,/HUD 0\.7\.6/);
 });
 
 test('068: boss telegraph and limited specials, parry and projectile reflection',()=>{
@@ -337,7 +337,7 @@ test('068: boss telegraph and limited specials, parry and projectile reflection'
  assert.match(html,/abilityCooldown-90/);
  assert.match(html,/parryTicks>0&&Math\.hypot/);
  assert.match(html,/KeyV/);
- assert.match(html,/HUD 0\.7\.5/);
+ assert.match(html,/HUD 0\.7\.6/);
 });
 
 test('069: prism and shadow arsenal and opposite weaknesses',()=>{
@@ -351,7 +351,7 @@ test('069: prism and shadow arsenal and opposite weaknesses',()=>{
  assert.match(html,/boss\.dualSlow=kind==='SHADOW'/);
  assert.match(html,/dualElement==='PRISM'\?1\+/);
  assert.match(html,/pattern===7\|\|pattern===8/);
- assert.match(html,/HUD 0\.7\.5/);
+ assert.match(html,/HUD 0\.7\.6/);
 });
 
 test('070: light/shadow offensive powers, boss summons and slash combat',()=>{
@@ -367,7 +367,7 @@ test('070: light/shadow offensive powers, boss summons and slash combat',()=>{
  assert.match(html,/bossProjectileElement/);
  assert.match(html,/function playBiomeEnemySound\(/);
  assert.match(render,/function drawBiomeEnemy\(/);
- assert.match(html,/HUD 0\.7\.5/);
+ assert.match(html,/HUD 0\.7\.6/);
 });
 
 test('071: skill trajectories, aimed parry return and four projectile wave types',()=>{
@@ -381,7 +381,7 @@ test('071: skill trajectories, aimed parry return and four projectile wave types
  assert.match(html,/type:'REFLECTED'/);
  assert.match(html,/const wave=Math\.floor\(e\.shootTimer/);
  assert.match(html,/waveStyle:wave/);
- assert.match(html,/HUD 0\.7\.5/);
+ assert.match(html,/HUD 0\.7\.6/);
 });
 
 test('072: fixed skills per boss, held parry, reflected double damage and visible dives',()=>{
@@ -395,7 +395,7 @@ test('072: fixed skills per boss, held parry, reflected double damage and visibl
  assert.match(html,/type:'REFLECTED',color:'#22f7c4',damage:50/);
  assert.match(html,/targetY=\[85,205,155,245,110\]/);
  assert.match(html,/e\.swordCharge=60/);
- assert.match(html,/HUD 0\.7\.5/);
+ assert.match(html,/HUD 0\.7\.6/);
 });
 
 test('073: boss sword classes and parry stun vulnerability',()=>{
@@ -406,7 +406,7 @@ test('073: boss sword classes and parry stun vulnerability',()=>{
  assert.match(html,/parryVulnerableTicks>0\?1\.5:1/);
  assert.match(html,/if\(!defendCharge\(e\)\)applyDamage\(35/);
  assert.match(html,/if\(!defendCharge\(e\)\)applyDamage\(20/);
- assert.match(html,/HUD 0\.7\.5/);
+ assert.match(html,/HUD 0\.7\.6/);
 });
 
 test('074: shooting enemies, homing reflection, diagonal escorts and boss music',()=>{
@@ -420,7 +420,7 @@ test('074: shooting enemies, homing reflection, diagonal escorts and boss music'
  assert.match(music,/beginBossTheme\(\)/);
  assert.match(music,/endBossTheme\(\)/);
  assert.match(music,/bundled-14/);
- assert.match(html,/HUD 0\.7\.5/);
+ assert.match(html,/HUD 0\.7\.6/);
 });
 
 test('075: six-second invulnerable shield and enemy impact reflection',()=>{
@@ -432,5 +432,18 @@ test('075: six-second invulnerable shield and enemy impact reflection',()=>{
  assert.match(html,/const enemyTouchesShield=parryTicks>0/);
  assert.match(html,/e\.hp=Math\.max\(0,e\.hp-40\*1\.25\)/);
  assert.match(html,/e\.shieldBounceCooldown=45/);
- assert.match(html,/HUD 0\.7\.5/);
+ assert.match(html,/HUD 0\.7\.6/);
+});
+
+test('076: boss health, sword rush, ricochet collisions, re-tap parry',()=>{
+ const html=read('index.html');
+ assert.match(html,/Math\.pow\(1\.16,journey-1\)\*1\.20/);
+ assert.match(html,/function activateSwordRush\(/);
+ assert.match(html,/swordRushCooldown=240/);
+ assert.match(html,/if\(bossActive\)useBossSkill\(\);else activateSwordRush\(\)/);
+ assert.match(html,/e\.shieldReboundTicks=28/);
+ assert.match(html,/other\.hp=Math\.max\(0,other\.hp-damage\)/);
+ assert.match(html,/parryPrecisionTicks=15/);
+ assert.match(html,/parryHeldTicks<360/);
+ assert.match(html,/HUD 0\.7\.6/);
 });
