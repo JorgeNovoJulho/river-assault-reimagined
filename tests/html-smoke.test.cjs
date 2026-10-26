@@ -119,3 +119,11 @@ test('final da arena limpa projéteis e estados temporários do chefe',()=>{
  assert.match(html,/bossSkillEffect=null;skillTrajectories=\[\]/);
  assert.match(html,/e\.dualTicks=0;e\.gravityTicks=0/);
 });
+
+test('projéteis são percorridos em ordem inversa evitando pular tiros removidos',()=>{
+ const html=fs.readFileSync('index.html','utf8');
+ assert.match(html,/for\(let index=bullets\.length-1;index>=0;index--\)/);
+ assert.match(html,/for\(let index=enemyBullets\.length-1;index>=0;index--\)/);
+ assert.match(html,/!Number\.isFinite\(eb\.x\)/);
+ assert.match(html,/dodgeReflect:rollFrames>0\}\);addExplosion[\s\S]*?continue;/);
+});
