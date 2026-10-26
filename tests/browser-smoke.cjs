@@ -79,6 +79,21 @@ const {chromium}=require('playwright');const {spawn}=require('node:child_process
   await page.locator('#continue-btn').click();
   const continued=await page.evaluate(()=>({lives,state:gameState,credits:continues,screenHidden:document.getElementById('game-over-screen').classList.contains('hidden')}));
   if(continued.lives!==3||continued.state!=='PLAYING'||continued.credits!==0||!continued.screenHidden)throw Error('O botão CONTINUAR falhou: '+JSON.stringify(continued));
+  const bossFlow=await page.evaluate(()=>{
+    enemies=[];bullets=[];enemyBullets=[];bossDefeatedThisMission=false;
+    missionTransitionTicks=0;missionTicks=5500;player.invulnerable=5000;player.shield=player.maxShield;
+    spawnBoss(-100);
+    const boss=enemies.find(e=>e.type==='BOSS');boss.x=player.x;boss.y=110;boss.hp=1;
+    bullets.push({x:boss.x,y:boss.y,speed:0,vx:0});
+    update();
+    const transitionStarted={bossActive,defeated:bossDefeatedThisMission,ticks:missionTransitionTicks,sector};
+    for(let i=0;i<180;i++)update();
+    return {transitionStarted,finished:{sector,bossActive,defeated:bossDefeatedThisMission,ticks:missionTransitionTicks,mission:document.getElementById('mission-banner').textContent}};
+  });
+  console.log('Boss transition:',JSON.stringify(bossFlow));
+  if(bossFlow.transitionStarted.bossActive||!bossFlow.transitionStarted.defeated||bossFlow.transitionStarted.ticks!==180||
+     bossFlow.finished.sector!==6||bossFlow.finished.ticks!==0||bossFlow.finished.defeated)
+     throw Error('Chefe bloqueou a transição de missão: '+JSON.stringify(bossFlow));
   if(errors.length)throw Error('Erros no browser: '+JSON.stringify(errors));
 
  }finally{await browser?.close();server.kill('SIGKILL');}
