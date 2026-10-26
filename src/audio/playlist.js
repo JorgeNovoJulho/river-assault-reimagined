@@ -113,10 +113,10 @@ class RiverPlaylist{
  setRandom(value){this.random=!!value;try{localStorage.setItem('river_playlist_random',String(this.random))}catch(e){}}
  move(id,delta){const index=this.tracks.findIndex(x=>x.id===id),next=index+delta;if(index<0||next<0||next>=this.tracks.length)return;[this.tracks[index],this.tracks[next]]=[this.tracks[next],this.tracks[index]];this.customOrder=this.tracks.map(t=>t.id);try{localStorage.setItem('river_playlist_order',JSON.stringify(this.customOrder))}catch(e){}}
  preview(id){const item=this.tracks.find(x=>x.id===id);if(item){this.order=[item];this.current=0;this.playItem(item)}}
- startNewGame(){this.started=true;this.failedTracks.clear();this.bossMode=false;this.audio.loop=false;const missionTracks=this.tracks.filter(t=>t.id!=='bundled-14'&&!/Seoul Road/i.test(t.name));this.order=this.random?shuffle(missionTracks):[...missionTracks];this.current=-1;if(this.order.length){this.next();}else{this.onStatus('Músicas do pacote não encontradas; ative trilha sintetizada ou importe arquivos')}}
+ startNewGame(){this.started=true;this.failedTracks.clear();this.bossMode=false;this.audio.loop=false;const missionTracks=this.tracks.filter(t=>t.id!=='bundled-14'&&!/Seoul Road/i.test(t.name));this.order=this.random?shuffle(missionTracks):[...missionTracks];this.current=-1;if(this.order.length){this.next();}else{this.onStatus('Músicas do pacote não encontradas; importe as faixas oficiais')}}
  next(recover=false){if(!this.enabled||!this.order.length||this.bossMode)return;
  let tries=0;do{this.current=(this.current+1)%this.order.length;tries++}while(tries<=this.order.length&&this.failedTracks.has(this.order[this.current].id));
- if(tries>=this.order.length&&this.failedTracks.has(this.order[this.current].id)){this.onStatus('Nenhuma faixa reproduzível. Ativando trilha sintetizada.');this.stop();this.onUnavailable?.();return}
+ if(tries>=this.order.length&&this.failedTracks.has(this.order[this.current].id)){this.onStatus('Nenhuma faixa reproduzível. Aguardando música disponível.');this.stop();this.onUnavailable?.();return}
  const item=this.order[this.current];this.playItem(item)}
  playItem(item){if(!item)return;if(this.objectURL){URL.revokeObjectURL(this.objectURL);this.objectURL=null}this.audio.pause();if(item.url){this.audio.src=item.url}else{this.objectURL=URL.createObjectURL(item.blob);this.audio.src=this.objectURL;}this.onStatus('Carregando: '+item.name);this.audio.play().then(()=>{if(this.audio.currentSrc===this.audio.src)this.onStatus('Tocando: '+item.name)}).catch(e=>{if(e.name==='AbortError')return;if(e.name==='NotAllowedError'){this.onStatus('Clique em MÚSICA para liberar a reprodução');this.needsGesture=true;return}this.failedTracks.add(item.id);this.onStatus('Erro na faixa: '+item.name);if(this.bossMode){this.bossMode=false;this.audio.loop=false}this.next(true)})}
  fadeTo(target,duration=850,onDone){
@@ -124,22 +124,22 @@ class RiverPlaylist{
   this.fadeTimer=setInterval(()=>{step++;this.audio.volume=Math.max(0,Math.min(1,start+delta*step));if(step>=steps){clearInterval(this.fadeTimer);this.fadeTimer=null;if(onDone)onDone()}},duration/steps);
  }
  beginBossTheme(){
-  if(!this.enabled)return;
+  if(this.bossMode||!this.enabled)return;
   const theme=this.tracks.find(t=>t.id==='bundled-14')||this.tracks.find(t=>/Seoul Road/i.test(t.name));
-  if(!theme){this.onStatus('Trilha de chefe não disponível; mantendo música atual');return;}
+  if(!theme){this.onStatus('Música de batalha não carregada; verificando biblioteca');return}
   clearInterval(this.fadeTimer);this.fadeTimer=null;
   this.bossMode=true;this.audio.loop=true;
-  this.audio.volume=.38;
-  // A faixa 14 substitui imediatamente a música da missão após a confirmação.
-  this.playItem(theme);
-  this.onStatus('BATALHA: '+theme.name);
+  this.audio.volume=0;this.playItem(theme);
+  this.fadeTo(.38,2600);
  }
  endBossTheme(){
   if(!this.bossMode)return;
-  clearInterval(this.fadeTimer);this.fadeTimer=null;
-  this.bossMode=false;this.audio.loop=false;this.audio.volume=.38;
-  if(this.enabled&&this.order.length)this.next();
-  else this.pause();
+  this.bossMode=false;this.audio.loop=false;
+  this.fadeTo(0,2200,()=>{
+   if(this.bossMode)return;
+   this.audio.pause();this.audio.volume=.38;
+   if(this.enabled&&this.order.length)this.next();
+  });
  }
  pause(){this.audio.pause()}
  resume(){if(!this.enabled)return;this.needsGesture=false;if(this.bossMode){this.audio.play().catch(()=>{});return}if(this.order.length&&!this.audio.src)this.next();else if(this.order.length)this.audio.play().catch(()=>{});else this.onUnavailable?.()}
