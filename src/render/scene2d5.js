@@ -729,6 +729,17 @@ function biomeAtmosphere(c,data,t){
 /* Integração visual não invasiva: usa a simulação, os 20 setores,
    as hitboxes, inimigos, armas, itens e chefes do motor oficial. */
 const DETAIL_CACHE=new Map();
+let detailEnabled=true;
+try{
+ const params=new URLSearchParams(root.location.search);
+ const saved=root.localStorage?.getItem('riverstorm_visual_preview');
+ detailEnabled=params.get('graphics')==='classic'?false:params.get('graphics')==='enhanced'?true:saved!=='classic';
+}catch(_){}
+root.RiverGraphicsPreview={
+ setMode(mode){detailEnabled=mode!=='classic';try{root.localStorage?.setItem('riverstorm_visual_preview',detailEnabled?'enhanced':'classic')}catch(_){}return this.mode()},
+ mode(){return detailEnabled?'enhanced':'classic'},
+ cacheSize(){return DETAIL_CACHE.size}
+};
 function detailStamp(type,variant=0){
  const key=type+':'+variant;
  if(DETAIL_CACHE.has(key))return DETAIL_CACHE.get(key);
@@ -761,7 +772,7 @@ function detailStamp(type,variant=0){
 }
 function highDetailEnemy(c,e,time){
  const type=e.type||'JET';
- if(type==='BIOME_ENEMY'||type==='TANK'||type==='TURRET')return;
+ if(!detailEnabled||type==='BIOME_ENEMY'||type==='TANK'||type==='TURRET')return;
  if(!['MECHA_SWORD','MECHA_GUN','HELI','JET','SHIP','SUB','ZIGZAG','BOSS'].includes(type))return;
  const w=type==='BOSS'?Math.max(110,Math.min(185,(e.width||140))):type.startsWith('MECHA')?37:type==='SUB'?31:type==='SHIP'?34:29;
  const h=type==='BOSS'?Math.max(75,Math.min(112,(e.height||70)*1.25)):type.startsWith('MECHA')?46:type==='SUB'?40:type==='SHIP'?42:33;
@@ -772,7 +783,7 @@ function highDetailEnemy(c,e,time){
  c.restore();
 }
 function highDetailPlane(c,x,y,style){
- const scale=style==='titan'?1.08:.9,w=48*scale,h=59*scale;
+ if(!detailEnabled)return;const scale=style==='titan'?1.08:.9,w=48*scale,h=59*scale;
  c.save();c.globalAlpha=.8;c.drawImage(detailStamp('PLAYER'),x-w/2,y-h/2,w,h);
  c.strokeStyle='rgba(170,242,255,.68)';c.lineWidth=1;
  c.beginPath();c.moveTo(x,y-h*.44);c.lineTo(x,y+h*.28);c.stroke();c.restore();
