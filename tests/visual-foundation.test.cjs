@@ -70,7 +70,7 @@ test('gameplay 045: dams spaced, shots held, banks targetable',()=>{
  assert.match(html,/touchFireButton\.addEventListener\('pointerdown'/);
  assert.match(html,/e\.type === 'SHIP' \|\| e\.type === 'TURRET'/);
  assert.match(html,/e\.y>=5 && e\.y<VIRTUAL_HEIGHT-90/);
- assert.match(html,/HUD 0\.4\.7/);
+ assert.match(html,/HUD 0\.4\.8/);
 });
 
 test('hotfix 1: pickup spacing and visual types are enforced',()=>{
@@ -91,4 +91,15 @@ test('boss hud 047: compact boss bars without full width overlay',()=>{
  assert.match(html,/boss-dialogue-strip/);
  const scene=read('src/render/scene2d5.js');
  assert.doesNotMatch(scene,/c\.fillRect\(e.x-e.width\/2,e.y-e.height\/2-9,e.width,5\)/);
+});
+
+test('boss UI fix: active renderer uses compact meters and synthesized boss voices',()=>{
+ const html=read('index.html');
+ assert.match(html,/function drawBossCompactMeters\(/);
+ assert.match(html,/drawBossCompactMeters\(\);/);
+ assert.match(html,/const width=80,y=e.y-e.height\/2-34/);
+ assert.match(html,/function bossRobotVoice\(/);
+ assert.match(html,/bossRobotVoice\(e,true\)/);
+ assert.match(html,/115\)/);
+ assert.match(html,/window.addEventListener\('pointermove'/);
 });
