@@ -57,7 +57,7 @@ test('trilha catalogada com 14 faixas e ordens random/manual',()=>{
 });
 test('bosses usam HP ampliado, alerta e tempo minimo de batalha',()=>{
   const html=fs.readFileSync('index.html','utf8');
-  assert.match(html,/360\+mission\.difficulty\*110\+sector\*27/);
+  assert.match(html,/540\+mission\.difficulty\*160\+sector\*38/);
   assert.match(html,/RED ALERT/);
   assert.match(html,/redAlertTicks===0/);
   assert.match(html,/missionTicks >= 90\*60/);
