@@ -2041,6 +2041,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
           }catch(error){}
         }
         function updateBiomeEnemy(e){
+          if(e.terrainObstacle)return; // Objetivo destrutível: sem ataques ou IA de perseguição.
           e.biomeAge=(e.biomeAge||0)+1;
           const age=e.biomeAge,m=e.biomeMotion,banks=getRiverBoundariesAt(e.y);
           const center=banks.center,room=Math.max(20,banks.width*.27);
@@ -2088,6 +2089,22 @@ const TERRAIN_EVENTS=[
  ['EMP_FIELD',15],['CROSSWIND',16],['ICE',17],['EMP_FIELD',18],['THERMAL',19]
 ];
 let terrainEventTicks=0,terrainEventType='',terrainEventNotice=0;
+let secondaryTargetsDestroyed=0;
+const TERRAIN_OBJECTS=['RAIZ','CONTAINER','ROCHA','TRONCO','BOIA','GELO','TORRE','ANTENA','BASALTO','PEDRA','BARREIRA','PAINEL','GALHOS','ICEBERG','RUINA','CRISTAL','GUINDASTE','GELEIRA','BOBINA','FORTIFICACAO'];
+function spawnTerrainTarget(center){
+  if(bossActive||missionTransitionTicks>0||missionTicks%840!==0)return;
+  if(enemies.some(e=>e.terrainObstacle&&e.hp>0))return;
+  const lane=secondaryTargetsDestroyed%2===0?-1:1;
+  const boundaries=getRiverBoundariesAt(-42);
+  const clearance=Math.max(40,Math.min(90,boundaries.width*.22));
+  const x=Math.max(35,Math.min(VIRTUAL_WIDTH-35,center+lane*clearance));
+  const def=BIOME_ENEMIES[(sector-1)%20];
+  enemies.push({type:'BIOME_ENEMY',terrainObstacle:true,terrainName:TERRAIN_OBJECTS[(sector-1)%20],
+    biomeId:def.id,biomeColor:def.color,biomeMotion:'slow',biomeAttack:'none',biomeSector:sector,
+    x,y:-40,width:35,height:32,vx:0,vy:1.05,hp:12+sector,maxHp:12+sector,
+    score:190+sector*12,noDrop:true});
+  createFloatingText(x,65,'OBJETIVO EXTRA: DESTRUIR '+TERRAIN_OBJECTS[(sector-1)%20],'#fde68a');
+}
 function updateTerrainEvent(){
  if(bossActive||missionTransitionTicks>0){terrainEventTicks=0;terrainEventType='';return;}
  // Aviso periódico e janela curta: evita penalidades permanentes.
@@ -2125,6 +2142,7 @@ function updateTerrainEvent(){
             if (gameState !== 'PLAYING') return;
             if(!enemies.some(e=>e.type==='BOSS'))document.getElementById('boss-special-hud').classList.add('hidden');
             missionTicks++;
+            spawnTerrainTarget(getRiverBoundariesAt(-42).center);
             updateTerrainEvent();
             trackPilotProgress();
             const skillActive=!!(bossActive&&bossSkillEquipped);
@@ -2431,6 +2449,9 @@ function updateTerrainEvent(){
                     updateBossAttacks(e);
                 } else {
                     if(e.type==='BIOME_ENEMY')updateBiomeEnemy(e);
+                    if(!e.terrainObstacle&&terrainEventTicks>0&&['CROSSWIND','SANDSTORM','ICE'].includes(terrainEventType)){
+                        e.x=Math.max((e.width||32)/2,Math.min(VIRTUAL_WIDTH-(e.width||32)/2,e.x+Math.sin(missionTicks*.07+e.y*.03)*.6));
+                    }
                     if(e.type==='MEGAZORD'){e.y=155+Math.sin(missionTicks/40)*35;e.x+=Math.sin(missionTicks/65)*2.4;}
                     if(e.type==='MECHA_SWORD'){
                         e.slashTimer=(e.slashTimer||0)+1;
@@ -2515,6 +2536,12 @@ function updateTerrainEvent(){
                         addExplosion(b.x, b.y, b.type==='BANK_MISSILE'?'#fb923c':'#fba518', b.type==='BANK_MISSILE'?16:4);
 
                         if (e.hp <= 0) {
+                            if(e.terrainObstacle){
+                              secondaryTargetsDestroyed++;
+                              const reward=sector%2===0?'SHIELD':'FUEL';
+                              if(powerups.length<5)powerups.push({x:e.x,y:e.y,type:reward,color:reward==='SHIELD'?'#22c55e':'#fbbf24',label:reward==='SHIELD'?'ESC':'F'});
+                              createFloatingText(e.x,e.y-28,'ROTA EXTRA + RECOMPENSA!','#facc15');
+                            }
                             if(e.type==='BOSS' && sector%5===0 && Math.random()<.18){
                                 powerups.push({x:e.x,y:e.y+25,type:'LIFE',color:'#60a5fa',label:'★'});
                             }else if(!e.noDrop && e.type!=='BOSS')spawnPowerupCheck(e.x,e.y);
@@ -2683,7 +2710,7 @@ function updateTerrainEvent(){
             distance = 0;
             missionStartDistance = 0;
             missionTicks = 0;
-            terrainEventTicks=0;terrainEventType='';terrainEventNotice=0;
+            terrainEventTicks=0;terrainEventType='';terrainEventNotice=0;secondaryTargetsDestroyed=0;
             bombProjectiles = [];
             screenShake = 0;
             bossTaunt = null;
