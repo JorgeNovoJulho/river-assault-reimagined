@@ -2551,10 +2551,10 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
             player.speed = config.speed;
             player.baseScrollSpeed = config.scroll;
             player.currentScrollSpeed = config.scroll;
-            player.fuelDepletionRate = config.fuel*.8;
+            player.fuelDepletionRate = config.fuel*.8*Math.max(.72,1-(journey-1)*.018);
             player.weapon = config.weapons[0];
             player.weaponTimer = 0;
-            player.maxShield=150*(config.shieldMultiplier||1);
+            player.maxShield=Math.round(150*(config.shieldMultiplier||1)*(1+(journey-1)*.035));
             player.shield=player.maxShield;
             player.specialShots = 0;
             player.invulnerable = 0;
