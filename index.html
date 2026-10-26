@@ -2092,6 +2092,13 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
                     player.bombs=3;document.getElementById('bomb-count-touch').textContent='(3)';bombsPickedThisMission=0;
                     bossDefeatedThisMission=false;
                     clearBossArenaEffects();
+                    // Ao iniciar a próxima missão, estados hostis do chefe não persistem.
+                    if(['EMP','GRAVITY','ICE','POISON','BLEED','PRISM','SHADOW','FIRE','LIGHTNING'].includes(player.effectType)){
+                        player.effectType='';player.effectTimer=0;player.disabledTimer=0;
+                    }
+                    bossTaunt=null;bossFinalDialogue=false;screenShake=0;
+                    // Os projéteis da arena encerrada não podem atingir a missão seguinte.
+                    bullets=bullets.filter(b=>b.type!=='REFLECTED'&&b.type!=='BANK_MISSILE');
                     redAlertTriggered=false;redAlertTicks=0;missionTicks=0;missionStartDistance=distance;
                     playlist.endBossTheme?.();
                     enemies=enemies.filter(e=>e.type!=='BOSS'&&e.y<VIRTUAL_HEIGHT*.45);
