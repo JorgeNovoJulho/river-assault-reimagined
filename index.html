@@ -2347,6 +2347,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
             lives=3;
             continues=10;
             bossActive = false;
+            parryTicks=0;parryCooldown=0;
             bossSkillEquipped=null;bossSkillCharge=0;bossSkillCooldown=0;bossSkillEffect=null;
             skillPicker.classList.add('hidden');skillUseButton.classList.add('hidden');
 
@@ -2856,6 +2857,9 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
             if(gameState!=='PLAYING'&&!controllerMenuOpen && timestamp-(gameLoop.lastMenuFrame||0)<50){return;}
             if(gameState!=='PLAYING'&&!controllerMenuOpen)gameLoop.lastMenuFrame=timestamp;
             gamepadState = physicalGamepad.poll();
+            const parryPadPressed=!!physicalGamepad.lastButtons[4];
+            if(parryPadPressed&&!gameLoop.parryPadPrev&&gameState==='PLAYING')activateParry();
+            gameLoop.parryPadPrev=parryPadPressed;
             const status = gamepadState.connected ? 'Controle: '+physicalGamepad.name.slice(0,35) : 'Controle: não conectado';
             if (status !== lastControllerStatus) {
                 lastControllerStatus=status;indicator.textContent=status;settingsStatus.textContent=status;
