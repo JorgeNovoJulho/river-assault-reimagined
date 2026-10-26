@@ -2135,6 +2135,10 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
                     if(e.type==='BIOME_ENEMY')updateBiomeEnemy(e);
                     if(e.type==='MEGAZORD'){e.y=155+Math.sin(missionTicks/40)*35;e.x+=Math.sin(missionTicks/65)*2.4;}
                     if(e.type==='MECHA_SWORD'){
+                        e.slashTimer=(e.slashTimer||0)+1;
+                        if(e.slashTimer%230===175&&Math.abs(player.y-e.y)<235){e.slashWarn=45;createFloatingText(e.x,e.y-32,'⚔ CORTE EM 0,75 S','#fda4af');}
+                        if(e.slashWarn>0){e.slashWarn--;if(e.slashWarn===0){e.slashDash=15;e.slashVX=Math.sign(player.x-e.x||1)*5;e.slashVY=Math.sign(player.y-e.y||1)*3.3;}}
+                        if(e.slashDash>0){e.slashDash--;e.x+=e.slashVX;e.y+=e.slashVY;e.slashArc=e.slashDash; if(!e.slashHit&&Math.hypot(e.x-player.x,e.y-player.y)<35){applyDamage(20,'ESPADA DO MECHA');e.slashHit=true;}if(e.slashDash===0)e.slashHit=false;}
                         if(e.returning){e.y-=4.5;if(e.y< -45){e.returning=false;e.y=-45;e.reentries=(e.reentries||0)+1;}}
                         else {e.y+=player.currentScrollSpeed+(e.vy||0);if(e.y>VIRTUAL_HEIGHT-42)e.returning=true;}
                     }else e.y += player.currentScrollSpeed + (e.vy || 0);
@@ -2673,6 +2677,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
                 quality:qualitySelect.value
             });
             drawBossCompactMeters();
+            for(const e of enemies){if(e.type==='MECHA_SWORD'&&(e.slashArc>0||e.slashWarn>0)){ctx.save();ctx.strokeStyle=e.slashWarn>0?'#fde68a':'#f0abfc';ctx.lineWidth=4;ctx.shadowColor='#e879f9';ctx.shadowBlur=15;ctx.beginPath();ctx.arc(e.x,e.y,e.slashWarn>0?25:34,-Math.PI*.8,Math.PI*.42);ctx.stroke();ctx.restore();if(e.slashArc>0)e.slashArc--;}}
             for(const e of enemies){if(e.type==='BOSS'&&e.swordTrail?.ticks>0){const t=e.swordTrail;t.ticks--;ctx.save();ctx.strokeStyle='#f8fafc';ctx.shadowColor='#f472b6';ctx.shadowBlur=25;ctx.lineWidth=7;ctx.beginPath();ctx.moveTo(t.x1-20,t.y1-18);ctx.quadraticCurveTo((t.x1+t.x2)/2+22,(t.y1+t.y2)/2-27,t.x2+23,t.y2+23);ctx.stroke();ctx.strokeStyle='#fb7185';ctx.lineWidth=3;ctx.stroke();ctx.restore();}}
             for(const e of enemies){if(e.type!=='BOSS'||e.dualTicks<=0)continue;ctx.save();ctx.globalAlpha=.23+.1*Math.sin(missionTicks*.15);ctx.strokeStyle=e.dualElement==='PRISM'?'#fef08a':'#a78bfa';ctx.lineWidth=5;ctx.beginPath();ctx.ellipse(e.x,e.y,e.width*.6,e.height*.6,missionTicks*.02,0,Math.PI*2);ctx.stroke();ctx.restore();}
             if(parryTicks>0){ctx.save();ctx.strokeStyle='#67e8f9';ctx.lineWidth=4;ctx.shadowColor='#22d3ee';ctx.shadowBlur=18;ctx.beginPath();ctx.arc(player.x,player.y,32+Math.sin(missionTicks*.4)*3,0,Math.PI*2);ctx.stroke();ctx.restore();}
