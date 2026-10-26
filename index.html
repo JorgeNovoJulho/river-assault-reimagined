@@ -1227,7 +1227,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
             if(e.elementTicks>0){e.elementTicks--;e.elementClock=(e.elementClock||0)+1;if(e.elementClock%60===0){const d=e.maxHp*(e.elementRate||.01);e.hp=Math.max(0,e.hp-d);createFloatingText(e.x,e.y-40,e.elementKind+' -'+Math.ceil(d),BOSS_SKILLS[e.elementKind].color);if(e.hp<=0){finishBossDefeatedBySkill(e);return;}}}
             if(e.dualTicks>0){e.dualTicks--;e.dualClock=(e.dualClock||0)+1;if(e.dualClock%60===0){const d=e.maxHp*e.dualRate;e.hp=Math.max(0,e.hp-d);createFloatingText(e.x,e.y-42,(e.dualElement==='PRISM'?'LUZ':'SOMBRA')+' -'+Math.ceil(d),e.dualElement==='PRISM'?'#fde68a':'#a78bfa');if(e.hp<=0){finishBossDefeatedBySkill(e);return;}}}
             if(e.stunnedTicks>0)return;
-            if(e.dualSlow>0&&e.attackTimer%Math.max(1,Math.round(1/(1-e.dualSlow)))!==0)return;
+            if(e.dualTicks>0&&e.dualSlow>0&&e.attackTimer%Math.max(1,Math.round(1/(1-e.dualSlow)))!==0)return;
             if(e.rewardCooldown>0)e.rewardCooldown--;
 
             // Mechas convocados pelo chefe: uma pequena onda, com intervalo próprio.
@@ -2161,7 +2161,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
                         bullets.splice(bIndex, 1);
                         if(e.type==='BOSS'&&bossDefeatedThisMission) return;
                         if(e.type==='BOSS')dropBossReward(e,1);
-                        e.hp=Math.max(0,e.hp-(b.damage||1)*(b.iceWeak?.5:1)*(e.gravityTicks>0?2:1));
+                        e.hp=Math.max(0,e.hp-(b.damage||1)*(b.iceWeak?.5:1)*(e.gravityTicks>0?2:1)*(e.type==='BOSS'&&e.dualTicks>0&&e.dualElement==='PRISM'?1+(e.dualAmp||0):1));
                         addExplosion(b.x, b.y, b.type==='BANK_MISSILE'?'#fb923c':'#fba518', b.type==='BANK_MISSILE'?16:4);
 
                         if (e.hp <= 0) {
