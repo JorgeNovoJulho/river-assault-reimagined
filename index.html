@@ -3396,7 +3396,15 @@ function updateTerrainEvent(){
         const playlist=new window.RiverPlaylist({onStatus:(message)=>{
             const status=document.getElementById('playlist-status');if(status)status.textContent=message;
         }});
-        playlist.load();
+        playlist.onReady=()=>{
+          if(gameState!=='PLAYING'||!playlist.enabled)return;
+          if(redAlertTriggered||bossActive){
+            if(!playlist.bossMode)playlist.beginBossTheme();
+          }else if(!playlist.order.length){
+            playlist.startNewGame();
+          }
+        };
+        playlist.load().catch(error=>console.warn('Falha ao carregar playlist:',error));
         document.getElementById('music-library').addEventListener('click',()=>document.getElementById('music-upload').click());
         document.getElementById('music-upload').addEventListener('change',async event=>{
             await playlist.importFiles(event.target.files);event.target.value='';renderPlaylistItems();
