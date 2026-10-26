@@ -70,7 +70,7 @@ test('gameplay 045: dams spaced, shots held, banks targetable',()=>{
  assert.match(html,/touchFireButton\.addEventListener\('pointerdown'/);
  assert.match(html,/e\.type === 'SHIP' \|\| e\.type === 'TURRET'/);
  assert.match(html,/e\.y>=5 && e\.y<VIRTUAL_HEIGHT-90/);
- assert.match(html,/HUD 0\.5\.3/);
+ assert.match(html,/HUD 0\.5\.4/);
 });
 
 test('hotfix 1: pickup spacing and visual types are enforced',()=>{
@@ -131,7 +131,7 @@ test('visual phase 04: all twenty missions have deterministic biome atmosphere',
  assert.match(renderer,/BIOME_DETAILS,/);
  assert.match(renderer,/c\.save\(\);c\.translate\(x,y\);c\.scale\(scale,scale\)/);
  assert.match(renderer,/c\.restore\(\);/);
- assert.match(html,/HUD 0\.5\.3/);
+ assert.match(html,/HUD 0\.5\.4/);
  assert.match(campaign,/"id": 20/);
  const codes=renderer.match(/\['[A-Z_]+','#[A-Fa-f0-9]+','[^']+'\]/g)||[];
  assert.equal(codes.length,20);
@@ -150,7 +150,7 @@ test('visual 05: all seven player aircraft and key enemy types render unique det
  assert.match(scene,/function enemyDetails\(/);
  assert.match(scene,/aircraftDetails\(c,style,trim\)/);
  assert.match(scene,/enemyDetails\(c,e\)/);
- assert.match(read('index.html'),/HUD 0\.5\.3/);
+ assert.match(read('index.html'),/HUD 0\.5\.4/);
 });
 
 test('visual hangar 052: selected planes, portraits, pilot miniatures, visible silhouettes',()=>{
@@ -161,7 +161,7 @@ test('visual hangar 052: selected planes, portraits, pilot miniatures, visible s
  assert.match(html,/function renderHangar\(/);
  assert.match(html,/renderHangar\(\);/);
  assert.match(html,/window\.RiverVisuals/);
- assert.match(html,/HUD 0\.5\.3/);
+ assert.match(html,/HUD 0\.5\.4/);
  for(const plane of ['falcao','vespa','cometa','fenix','helicoptero','disco','titan'])
    assert.match(html,new RegExp(plane+":\\["));
  for(const enemy of ['MECHA_SWORD','MECHA_GUN','TANK','TURRET','BOSS']) assert.ok(renderer.includes(enemy));
@@ -174,5 +174,14 @@ test('hangar 053: scrollable menu preserves previews on short displays',()=>{
  assert.match(html,/id="pilot-portrait"/);
  assert.match(html,/id="pilot-body"/);
  assert.match(html,/id="hangar-stats"/);
- assert.match(html,/HUD 0\.5\.3/);
+ assert.match(html,/HUD 0\.5\.4/);
+});
+
+test('hangar 054: commands outside scrollable hangar and attribute bars',()=>{
+ const html=read('index.html');
+ assert.match(html,/id="start-actions"/);
+ assert.match(html,/#start-actions\{display:grid!important/);
+ assert.match(html,/#start-screen>div:not\(#start-actions\)/);
+ for(const id of ['start-btn','menu-settings-btn','hangar-speed-bar','hangar-shield-bar','hangar-range-bar','hangar-fire-bar'])assert.ok(html.includes('id="'+id+'"'));
+ assert.match(html,/HUD 0\.5\.4/);
 });
