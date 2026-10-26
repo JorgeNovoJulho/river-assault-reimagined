@@ -107,6 +107,22 @@ const {chromium}=require('playwright');const {spawn}=require('node:child_process
   });
   if(checkpointFlow.good!==8||checkpointFlow.rejected!==false||!checkpointFlow.unchanged)
     throw Error('Checkpoint legítimo sobrescrito por missão avulsa: '+JSON.stringify(checkpointFlow));
+  // Renderização e identidade do terreno em todas as 20 fases, sem erros JS.
+  const mapSweep=await page.evaluate(()=>{
+    const originalSector=sector,originalState=gameState;
+    const failed=[];
+    for(let m=1;m<=20;m++){
+      try{
+        sector=m;gameState='PLAYING';
+        render();
+        const def=window.RiverVisuals?.THEMES?.[m-1];
+        if(!def)failed.push('Tema ausente '+m);
+      }catch(err){failed.push('Mapa '+m+': '+String(err?.message||err))}
+    }
+    sector=originalSector;gameState=originalState;
+    return failed;
+  });
+  if(mapSweep.length)throw Error('Falhas no passeio dos 20 mapas: '+mapSweep.join('; '));
   // Campaign regression: direct mission 20 must never grant a promotion.
   const campaignFlow=await page.evaluate(()=>{
     const startingJourney=journey,startingPoints=careerPoints;
