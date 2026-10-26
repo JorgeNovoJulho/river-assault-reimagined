@@ -2110,6 +2110,11 @@ function updateTerrainEvent(){
      player.fuel=Math.max(0,player.fuel-.01);
    }else if(terrainEventType==='ICE'){
      player.x=Math.max(24,Math.min(VIRTUAL_WIDTH-24,player.x+oscillation*.18));
+   }else if(terrainEventType==='MUD'){
+     player.fuel=Math.max(0,player.fuel-.006);
+   }else if(terrainEventType==='EMP_FIELD'&&missionTicks%80===0){
+     // Interferência curta no armamento; não congela controles nem bloqueia a aeronave.
+     player.weaponTimer=Math.max(player.weaponTimer||0,12);
    }
    if(terrainEventTicks===0)terrainEventType='';
  }
