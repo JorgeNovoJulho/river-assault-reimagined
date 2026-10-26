@@ -46,3 +46,22 @@
 - Persistem 16 falhas na suíte: muitas são verificações textuais de implementações anteriores. Precisam ser classificadas entre regressões reais e assertivas obsoletas, sem ocultar falhas.
 - GitHub Pages já publicou versão anterior, mas pipeline completo não foi homologado.
 - Pendente: testes de longa duração/colisão, extração modular do HTML, arte 2.5D/3D final, 20 chefes exclusivos, e builds APK/EXE assinadas/homologadas.
+
+## Atualização de pendências — 26/10/2026 (revisão de checkpoints)
+### Confirmado por pipelines anteriores
+- GitHub Pages, validação web, smoke browser e geração de APK de TESTE tiveram execução com sucesso no commit 87d2225d. Isso não equivale a homologação de dispositivos nem assinatura de release.
+- A antiga anotação de 16 testes reprovados refere-se a 0.8.3: foi resolvida em revisões posteriores. Não deve ser interpretada como estado atual.
+- Efeitos de habilidades na transição, rastros de projéteis, controle de dano e progressão XP receberam correções com testes de regressão.
+### Implementado nesta revisão, aguardando CI
+- Impedir que salvar missão avulsa sobrescreva checkpoint de campanha legítima.
+- Testar no navegador checkpoint sequencial válido e preservação após tentativa de salvamento de missão avulsa.
+### Pendências de verdade
+1. Testes e2e das 20 missões consecutivas e NG+ em múltiplas jornadas, inclusive reinicialização real do navegador, save/load e ausência de exploits.
+2. Stress test de colisões/projéteis/efeitos em sessões longas (incluindo pausas e retomadas) e testes de FPS e memória.
+3. Modularizar o HTML principal em componentes próprios de combate, mundo, HUD e menus com segurança e testes.
+4. Desenvolver 20 mapas plenamente diferenciados e 20 chefes com IA, fases e mecânicas realmente exclusivas.
+5. Produzir assets finais 2.5D/3D, animações, partículas, efeitos e otimizar perfil econômico.
+6. Homologar controles físicos e desempenho em Android real, inclusive Realme C55 e modelos inferiores.
+7. Criar release instalável Windows assinado e Android APK/AAB assinado com fluxo de atualização.
+8. Identidade de usuário global exclusiva e foto sincronizada dependem de backend/autenticação; o perfil atual é local.
+9. Trilhas de terceiros só podem ser embarcadas com arquivos e autorizações apropriadas.
