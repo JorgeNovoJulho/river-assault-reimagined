@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>RiverStorm — NG+ e Patentes 0.8.0</title>
+    <title>RiverStorm — Perfil do Piloto 0.8.1</title>
     <link rel="stylesheet" href="./src/styles/tailwind.css">
     <style>
         body {
@@ -103,6 +103,16 @@
 
         <div id="controller-settings" class="hidden absolute inset-0 bg-slate-950/95 z-50 p-4 overflow-auto text-sm" role="dialog" aria-modal="true" aria-label="Configuração do controle">
             <h2 class="text-xl font-bold text-cyan-300 mb-2">CONFIGURAR CONTROLE</h2>
+            <button id="pilot-profile-open" type="button" style="background:#075985;color:white;font-weight:900;padding:12px;border:2px solid #67e8f9;border-radius:10px;width:100%;margin-bottom:12px">👤 PERFIL DO PILOTO</button>
+            <section id="pilot-profile-panel" hidden style="display:none;max-width:460px;margin:8px auto;padding:14px;border-radius:14px;border:2px solid #38bdf8;background:#081b31;color:#e2e8f0;box-sizing:border-box">
+              <h3 style="font-size:19px;font-weight:900;color:#facc15;margin-bottom:9px">IDENTIDADE DO PILOTO</h3>
+              <div style="display:flex;gap:12px;align-items:center"><img id="pilot-profile-photo" alt="Foto do piloto" style="width:76px;height:76px;object-fit:cover;border-radius:50%;border:2px solid #67e8f9;background:#172b48"><div style="flex:1"><label for="pilot-photo-upload">Foto de perfil (local)</label><input id="pilot-photo-upload" type="file" accept="image/png,image/jpeg,image/webp" style="width:100%;font-size:11px"></div></div>
+              <label for="pilot-nickname" style="display:block;margin-top:10px">Nome de usuário (3 a 18 caracteres)</label>
+              <div style="display:flex;gap:6px"><input id="pilot-nickname" maxlength="18" autocomplete="off" style="min-width:0;flex:1;color:white;background:#0f2540;border:1px solid #64748b;border-radius:6px;padding:9px"><button id="pilot-nickname-save" type="button" style="background:#047857;padding:9px;border-radius:6px">SALVAR</button></div>
+              <p id="pilot-nickname-status" aria-live="polite" style="font-size:11px;color:#fbbf24;margin-top:4px">Nome salvo apenas neste dispositivo; exclusividade global requer servidor de contas.</p>
+              <div id="pilot-profile-stats" style="font:12px/1.9 monospace;white-space:pre-line;margin-top:12px;padding:10px;background:#061124;border-radius:8px"></div>
+              <button id="pilot-profile-close" type="button" style="margin-top:10px;padding:10px;width:100%;background:#334155;border-radius:8px">VOLTAR ÀS CONFIGURAÇÕES</button>
+            </section>
             <p id="gamepad-status" class="text-slate-300 mb-3">Procurando controle...</p>
             <p class="text-xs text-slate-400 mb-3">Conecte seu controle via Bluetooth ou USB nas configurações do dispositivo. Pressione qualquer botão para ativá-lo.</p>
             <label for="pad-deadzone" class="block mb-1">Zona morta do analógico: <span id="pad-deadzone-value">22%</span></label>
@@ -601,6 +611,42 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
         }
         function readCheckpoint(){try{const c=JSON.parse(localStorage.getItem(CHECKPOINT_KEY)||'null');return c&&c.version===2&&c.verifiedRun===true&&Number.isInteger(c.sector)&&c.sector>=1&&c.sector<=20?c:null}catch(e){return null}}
         function updateContinueButton(){const b=document.getElementById('continue-mission-btn');if(b){const c=readCheckpoint();b.classList.toggle('hidden',!c);if(c)b.textContent='CONTINUAR MISSÃO '+c.sector;}}
+        const PROFILE_KEY='riverstorm_pilot_profile_v1';
+        let pilotProfile={nickname:'',photo:'',playSeconds:0,planeSeconds:{},bestByJourney:{},lastSequentialMission:0};
+        try{const saved=JSON.parse(localStorage.getItem(PROFILE_KEY)||'null');if(saved&&typeof saved==='object')pilotProfile={...pilotProfile,...saved,planeSeconds:saved.planeSeconds||{},bestByJourney:saved.bestByJourney||{}}}catch(e){}
+        function savePilotProfile(){try{localStorage.setItem(PROFILE_KEY,JSON.stringify(pilotProfile))}catch(e){console.warn('Perfil sem espaço para salvar',e)}}
+        function recordSequentialMission(){if(campaignVerified){pilotProfile.lastSequentialMission=sector;savePilotProfile()}}
+        function trackPilotProgress(){
+          pilotProfile.playSeconds+=1/60;
+          pilotProfile.planeSeconds[selectedPlane]=(pilotProfile.planeSeconds[selectedPlane]||0)+1/60;
+          const key=String(journey);
+          pilotProfile.bestByJourney[key]=Math.max(pilotProfile.bestByJourney[key]||0,score);
+          if(missionTicks%300===0)savePilotProfile();
+        }
+        function renderPilotProfile(){
+          const fmt=n=>Math.floor(Number(n)||0).toLocaleString('pt-BR');
+          const duration=Math.floor(pilotProfile.playSeconds||0),hours=Math.floor(duration/3600),minutes=Math.floor(duration%3600/60),seconds=duration%60;
+          const favorite=Object.entries(pilotProfile.planeSeconds||{}).sort((a,b)=>b[1]-a[1])[0]?.[0];
+          const next=journey>=RANKS.length?'PATENTE MÁXIMA':RANKS[journey];
+          const stats=[
+            'NAVE FAVORITA: '+(aircraftCatalog.PLANES[favorite]?.name||'Ainda não definida'),
+            'PATENTE ATUAL: '+rankName(),
+            'PRÓXIMA PATENTE: '+next,
+            'NÍVEL: '+pilotLevel+' / 100',
+            'XP ACUMULADO: '+fmt(pilotXP),
+            'PONTOS DE CARREIRA: '+fmt(careerPoints),
+            'PONTOS NA PARTIDA: '+fmt(score),
+            'JORNADA ATUAL: '+journey+' (NG+'+Math.max(0,journey-1)+')',
+            'RECORDE DESTA JORNADA: '+fmt(Math.max(pilotProfile.bestByJourney[String(journey)]||0,score)),
+            'RECORDES POR JORNADA: '+(Object.entries(pilotProfile.bestByJourney).sort((a,b)=>Number(a[0])-Number(b[0])).map(([k,v])=>'J'+k+': '+fmt(v)).join(' · ')||'Sem registros'),
+            'TEMPO TOTAL: '+hours+'h '+minutes+'min '+seconds+'s',
+            'ÚLTIMA MISSÃO SEQUENCIAL: '+(pilotProfile.lastSequentialMission||'Nenhuma')
+          ];
+          document.getElementById('pilot-profile-stats').textContent=stats.join('\n');
+          document.getElementById('pilot-nickname').value=pilotProfile.nickname||'';
+          const photo=document.getElementById('pilot-profile-photo');
+          if(pilotProfile.photo)photo.src=pilotProfile.photo;else photo.removeAttribute('src');
+        }
         let campaignVerified=false;
         let careerPoints=0;
         try{careerPoints=Math.max(0,Number(localStorage.getItem('riverstorm_career_points_v1'))||0)}catch(e){}
@@ -809,6 +855,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
           const oldRank=rankName();
           const bonus=legitimate?Math.round(5000*scoreMultiplier()):0;
           if(legitimate){
+            recordSequentialMission();
             score+=bonus;earnedPoints+=bonus;careerPoints+=score;
             try{localStorage.setItem('riverstorm_career_points_v1',String(careerPoints))}catch(e){}
             if(journey<RANKS.length)journey++;
@@ -1148,6 +1195,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
           addExplosion(e.x,e.y,'#ef4444',45);sound.playExplosion(true);
           score+=awardEnemyPoints(e.score);kills++;grantEnemyXP(e);
           enemies=enemies.filter(enemy=>enemy!==e);
+          recordSequentialMission();
           if(sector<20)writeCheckpoint(sector+1);else try{localStorage.removeItem(CHECKPOINT_KEY)}catch(err){}
           bossTaunt={name:e.name,line:'MEUS SISTEMAS... DERROTADOS!',ticks:175};
           if(sector===20){finishFullCampaign();}else{missionTransitionTicks=180;document.getElementById('mission-banner').textContent='PRÓXIMA MISSÃO: '+campaign.at(sector+1).name;createFloatingText(e.x,e.y,'CHEFE DERROTADO!','#22c55e')}
@@ -1980,6 +2028,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
             if (gameState !== 'PLAYING') return;
             if(!enemies.some(e=>e.type==='BOSS'))document.getElementById('boss-special-hud').classList.add('hidden');
             missionTicks++;
+            trackPilotProgress();
             const skillActive=!!(bossActive&&bossSkillEquipped);
             skillUseButton.classList.remove('hidden');
             if(skillActive)skillUseButton.textContent=BOSS_SKILLS[bossSkillEquipped].icon+' '+bossSkillCharge+' · '+(bossSkillCooldown>0?Math.ceil(bossSkillCooldown/60)+'s':'PRONTO')+' [C]';
@@ -2352,6 +2401,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
                                 if(!bossDefeatedThisMission){
                                     bossDefeatedThisMission=true;bossActive=false;enemyBullets=[];
                                     unlockBossSkill(e.skillAffinity);bossSkillEquipped=null;skillUseButton.classList.add('hidden');
+                                    recordSequentialMission();
                                     if(sector<20)writeCheckpoint(sector+1);else {try{localStorage.removeItem(CHECKPOINT_KEY)}catch(err){}}
                                     bossTaunt={name:e.name,line:['NÃO! MEUS SISTEMAS!','ISSO NÃO ACABOU, PILOTO!','IMPOSSÍVEL! VOCÊ VENCEU?!','RETIRADA! HA... HA...'][sector%4],ticks:175};
                                     if(sector===20){finishFullCampaign();} else {
@@ -2522,6 +2572,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
             bombFlash = 0;
             sector = Math.max(1,Math.min(20,Number(levelSelector.value)||1));
             campaignVerified=sector===1;
+            if(campaignVerified){pilotProfile.lastSequentialMission=0;savePilotProfile()}
             kills = 0;
             rescuedSoldiers = 0;
             fuelSpawnAt = -99999;
@@ -2931,12 +2982,37 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
             controllerDialog.style.display=open?'block':'none';
             controllerDialog.setAttribute('aria-hidden',String(!open));
             if(open){
+                renderPilotProfile();
                 remapPreviousButtons=[...physicalGamepad.lastButtons];
                 updateSensitivityUI();
                 controllerDialog.scrollTop=0;
                 // Não roubar foco/rolagem dos controles de toque.
             }
         }
+        const profilePanel=document.getElementById('pilot-profile-panel');
+        document.getElementById('pilot-profile-open').addEventListener('click',()=>{renderPilotProfile();profilePanel.hidden=false;profilePanel.style.display='block';profilePanel.scrollIntoView({block:'start',behavior:'smooth'})});
+        document.getElementById('pilot-profile-close').addEventListener('click',()=>{profilePanel.hidden=true;profilePanel.style.display='none';controllerDialog.scrollTop=0});
+        document.getElementById('pilot-nickname-save').addEventListener('click',()=>{
+          const value=document.getElementById('pilot-nickname').value.trim();
+          const status=document.getElementById('pilot-nickname-status');
+          if(!/^[a-zA-Z0-9_]{3,18}$/.test(value)){status.textContent='Use entre 3 e 18 letras, números ou _. ';return}
+          pilotProfile.nickname=value;savePilotProfile();
+          status.textContent='Nome salvo neste dispositivo. Exclusividade entre todos os jogadores exige servidor de cadastro.';
+        });
+        document.getElementById('pilot-photo-upload').addEventListener('change',event=>{
+          const file=event.target.files?.[0];if(!file)return;
+          const status=document.getElementById('pilot-nickname-status');
+          if(!['image/png','image/jpeg','image/webp'].includes(file.type)||file.size>1024*1024){status.textContent='Foto PNG/JPG/WEBP com até 1 MB.';return}
+          const reader=new FileReader();reader.onload=()=>{
+            const img=new Image();img.onload=()=>{
+              const canvas=document.createElement('canvas');canvas.width=128;canvas.height=128;
+              const c=canvas.getContext('2d');const side=Math.min(img.width,img.height);
+              c.drawImage(img,(img.width-side)/2,(img.height-side)/2,side,side,0,0,128,128);
+              pilotProfile.photo=canvas.toDataURL('image/jpeg',.72);savePilotProfile();renderPilotProfile();
+              status.textContent='Foto salva localmente.';
+            };img.src=reader.result;
+          };reader.readAsDataURL(file);
+        });
         document.getElementById('controller-settings-btn').addEventListener('click',()=>showControllerSettings(true));
         document.getElementById('menu-settings-btn').addEventListener('click',()=>showControllerSettings(true));
         document.getElementById('pad-close').addEventListener('click',()=>showControllerSettings(false));
