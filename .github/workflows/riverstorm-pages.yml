@@ -2,7 +2,7 @@ name: RiverStorm - validação e publicação web
 
 on:
   push:
-    branches: [full-game-graphics-integration]
+    branches: [main, full-game-graphics-integration]
   workflow_dispatch:
 
 permissions:
