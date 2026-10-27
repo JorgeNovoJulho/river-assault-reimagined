@@ -110,6 +110,19 @@
 #start-main select,#start-main details{border-color:#4a9ebc!important;background-color:#0a2136!important;color:#e8f8ff!important}
 #playlist-status{font:600 12px/1.4 system-ui;color:#8ae9f3!important}
 @media(max-width:600px){#start-pilot-identity{padding:10px}#start-pilot-avatar{height:66px;width:66px}}
+</style><style id="riverstorm-menu-polish-v2">
+#start-headline{display:flex;gap:.15em;align-items:baseline;justify-content:center;font-family:Impact,'Arial Black',sans-serif;font-size:clamp(30px,5vw,54px);font-weight:900;letter-spacing:.065em;margin:0 0 5px;line-height:1}
+#start-headline span:first-child{background:linear-gradient(#e7fdff,#6cd7ff 60%,#187ba9);background-clip:text;-webkit-background-clip:text;color:transparent;filter:drop-shadow(0 3px 3px #000)}
+#start-headline span:last-child{background:linear-gradient(#fff4e5,#ffa95d 65%,#e95b3d);background-clip:text;-webkit-background-clip:text;color:transparent;filter:drop-shadow(0 3px 3px #000)}
+#start-brand .brand-top h1{font-size:clamp(30px,4vw,52px)}
+#start-brand,#start-main{border-radius:17px!important;border:1px solid #378db5!important;background:linear-gradient(150deg,rgba(8,29,50,.97),rgba(5,16,31,.98))!important;box-shadow:0 10px 32px #0007,0 0 18px #116a9440 inset}
+#start-main{padding:16px!important}
+#start-main label{font:800 11px/1.4 system-ui!important;letter-spacing:.095em;color:#77daf1!important}
+#start-main button{border-radius:11px!important}
+#start-btn{background:linear-gradient(120deg,#49dbbb,#2f9ac1)!important;color:#061b2c!important;box-shadow:0 6px 20px #13a6aa4f}
+#start-pilot-identity{background:linear-gradient(120deg,#123954,#081a30)!important}
+#start-pilot-avatar:not([src]){background:radial-gradient(circle at 50% 35%,#55a8be 0 15%,transparent 16%),radial-gradient(ellipse at 50% 100%,#2a7892 0 33%,transparent 34%),#071b31}
+@media(max-width:650px){#start-main{padding:9px!important}#start-headline{font-size:31px}}
 </style></head>
 <body class="h-screen w-screen flex flex-col items-center justify-center p-2 sm:p-4">
 
@@ -188,7 +201,7 @@
         <!-- Telas de Interface Overlay -->
         <!-- Tela Inicial / Menu Principal -->
         <div id="start-screen" class="absolute inset-0 bg-black/90 flex flex-col items-center justify-start p-3 text-center z-30">
-            <h1 class="text-3xl sm:text-5xl font-extrabold text-amber-500 tracking-wider mb-2 italic drop-shadow-[0_4px_8px_rgba(245,158,11,0.5)]">RIVERSTORM</h1>
+            <h1 id="start-headline" aria-label="RiverStorm"><span>RIVER</span><span>STORM</span></h1>
             <p class="text-xs sm:text-sm text-cyan-400 font-semibold tracking-widest mb-6">EDIÇÃO REIMAGINADA (PT-BR)</p>
 
             <p class="text-slate-300 text-sm max-w-md">20 missões • 7 aeronaves • resgates • chefes épicos</p>
@@ -688,6 +701,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
             'ÚLTIMA MISSÃO SEQUENCIAL: '+(pilotProfile.lastSequentialMission||'Nenhuma')
           ];
           document.getElementById('pilot-profile-stats').textContent=stats.join('\n');
+          refreshStartPilotIdentity();
           document.getElementById('pilot-nickname').value=pilotProfile.nickname||'';
           const photo=document.getElementById('pilot-profile-photo');
           if(pilotProfile.photo)photo.src=pilotProfile.photo;else photo.removeAttribute('src');
