@@ -1564,7 +1564,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
             }
             // Assinaturas especiais por chefe: EMP, relâmpagos, gravidade, fogo, gelo e investida.
             // Um único relógio de recarga para todos os especiais; nunca usar dois EMP em paralelo.
-            const abilityCooldown=Math.max(420,e.specialCooldown || 480);
+            const abilityCooldown=Math.max(360,Math.round((e.specialCooldown || 480)/adaptiveThreat));
             e.specialCharge=Math.min(abilityCooldown,(e.specialCharge||0)+1);
             const warning=e.specialCount<5 && e.specialCharge>=abilityCooldown-90;
             if(warning&&e.specialCharge===abilityCooldown-90){createFloatingText(e.x,e.y-55,'⚠ ESPECIAL EM 1,5 S','#facc15');try{window.RiverSFX?.alert?.()}catch(error){}}
@@ -2906,7 +2906,7 @@ function updateTerrainEvent(){
                 else {w.ttl=Math.max(1200,w.ttl||0);w.detach=0;}
             }
             // Reforços pontuais impedem longos intervalos sem combate sem criar amontoados.
-            if(!bossActive && missionTicks%205===0){
+            if(!bossActive && missionTicks%Math.max(155,Math.round(205/adaptiveThreat))===0){
                 const visible=enemies.filter(e=>e.type!=='BOSS'&&e.y>-25&&e.y<VIRTUAL_HEIGHT).length;
                 if(visible<2 && !structures.some(o=>o.y<145) && !rescueBoats.some(o=>o.y<100)){
                     const bank=getRiverBoundariesAt(25);
