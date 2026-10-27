@@ -2868,7 +2868,7 @@ function updateTerrainEvent(){
             if(parryTicks>0){for(const e of enemies){
               if(e.hp<=0||e.type==='BOSS'||e.reflectTicks>0||Math.hypot(e.x-player.x,e.y-player.y)>53)continue;
               const dx=e.x-player.x,dy=e.y-player.y,d=Math.max(1,Math.hypot(dx,dy));
-              e.reflectVX=dx/d*11;e.reflectVY=dy/d*11;e.reflectTicks=28;e.reflectHits=[];e.hp-=Math.max(1,(e.maxHp||e.hp)*.25);
+              e.reflectVX=dx/d*15;e.reflectVY=dy/d*15;e.reflectTicks=32;e.reflectHits=[];e.hp-=Math.max(2,(e.maxHp||e.hp)*.30);
               addExplosion(e.x,e.y,'#67e8f9',7);
             }}
             for(let i=0;i<enemies.length;i++){
@@ -2878,7 +2878,10 @@ function updateTerrainEvent(){
                 if(i===j)continue;const b=enemies[j];if(b.hp<=0||b.type==='BOSS'||Math.hypot(a.x-b.x,a.y-b.y)>(a.width+b.width)*.38)continue;
                 if(a.reflectHits?.includes(b))continue;
                 (a.reflectHits??=[]).push(b);
-                const damage=Math.max(1,(a.maxHp||4)*.25);a.hp-=damage;b.hp-=damage;
+                const damage=Math.max(2,(a.maxHp||4)*.35);a.hp-=damage;b.hp-=damage;
+                // Impacto explosivo entre inimigos: explosão física e dano radial limitado.
+                if(a.hp<=0){addExplosion(a.x,a.y,'#ff5ba5',22);for(const other of enemies){if(other!==a&&other!==b&&other.hp>0&&other.type!=='BOSS'&&Math.hypot(other.x-a.x,other.y-a.y)<48)other.hp-=Math.max(2,damage*.35);}}
+                if(b.hp<=0)addExplosion(b.x,b.y,'#ffdc71',22);
                 b.reflectVX=(b.x-a.x>=0?1:-1)*8;b.reflectVY=(b.y-a.y>=0?1:-1)*7;b.reflectTicks=18;
                 createFloatingText(b.x,b.y-20,'COLISÃO!','#fef08a');addExplosion(b.x,b.y,'#fb923c',10);
               }
@@ -3382,32 +3385,8 @@ function updateTerrainEvent(){
             try{window.RiverSFX?.impact()}catch(e){}
             screenShake=15;bombFlash=13;bombAftershockFrames=180;bombAftershockOrigin={x:b.x,y:b.y};
             enemyBullets=[];
-            // Bombas ignoram cobertura; destroem ilhotas pequenas e mantem dano global.
-            for(let i=islands.length-1;i>=0;i--){
-                const is=islands[i];
-                if(is.width<=80 && is.height<=100){
-                    addExplosion(is.x,is.y,'#fbbf24',26);
-                    createFloatingText(is.x,is.y,'ILHA DESTRUIDA!','#fbbf24');
-                    islands.splice(i,1);
-                    score+=150;
-                }
-            }
-            enemies.forEach(e=>{
-                if(e.type==='BOSS'){
-                    dropBossReward(e,16);
-                    bossTaunt={name:e.name,line:['AAAAAH! DANO CRÍTICO!','NÃO! ESSA BOMBA ATRAVESSOU MINHA BLINDAGEM!','ARGH! SISTEMAS EM COLAPSO!'][Math.floor(Math.random()*3)],ticks:170};
-                    createFloatingText(e.x,e.y,'DANO MASSIVO!','#ff6b6b');
-                    bossRobotVoice(e,true);e.bombKnockback=38;e.stunnedTicks=Math.max(e.stunnedTicks||0,20);
-                }
-                e.hp=e.type==='BOSS'?Math.max(1,e.hp-10*(e.parryVulnerableTicks>0?1.5:1)*(e===directTarget?1.10:1)):e.hp-999*(e===directTarget?1.10:1);
-                addExplosion(e.x,e.y,'#ffb347',20);
-            });
-            for(let i=enemies.length-1;i>=0;i--){
-                if(enemies[i].hp<=0&&enemies[i].type!=='BOSS'){
-                    score+=awardEnemyPoints(enemies[i].score);kills++;grantEnemyXP(enemies[i]);
-                    enemies.splice(i,1);
-                }
-            }
+            // Os danos não são instantâneos: cada um dos três pulsos aplica a destruição.
+            updateBombAftershock();
             addExplosion(b.x,b.y,'#fff3ad',34);
             createFloatingText(b.x,b.y,'BOMBA IMPACTOU!','#fbbf24');
         }
