@@ -24,9 +24,14 @@ body{margin:0;min-height:100vh;background:#06101f;color:#d8e9f8;font:14px system
         this.load.svg('fighter','./assets/sprites/player/riverstorm-fighter.svg');
         this.load.svg('bank-left','./assets/sprites/terrain/river-bank-left.svg');
         this.load.svg('bank-right','./assets/sprites/terrain/river-bank-right.svg');
+        this.load.svg('water-detail','./assets/sprites/terrain/water-detail.svg');
+        this.load.svg('island-detail','./assets/sprites/terrain/river-island-detail.svg');
       }
       create(){
         this.add.rectangle(W/2,H/2,265,H,0x126078);
+        this.waterTiles=[];
+        for(let j=0;j<3;j++)this.waterTiles.push(this.add.image(W/2,j*480-240,'water-detail').setDisplaySize(280,480).setDepth(-1));
+        this.islandVisuals=[this.add.image(157,-90,'island-detail').setDisplaySize(102,63).setDepth(0),this.add.image(378,-560,'island-detail').setDisplaySize(110,66).setDepth(0)];
         this.banks=[];
         for(let j=0;j<3;j++){
           this.banks.push(this.add.image(65,j*480-240,'bank-left').setDisplaySize(130,480).setDepth(0));
@@ -46,6 +51,8 @@ body{margin:0;min-height:100vh;background:#06101f;color:#d8e9f8;font:14px system
       update(time,delta){
         const dt=Math.min(2,delta/16.7);
         for(const bank of this.banks){bank.y+=1.25*dt;if(bank.y>H+240)bank.y-=1440;}
+        for(const tile of this.waterTiles){tile.y+=1.25*dt;if(tile.y>H+240)tile.y-=1440;}
+        for(const island of this.islandVisuals){island.y+=1.25*dt;if(island.y>H+75)island.y-=1250;}
         if(this.keys.left.isDown)this.player.x-=5*dt;
         if(this.keys.right.isDown)this.player.x+=5*dt;
         if(this.keys.up.isDown)this.player.y-=5*dt;
