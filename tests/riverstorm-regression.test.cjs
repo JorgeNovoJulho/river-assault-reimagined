@@ -127,7 +127,7 @@ test('bosses 1 a 3 usam sprites diferentes e distribuidos na build',()=>{
   assert.ok(vite.includes(p),p);
   assert.ok(renderer.includes(file),file);
  }
- assert.match(renderer,/Number\(d\.sector\)<=6/);
+ assert.match(renderer,/Number\(d\.sector\)<=12/);
 });
 
 test('sprites de chefes 4 a 6 integrados',()=>{
@@ -137,5 +137,7 @@ test('sprites de chefes 4 a 6 integrados',()=>{
   const p='assets/sprites/bosses/'+file;
   assert.ok(fs.existsSync(p),p);assert.ok(renderer.includes(file));assert.ok(vite.includes(p));
  }
- assert.ok(renderer.includes('Number(d.sector)<=6'));
+ assert.ok(renderer.includes('Number(d.sector)<=12'));
 });
+
+test('chefes 7 a 12 possuem sprites integrados',()=>{const render=fs.readFileSync('src/render/scene2d5.js','utf8'),vite=fs.readFileSync('vite.config.js','utf8');for(const name of ['storm-mantis','neon-leviathan','inferno-dredger','glacier-titan','solar-vulture','night-harvester']){const p='assets/sprites/bosses/'+name+'.svg';assert.ok(fs.existsSync(p),p);assert.ok(render.includes(name+'.svg'));assert.ok(vite.includes(p));}assert.ok(render.includes('Number(d.sector)<=12'));});
