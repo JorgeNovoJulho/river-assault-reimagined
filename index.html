@@ -1809,6 +1809,14 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
                   for(let n=0;n<4;n++){const angle=flash+n*Math.PI/2;ctx.strokeStyle=shades[n];ctx.lineWidth=2.5;ctx.shadowColor=shades[n];ctx.shadowBlur=qualitySelect.value==='eco'?0:10;ctx.beginPath();ctx.arc(0,0,7+n*2,angle,angle+Math.PI*.85);ctx.stroke();}
                   ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(0,0,2.5,0,Math.PI*2);ctx.fill();ctx.restore();
                 }
+                // Detalhe de classe visual para projéteis elementais; mantém tipo e colisões.
+                if(eb.element&&qualitySelect.value!=='eco'){
+                  ctx.save();
+                  const elementColor={EMP:'#67e8f9',LIGHTNING:'#fde047',GRAVITY:'#c4b5fd',ICE:'#bae6fd',FIRE:'#fb923c',BLEED:'#fb7185',POISON:'#86efac',PRISM:'#fef08a',SHADOW:'#a78bfa'}[eb.element]||eb.color||'#f8fafc';
+                  ctx.globalAlpha=.75;ctx.strokeStyle=elementColor;ctx.shadowColor=elementColor;ctx.shadowBlur=8;ctx.lineWidth=1.8;
+                  const blades=eb.element==='ICE'?6:eb.element==='PRISM'?7:eb.element==='SHADOW'?3:5;
+                  ctx.beginPath();for(let n=0;n<blades*2;n++){const a=n*Math.PI/blades+missionTicks*.045,r=n%2?5:11;const x=Math.cos(a)*r,y=Math.sin(a)*r;if(n)ctx.lineTo(x,y);else ctx.moveTo(x,y);}ctx.closePath();ctx.stroke();ctx.restore();
+                }
                 const element=eb.element||'';
                 const time=missionTicks*.12,angle=Math.atan2(eb.vy||1,eb.vx||0)+Math.PI/2;
                 ctx.rotate(angle);ctx.shadowColor=eb.color||'#ef4444';ctx.shadowBlur=12;
