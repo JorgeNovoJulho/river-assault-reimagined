@@ -1549,7 +1549,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
             if(bossSkillCooldown>0)bossSkillCooldown--;
             for(const prop of ['frozenTicks','stunnedTicks','burningTicks','shockTicks','parryVulnerableTicks'])if(e[prop]>0)e[prop]--;
             if(e.statusTicks>0){e.statusTicks--;if(++e.statusClock>=60){e.statusClock=0;const cap=e.statusBaseHp*.30;const dot=Math.max(0,Math.min(e.statusBaseHp*(e.statusRate||.01),cap-(e.statusDealt||0)));e.statusDealt=(e.statusDealt||0)+dot;e.hp=Math.max(0,e.hp-dot);createFloatingText(e.x,e.y-35,(e.statusKind==='BLEED'?'SANGRAMENTO':'VENENO')+' -'+Math.ceil(dot),e.statusKind==='BLEED'?'#fb7185':'#4ade80');if(e.hp<=0){finishBossDefeatedBySkill(e);return;}}}
-            if(e.gravityTicks>0){e.gravityClock=(e.gravityClock||0)+1;if(e.gravityClock%60===0){const d=e.maxHp*(e.gravityRate||.03);e.hp=Math.max(0,e.hp-d);createFloatingText(e.x,e.y-46,'GRAVIDADE -'+Math.ceil(d),'#c4b5fd');if(e.hp<=0){finishBossDefeatedBySkill(e);return;}}e.gravityTicks--;}
+            if(e.gravityTicks>0){e.gravityClock=(e.gravityClock||0)+1;if(e.gravityClock%60===0){const d=e.maxHp*(e.gravityRate||.03);e.hp=Math.max(0,e.hp-d);createFloatingText(e.x,e.y-46,'GRAVIDADE -'+Math.ceil(d),'#c4b5fd');if(e.hp<=0){finishBossDefeatedBySkill(e);return;}}e.gravityTicks--;if(e.gravityTicks===0){e.gravityRate=0;e.gravityClock=0;}}
             if(e.elementTicks>0){e.elementTicks--;e.elementClock=(e.elementClock||0)+1;if(e.elementClock%60===0){const d=e.maxHp*(e.elementRate||.01);e.hp=Math.max(0,e.hp-d);createFloatingText(e.x,e.y-40,e.elementKind+' -'+Math.ceil(d),BOSS_SKILLS[e.elementKind].color);if(e.hp<=0){finishBossDefeatedBySkill(e);return;}}}
             if(e.dualTicks>0){e.dualTicks--;e.dualClock=(e.dualClock||0)+1;if(e.dualClock%60===0){const d=e.maxHp*e.dualRate;e.hp=Math.max(0,e.hp-d);createFloatingText(e.x,e.y-42,(e.dualElement==='PRISM'?'LUZ':'SOMBRA')+' -'+Math.ceil(d),e.dualElement==='PRISM'?'#fde68a':'#a78bfa');if(e.hp<=0){finishBossDefeatedBySkill(e);return;}}}
             if(e.stunnedTicks>0)return;
@@ -1898,11 +1898,16 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
             ctx.fillStyle='#fff';ctx.fillRect(-1,-8,2,13);
           }ctx.restore();
         }
+        const projectileArt={blue:new Image(),red:new Image()};
+        projectileArt.blue.src='./assets/sprites/projectiles/plasma-blue.svg';
+        projectileArt.red.src='./assets/sprites/projectiles/plasma-red.svg';
         function drawBullets() {
             bullets.forEach(b => {
                 if(b.weaponId&&b.weaponId!=='SINGLE'&&b.weaponId!=='CIRCLE')drawBulletTrail(b);
                 ctx.save();
                 ctx.translate(b.x, b.y);
+                const projectileImage=(b.reflected||b.type==='REFLECTED')?null:(b.color&&/f[456]|e[f0]|ff[346]/i.test(b.color)?projectileArt.red:projectileArt.blue);
+                if(projectileImage&&projectileImage.complete&&projectileImage.naturalWidth){ctx.rotate(Math.atan2(b.vx||0,-(b.speed||7)));ctx.drawImage(projectileImage,-5,-13,10,26);ctx.restore();return;}
 
                 // Render de sprite por arma, com silhueta e material identificáveis.
                 if(b.type!=='REFLECTED'){
@@ -2867,8 +2872,8 @@ function updateTerrainEvent(){
             const skillActive=!!(bossActive&&bossSkillEquipped);
             skillUseButton.classList.remove('hidden');
             if(skillActive)skillUseButton.textContent=BOSS_SKILLS[bossSkillEquipped].icon+' '+bossSkillCharge+' · '+(bossSkillCooldown>0?Math.ceil(bossSkillCooldown/60)+'s':'PRONTO')+' [C]';
-            if(player.effectTimer>0){player.effectTimer--;if((player.effectType==='POISON'||player.effectType==='BLEED')&&player.effectTimer%60===0)applyDamage(player.effectType==='POISON'?3:5,player.effectType);if(player.effectType==='GRAVITY'&&player.effectTimer>0){const boss=enemies.find(e=>e.type==='BOSS');if(boss){player.x+=(boss.x-player.x)*.11;player.y+=(Math.min(VIRTUAL_HEIGHT-65,boss.y+145)-player.y)*.08;}}
-            if(player.effectType==='GRAVITY'&&player.effectTimer%60===0)applyDamage(player.maxShield*.03,'GRAVIDADE');if((player.effectType==='PRISM'||player.effectType==='SHADOW')&&player.effectTimer%60===0)applyDamage(player.maxShield*.005,player.effectType);
+            if(player.effectTimer>0){player.effectTimer--;if(player.effectTimer===0){player.effectType='';player.gravityDamageRate=0;}if((player.effectType==='POISON'||player.effectType==='BLEED')&&player.effectTimer%60===0)applyDamage(player.effectType==='POISON'?3:5,player.effectType);if(player.effectType==='GRAVITY'&&player.effectTimer>0){const boss=enemies.find(e=>e.type==='BOSS');if(boss){player.x+=(boss.x-player.x)*.11;player.y+=(Math.min(VIRTUAL_HEIGHT-65,boss.y+145)-player.y)*.08;}}
+            if(player.effectType==='GRAVITY'&&player.effectTimer>0&&player.effectTimer%60===0)applyDamage(player.maxShield*.03,'GRAVIDADE');if((player.effectType==='PRISM'||player.effectType==='SHADOW')&&player.effectTimer%60===0)applyDamage(player.maxShield*.005,player.effectType);
             if(player.effectType==='FIRE'&&player.effectTimer%60===0)applyDamage(player.maxShield*.01,'QUEIMADURA');if(player.effectType==='ICE'&&player.effectTimer%60===0)applyDamage(player.maxShield*.01,'CONGELAMENTO');if(player.effectType==='LIGHTNING'&&player.effectTimer%60===0)applyDamage(player.maxShield*.01,'CHOQUE');if(player.effectTimer===0)player.effectType='';}
             if(missionTransitionTicks>0){
                 missionTransitionTicks--;
@@ -4217,6 +4222,7 @@ function updateTerrainEvent(){
             drawClimateOverlay();
             // Reforça a silhueta do jogador acima dos disparos CIRCLE e do clima.
             window.RiverVisuals.drawPlayerForeground?.(ctx,player.x,player.y,player.aircraftType||selectedPlane,player.invulnerable);
+            if(player.damageBlinkFrames>0&&missionTicks%4<2){ctx.save();ctx.globalCompositeOperation='source-over';ctx.fillStyle='rgba(255,22,41,.88)';ctx.beginPath();ctx.ellipse(player.x,player.y,18,23,0,0,Math.PI*2);ctx.fill();ctx.restore();}
             if(player.damageBlinkFrames>0&&missionTicks%4<2){
               ctx.save();ctx.globalCompositeOperation='screen';ctx.fillStyle='rgba(255,30,45,.8)';
               ctx.shadowColor='#ff182e';ctx.shadowBlur=14;
