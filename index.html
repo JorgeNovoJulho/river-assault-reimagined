@@ -2853,6 +2853,8 @@ function updateTerrainEvent(){
             if(player.gravityDebuffTicks>0)player.gravityDebuffTicks--;
             // Orçamento visual por arena: protege CPU/GPU em resoluções altas.
             if(bossActive){
+              const bossMaxBullets=qualitySelect.value==='eco'?70:qualitySelect.value==='enhanced'?115:90;
+              if(enemyBullets.length>bossMaxBullets)enemyBullets.splice(0,enemyBullets.length-bossMaxBullets);
               if(enemyBullets.length>125)enemyBullets.splice(0,enemyBullets.length-125);
               if(particles.length>150)particles.splice(0,particles.length-150);
               if(floatingTexts.length>24)floatingTexts.splice(0,floatingTexts.length-24);
@@ -3971,7 +3973,7 @@ function updateTerrainEvent(){
         }
 
         function addExplosion(x, y, color, count = 10) {
-            const maxParticles=bossActive?150:240;
+            const maxParticles=bossActive?(qualitySelect.value==='eco'?75:qualitySelect.value==='enhanced'?135:100):240;
             if(particles.length>=maxParticles)return;
             count=Math.min(count,bossActive?14:28,maxParticles-particles.length);
             for (let i = 0; i < count; i++) {
@@ -3987,6 +3989,7 @@ function updateTerrainEvent(){
         }
 
         function createFloatingText(x, y, text, color) {
+            if(bossActive&&floatingTexts.length>=20)return;
             floatingTexts.push({ x: x, y: y, text: text, color: color, life: 1.0 });
         }
 
