@@ -1361,6 +1361,28 @@ function livingSetDressing(c,d,t){
  }
  c.restore();
 }
+// Boss silhouette accessories — recognizable functional parts over the original hull.
+function bossAccessories(c,e,d){
+ if(e.type!=='BOSS'||e.hp<=0)return;
+ const family=((e.bossId||1)-1)%7,t=(d.missionTicks||0)*.07;
+ const w=Math.max(76,e.width||110),h=Math.max(48,e.height||70);
+ const accents=['#e8ad71','#83d2e7','#c6a2e9','#f5b57a','#90ddc4','#e79796','#a4d3f2'];
+ c.save();c.translate(e.x,e.y);c.lineJoin='round';c.strokeStyle='#152635';c.lineWidth=2.5;c.fillStyle='#3b5366';
+ const pod=(x,y)=>{c.save();c.translate(x,y);c.beginPath();c.ellipse(0,0,10,16,0,0,Math.PI*2);c.fill();c.stroke();c.fillStyle=accents[family];c.fillRect(-3,3,6,12);c.restore();};
+ if(family===0||family===4){
+   for(const side of [-1,1]){c.save();c.scale(side,1);c.beginPath();c.moveTo(w*.18,-h*.3);c.quadraticCurveTo(w*.6,-h*.36,w*.63,-h*.06);c.lineTo(w*.54,h*.25);c.lineTo(w*.24,h*.06);c.closePath();c.fill();c.stroke();c.restore();pod(side*w*.43,0);}
+ }else if(family===1){
+   for(const side of [-1,1]){const x=side*w*.33;pod(x,0);c.save();c.translate(x,-h*.23);c.rotate(t*2*side);c.strokeStyle='#dae9f4';c.lineWidth=3;c.beginPath();c.moveTo(-w*.2,0);c.lineTo(w*.2,0);c.moveTo(0,-w*.12);c.lineTo(0,w*.12);c.stroke();c.restore();}
+ }else if(family===2||family===5){
+   for(const side of [-1,1]){c.save();c.scale(side,1);for(let k=0;k<3;k++){const y=(k-1)*h*.24;c.beginPath();c.moveTo(w*.19,y);c.lineTo(w*.39,y+Math.sin(t+k)*4);c.lineTo(w*.53,y+h*.11);c.stroke();}c.restore();}
+   c.strokeStyle=accents[family];c.lineWidth=4;c.beginPath();c.moveTo(0,-h*.2);c.quadraticCurveTo(22,-h*.64+Math.sin(t)*5,0,-h*.71);c.stroke();
+ }else if(family===3){
+   for(const side of [-1,1]){const x=side*w*.34;c.save();c.translate(x,0);c.fillStyle='#273340';c.beginPath();c.roundRect(-11,-h*.4,22,h*.8,8);c.fill();c.stroke();c.strokeStyle='#a5b4bf';for(let k=-2;k<=2;k++){c.beginPath();c.moveTo(-9,k*h*.13);c.lineTo(9,k*h*.13);c.stroke();}c.restore();}pod(0,-h*.15);
+ }else{
+   for(const side of [-1,1]){pod(side*w*.35,0);c.save();c.translate(side*w*.35,-h*.15);c.rotate(t*1.4);c.strokeStyle=accents[family];c.beginPath();c.ellipse(0,0,17,7,0,0,Math.PI*2);c.stroke();c.restore();}
+ }
+ c.restore();
+}
 function draw(c,d){
  const t=THEMES[((d.sector-1)%THEMES.length+THEMES.length)%THEMES.length];
  landscape(c,d,t);terrainSignature(c,d,t);landmark(c,d,t);mapSetPieces(c,d,t);biomeAtmosphere(c,d,t);enhancedWorld(c,d,t);livingSetDressing(c,d,t);
@@ -1368,7 +1390,7 @@ function draw(c,d){
  islands(c,(d.islands||[]).filter(p=>p.y+(p.height||0)>-32&&p.y-(p.height||0)<d.h+32&&p.x+(p.width||0)>-32&&p.x-(p.width||0)<d.w+32),t);
  for(const e of d.enemies||[]){
    if(e.hp<=0||e.y+(e.height||40)<-45||e.y-(e.height||40)>d.h+45||e.x+(e.width||40)<-45||e.x-(e.width||40)>d.w+45)continue;
-   enemy(c,e,t.time);highDetailEnemy(c,e,t.time);drawAtlasVehicle(c,e);drawBiomeOverlay(c,e);mechArticulation(c,e);
+   enemy(c,e,t.time);highDetailEnemy(c,e,t.time);drawAtlasVehicle(c,e);drawBiomeOverlay(c,e);mechArticulation(c,e);bossAccessories(c,e,d);
  }
  if(!d.invulnerable||Math.floor(Date.now()/110)%2){plane(c,d.player.x,d.player.y,d.player.aircraftType||d.aircraft,0.85);highDetailPlane(c,d.player.x,d.player.y,d.player.aircraftType||d.aircraft)}enhancedBattleLight(c,d);enhancedWeaponGlints(c,d);bossPresentation(c,d);atmosphereByTime(c,d);combatAtmosphere(c,d);
 }
