@@ -207,3 +207,13 @@ test('Phaser TypeScript has isolated entry without replacing original campaign',
  assert.match(module,/assets\/sprites\/bosses/);
  assert.match(game,/id="gameCanvas"/);
 });
+
+test('Phaser experimental arena has real gameplay systems, not only showroom',()=>{
+ const src=fs.readFileSync('src/phaser/main.ts','utf8');
+ for(const marker of ['private spawnWave(', 'private shoot(', 'private damage(', 'this.keys.space.isDown','this.pointerActive','this.bossHp-=b.damage','this.lives-=amount','Math.round(this.game.loop.actualFps)']){
+  assert.ok(src.includes(marker),'phaser gameplay: '+marker);
+ }
+ assert.match(src,/Phaser\.Math\.Distance\.Between/);
+ assert.match(src,/this\.shots\.splice\(i,1\)/);
+ assert.match(src,/this\.enemies\.splice\(i,1\)/);
+});
