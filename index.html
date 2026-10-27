@@ -196,10 +196,7 @@
             ⚠ SISTEMAS DESATIVADOS POR EMP! ⚠
         </div>
 
-        <div id="boss-special-hud" class="hidden absolute top-9 left-1/2 -translate-x-1/2 z-20 pointer-events-none" style="width:min(82%,310px);padding:7px 10px;background:#08172fe8;border:1px solid #22d3ee;border-radius:9px;color:white;font:bold 11px monospace;box-shadow:0 2px 12px #000a">
-          <div style="display:flex;justify-content:space-between;gap:10px"><span id="boss-special-name">ESPECIAL DO CHEFE</span><span id="boss-special-status">CARREGANDO</span></div>
-          <div style="height:9px;background:#273449;border-radius:7px;overflow:hidden;margin-top:5px"><div id="boss-special-fill" style="width:0%;height:100%;background:linear-gradient(90deg,#0891b2,#67e8f9)"></div></div>
-        </div>
+
         <!-- Telas de Interface Overlay -->
         <!-- Tela Inicial / Menu Principal -->
         <div id="start-screen" class="absolute inset-0 bg-black/90 flex flex-col items-center justify-start p-3 text-center z-30">
@@ -291,6 +288,10 @@
         </div>
     </div>
 
+        <div id="boss-special-hud" class="hidden" style="width:min(100%,920px);padding:7px 10px;background:#08172fe8;border:1px solid #22d3ee;border-radius:9px;color:white;font:bold 11px monospace;box-shadow:0 2px 12px #000a">
+          <div style="display:flex;justify-content:space-between;gap:10px"><span id="boss-special-name">ESPECIAL DO CHEFE</span><span id="boss-special-status">CARREGANDO</span></div>
+          <div style="height:9px;background:#273449;border-radius:7px;overflow:hidden;margin-top:5px"><div id="boss-special-fill" style="width:0%;height:100%;background:linear-gradient(90deg,#0891b2,#67e8f9)"></div></div>
+        </div>
     <div id="boss-dialogue-strip" aria-live="polite" class="hidden" role="status"><b id="boss-dialogue-name" style="display:block;color:#fbbf24"></b><span id="boss-dialogue-text" style="color:#fff"></span></div>
     <!-- HUD compacto unificado: fora do Canvas para preservar toda a área de combate. -->
     <section id="compact-hud" aria-label="Painel de combate RiverStorm">
@@ -316,7 +317,8 @@
     </div>
 
     <style>
-      #game-container{min-height:180px} #boss-dialogue-strip{box-shadow:0 5px 12px #000a!important} #boss-special-hud{display:none!important}
+      #game-container{min-height:180px} #boss-dialogue-strip{box-shadow:0 5px 12px #000a!important} #boss-special-hud.hidden{display:none!important}
+      #boss-special-hud:not(.hidden){display:block!important;position:relative!important;inset:auto!important;transform:none!important;margin:0 auto 4px!important;max-width:920px!important;box-sizing:border-box;flex:none!important}
       #mission-banner{display:none!important}
       #compact-hud{box-sizing:border-box;width:100%;max-width:920px;flex:0 0 auto;background:linear-gradient(#0b2842,#071326);border:2px solid #3d8faf;border-radius:7px;padding:4px 6px;color:#e4f7ff;box-shadow:inset 0 0 0 1px #163a5c;font:700 clamp(9px,1.15vw,12px) monospace}
       .rs-hud-grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:3px}
@@ -1464,7 +1466,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
             }
             // Assinaturas especiais por chefe: EMP, relâmpagos, gravidade, fogo, gelo e investida.
             // Um único relógio de recarga para todos os especiais; nunca usar dois EMP em paralelo.
-            const abilityCooldown=e.specialCooldown || 480;
+            const abilityCooldown=Math.max(420,e.specialCooldown || 480);
             e.specialCharge=Math.min(abilityCooldown,(e.specialCharge||0)+1);
             const warning=e.specialCount<5 && e.specialCharge>=abilityCooldown-90;
             if(warning&&e.specialCharge===abilityCooldown-90){createFloatingText(e.x,e.y-55,'⚠ ESPECIAL EM 1,5 S','#facc15');try{window.RiverSFX?.alert?.()}catch(error){}}
@@ -1480,7 +1482,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
                 if(parryTicks>0){launchSkillTrajectory(e.skillAffinity,e.x,e.y,player.x,player.y,BOSS_SKILLS[e.skillAffinity]?.color||'#a78bfa');reflectBossSpecial(e);return;}
                 launchSkillTrajectory(e.skillAffinity,e.x,e.y,player.x,player.y,BOSS_SKILLS[e.skillAffinity]?.color||'#a78bfa');
                 const pattern=BOSS_AFFINITIES.indexOf(e.skillAffinity);
-                if(pattern===0){player.disabledTimer=300;player.effectType='EMP';player.effectTimer=300; sound.playEmpSound();document.getElementById('game-container').classList.add('emp-flash');setTimeout(()=>document.getElementById('game-container').classList.remove('emp-flash'),300);createFloatingText(player.x,player.y,'EMP · 5 S','#67e8f9')}
+                if(pattern===0){player.disabledTimer=Math.max(player.disabledTimer||0,72);player.effectType='EMP';player.effectTimer=72; sound.playEmpSound();document.getElementById('game-container').classList.add('emp-flash');setTimeout(()=>document.getElementById('game-container').classList.remove('emp-flash'),300);createFloatingText(player.x,player.y,'EMP · 1,2 S','#67e8f9')}
                 else if(pattern===1){player.effectType='LIGHTNING';player.effectTimer=600;for(let n=-2;n<=2;n++)enemyBullets.push({x:e.x+n*26,y:e.y+25,vx:n*.65,vy:5.2,color:'#67e8f9'})}
                 else if(pattern===2){player.effectType='GRAVITY';player.effectTimer=180;player.gravityDamageRate=.03;player.x+=(e.x-player.x)*.15;createFloatingText(player.x,player.y,'PULSO GRAVITACIONAL','#c4b5fd')}
                 else if(pattern===3||pattern===4){player.effectType=pattern===3?'FIRE':'ICE';player.effectTimer=600;for(let n=-2;n<=2;n++)enemyBullets.push({x:e.x+n*20,y:e.y+28,vx:n*1.05,vy:3.8,color:pattern===3?'#fb923c':'#bae6fd'})}
