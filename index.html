@@ -3222,7 +3222,7 @@ function updateTerrainEvent(){
             window.RiverVisuals.draw(ctx,{
                 w: VIRTUAL_WIDTH, h: VIRTUAL_HEIGHT, riverPoints, islands, enemies, player,
                 sector, aircraft:player.aircraftType||selectedPlane, distance, invulnerable:player.invulnerable,
-                quality:qualitySelect.value,dayPhase:sectorTime(),weather:sectorWeather()
+                quality:qualitySelect.value,dayPhase:sectorTime(),weather:sectorWeather(),missionTicks
             });
             // Sprites de alvos destrutíveis em três estados; formas variam por bioma.
             for(const target of enemies){
