@@ -2875,7 +2875,7 @@ function updateTerrainEvent(){
             if(player.effectType!==player.lastAudibleEffect){
               player.lastAudibleEffect=player.effectType;
               if(player.effectType&&player.effectTimer>0){
-                try{window.RiverSFX?.impact?.()}catch(_){}
+                try{window.RiverSFX?.status?.(player.effectType)}catch(_){}
                 createFloatingText(player.x,player.y-42,'AFETADO: '+player.effectType,'#ffcc7f');
               }
             }
