@@ -35,6 +35,11 @@ function copyAndVersionRuntime() {
         .join('href="./src/styles/tailwind.css?build='+buildId+'"');
       html = html.replace('</head>',
         '<meta name="riverstorm-build" content="'+buildId+'">\n</head>');
+      for(const file of ['assets/sprites/projectiles/plasma-blue.svg','assets/sprites/projectiles/plasma-red.svg','assets/sprites/bosses/iron-wasp.svg']){
+        const source=resolve(file),target=resolve('dist',file);
+        if(!existsSync(source))throw new Error('Sprite obrigatorio ausente: '+file);
+        mkdirSync(dirname(target),{recursive:true});copyFileSync(source,target);
+      }
       writeFileSync(indexPath, html);
       writeFileSync(resolve('dist/build-info.json'), JSON.stringify({
         build: buildId, release: '0.5.6', timestamp: new Date().toISOString()
