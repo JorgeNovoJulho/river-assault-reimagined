@@ -34,6 +34,15 @@ body{margin:0;min-height:100vh;background:#06101f;color:#d8e9f8;font:14px system
         for(const [key,file,width,height] of sprites){
           this.load.svg(key,'./assets/sprites/'+file,{width,height});
         }
+        // Carregamento visual opcional: a jogabilidade nunca depende destes PNGs.
+        // Ativar a skin premium somente se TODOS os recursos necessários existirem.
+        this.premiumReady=false;
+        this.premiumManifest={
+          fighter:'./assets/sprites/premium/runtime/player/fighter_candidate.png',
+          explosion:'./assets/sprites/premium/runtime/fx/explosion_atlas_4x3.png'
+        };
+        this.load.image('premium-fighter',this.premiumManifest.fighter);
+        this.load.spritesheet('premium-explosion',this.premiumManifest.explosion,{frameWidth:128,frameHeight:128});
         this.load.on('loaderror',file=>{
           this.assetFailures.push(file.key);
           console.error('[RiverStorm] Sprite não carregado:',file.key,file.src);
@@ -50,7 +59,11 @@ body{margin:0;min-height:100vh;background:#06101f;color:#d8e9f8;font:14px system
           this.banks.push(this.add.image(W-65,j*480-240,'bank-right').setDisplaySize(130,480).setDepth(0));
         }
         this.boss=this.add.image(W/2,170,'boss').setDisplaySize(170,130);
-        this.player=this.add.image(W/2,H-120,'fighter').setDisplaySize(52,61).setDepth(2);
+        this.premiumReady=this.textures.exists('premium-fighter')&&this.textures.exists('premium-explosion');
+        this.player=this.add.image(W/2,H-120,this.premiumReady?'premium-fighter':'fighter').setDisplaySize(52,61).setDepth(2);
+        if(this.premiumReady){
+          this.anims.create({key:'premium-boom',frames:this.anims.generateFrameNumbers('premium-explosion',{start:0,end:11}),frameRate:20,repeat:0});
+        }
         this.keys=this.input.keyboard.createCursorKeys();
         this.keyboardSpace=this.input.keyboard.addKey('SPACE');
         this.status=this.add.text(10,10,'PHASER 4 | RECUPERAÇÃO',{fontFamily:'monospace',fontSize:'17px',color:'#ffffff'});
@@ -59,11 +72,14 @@ body{margin:0;min-height:100vh;background:#06101f;color:#d8e9f8;font:14px system
         this.input.on('pointermove',p=>{if(this.pressed)this.target={x:p.x,y:p.y};});
         this.input.on('pointerup',()=>{this.pressed=false;});
         const missing=['boss','enemy','bullet','fighter','bank-left','bank-right','water-detail','island-detail'].filter(key=>!this.textures.exists(key));
-        if(this.assetFailures.length||missing.length){
-          output.textContent='ATENÇÃO: texturas com falha: '+[...new Set([...this.assetFailures,...missing])].join(', ')+'. Verifique recursos no GitHub Pages.';
+        // A ausência dos PNGs premium é esperada enquanto não forem publicados;
+        // não classificar essa ausência como falha dos SVGs ativos.
+        const mandatoryFailures=this.assetFailures.filter(k=>!k.startsWith('premium-'));
+        if(mandatoryFailures.length||missing.length){
+          output.textContent='ATENÇÃO: texturas com falha: '+[...new Set([...mandatoryFailures,...missing])].join(', ')+'. Verifique recursos no GitHub Pages.';
           output.style.color='#ffb384';
         }else{
-          output.textContent='Arena Phaser carregada: 8/8 sprites disponíveis. Motor de recuperação; campanha preservada.';
+          output.textContent='Arena Phaser: 8/8 sprites legados OK; skin '+(this.premiumReady?'PREMIUM ativa':'SVG de segurança ativo (PNG premium ainda não publicado)')+'. Campanha preservada.';
         }
       }
       update(time,delta){
