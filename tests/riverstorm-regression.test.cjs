@@ -95,3 +95,20 @@ test('limites na arena respeitam qualidade grafica',()=>{
  assert.match(game,/floatingTexts.length>=20/);
  assert.match(game,/maxParticles=bossActive\?\(qualitySelect/);
 });
+
+test('boss UI uses arcs and slender status lines without square halo',()=>{
+ const render=fs.readFileSync('src/render/scene2d5.js','utf8');
+ const block=render.slice(render.indexOf('function bossPresentation(c,d)'),render.indexOf('function livingSetDressing(c,d,t)'));
+ assert.match(block,/integrados ao casco/);
+ assert.doesNotMatch(block,/strokeRect\(/);
+});
+test('all boss statuses have sound and visible feedback on pilot',()=>{
+ const audio=fs.readFileSync('src/audio/sfx-modern.js','utf8');
+ assert.match(game,/function drawPlayerStatusEffect\(/);
+ assert.match(game,/drawPlayerStatusEffect\(\)/);
+ assert.match(game,/RiverSFX\?\.status\?\.\(player.effectType\)/);
+ for(const effect of ['EMP','LIGHTNING','ICE','FIRE','BLEED','POISON','PRISM','SHADOW','GRAVITY']){
+  assert.ok(audio.includes(effect+':['),effect+' sound');
+  assert.ok(game.includes(effect+':'),effect+' visual palette');
+ }
+});
