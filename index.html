@@ -956,6 +956,15 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
             { name: 'FORTALEZA VOADORA', width: 170, height: 65, hp: 125, color: '#334155', score: 2500 }
         ];
 
+        // Perfis individuais dos 20 chefes: vida, cadência, agilidade e recarga.
+        // Multiplicadores conservadores para não alterar a curva global de progressão.
+        const BOSS_BALANCE_20=[
+          [1.00,1.00,1.00],[1.06,1.05,.98],[.96,1.12,1.08],[1.10,.94,.96],
+          [1.02,1.15,1.04],[1.08,.96,1.10],[.98,1.12,1.12],[1.12,.92,.94],
+          [1.04,1.07,1.03],[1.07,1.08,1.02],[1.12,.95,.98],[1.02,1.15,1.10],
+          [1.00,1.16,1.12],[1.10,1.04,.96],[1.15,.96,.94],[1.05,1.14,1.08],
+          [1.12,1.08,1.02],[1.16,1.03,.98],[1.10,1.12,1.05],[1.22,1.04,.93]
+        ];
         // --- GERAÇÃO DO RIO E ILHAS ---
         function initRiver() {
             riverPoints = [];
@@ -1201,7 +1210,8 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
             const cycleMultiplier = 1 + Math.floor((sector - 1) / BOSS_TYPES.length) * 0.4;
             // Boss é confronto prolongado; escala por dificuldade, missão e jornada.
             const bossClimateStrength=sectorTime()==='NIGHT'?1.10:sectorWeather()==='HEAT'?1.06:.94;
-            const calculatedHp = Math.round((540+mission.difficulty*160+sector*38)*cycleMultiplier*Math.pow(1.16,journey-1)*1.20*1.20*bossClimateStrength);
+            const bossBalance=BOSS_BALANCE_20[Math.max(0,Math.min(19,sector-1))];
+            const calculatedHp = Math.round((540+mission.difficulty*160+sector*38)*cycleMultiplier*Math.pow(1.16,journey-1)*1.20*1.20*bossClimateStrength*bossBalance[0]);
 
             enemies.push({
                 type: 'BOSS',
@@ -1219,12 +1229,12 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
                 maxHp: calculatedHp,
                 score: bossConfig.score,
                 color: bossConfig.color,
-                vx: 1.8,
+                vx: 1.8*bossBalance[2],
                 shootTimer: 0,
                 attackPattern: 0,
                 attackTimer: 0,
                 specialCharge: 0,
-                specialCooldown: Math.round(480/bossClimateStrength),
+                specialCooldown: Math.round(480/bossClimateStrength*bossBalance[1]),
                 environmentalStrength:bossClimateStrength,
                 specialCount:0,
                 laserCharging: false,
@@ -1880,6 +1890,19 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
                 ctx.save();
                 ctx.translate(e.x, e.y);
 
+                // Passo 3: animações de sprites por movimento e estado, baseadas
+                // no relógio da missão (evita Date.now e mantém FPS previsível).
+                if(e.type!=='BOSS'&&e.type!=='MEGAZORD'){
+                  const ticks=missionTicks*.06+(e.x||0)*.025;
+                  const damage=e.maxHp>0?Math.max(0,1-e.hp/e.maxHp):0;
+                  const bob=Math.sin(ticks)*Math.min(2.5,(e.height||24)*.065);
+                  ctx.translate(0,bob);
+                  if(e.type==='HELI')ctx.rotate(Math.sin(ticks*.55)*.035);
+                  if(e.type==='JET'||e.type==='ZIGZAG')ctx.rotate(Math.sin(ticks*.65)*.06);
+                  if(damage>.5&&qualitySelect.value!=='eco'){
+                    ctx.shadowColor='#fb923c';ctx.shadowBlur=4+Math.sin(ticks*3)*2;
+                  }
+                }
                 if(e.type==='MEGAZORD'){
                     ctx.fillStyle='#25354e';ctx.fillRect(-29,-34,58,68);
                     ctx.fillStyle='#f97316';ctx.fillRect(-19,-52,38,24);
