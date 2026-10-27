@@ -3305,7 +3305,7 @@ function updateTerrainEvent(){
         function fireBankMissiles(){
             const launch=(x,y,vx,vy)=>bullets.push({x,y,vx,speed:-vy,type:'BANK_MISSILE',color:'#fb923c',damage:6,angle:Math.atan2(vx,-vy)});
             launch(player.x,player.y-24,0,-12);launch(player.x-24,player.y-6,-11,0);launch(player.x+24,player.y-6,11,0);
-            for(const w of wingmen)if(w.ttl>0)launch(player.x+w.side*45,player.y-8,w.side*7,-9);
+            // As auxiliares têm arma independente; fireWingmen() cuida apenas de mísseis.
         }
         function fireWeapon() {
             if (gameState !== 'PLAYING' || player.disabledTimer > 0) return;
@@ -3328,12 +3328,12 @@ function updateTerrainEvent(){
         }
 
         function fireWingmen(){
-            if(missionTicks%4!==0)return;
+            if(missionTicks%8!==0)return;
             for(const w of wingmen){
                 if(w.ttl<=0)continue;
                 // Naves auxiliares usam sempre mísseis, independentemente do armamento principal.
                 for(const direction of [-1,1]){
-                    bullets.push({x:player.x+w.side*36,y:player.y+10,vx:w.side*5.8,speed:direction*8.6,
+                    bullets.push({x:player.x+w.side*36+direction*4,y:player.y+7,vx:w.side*1.2+direction*.65,speed:8.6,
                         type:'MISSILE',weaponId:'MISSILE',color:'#ffb65c',isWingmanMissile:true});
                 }
             }
