@@ -1180,6 +1180,32 @@ function cinematicBossSkill(c,f){
  }
  c.restore();
 }
+function atmosphereByTime(c,d){
+ if(!detailEnabled)return;
+ const {w,h}=d,weather=d.weather||'RAIN',day=d.dayPhase||'MORNING',time=Date.now()*.001;
+ c.save();
+ if(day==='NIGHT'){c.fillStyle='rgba(3,10,39,.29)';c.fillRect(0,0,w,h)}
+ else if(day==='MORNING'){c.fillStyle='rgba(255,192,111,.075)';c.fillRect(0,0,w,h)}
+ else{c.fillStyle='rgba(255,222,146,.04)';c.fillRect(0,0,w,h)}
+ const count=d.quality==='eco'?22:56;
+ if(weather==='RAIN'||weather==='SNOW'){
+  c.strokeStyle=weather==='RAIN'?'rgba(178,221,255,.39)':'rgba(241,251,255,.74)';
+  c.fillStyle='rgba(245,253,255,.78)';c.lineWidth=weather==='RAIN'?1.1:1.8;
+  for(let i=0;i<count;i++){
+   const x=(hash(i*71+Number(d.sector)*9)*w+time*(weather==='RAIN'?65:14))%w;
+   const y=(hash(i*31+17)*h+time*(weather==='RAIN'?235:42))%h;
+   c.beginPath();if(weather==='RAIN'){c.moveTo(x,y);c.lineTo(x-7,y+17);c.stroke()}else{c.arc(x,y,1.2+i%3*.45,0,7);c.fill()}
+  }
+ }else if(weather==='WIND'){
+  c.strokeStyle='rgba(204,235,240,.25)';c.lineWidth=1.3;
+  for(let i=0;i<count;i++){const x=(hash(i*33)*w+time*108)%w,y=hash(i*45+8)*h;c.beginPath();c.moveTo(x,y);c.lineTo(x+16,y-3);c.stroke()}
+ }else if(weather==='HEAT'){
+  for(let i=0;i<count/2;i++){const y=hash(i*17+14)*h,cx=hash(i*19+12)*w;c.strokeStyle='rgba(255,187,85,.075)';c.lineWidth=2;c.beginPath();c.moveTo(cx-20,y);c.quadraticCurveTo(cx+Math.sin(time*3+i)*12,y-8,cx+22,y);c.stroke()}
+ }else if(weather==='FOG'){
+  for(let i=0;i<5;i++){const x=((hash(i*73)*w+Math.sin(time*.17+i)*28)%w),y=h*(i+.5)/5;const g=c.createRadialGradient(x,y,10,x,y,w*.55);g.addColorStop(0,'rgba(201,220,233,.13)');g.addColorStop(1,'rgba(201,220,233,0)');c.fillStyle=g;c.fillRect(0,Math.max(0,y-w*.6),w,w*1.2)}
+ }
+ c.restore();
+}
 function draw(c,d){
  const t=THEMES[((d.sector-1)%THEMES.length+THEMES.length)%THEMES.length];
  landscape(c,d,t);terrainSignature(c,d,t);landmark(c,d,t);mapSetPieces(c,d,t);biomeAtmosphere(c,d,t);enhancedWorld(c,d,t);
@@ -1189,7 +1215,7 @@ function draw(c,d){
    if(e.hp<=0||e.y+(e.height||40)<-45||e.y-(e.height||40)>d.h+45||e.x+(e.width||40)<-45||e.x-(e.width||40)>d.w+45)continue;
    enemy(c,e,t.time);highDetailEnemy(c,e,t.time);drawAtlasVehicle(c,e);drawBiomeOverlay(c,e);mechArticulation(c,e);
  }
- if(!d.invulnerable||Math.floor(Date.now()/110)%2){plane(c,d.player.x,d.player.y,d.player.aircraftType||d.aircraft,0.85);highDetailPlane(c,d.player.x,d.player.y,d.player.aircraftType||d.aircraft)}enhancedBattleLight(c,d);enhancedWeaponGlints(c,d);
+ if(!d.invulnerable||Math.floor(Date.now()/110)%2){plane(c,d.player.x,d.player.y,d.player.aircraftType||d.aircraft,0.85);highDetailPlane(c,d.player.x,d.player.y,d.player.aircraftType||d.aircraft)}enhancedBattleLight(c,d);enhancedWeaponGlints(c,d);atmosphereByTime(c,d);
 }
 root.RiverVisuals={cinematicBossSkill,draw,plane,enemy,THEMES,BIOME_DETAILS,drawIslands(c,items,sector){const t=THEMES[((sector-1)%THEMES.length+THEMES.length)%THEMES.length];islands(c,items,t)}};
 })(window);
