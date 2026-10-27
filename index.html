@@ -2685,24 +2685,24 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
           ctx.save();
           if(night){ctx.fillStyle='rgba(10,16,56,.12)';ctx.fillRect(0,0,VIRTUAL_WIDTH,VIRTUAL_HEIGHT);}
           if(weather==='HEAT'){
-            const intensity=.035+climateHeat*.065;
+            const intensity=.014+climateHeat*.032;
             ctx.fillStyle='rgba(255,118,21,'+intensity+')';ctx.fillRect(0,0,VIRTUAL_WIDTH,VIRTUAL_HEIGHT);
             for(let i=0;i<5;i++){let x=(i*109+sector*17)%VIRTUAL_WIDTH,y=(missionTicks*1.3+i*137)%VIRTUAL_HEIGHT;
               ctx.strokeStyle='rgba(255,198,97,.14)';ctx.beginPath();ctx.moveTo(x-45,y);ctx.quadraticCurveTo(x+Math.sin(missionTicks*.025+i)*18,y-25,x+45,y-40);ctx.stroke();}
           }else if(weather==='FOG'){
-            for(let i=0;i<6;i++){const x=(i*119+missionTicks*.12+sector*19)%(VIRTUAL_WIDTH+180)-90,y=(i*145+missionTicks*.06)%VIRTUAL_HEIGHT;
-              const grad=ctx.createRadialGradient(x,y,12,x,y,115);grad.addColorStop(0,'rgba(201,225,234,.22)');grad.addColorStop(1,'rgba(201,225,234,0)');
+            for(let i=0;i<3;i++){const x=(i*119+missionTicks*.12+sector*19)%(VIRTUAL_WIDTH+180)-90,y=(i*145+missionTicks*.06)%VIRTUAL_HEIGHT;
+              const grad=ctx.createRadialGradient(x,y,12,x,y,115);grad.addColorStop(0,'rgba(201,225,234,.12)');grad.addColorStop(1,'rgba(201,225,234,0)');
               ctx.fillStyle=grad;ctx.beginPath();ctx.arc(x,y,115,0,Math.PI*2);ctx.fill();}
           }else if(weather==='SNOW'){
             ctx.fillStyle='rgba(215,235,255,'+(.035+climateSnow*.09)+')';ctx.fillRect(0,0,VIRTUAL_WIDTH,VIRTUAL_HEIGHT);
             ctx.fillStyle='rgba(245,250,255,.8)';
-            const count=qualitySelect.value==='eco'?32:78;
+            const count=qualitySelect.value==='eco'?14:35;
             for(let i=0;i<count;i++){const x=(i*77+Math.sin(i*2.4)*39+missionTicks*(.22+i%3*.07))%VIRTUAL_WIDTH,y=(i*53+missionTicks*(.7+i%4*.17))%VIRTUAL_HEIGHT;
               ctx.beginPath();ctx.arc(x,y,i%6===0?2:1,0,Math.PI*2);ctx.fill();}
             ctx.fillStyle='rgba(242,249,255,'+(climateSnow*.32)+')';ctx.fillRect(0,VIRTUAL_HEIGHT-12,VIRTUAL_WIDTH,12);
           }else if(weather==='RAIN'){
             ctx.strokeStyle='rgba(157,213,255,.37)';ctx.lineWidth=1;
-            const count=qualitySelect.value==='eco'?36:86;
+            const count=qualitySelect.value==='eco'?12:30;
             for(let i=0;i<count;i++){const x=(i*71+missionTicks*(1.6+i%3))%VIRTUAL_WIDTH,y=(i*127+missionTicks*(4+i%3))%VIRTUAL_HEIGHT;
               ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x-5,y+19);ctx.stroke();}
             if(climateFlash>0){
@@ -3109,13 +3109,13 @@ function updateTerrainEvent(){
             for(const boss of enemies){
               if(boss.type!=='BOSS'||boss.hp<=0)continue;
               boss.turretTimer=(boss.turretTimer||0)+1;
-              if(boss.turretTimer%72===0){
+              if(boss.turretTimer%155===0&&enemyBullets.length<38){
                 for(const side of [-1,1]){
                   const hp=side<0?boss.turretLeftHp:boss.turretRightHp;
                   if(hp<=0)continue;
                   const x=boss.x+side*boss.width*.37,y=boss.y+boss.height*.15;
                   const dx=player.x-x,dy=player.y-y,d=Math.max(1,Math.hypot(dx,dy));
-                  for(let i=-1;i<=1;i++)enemyBullets.push({x,y,vx:dx/d*3.3+i*.55,vy:dy/d*3.3,element:boss.skillAffinity,color:'#ff728f',isMissile:false});
+                  for(let i=-1;i<=1;i++)enemyBullets.push({x,y,vx:dx/d*3.3+i*.85,vy:dy/d*3.3,element:boss.skillAffinity,color:'#ff728f',isMissile:false});
                 }
               }
               for(const shot of bullets){
