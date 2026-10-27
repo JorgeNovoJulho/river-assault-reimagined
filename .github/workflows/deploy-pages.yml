@@ -25,6 +25,8 @@ jobs:
         run: npm install
       - name: Executar testes obrigatórios
         run: npm test
+      - name: Validar laboratorio Phaser TypeScript
+        run: npm run check:phaser
       - name: Compilar página jogável
         run: npm run build
       - name: Verificar se o HUD novo entrou na build
