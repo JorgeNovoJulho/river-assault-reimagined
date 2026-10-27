@@ -23,6 +23,12 @@ function noise(duration=.19,gain=.1,low=600,high=5000,delay=0){
  }catch(e){}
 }
 w.RiverSFX={volume:.65,
+ status(kind){
+  const pitches={EMP:[185,65],LIGHTNING:[1150,240],ICE:[860,115],FIRE:[240,85],BLEED:[450,125],POISON:[130,70],PRISM:[940,610],SHADOW:[125,45],GRAVITY:[105,38]};
+  const p=pitches[kind];if(!p)return;
+  tone(p[0],.21,kind==='GRAVITY'||kind==='SHADOW'?'sine':'triangle',p[1],.055);
+  if(['FIRE','LIGHTNING','BLEED','EMP'].includes(kind))noise(.14,.038,kind==='FIRE'?160:500,3600);
+ },
  weapon(name){
   const t=Date.now();if(t-last<70)return;last=t;
   if(/LASER|BEAM|PULSE/.test(name)){tone(1320,.19,'sawtooth',300,.047);tone(1100,.12,'sine',520,.025,.012)}
