@@ -79,3 +79,10 @@ Atualizado: 2026-10-27. Regra: só considerar "homologado" após build, ensaio n
 - **9 tipos de inimigos comuns** com sprites dedicados no renderer; seleção por tipo, fallback de desenho legado.
 - Arquivos incluídos no Vite e testes de regressão atualizados.
 - Pendentes: tipos biome especiais, outros obstáculos, animações, testes reais de FPS e imagens no navegador.
+
+## Auditoria de efeito real no jogo — 27/10/2026
+- **Reforço de build aplicado:** GitHub Actions verifica os 38 SVGs atualmente referenciados pela configuração Vite, confirmando presença e arquivo não vazio em `dist/`.
+- **Reforço de publicação aplicado:** após o deploy, GitHub Actions acessa exemplos de sprites de bosses, inimigos, cenários e armas na URL pública, validando resposta HTTP e conteúdo SVG.
+- **Integração de código:** sprites já selecionados por tipo no renderizador, com fallback procedural para imagens não carregadas.
+- **Limites honestos:** não houve nesta rodada medição de FPS nem playtest automatizado no navegador; a execução bem-sucedida das novas etapas do workflow precisa ser confirmada em Actions. Passar por testes de assets não comprova a renderização estética, animação ou colisões.
+- **Próximo passo:** incluir smoke test do canvas em navegador real no CI, imagens de referência e testes das missões 1–20, além dos elementos bioma/especiais ainda procedurais.
