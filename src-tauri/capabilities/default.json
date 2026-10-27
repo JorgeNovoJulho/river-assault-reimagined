@@ -1,0 +1,10 @@
+{
+  "identifier": "default",
+  "description": "Permissões mínimas do River Storm",
+  "windows": [
+    "main"
+  ],
+  "permissions": [
+    "core:default"
+  ]
+}
