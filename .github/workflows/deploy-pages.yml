@@ -22,40 +22,23 @@ jobs:
         with:
           node-version: '24'
       - name: Instalar dependencias
-        id: install
-        continue-on-error: true
-        run: npm ci --no-audit --no-fund
-      - name: Diagnostico da campanha e do motor Phaser
-        if: steps.install.outcome == 'success'
-        continue-on-error: true
-        run: |
-          npm test
-          npm run check:phaser
+        run: npm install --no-audit --no-fund
+      - name: Validar regressões
+        run: npm test
+      - name: Validar Phaser TypeScript
+        run: npm run check:phaser
       - name: Compilar jogo original e arena
-        id: build
-        if: steps.install.outcome == 'success'
-        continue-on-error: true
         run: npm run build
-      - name: Publicacao de recuperacao caso o build falhe
-        if: steps.build.outcome != 'success'
-        shell: bash
-        run: |
-          set -euo pipefail
-          mkdir -p dist
-          cp index.html phaser-lab.html dist/
-          cp -R src assets dist/
-          if [ -d music ]; then cp -R music dist/; fi
-          if [ -d public ]; then cp -R public/. dist/; fi
-          echo "::warning::Build falhou; publicando fallback estatico. Conferir erros da compilacao."
       - name: Garantir arena e assets no artefato
         shell: bash
         run: |
           set -euo pipefail
           test -s dist/index.html
-          cp phaser-lab.html dist/phaser-lab.html
-          # Identificador imutável da revisão publicada, inclusive em fallback estático.
+          # Manter HTML produzido pelo Vite (não sobrescrever pelo HTML de origem).
+          # Identificador da revisão publicada.
           sed -i "s/__RIVERSTORM_DEPLOY_SHA__/$GITHUB_SHA/g" dist/phaser-lab.html
           test -s dist/phaser-lab.html
+          grep -Eq 'src="/?assets/[^"]+\.js"|src="\./assets/[^"]+\.js"' dist/phaser-lab.html || { echo "::error::Bundle da arena Phaser ausente"; exit 1; }
           if grep -q '__RIVERSTORM_DEPLOY_SHA__' dist/phaser-lab.html; then
             echo '::error::Versão da arena não foi injetada'; exit 1
           fi
@@ -72,7 +55,7 @@ jobs:
             test -d dist/music || { echo '::error::Trilhas de audio ausentes da publicacao'; exit 1; }
           fi
           touch dist/.nojekyll
-          printf '{"build":"%s","published_by":"github-actions","build_outcome":"%s"}\n' "$GITHUB_SHA" "${{ steps.build.outcome }}" > dist/deployment-health.json
+          printf '{"build":"%s","published_by":"github-actions","build_outcome":"success"}\\n' "$GITHUB_SHA" > dist/deployment-health.json
       - uses: actions/configure-pages@v5
         with:
           enablement: true
