@@ -2384,6 +2384,7 @@ function updateTerrainEvent(){
             if (gameState !== 'PLAYING') return;
             if(!enemies.some(e=>e.type==='BOSS'))document.getElementById('boss-special-hud').classList.add('hidden');
             missionTicks++;
+            updateContinuousLaser();
             updateBombAftershock();
             // Falas periódicas na arena, preservando as reações de dor de maior prioridade.
             if(bossActive&&missionTicks%460===0&&!bossDefeatedThisMission&&(!bossTaunt||bossTaunt.ticks<110)){
@@ -3118,8 +3119,41 @@ function updateTerrainEvent(){
             launch(player.x,player.y-24,0,-12);launch(player.x-24,player.y-6,-11,0);launch(player.x+24,player.y-6,11,0);
             for(const w of wingmen)if(w.ttl>0)launch(player.x+w.side*45,player.y-8,w.side*7,-9);
         }
+        let laserImpact=null;
+        function updateContinuousLaser(){
+            laserImpact=null;
+            if(gameState!=='PLAYING'||player.disabledTimer>0||player.weapon!=='LASER'||!fireInputHeld())return;
+            if(player.specialShots<=0){player.weapon=aircraftCatalog.PLANES[player.aircraftType||selectedPlane].weapons[0];return;}
+            const targets=enemies.filter(e=>e.hp>0&&e.y<player.y&&e.y>-30&&Math.abs(e.x-player.x)<Math.max(18,(e.width||22)/2+7));
+            targets.sort((a,b)=>b.y-a.y);
+            const target=targets[0],hitY=target?Math.max(0,target.y+(target.height||24)/2):0;
+            laserImpact={x:player.x,y:hitY,hit:!!target};
+            if(missionTicks%6===0){
+                if(target){
+                    target.hp=Math.max(0,target.hp-(target.type==='BOSS'?3:2));
+                    if(missionTicks%18===0)addExplosion(target.x,hitY,'#67e8f9',4);
+                    if(target.type==='BOSS'&&target.hp<=0)finishBossDefeatedBySkill(target);
+                }
+                player.specialShots=Math.max(0,player.specialShots-1);
+                if(player.specialShots===0)player.weapon=aircraftCatalog.PLANES[player.aircraftType||selectedPlane].weapons[0];
+            }
+        }
+        function drawContinuousLaser(){
+            if(!laserImpact)return;
+            const t=laserImpact,ox=player.x,oy=player.y-22,wobble=Math.sin(missionTicks*.77)*2.8;
+            ctx.save();ctx.globalCompositeOperation='screen';
+            for(const [width,color,blur] of [[19,'rgba(8,145,178,.36)',18],[9,'#22d3ee',15],[3,'#f8fafc',5]]){
+                ctx.beginPath();ctx.moveTo(ox,oy);ctx.lineTo(ox+wobble,Math.max(t.y,oy-85));ctx.lineTo(t.x,t.y);
+                ctx.strokeStyle=color;ctx.shadowColor='#67e8f9';ctx.shadowBlur=blur;ctx.lineWidth=width;ctx.stroke();
+            }
+            for(let i=0;i<5;i++){const a=missionTicks*.34+i*6.283/5,r=8+(missionTicks%6);
+                ctx.beginPath();ctx.moveTo(t.x,t.y);ctx.lineTo(t.x+Math.cos(a)*r,t.y+Math.sin(a)*r);
+                ctx.strokeStyle=i%2?'#fef08a':'#fff';ctx.lineWidth=2;ctx.stroke();}
+            ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(t.x,t.y,5+(missionTicks%4),0,Math.PI*2);ctx.fill();ctx.restore();
+        }
         function fireWeapon() {
             if (gameState !== 'PLAYING' || player.disabledTimer > 0) return;
+            if(player.weapon==='LASER')return;
             const baseWeapon=aircraftCatalog.PLANES[player.aircraftType||selectedPlane].weapons[0];
             if(player.weapon!==baseWeapon){
                 if(player.specialShots<=0)player.weapon=baseWeapon;
@@ -3508,6 +3542,7 @@ function updateTerrainEvent(){
             drawWingmen();
             drawPowerups();
             drawBullets();
+            drawContinuousLaser();
             drawParticles();
             drawBossSkillEffect();
             drawSkillTrajectories();
@@ -3902,7 +3937,7 @@ function updateTerrainEvent(){
         window.addEventListener('keydown', e => {
             if (keys.hasOwnProperty(e.code)) { e.preventDefault(); keys[e.code] = true; }
 
-            if (e.code === 'Space' || e.code === 'KeyZ') { if(!e.repeat)fireWeapon(); }
+            if (e.code === 'Space' || e.code === 'KeyZ') { if(!e.repeat){if(keys.KeyX||keys.KeyF||keys.ShiftLeft)coupleWingmen();else fireWeapon();} }
             if(e.code==='KeyC'&&!e.repeat){e.preventDefault();if(bossActive)useBossSkill();else activateSwordRush()}
             if(e.code==='KeyV'&&!e.repeat){e.preventDefault();parryHeld=true;activateParry()}
             if((e.code==='KeyQ'||e.code==='KeyE')&&!e.repeat){e.preventDefault();activateRoll(e.code==='KeyQ'?-1:1)}
@@ -4006,7 +4041,7 @@ function updateTerrainEvent(){
         touchFireButton.addEventListener('pointerdown',e=>{e.preventDefault();touchFireHeld=true;sound.init();fireWeapon();try{touchFireButton.setPointerCapture(e.pointerId)}catch(_){}});
         for(const ev of ['pointerup','pointercancel','lostpointercapture'])touchFireButton.addEventListener(ev,()=>{touchFireHeld=false});
 
-        document.getElementById('btn-bomb').addEventListener('touchstart', (e) => {
+        document.getElementById('btn-bomb').addEventListener('pointerdown', (e) => {
             e.preventDefault();
             sound.init();
             bombOrCouple(touchFireHeld);
