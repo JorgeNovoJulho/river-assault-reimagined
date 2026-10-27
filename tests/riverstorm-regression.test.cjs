@@ -169,3 +169,16 @@ test('damage states of bridges dams and islands use packaged sprites',()=>{
  assert.match(game,/p\.hp\/p\.maxHp<=\.45/);
  assert.match(render,/p\.hp\/p\.maxHp<=\.45/);
 });
+
+test('four common enemy sprites are drawn without legacy overlays',()=>{
+ const render=fs.readFileSync('src/render/scene2d5.js','utf8');
+ const vite=fs.readFileSync('vite.config.js','utf8');
+ for(const name of ['mecha-gun.svg','mecha-sword.svg','helicopter.svg','submarine.svg']){
+  const p='assets/sprites/enemies/'+name;
+  assert.ok(fs.existsSync(p),p);
+  assert.ok(vite.includes(p),p);
+  assert.ok(render.includes(name),name);
+ }
+ assert.match(render,/commonEnemySprites/);
+ assert.match(render,/if\(replacement&&replacement\.complete&&replacement\.naturalWidth\)/);
+});
