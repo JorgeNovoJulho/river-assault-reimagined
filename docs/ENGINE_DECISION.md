@@ -34,3 +34,9 @@
 - Medidor de FPS no HUD; reinício com R; troca de três texturas de chefe com teclas 1/2/3.
 - A cena é **experimental e isolada**: não tem 20 fases da campanha, habilidades completas, salvamento, multiplayer nem paridade funcional com a Original.
 - CI contém verificação de tipos `check:phaser`, mas é necessário confirmar execução bem-sucedida do workflow e abertura real da página.
+
+## Correção de indisponibilidade da arena Phaser (27/10/2026)
+- Simplificada a criação da nave em TypeScript evitando encadeamento potencialmente incompatível de `setStrokeStyle` com `Triangle`.
+- `phaser-lab.html` agora exibe erros reais de JavaScript/promises em vez de uma tela silenciosa.
+- GitHub Actions deve verificar que `dist/phaser-lab.html` possui um arquivo JS compilado e que o HTML da arena está acessível no Pages após o deploy.
+- **Sem homologação externa:** esta correção foi gravada, porém não foi possível confirmar daqui o carregamento do GitHub Pages nem executar os logs do job; conferir `Actions` e não comunicar como já publicado antes de sucesso.
