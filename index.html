@@ -1337,6 +1337,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
         }
         function drawBossSkillEffect(){
           const f=bossSkillEffect;if(!f)return;
+          const tracked=enemies.find(e=>e.type==='BOSS'&&e.hp>0);if(tracked){f.x=tracked.x;f.y=tracked.y;}
           if(window.RiverGraphicsPreview?.mode?.()==='enhanced'&&window.RiverVisuals?.cinematicBossSkill){
             window.RiverVisuals.cinematicBossSkill(ctx,f);
             f.life--;if(f.life<=0)bossSkillEffect=null;
@@ -2297,6 +2298,7 @@ function updateTerrainEvent(){
             if (gameState !== 'PLAYING') return;
             if(!enemies.some(e=>e.type==='BOSS'))document.getElementById('boss-special-hud').classList.add('hidden');
             missionTicks++;
+            updateBombAftershock();
             // Falas periódicas na arena, preservando as reações de dor de maior prioridade.
             if(bossActive&&missionTicks%460===0&&!bossDefeatedThisMission&&(!bossTaunt||bossTaunt.ticks<110)){
               const speakingBoss=enemies.find(e=>e.type==='BOSS'&&e.hp>0);
@@ -2912,6 +2914,7 @@ function updateTerrainEvent(){
             missionTicks = 0;
             terrainEventTicks=0;terrainEventType='';terrainEventNotice=0;secondaryTargetsDestroyed=0;
             bombProjectiles = [];
+            bombAftershockFrames=0;
             screenShake = 0;
             bossTaunt = null;
             bossFinalDialogue=false;
@@ -3030,9 +3033,32 @@ function updateTerrainEvent(){
             document.getElementById('bomb-count-touch').innerText='('+player.bombs+')';
             bombProjectiles.push({x:player.x,y:player.y-16,vy:-9,life:52});
         }
+        let bombAftershockFrames=0,bombAftershockOrigin={x:200,y:300};
+        function updateBombAftershock(){
+          if(bombAftershockFrames<=0)return;
+          bombAftershockFrames--;enemyBullets.length=0;
+          for(let i=enemies.length-1;i>=0;i--){
+            const e=enemies[i];if(!e||e.hp<=0)continue;
+            if(e.type==='BOSS'){if(bombAftershockFrames%30===0){e.hp=Math.max(1,e.hp-2);addExplosion(e.x,e.y,'#ffca87',3)}continue}
+            if(e.bombAftershockTagged)continue;
+            e.bombAftershockTagged=true;e.hp=0;addExplosion(e.x,e.y,'#ffca87',12);
+            score+=awardEnemyPoints(e.score);kills++;grantEnemyXP(e);enemies.splice(i,1);
+          }
+        }
+        function drawBombAftershock(){
+          if(bombAftershockFrames<=0)return;
+          const age=180-bombAftershockFrames,alpha=Math.min(.85,bombAftershockFrames/35);
+          ctx.save();ctx.globalCompositeOperation='screen';ctx.globalAlpha=alpha;
+          const rad=Math.hypot(VIRTUAL_WIDTH,VIRTUAL_HEIGHT)*(1-Math.exp(-age/19));
+          const grad=ctx.createRadialGradient(bombAftershockOrigin.x,bombAftershockOrigin.y,rad*.4,bombAftershockOrigin.x,bombAftershockOrigin.y,rad);
+          grad.addColorStop(0,'rgba(255,202,95,0)');grad.addColorStop(.8,'rgba(255,189,76,.05)');grad.addColorStop(.95,'rgba(255,231,173,.45)');grad.addColorStop(1,'rgba(255,255,255,0)');
+          ctx.fillStyle=grad;ctx.beginPath();ctx.arc(bombAftershockOrigin.x,bombAftershockOrigin.y,rad,0,Math.PI*2);ctx.fill();
+          ctx.strokeStyle='#ffebaf';ctx.lineWidth=Math.max(1,6-age*.02);ctx.shadowColor='#ff9c48';ctx.shadowBlur=20;
+          ctx.beginPath();ctx.arc(bombAftershockOrigin.x,bombAftershockOrigin.y,rad,0,Math.PI*2);ctx.stroke();ctx.restore();
+        }
         function explodeBomb(b,directTarget=null){
             try{window.RiverSFX?.impact()}catch(e){}
-            screenShake=15;bombFlash=13;
+            screenShake=15;bombFlash=13;bombAftershockFrames=180;bombAftershockOrigin={x:b.x,y:b.y};
             enemyBullets=[];
             // Bombas ignoram cobertura; destroem ilhotas pequenas e mantem dano global.
             for(let i=islands.length-1;i>=0;i--){
@@ -3321,7 +3347,7 @@ function updateTerrainEvent(){
             for(const e of enemies){if(e.type!=='BOSS'||e.statusTicks<=0)continue;ctx.save();ctx.globalAlpha=.34;ctx.fillStyle=e.statusKind==='POISON'?'#4ade80':'#fb233a';ctx.beginPath();ctx.ellipse(e.x,e.y,e.width*.55,e.height*.56,0,0,Math.PI*2);ctx.fill();ctx.restore();}
             drawFuelDepots();
             drawStructures();
-            drawBombs();
+            drawBombs();drawBombAftershock();
             drawRescueBoats();
             drawWingmen();
             drawPowerups();
