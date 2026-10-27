@@ -51,3 +51,17 @@ test('fusao tem contador de duracao e recarga independente',()=>{
  assert.match(game,/fusionCooldown=360/);
  assert.match(game,/FUSÃO RECARGA/);
 });
+
+test('fusao intercepta tiros inimigos na faixa',()=>{
+ assert.match(game,/for\(let i=enemyBullets\.length-1;i>=0;i--\)/);
+ assert.match(game,/Math\.abs\(shot\.x-player\.x\)>32/);
+ assert.match(game,/enemyBullets\.splice\(i,1\)/);
+});
+test('acertos, notas e adaptacao persistem por campanha',()=>{
+ assert.match(game,/missionHits=Array\(20\)\.fill\(0\)/);
+ assert.match(game,/const hitGrade=/);
+ assert.match(game,/function adaptAfterBoss\(/);
+ assert.match(game,/function showMissionReport\(/);
+ assert.match(game,/damageBlinkFrames=16/);
+ assert.match(game,/adaptiveThreat/);
+});
