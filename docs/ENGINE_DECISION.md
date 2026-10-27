@@ -40,3 +40,10 @@
 - `phaser-lab.html` agora exibe erros reais de JavaScript/promises em vez de uma tela silenciosa.
 - GitHub Actions deve verificar que `dist/phaser-lab.html` possui um arquivo JS compilado e que o HTML da arena está acessível no Pages após o deploy.
 - **Sem homologação externa:** esta correção foi gravada, porém não foi possível confirmar daqui o carregamento do GitHub Pages nem executar os logs do job; conferir `Actions` e não comunicar como já publicado antes de sucesso.
+
+## Hotfix 404 da arena em Pages
+- Imagem fornecida pelo usuário mostra **HTTP 404, arquivo ausente no site**, não erro de desenho da nave Phaser.
+- `phaser-lab.html` recebeu fallback executável via import remoto oficial `phaser@4.2.1/dist/phaser.esm.js`, que não depende do bundle `src/phaser/main.ts` para iniciar a arena de recuperação.
+- GitHub Actions mantém a verificação de tipos como diagnóstico não bloqueante para permitir entrega emergencial do fallback; **tipagem não homologada** não deve ser marcada como aprovada.
+- O fallback tem controles/tiros/inimigos básicos; não substitui a migração TypeScript.
+- **Publicação ainda não confirmada:** o endereço só sairá do 404 após GitHub Pages publicar a nova revisão. Se permanecer 404, investigar execução do workflow/Pages Source e bloqueio de deploy, não adicionar mais efeitos gráficos.
