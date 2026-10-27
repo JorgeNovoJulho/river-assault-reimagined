@@ -86,3 +86,11 @@ Atualizado: 2026-10-27. Regra: só considerar "homologado" após build, ensaio n
 - **Integração de código:** sprites já selecionados por tipo no renderizador, com fallback procedural para imagens não carregadas.
 - **Limites honestos:** não houve nesta rodada medição de FPS nem playtest automatizado no navegador; a execução bem-sucedida das novas etapas do workflow precisa ser confirmada em Actions. Passar por testes de assets não comprova a renderização estética, animação ou colisões.
 - **Próximo passo:** incluir smoke test do canvas em navegador real no CI, imagens de referência e testes das missões 1–20, além dos elementos bioma/especiais ainda procedurais.
+
+## Correção prioritária de arquitetura — Motor Phaser + TypeScript
+- Conferência histórica da decisão de 26/10/2026: **Phaser + TypeScript** é o motor escolhido para Nova Geração; Canvas 2D legado é transitório. Three.js opcional.
+- Auditoria detectou que os sprites anteriores foram integrados no motor legado Canvas, não no Phaser escolhido.
+- Adicionada entrada `phaser-lab.html` e cena `src/phaser/main.ts` com Phaser, assets SVG já utilizados no jogo, FPS e movimentação experimental.
+- Vite configurado para produzir entrada separada; `npm run check:phaser` incluído no CI.
+- O jogo principal continua Canvas para manter as funcionalidades durante a migração.
+- **Pendente:** garantir compilação/execução no Pages, depois portar mecânicas, sprites, cenas e chefes ao Phaser. Ver `docs/ENGINE_DECISION.md`.
