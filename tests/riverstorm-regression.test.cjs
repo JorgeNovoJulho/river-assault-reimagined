@@ -83,3 +83,15 @@ test('piscar vermelho em cima do sprite do piloto',()=>{
  assert.match(game,/damageBlinkFrames=16/);
  assert.match(game,/rgba\(255,22,41,\.88\)/);
 });
+
+test('FOGO boss usa 8 chamas sem gradientes por chama',()=>{
+ const render=fs.readFileSync('src/render/scene2d5.js','utf8');
+ const effect=render.slice(render.indexOf("}else if(f.kind==='FIRE'){"),render.indexOf("}else if(f.kind==='BLEED'){"));
+ assert.match(effect,/i<8/);
+ assert.doesNotMatch(effect,/createLinearGradient/);
+});
+test('limites na arena respeitam qualidade grafica',()=>{
+ assert.match(game,/bossMaxBullets=qualitySelect/);
+ assert.match(game,/floatingTexts.length>=20/);
+ assert.match(game,/maxParticles=bossActive\?\(qualitySelect/);
+});
