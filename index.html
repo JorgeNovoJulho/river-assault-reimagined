@@ -1253,7 +1253,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
         }
         function spawnBoss(y,confirmed=false) {
             if(!confirmed){openBossSkillPicker();return;}
-            bossActive = true;
+            bossActive = true;fusionBossUsed=false;
             try{if(!playlist.bossMode)playlist.beginBossTheme?.()}catch(audioError){console.warn('Áudio do chefe:',audioError)}
             redAlertTicks=0;
             const mission=campaign.at(sector);
@@ -1289,6 +1289,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
                 specialCooldown: Math.round(480/bossClimateStrength*bossBalance[1]),
                 environmentalStrength:bossClimateStrength,
                 specialCount:0,
+                turretLeftHp:Math.round(calculatedHp*.09),turretRightHp:Math.round(calculatedHp*.09),turretTimer:0,
                 laserCharging: false,
                 laserTimer: 0
             });
@@ -3103,7 +3104,35 @@ function updateTerrainEvent(){
                 }
             }
 
-            // Escudo cinético: contato arremessa inimigos e ricochetes causam colisões entre si.
+            // Subcomponentes destrutíveis no próprio boss, sem perder sua identidade visual.
+            for(const boss of enemies){
+              if(boss.type!=='BOSS'||boss.hp<=0)continue;
+              boss.turretTimer=(boss.turretTimer||0)+1;
+              if(boss.turretTimer%72===0){
+                for(const side of [-1,1]){
+                  const hp=side<0?boss.turretLeftHp:boss.turretRightHp;
+                  if(hp<=0)continue;
+                  const x=boss.x+side*boss.width*.37,y=boss.y+boss.height*.15;
+                  const dx=player.x-x,dy=player.y-y,d=Math.max(1,Math.hypot(dx,dy));
+                  for(let i=-1;i<=1;i++)enemyBullets.push({x,y,vx:dx/d*3.3+i*.55,vy:dy/d*3.3,element:boss.skillAffinity,color:'#ff728f',isMissile:false});
+                }
+              }
+              for(const shot of bullets){
+                if(shot._turretHit||!Number.isFinite(shot.x)||!Number.isFinite(shot.y))continue;
+                for(const side of [-1,1]){
+                  const property=side<0?'turretLeftHp':'turretRightHp';
+                  if(boss[property]<=0)continue;
+                  const tx=boss.x+side*boss.width*.37,ty=boss.y+boss.height*.15;
+                  if(Math.hypot(shot.x-tx,shot.y-ty)<19){
+                    boss[property]=Math.max(0,boss[property]-(shot.damage||12));shot._turretHit=true;
+                    addExplosion(tx,ty,boss[property]<=0?'#ffb35e':'#67e8f9',boss[property]<=0?23:5);
+                    if(boss[property]===0){boss.parryVulnerableTicks=Math.max(boss.parryVulnerableTicks||0,180);createFloatingText(tx,ty-24,'TORRETA DESTRUÍDA!','#fcd34d');}
+                    break;
+                  }
+                }
+              }
+            }
+                        // Escudo cinético: contato arremessa inimigos e ricochetes causam colisões entre si.
             // Efeitos de contato mantêm entidades inimigas no render de inimigos.
             if(shieldEnemyFlash>0)shieldEnemyFlash--;
             if(shieldShotFlash>0)shieldShotFlash--;
@@ -3577,7 +3606,7 @@ function updateTerrainEvent(){
         const fusionAvailable=()=>gameState==='PLAYING'&&wingmen.some(w=>w.ttl>0)&&fusionTicks<=0&&fusionCooldown<=0&&(!bossActive||!fusionBossUsed);
         function activateFusion(){
           if(!fusionAvailable())return false;
-          fusionTicks=360;fusionCooldown=bossActive?0:720;fusionBossUsed=!!bossActive;fusionLastBossTick=-1;
+          fusionTicks=360;fusionCooldown=bossActive?0:360;fusionBossUsed=!!bossActive;fusionLastBossTick=-1;
           createFloatingText(player.x,player.y-50,'FUSÃO DAS AUXILIARES • 6S','#7dd3fc');
           try{window.RiverSFX?.impact?.()}catch(error){}
           return true;
@@ -3948,6 +3977,17 @@ function updateTerrainEvent(){
             drawStructures();
             drawBombs();drawBombAftershock();
             drawRescueBoats();
+            // Torres acopladas: cascos detalhados desaparecem ao serem destruídos.
+            for(const boss of enemies){if(boss.type!=='BOSS'||boss.hp<=0)continue;
+              for(const side of [-1,1]){if((side<0?boss.turretLeftHp:boss.turretRightHp)<=0)continue;
+                ctx.save();ctx.translate(boss.x+side*boss.width*.37,boss.y+boss.height*.15);
+                ctx.fillStyle='#26374a';ctx.strokeStyle='#e3c17a';ctx.lineWidth=1.5;
+                ctx.beginPath();ctx.moveTo(-14,-7);ctx.lineTo(-7,-12);ctx.lineTo(9,-12);ctx.lineTo(14,-4);ctx.lineTo(12,9);ctx.lineTo(-13,9);ctx.closePath();ctx.fill();ctx.stroke();
+                ctx.fillStyle='#788998';ctx.fillRect(-4,3,8,16);
+                ctx.fillStyle='#ff6d5e';ctx.fillRect(-5,-8,10,5);
+                ctx.restore();
+              }
+            }
             drawWingmen();
             drawShieldContactFlash();
             drawSwordImpact();
