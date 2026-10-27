@@ -1747,12 +1747,67 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
             for(let i=0;i<3;i++){ctx.strokeStyle=i===0?'#ffffff':color;ctx.lineWidth=4-i;ctx.beginPath();ctx.ellipse(0,0,42+i*5,36+i*4,0,Math.PI*(i*.47+missionTicks*.06),Math.PI*(i*.47+missionTicks*.06+1.15));ctx.stroke();}
           }ctx.restore();
         }
+        // Sprites vetoriais ilustrados: silhuetas de armas, não pontos genéricos.
+        // Formas desenhadas em coordenadas locais de Canvas; partículas são apenas acabamento.
+        function drawProjectileSprite(kind, color, frame){
+          const k=String(kind||'SINGLE').toUpperCase(),c=color||'#69d9ff',t=frame*.11;
+          ctx.save();ctx.lineJoin='round';ctx.lineCap='round';ctx.lineWidth=1.5;
+          ctx.shadowBlur=qualitySelect.value==='eco'?0:9;ctx.shadowColor=c;ctx.strokeStyle=c;
+          const hull=(pts,fill)=>{ctx.beginPath();pts.forEach(([x,y],i)=>i?ctx.lineTo(x,y):ctx.moveTo(x,y));ctx.closePath();ctx.fillStyle=fill;ctx.fill();ctx.stroke();};
+          if(/MISSILE|ROCKET|TRACKER|GUIDED|BANK_MISSILE|MULTI/.test(k)){
+            hull([[0,-14],[4,-7],[4,7],[0,10],[-4,7],[-4,-7]],'#dbeafe');
+            hull([[-4,2],[-9,10],[-3,8]],'#64748b');hull([[4,2],[9,10],[3,8]],'#64748b');
+            ctx.fillStyle='#1e3a5f';ctx.fillRect(-1.5,-6,3,10);
+            hull([[-2.8,9],[0,16+Math.sin(t)*2],[2.8,9]],'#ffb657');
+          }else if(k==='ICE'){
+            hull([[0,-16],[7,-5],[5,7],[0,16],[-6,7],[-7,-5]],'#b9f2ff');
+            ctx.strokeStyle='#ffffff';ctx.beginPath();ctx.moveTo(0,-14);ctx.lineTo(0,11);ctx.moveTo(-5,-5);ctx.lineTo(0,0);ctx.lineTo(5,-5);ctx.stroke();
+          }else if(k==='FIRE'){
+            hull([[0,-17],[7,-7],[5,4],[10,12],[0,8],[-10,12],[-5,4],[-7,-7]],'#fb572b');
+            hull([[0,-13],[3,-5],[2,4],[0,7],[-2,4],[-3,-5]],'#ffe08a');
+          }else if(k==='LIGHTNING'||k==='EMP'){
+            hull([[-4,-15],[6,-15],[0,-4],[8,-4],[-5,16],[-1,2],[-8,2]],'#bff5ff');
+            ctx.strokeStyle='#fff';ctx.beginPath();ctx.moveTo(-2,-11);ctx.lineTo(3,-11);ctx.lineTo(-2,0);ctx.stroke();
+          }else if(k==='GRAVITY'){
+            hull([[0,-13],[10,-4],[7,10],[-7,10],[-10,-4]],'#17203d');
+            ctx.strokeStyle='#c4b5fd';ctx.beginPath();ctx.ellipse(0,0,12,5,t*.22,0,Math.PI*2);ctx.stroke();
+            ctx.fillStyle='#6d28d9';ctx.fillRect(-2,-3,4,6);
+          }else if(k==='POISON'){
+            hull([[0,-15],[9,2],[5,12],[-5,12],[-9,2]],'#4dcd73');
+            ctx.fillStyle='#eaffb2';ctx.beginPath();ctx.ellipse(0,2,3,6,0,0,Math.PI*2);ctx.fill();
+          }else if(k==='BLEED'){
+            hull([[0,-16],[4,-5],[11,9],[0,5],[-11,9],[-4,-5]],'#fb7185');
+            ctx.fillStyle='#fff';ctx.fillRect(-1,-11,2,9);
+          }else if(k==='SHADOW'){
+            hull([[-4,-14],[8,-9],[3,1],[10,13],[-5,8],[-9,-4]],'#382155');
+            ctx.strokeStyle='#c4b5fd';ctx.beginPath();ctx.moveTo(-4,-11);ctx.lineTo(6,-8);ctx.lineTo(2,2);ctx.stroke();
+          }else if(k==='PRISM'||k==='CIRCLE'){
+            hull([[0,-12],[11,-5],[10,8],[0,13],[-10,8],[-11,-5]],'#43396f');
+            ctx.strokeStyle='#fef08a';ctx.beginPath();ctx.moveTo(0,-9);ctx.lineTo(8,0);ctx.lineTo(0,9);ctx.lineTo(-8,0);ctx.closePath();ctx.stroke();
+            ctx.fillStyle='#ffffff';ctx.fillRect(-2,-3,4,6);
+          }else if(k==='BEAM'||k==='LASER'||k==='PRECISION'||k==='NEEDLE'){
+            hull([[-2.5,-16],[2.5,-16],[5,9],[0,13],[-5,9]],'#67e8f9');
+            ctx.fillStyle='#fff';ctx.fillRect(-1,-12,2,19);
+          }else if(k==='PULSE'||k==='SPREAD'||k==='HYBRID'){
+            hull([[0,-13],[8,-3],[6,9],[0,5],[-6,9],[-8,-3]],c);
+            ctx.fillStyle='#fff';ctx.beginPath();ctx.ellipse(0,-3,2.5,5,0,0,Math.PI*2);ctx.fill();
+          }else{
+            hull([[0,-12],[4,-2],[3,9],[0,11],[-3,9],[-4,-2]],'#8aeaff');
+            ctx.fillStyle='#fff';ctx.fillRect(-1,-8,2,13);
+          }ctx.restore();
+        }
         function drawBullets() {
             bullets.forEach(b => {
                 if(b.weaponId&&b.weaponId!=='SINGLE')drawBulletTrail(b);
                 ctx.save();
                 ctx.translate(b.x, b.y);
 
+                // Render de sprite por arma, com silhueta e material identificáveis.
+                if(b.type!=='REFLECTED'){
+                  ctx.save();ctx.rotate(Math.atan2(b.vx||0,-(b.speed||7)));
+                  drawProjectileSprite(b.weaponId||b.type||'SINGLE',b.color,missionTicks);ctx.restore();
+                  ctx.restore();return;
+                }
                 // Visual exclusivo e CONTIDO no projétil: sem feixes persistentes ou bloom acumulado.
                 if(b.weaponId&&b.weaponId!=='SINGLE'&&b.type!=='REFLECTED'){
                     ctx.save();
