@@ -3666,8 +3666,29 @@ function updateTerrainEvent(){
               if(boss){boss.hp=Math.max(1,boss.hp-boss.maxHp*.05);addExplosion(boss.x,boss.y+boss.height*.27,'#b6f7ff',17);}
               fusionLastBossTick=elapsed;
             }
-          }else if(elapsed%10===0){
-            for(const enemy of enemies){if(enemy.hp>0&&enemy.type!=='BOSS'){enemy.hp-=Math.max(8,(enemy.maxHp||8)*.28);addExplosion(enemy.x,enemy.y,'#86e8ff',5);}}
+          }else if(elapsed%4===0){
+            // Faixa de energia: varredura de toda a área visível do feixe.
+            const beamTop=0,beamBottom=player.y-30,beamHalfWidth=27;
+            for(const collection of [structures,islands]){
+              for(let i=collection.length-1;i>=0;i--){
+                const o=collection[i];
+                if(!o||o.destructible===false)continue;
+                const halfW=Math.max(8,(o.width||24)/2),halfH=Math.max(8,(o.height||24)/2);
+                if(o.y-halfH>beamBottom||o.y+halfH<beamTop)continue;
+                // Pontes/represas cobrem todo o rio: basta cruzar qualquer parte da faixa.
+                const hits=(o.x-halfW<=player.x+beamHalfWidth&&o.x+halfW>=player.x-beamHalfWidth);
+                if(!hits)continue;
+                addExplosion(o.x,o.y,'#8beaff',28);
+                createFloatingText(o.x,o.y-20,(o.type==='BRIDGE'?'PONTE':o.type==='DAM'?'REPRESA':'ILHA')+' DESTRUIDA','#a5f3fc');
+                collection.splice(i,1);score+=150;
+              }
+            }
+            for(const enemy of enemies){
+              if(enemy.hp<=0||enemy.type==='BOSS')continue;
+              if(enemy.y-(enemy.height||24)/2>beamBottom||enemy.y+(enemy.height||24)/2<beamTop)continue;
+              if(Math.abs(enemy.x-player.x)>(enemy.width||24)/2+beamHalfWidth)continue;
+              enemy.hp=0;addExplosion(enemy.x,enemy.y,'#86e8ff',10);
+            }
             enemyBullets.length=0;
           }
           fusionTicks--;
