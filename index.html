@@ -2012,7 +2012,64 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
                     };
                     // Sombra projetada e propulsores aplicados a todas as silhuetas.
                     ctx.fillStyle='rgba(0,5,18,.32)';ctx.beginPath();ctx.ellipse(5,h*.26,w*.54,h*.37,0,0,Math.PI*2);ctx.fill();
-                    if(e.bossSubType===0){
+                    // 12 familias reais de casco para os 20 chefes (sem reutilizar os 4 cascos legados).
+                    const BOSS_HULL_ARCHETYPES=[0,1,2,3,4,5,6,7,8,9,10,11,2,3,5,6,9,7,8,11];
+                    const hullId=Math.max(0,Math.min(19,(e.bossId||sector||1)-1));
+                    const archetype=BOSS_HULL_ARCHETYPES[hullId];
+                    if(e.bossId>=1&&e.bossId<=20){
+                      const angle=ph*(archetype%2?-.38:.32);
+                      const primary=['#6d8499','#84909b','#4b758c','#758998','#455c76','#64758a','#576d86','#4e7794','#766982','#736f63','#82739e','#576b89'][archetype];
+                      ctx.save();
+                      switch(archetype){
+                        case 0: // Fortaleza modular: ponte ampla e quatro torres
+                          hull([[-w*.53,-h*.30],[w*.53,-h*.30],[w*.48,h*.32],[-w*.48,h*.32]],armor);
+                          for(let x of [-.37,-.12,.12,.37])turret(x*w,-h*.12,Math.sin(ph)*.1);
+                          break;
+                        case 1: // Couracado railgun: casco naval pontudo e dois trilhos
+                          hull([[0,-h*.66],[w*.25,-h*.35],[w*.47,h*.37],[0,h*.52],[-w*.47,h*.37],[-w*.25,-h*.35]],armor);
+                          ctx.fillStyle=primary;for(let x of [-w*.15,w*.15])ctx.fillRect(x-4,-h*.65,8,h*.9);
+                          glow(0,-h*.48,5,'#38bdf8');break;
+                        case 2: // Porta-drones: hangar de tres baias com comportas
+                          hull([[-w*.48,-h*.34],[w*.48,-h*.34],[w*.4,h*.38],[-w*.4,h*.38]],armor);
+                          for(let x of [-w*.28,0,w*.28]){ctx.fillStyle='#081c2c';ctx.fillRect(x-10,-h*.16,20,h*.37);ctx.strokeStyle='#8ec0d8';ctx.strokeRect(x-10,-h*.16,20,h*.37);}
+                          break;
+                        case 3: // Aranha de cerco: corpo oval com pernas articuladas
+                          ctx.fillStyle=primary;ctx.beginPath();ctx.ellipse(0,0,w*.27,h*.42,0,0,Math.PI*2);ctx.fill();ctx.stroke();
+                          for(let side of [-1,1])for(let n=0;n<3;n++){let y=(n-1)*h*.26;ctx.beginPath();ctx.moveTo(side*w*.22,y);ctx.lineTo(side*w*.42,y-9+Math.sin(angle+n)*7);ctx.lineTo(side*w*.55,y+12);ctx.stroke();}
+                          glow(0,0,6,'#f97316');break;
+                        case 4: // Bombardeiro abissal: asa delta larga
+                          hull([[0,-h*.5],[w*.56,h*.32],[w*.14,h*.2],[0,h*.46],[-w*.14,h*.2],[-w*.56,h*.32]],armor);
+                          for(let x of [-w*.34,w*.34])glow(x,h*.25,5,'#fb7185');break;
+                        case 5: // Disco prismático: dois aneis contrarrotativos
+                          ctx.fillStyle=primary;ctx.beginPath();ctx.ellipse(0,0,w*.45,h*.35,0,0,Math.PI*2);ctx.fill();ctx.stroke();
+                          for(let n=0;n<8;n++){let a=angle+n*Math.PI/4;glow(Math.cos(a)*w*.36,Math.sin(a)*h*.28,2,'#d8b4fe');}
+                          glow(0,0,8,'#e879f9');break;
+                        case 6: // Serpente mecanica: seis segmentos blindados sinuosos
+                          for(let n=5;n>=0;n--){let x=Math.sin(angle*2+n*.68)*w*.12,y=(n-2.5)*h*.19;ctx.fillStyle=n%2?primary:'#334155';ctx.beginPath();ctx.ellipse(x,y,w*.19,h*.14,Math.sin(angle+n)*.2,0,Math.PI*2);ctx.fill();ctx.stroke();}
+                          glow(0,-h*.4,5,'#a3e635');break;
+                        case 7: // Nucleo orbital: reator com quatro satelites
+                          hull([[0,-h*.32],[w*.21,0],[0,h*.32],[-w*.21,0]],armor);
+                          for(let n=0;n<4;n++){let a=n*Math.PI/2+angle;ctx.fillStyle=primary;ctx.beginPath();ctx.arc(Math.cos(a)*w*.4,Math.sin(a)*h*.43,8,0,Math.PI*2);ctx.fill();glow(Math.cos(a)*w*.4,Math.sin(a)*h*.43,3,'#38bdf8');}
+                          break;
+                        case 8: // Titan de laminas: corpo angular com foices oscilantes
+                          hull([[0,-h*.55],[w*.22,-h*.12],[w*.15,h*.42],[-w*.15,h*.42],[-w*.22,-h*.12]],armor);
+                          for(let side of [-1,1]){ctx.beginPath();ctx.moveTo(side*w*.18,-h*.1);ctx.lineTo(side*w*.58,-h*.34+Math.sin(angle)*7);ctx.lineTo(side*w*.4,h*.4);ctx.lineTo(side*w*.28,h*.13);ctx.stroke();}
+                          glow(0,0,5,'#f43f5e');break;
+                        case 9: // Leviata industrial: plataforma com brocas e guindastes
+                          hull([[-w*.48,-h*.39],[w*.48,-h*.39],[w*.5,h*.37],[-w*.5,h*.37]],armor);
+                          for(let side of [-1,1]){ctx.strokeStyle='#d6a15f';ctx.beginPath();ctx.moveTo(side*w*.3,-h*.34);ctx.lineTo(side*w*.42,-h*.56);ctx.lineTo(side*w*.48,-h*.24);ctx.stroke();ctx.fillStyle=primary;ctx.fillRect(side*w*.28-5,h*.06,10,h*.3);}
+                          turret(0,-h*.2);break;
+                        case 10: // Santuario tecno-arcano: obeliscos e cristal
+                          hull([[0,-h*.57],[w*.28,-h*.21],[w*.35,h*.42],[-w*.35,h*.42],[-w*.28,-h*.21]],armor);
+                          for(let side of [-1,1]){ctx.fillStyle=primary;ctx.fillRect(side*w*.43-6,-h*.3,12,h*.6);}
+                          glow(0,-h*.05,9,'#c084fc');break;
+                        case 11: // Imperador hibrido: asa dupla, coroa e canhoes
+                          hull([[0,-h*.57],[w*.17,-h*.34],[w*.53,-h*.09],[w*.38,h*.38],[0,h*.51],[-w*.38,h*.38],[-w*.53,-h*.09],[-w*.17,-h*.34]],armor);
+                          for(let side of [-1,1]){turret(side*w*.32,0,side*.15);glow(side*w*.2,h*.3,4,'#fb923c');}
+                          glow(0,-h*.17,9,'#facc15');break;
+                      }
+                      ctx.restore();
+                    } else if(e.bossSubType===0){
                         // Ponte fortificada: tabuleiro blindado, cabos, pilares, torres e baterias.
                         hull([[-w*.52,-13],[-w*.38,-23],[w*.38,-23],[w*.52,-13],[w*.52,18],[-w*.52,18]],armor,'#8a6952');
                         ctx.fillStyle='#724837';ctx.fillRect(-w*.48,-9,w*.96,22);
