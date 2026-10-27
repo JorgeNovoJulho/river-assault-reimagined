@@ -49,3 +49,8 @@ Atualizado: 2026-10-27. Regra: só considerar "homologado" após build, ensaio n
 - Seis novos sprites SVG individuais gravados em `assets/sprites/bosses/`, ligados ao renderizador e ao bundle web.
 - Total: **12 chefes com arquivos de sprite integrados**; faltam chefes 13–20, animações específicas e substituição da maioria dos cenários/inimigos.
 - Os novos sprites são uma primeira versão vetorial, não arte final homologada.
+
+## Atualização — chefes 13–20
+- Sprites SVG individuais criados, salvos e integrados para missões 13 a 20.
+- **20 de 20 missões com sprite dedicado no código e Vite**; arte ainda provisória e sem homologação visual, animações e benchmarks.
+- Restam cenários, inimigos, demais efeitos, teste jogável e publicação confirmada.
