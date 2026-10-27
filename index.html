@@ -268,7 +268,19 @@
             <button id="resume-btn" class="arcade-btn bg-cyan-600 hover:bg-cyan-500 text-white font-bold px-6 py-2 rounded-lg">CONTINUAR</button>
         </div>
 
-        <div id="victory-screen" class="hidden absolute inset-0 z-40 bg-slate-950/95 p-5 text-center overflow-y-auto flex-col items-center justify-center gap-4"><h2 class="text-3xl font-black text-amber-400">CAMPANHA CONCLUÍDA!</h2><p>As vinte operações foram vencidas!</p><p id="rank-award" class="text-yellow-300 font-bold"></p><button id="victory-restart" class="bg-amber-500 text-black rounded-xl p-4 font-bold">JOGAR NOVAMENTE</button></div>
+        <div id="victory-screen" class="hidden absolute inset-0 z-40 bg-slate-950/95 p-4 text-center overflow-y-auto flex-col items-center justify-start gap-3" style="background:radial-gradient(ellipse at top,#183f63 0%,#091b32 55%,#040d1d 100%)">
+<h2 class="text-3xl font-black text-amber-300 tracking-wider">HONRA AO PILOTO • RIVER STORM</h2>
+<p id="victory-tribute" class="text-slate-100 max-w-xl leading-relaxed">Parabéns! Você concluiu as missões e salvou o planeta da invasão.</p>
+<div class="flex items-center gap-4 rounded-xl border border-amber-400/60 bg-slate-900/80 p-3">
+<img id="victory-avatar" alt="Retrato do piloto" class="w-20 h-20 rounded-lg object-cover border border-cyan-300 hidden">
+<div class="text-left"><p id="victory-pilot-name" class="text-xl font-black text-cyan-200"></p><p id="victory-level" class="text-amber-100"></p><p id="victory-rank-transition" class="text-green-300 font-bold"></p></div></div>
+<p id="rank-award" class="text-yellow-300 font-bold"></p>
+<p id="victory-aircraft" class="text-slate-200 text-sm max-w-xl"></p>
+<div class="rounded-lg border border-cyan-500/40 p-3 bg-slate-950/70 w-full max-w-xl"><h3 class="font-bold text-amber-300">RECORDE DO PILOTO • PLACAR LOCAL</h3><p id="victory-record" class="text-cyan-100"></p><p class="text-xs text-slate-400">Registro neste dispositivo; partidas em rede local serão desenvolvidas futuramente.</p></div>
+<p id="victory-wallet" class="text-amber-200"></p>
+<div id="victory-shop" class="flex flex-wrap gap-2 justify-center max-w-xl"></div>
+<p id="victory-shop-status" class="text-sm text-green-300"></p>
+<button id="victory-restart" class="bg-amber-500 text-black rounded-xl p-4 font-bold">INICIAR PRÓXIMA JORNADA</button></div>
         <div id="mission-banner" class="absolute top-9 left-2 px-2 py-1 bg-slate-900/65 text-amber-200 font-bold text-xs pointer-events-none"></div>
         <!-- Tela de Fim de Jogo (Game Over) -->
         <div id="game-over-screen" class="hidden absolute inset-0 bg-black/90 flex flex-col items-center justify-center p-6 text-center z-30">
@@ -919,28 +931,65 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
         const scoreMultiplier=()=>Math.pow(1.1,journey-1);
         function finishFullCampaign(){
           const legitimate=campaignVerified&&sector===20;
-          const finishedJourney=journey;
-          const oldRank=rankName();
-          const bonus=legitimate?Math.round(5000*scoreMultiplier()):0;
+          const completedJourney=journey,oldRank=rankName(),oldLevel=pilotLevel;
+          const pointsBonus=legitimate?5000:0,xpBonus=legitimate?5000:0;
           if(legitimate){
             recordSequentialMission();
-            score+=bonus;earnedPoints+=bonus;careerPoints+=score;
-            try{localStorage.setItem('riverstorm_career_points_v1',String(careerPoints))}catch(e){}
+            score+=pointsBonus;earnedPoints+=pointsBonus;bank+=pointsBonus;
+            pilotXP=Math.min(XP_CAP,pilotXP+xpBonus);
+            pilotLevel=window.RiverPilotProgress.levelFor(pilotXP);
+            careerPoints+=score;
+            try{localStorage.setItem(earnedKey,String(bank));localStorage.setItem(XP_STORE,String(pilotXP));localStorage.setItem('riverstorm_career_points_v1',String(careerPoints));}catch(err){}
             if(journey<RANKS.length)journey++;
-            try{localStorage.setItem('river_journey_v1',String(journey))}catch(e){}
+            try{localStorage.setItem('river_journey_v1',String(journey))}catch(err){}
           }
+          const bestKey=String(completedJourney);
+          pilotProfile.bestByJourney[bestKey]=Math.max(pilotProfile.bestByJourney[bestKey]||0,score);
+          pilotProfile.lastSequentialMission=legitimate?20:pilotProfile.lastSequentialMission;
+          savePilotProfile();refreshWallet();
           campaignVerified=false;
-          try{localStorage.removeItem(CHECKPOINT_KEY)}catch(e){}
+          try{localStorage.removeItem(CHECKPOINT_KEY)}catch(err){}
           gameState='VICTORY';playlist.pause();
           const atMax=journey===RANKS.length;
-          document.querySelector('#victory-screen h2').textContent=legitimate?'TODAS AS 20 MISSÕES CONCLUÍDAS!':'MISSÃO 20 CONCLUÍDA — MODO TESTE';
+          const screen=document.getElementById('victory-screen');
+          screen.querySelector('h2').textContent=legitimate?'PLANETA SALVO • MISSÃO CUMPRIDA!':'MISSÃO 20 CONCLUÍDA — TREINAMENTO';
+          document.getElementById('victory-tribute').textContent=legitimate?
+            'Parabéns, piloto! Você venceu as 20 missões, derrotou o comando invasor e salvou nosso planeta. Pela coragem e serviço extraordinário, recebe uma promoção e é convocado imediatamente para uma nova jornada de defesa da Terra.':
+            'Missão 20 concluída pelo seletor. Esta é uma simulação; conclua as vinte missões em sequência para receber promoção e bônus.';
+          document.getElementById('victory-pilot-name').textContent=pilotProfile.nickname||'PILOTO';
+          const avatar=document.getElementById('victory-avatar');
+          if(pilotProfile.photo){avatar.src=pilotProfile.photo;avatar.classList.remove('hidden');}else{avatar.removeAttribute('src');avatar.classList.add('hidden');}
+          document.getElementById('victory-level').textContent='NÍVEL '+(pilotLevel+1)+' • '+Math.floor(pilotXP).toLocaleString('pt-BR')+' XP'+(legitimate?' (+5.000 XP)':'');
+          document.getElementById('victory-rank-transition').textContent='PATENTE: '+oldRank+(legitimate?' → '+rankName():' • SEM PROMOÇÃO');
           document.getElementById('rank-award').textContent=legitimate?
-            'JORNADA '+finishedJourney+' FINALIZADA • '+oldRank+' → '+rankName()+' • BÔNUS +'+bonus+' • TOTAL DA CARREIRA '+careerPoints+' • '+(atMax?'PATENTE MÁXIMA ATINGIDA':'NG+'+finishedJourney+' LIBERADO'):
-            'Missão selecionada diretamente: sem promoção, NG+ ou bônus de campanha. Conclua as 20 missões em sequência para evoluir.';
-          document.getElementById('victory-restart').textContent=legitimate&&!atMax?'INICIAR NG+'+finishedJourney:'INICIAR NOVA CAMPANHA';
-          document.getElementById('victory-screen').classList.remove('hidden');
+            'JORNADA '+completedJourney+' VENCIDA • +5.000 PONTOS • +5.000 XP • '+(atMax?'PATENTE FINAL CONQUISTADA OU MANTIDA':'PRÓXIMA JORNADA '+journey):
+            'Sem bônus ou promoção: missão escolhida diretamente.';
+          const used=Object.entries(pilotProfile.planeSeconds||{}).filter(([,time])=>time>0).sort((a,b)=>b[1]-a[1]);
+          document.getElementById('victory-aircraft').textContent='AERONAVES UTILIZADAS: '+(used.length?used.map(([id])=>aircraftCatalog.PLANES[id]?.name||id).join(' • '):aircraftCatalog.PLANES[selectedPlane]?.name||selectedPlane);
+          document.getElementById('victory-record').textContent='RECORDE DA JORNADA: '+Math.floor(pilotProfile.bestByJourney[bestKey]||0).toLocaleString('pt-BR')+' • CARREIRA: '+Math.floor(careerPoints).toLocaleString('pt-BR');
+          document.getElementById('victory-wallet').textContent='SALDO PARA NOVAS AERONAVES: '+bank.toLocaleString('pt-BR')+' PONTOS';
+          const shop=document.getElementById('victory-shop');shop.replaceChildren();
+          for(const [id,plane] of Object.entries(aircraftCatalog.PLANES)){
+            if(!plane.price||unlocked.includes(id))continue;
+            const button=document.createElement('button');button.type='button';button.className='rounded-lg border border-cyan-500/60 bg-slate-800 px-3 py-2 text-sm font-bold text-cyan-100';
+            button.textContent='COMPRAR '+plane.name+' • '+plane.price.toLocaleString('pt-BR')+' pts';
+            button.disabled=!!plane.requiredJourney&&journey<plane.requiredJourney;
+            if(button.disabled)button.title='Requer Jornada '+plane.requiredJourney;
+            button.addEventListener('click',()=>{
+              const status=document.getElementById('victory-shop-status');
+              if(unlocked.includes(id)){status.textContent='Aeronave já disponível.';return;}
+              if(bank<plane.price){status.textContent='Pontos insuficientes para '+plane.name+'.';return;}
+              bank-=plane.price;unlocked.push(id);
+              try{localStorage.setItem(earnedKey,String(bank));localStorage.setItem(unlockedKey,JSON.stringify(unlocked));}catch(err){}
+              refreshWallet();button.remove();
+              status.textContent=plane.name+' adquirida! Selecione-a no hangar na nova jornada.';
+              document.getElementById('victory-wallet').textContent='SALDO: '+bank.toLocaleString('pt-BR')+' PONTOS';
+            });shop.appendChild(button);
+          }
+          document.getElementById('victory-restart').textContent=legitimate?(atMax?'INICIAR NOVA JORNADA • PATENTE MÁXIMA':'INICIAR JORNADA '+journey):'RECOMEÇAR CAMPANHA';
+          screen.classList.remove('hidden');refreshStartPilotIdentity();
         }
-        const awardEnemyPoints=points=>Math.round((points||100)*scoreMultiplier());
+                const awardEnemyPoints=points=>Math.round((points||100)*scoreMultiplier());
         let lives=3;
         let continues=10;
         let earnedPoints=0;
