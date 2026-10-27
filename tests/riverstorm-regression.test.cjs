@@ -117,3 +117,15 @@ test('boss low-health and special warning use arcs, never rectangle outlines',()
  assert.doesNotMatch(game,/ctx\.strokeRect\(e\.x-e\.width\/2/);
  assert.match(game,/ctx\.arc\(e\.x,e\.y,Math\.min\(34,e\.width\*\.28\)/);
 });
+
+test('bosses 1 a 3 usam sprites diferentes e distribuidos na build',()=>{
+ const renderer=fs.readFileSync('src/render/scene2d5.js','utf8');
+ const vite=fs.readFileSync('vite.config.js','utf8');
+ for(const file of ['iron-wasp.svg','abyss-manta.svg','crimson-rotor.svg']){
+  const p='assets/sprites/bosses/'+file;
+  assert.ok(fs.existsSync(p),p);
+  assert.ok(vite.includes(p),p);
+  assert.ok(renderer.includes(file),file);
+ }
+ assert.match(renderer,/Number\(d\.sector\)<=3/);
+});
