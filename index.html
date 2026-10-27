@@ -3627,7 +3627,7 @@ function updateTerrainEvent(){
             }
         }
         function fireWeapon() {
-            if (gameState !== 'PLAYING' || player.disabledTimer > 0) return;
+            if (gameState !== 'PLAYING' || player.disabledTimer > 0 || fusionTicks>0) return;
             if(player.weapon==='PULSE')pulseDestroyTerrain();
             const baseWeapon=aircraftCatalog.PLANES[player.aircraftType||selectedPlane].weapons[0];
             if(player.weapon!==baseWeapon){
@@ -3650,8 +3650,12 @@ function updateTerrainEvent(){
         // Fusão das auxiliares: disparo + bomba. Consome a ação de bomba, não o estoque.
         let fusionTicks=0,fusionCooldown=0,fusionBossUsed=false,fusionLastBossTick=-1;
         const fusionAvailable=()=>gameState==='PLAYING'&&wingmen.some(w=>w.ttl>0)&&fusionTicks<=0&&fusionCooldown<=0&&(!bossActive||!fusionBossUsed);
+        let fusionPreviousArmament=null;
         function activateFusion(){
           if(!fusionAvailable())return false;
+          fusionPreviousArmament={weapon:player.weapon,specialShots:player.specialShots};
+          bullets.length=0;
+          for(const w of wingmen){w.maxHp=Math.max(175,w.maxHp||0);w.hp=w.maxHp;w.ttl=Math.max(1200,w.ttl||0);}
           fusionTicks=360;fusionCooldown=bossActive?0:360;fusionBossUsed=!!bossActive;fusionLastBossTick=-1;
           createFloatingText(player.x,player.y-50,'FUSÃO DAS AUXILIARES • 6S','#7dd3fc');
           try{window.RiverSFX?.impact?.()}catch(error){}
@@ -3692,6 +3696,11 @@ function updateTerrainEvent(){
             enemyBullets.length=0;
           }
           fusionTicks--;
+          if(fusionTicks===0){
+            if(fusionPreviousArmament){player.weapon=fusionPreviousArmament.weapon;player.specialShots=Math.max(100,fusionPreviousArmament.specialShots||0);fusionPreviousArmament=null;}
+            for(const w of wingmen){w.maxHp=Math.max(175,w.maxHp||0);w.hp=w.maxHp;w.ttl=Math.max(w.ttl||0,1200);w.detach=0;}
+            createFloatingText(player.x,player.y-45,'ARMAS E AUXILIARES RESTAURADAS','#67e8f9');
+          }
         }
         function drawFusion(){
           if(fusionTicks<=0)return;
@@ -3704,7 +3713,7 @@ function updateTerrainEvent(){
           ctx.restore();
         }
                 function fireWingmen(){
-            if(missionTicks%8!==0)return;
+            if(fusionTicks>0||missionTicks%8!==0)return;
             for(const w of wingmen){
                 if(w.ttl<=0)continue;
                 // Naves auxiliares usam sempre mísseis, independentemente do armamento principal.
@@ -3715,7 +3724,8 @@ function updateTerrainEvent(){
             }
         }
         function triggerBomb() {
-            if((keys.Space||keys.KeyZ||mouseInput.fire||gamepadState.fire||touchFireHeld)&&activateFusion())return;
+            if(fusionTicks>0)return;
+            if((keys.Space||keys.KeyZ||keys.KeyJ||mouseInput.fire||gamepadState.fire||touchFireHeld)&&activateFusion())return;
             if(gameState!=='PLAYING'||player.bombs<=0||player.disabledTimer>0)return;
             player.bombs--;
             document.getElementById('bomb-count-touch').innerText='('+player.bombs+')';
