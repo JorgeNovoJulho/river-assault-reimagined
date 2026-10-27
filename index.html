@@ -148,7 +148,7 @@
             <button id="pilot-profile-open" type="button" style="background:#075985;color:white;font-weight:900;padding:12px;border:2px solid #67e8f9;border-radius:10px;width:100%;margin-bottom:12px">👤 PERFIL DO PILOTO</button>
             <section id="pilot-profile-panel" hidden style="display:none;max-width:460px;margin:8px auto;padding:14px;border-radius:14px;border:2px solid #38bdf8;background:#081b31;color:#e2e8f0;box-sizing:border-box">
               <h3 style="font-size:19px;font-weight:900;color:#facc15;margin-bottom:9px">IDENTIDADE DO PILOTO</h3>
-              <div style="display:flex;gap:12px;align-items:center"><img id="pilot-profile-photo" alt="Foto do piloto" style="width:76px;height:76px;object-fit:cover;border-radius:50%;border:2px solid #67e8f9;background:#172b48"><div style="flex:1"><label for="pilot-photo-upload">Foto de perfil (local)</label><input id="pilot-photo-upload" type="file" accept="image/png,image/jpeg,image/webp" style="width:100%;font-size:11px"></div></div>
+              <div style="display:flex;gap:12px;align-items:center"><img id="pilot-profile-photo" alt="Foto do piloto" style="width:76px;height:76px;object-fit:cover;border-radius:50%;border:2px solid #67e8f9;background:#172b48"><div style="flex:1"><label for="pilot-photo-upload">Foto de perfil (local)</label><input id="pilot-photo-upload" type="file" accept="image/*,.gif,.bmp,.avif,.heic,.heif,.tif,.tiff,.svg" style="width:100%;font-size:11px"></div></div>
               <label for="pilot-nickname" style="display:block;margin-top:10px">Nome de usuário (3 a 18 caracteres)</label>
               <div style="display:flex;gap:6px"><input id="pilot-nickname" type="text" size="18" minlength="3" maxlength="18" autocomplete="off" autocapitalize="off" spellcheck="false" style="min-width:0;width:100%;flex:1 1 200px;box-sizing:border-box;font-size:16px;color:white;background:#0f2540;border:1px solid #64748b;border-radius:6px;padding:9px"><button id="pilot-nickname-save" type="button" style="background:#047857;padding:9px;border-radius:6px">SALVAR</button></div>
               <p id="pilot-nickname-status" aria-live="polite" style="font-size:11px;color:#fbbf24;margin-top:4px">Nome salvo apenas neste dispositivo; exclusividade global requer servidor de contas.</p>
@@ -636,8 +636,8 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
         // Coordenadas de jogo constantes, independentemente do DPR e do tamanho da tela.
         const visualProfile={
             eco:{dprMax:1,glow:0,particles:.55},
-            balanced:{dprMax:1.5,glow:.5,particles:.85},
-            enhanced:{dprMax:2,glow:1,particles:1}
+            balanced:{dprMax:2,glow:.5,particles:.85},
+            enhanced:{dprMax:3,glow:1,particles:1}
         };
         function activeVisualProfile(){return visualProfile[document.getElementById('quality-select')?.value]||visualProfile.eco}
         function beginLogicalFrame(){ctx.setTransform(canvas.width/VIRTUAL_WIDTH,0,0,canvas.height/VIRTUAL_HEIGHT,0,0);ctx.imageSmoothingEnabled=true}
@@ -3439,21 +3439,42 @@ function updateTerrainEvent(){
           pilotProfile.nickname=value;savePilotProfile();
           status.textContent='Nome salvo neste dispositivo. Exclusividade entre todos os jogadores exige servidor de cadastro.';
         });
-        document.getElementById('pilot-photo-upload').addEventListener('change',event=>{
+        document.getElementById('pilot-photo-upload').addEventListener('change',async event=>{
           const file=event.target.files?.[0];if(!file)return;
           const status=document.getElementById('pilot-nickname-status');
-          if(!['image/png','image/jpeg','image/webp'].includes(file.type)||file.size>1024*1024){status.textContent='Foto PNG/JPG/WEBP com até 1 MB.';return}
-          const reader=new FileReader();reader.onload=()=>{
-            const img=new Image();img.onload=()=>{
-              const canvas=document.createElement('canvas');canvas.width=128;canvas.height=128;
-              const c=canvas.getContext('2d');const side=Math.min(img.width,img.height);
-              c.drawImage(img,(img.width-side)/2,(img.height-side)/2,side,side,0,0,128,128);
-              pilotProfile.photo=canvas.toDataURL('image/jpeg',.72);savePilotProfile();renderPilotProfile();
-              status.textContent='Foto salva localmente.';
-            };img.src=reader.result;
-          };reader.readAsDataURL(file);
+          const mime=file.type||'', ext=file.name.split('.').pop().toLowerCase();
+          const valid=mime.startsWith('image/')||['gif','bmp','avif','heic','heif','tif','tiff','svg','png','jpg','jpeg','webp'].includes(ext);
+          if(!valid){status.textContent='Selecione um arquivo de imagem.';return}
+          if(file.size>20*1024*1024){status.textContent='Imagem muito grande (máximo 20 MB).';return}
+          const url=URL.createObjectURL(file);
+          const img=new Image();
+          try{
+            await new Promise((resolve,reject)=>{img.onload=resolve;img.onerror=()=>reject(new Error('O navegador não consegue decodificar esta imagem.'));img.src=url});
+            const side=Math.min(img.naturalWidth,img.naturalHeight);
+            const canvas=document.createElement('canvas');
+            canvas.width=320;canvas.height=320;
+            const c=canvas.getContext('2d',{alpha:false});
+            c.imageSmoothingEnabled=true;c.imageSmoothingQuality='high';
+            c.fillStyle='#0d243a';c.fillRect(0,0,320,320);
+            c.drawImage(img,(img.naturalWidth-side)/2,(img.naturalHeight-side)/2,side,side,0,0,320,320);
+            let saved=canvas.toDataURL('image/webp',.87);
+            if(!saved.startsWith('data:image/webp'))saved=canvas.toDataURL('image/jpeg',.88);
+            // GIF animado permanece animado se couber no armazenamento local.
+            // Caso contrário, a miniatura otimizada usa o primeiro quadro.
+            if((mime==='image/gif'||ext==='gif')&&file.size<=240*1024){
+              const reader=new FileReader();
+              saved=await new Promise((resolve,reject)=>{reader.onload=()=>resolve(reader.result);reader.onerror=reject;reader.readAsDataURL(file)});
+            }
+            const old=pilotProfile.photo;
+            pilotProfile.photo=saved;
+            try{localStorage.setItem(PROFILE_KEY,JSON.stringify(pilotProfile))}
+            catch(error){pilotProfile.photo=old;throw new Error('Armazenamento local cheio. Não foi possível salvar a imagem.')}
+            renderPilotProfile();refreshStartPilotIdentity();
+            status.textContent='Foto enquadrada e otimizada com sucesso (320 × 320).';
+          }catch(error){status.textContent=error.message||'Falha ao carregar imagem.'}
+          finally{URL.revokeObjectURL(url);event.target.value=''}
         });
-        document.getElementById('controller-settings-btn').addEventListener('click',()=>showControllerSettings(true));
+                document.getElementById('controller-settings-btn').addEventListener('click',()=>showControllerSettings(true));
         document.getElementById('menu-settings-btn').addEventListener('click',()=>showControllerSettings(true));
         document.getElementById('pad-close').addEventListener('click',()=>showControllerSettings(false));
         sensitivity.addEventListener('input',()=>{
@@ -3654,7 +3675,9 @@ function updateTerrainEvent(){
         }
 
         function resizeCanvas() {
-            const density=Math.min(activeVisualProfile().dprMax,Math.max(1,window.devicePixelRatio||1));
+            const targetDpr=activeVisualProfile().dprMax;
+            const density=Math.min(targetDpr,Math.max(1,window.devicePixelRatio||1),Math.sqrt(4000000/(VIRTUAL_WIDTH*VIRTUAL_HEIGHT)));
+            // A base lógica permanece 400x600; o backing store em maior resolução melhora antialiasing sem alterar hitboxes.
             const nextWidth=Math.round(VIRTUAL_WIDTH*density);
             const nextHeight=Math.round(VIRTUAL_HEIGHT*density);
             if(nextWidth===lastBackingWidth&&nextHeight===lastBackingHeight)return;
