@@ -1167,10 +1167,11 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
           ['Sua pontaria está de férias?','Essa vitória não está no seu mapa!'],
           ['HÁ-HÁ! Até meus drones estão rindo!','Vai precisar de mais do que sorte, piloto!']
         ];
+        const sectorBossLines=[["Esta ponte não será atravessada!","Minhas torres já calcularam sua queda."],["Você não afunda um encouraçado com coragem.","Toda a artilharia, fogo no intruso!"],["Meus radares veem tudo, menos sua chance.","Você está na mira do invisível."],["Minha fortaleza domina este corredor.","Todas as baterias: eliminar o piloto!"],["A selva esconde meus canhões.","Suas asas serão adubo para esta terra."],["Minha tempestade engolirá seu avião.","Os trovões vão marcar sua derrota."],["Meu reator vai apagar o seu céu.","Aproxime-se e sinta a radiação."],["Nenhum radar sobrevive ao meu pulso.","Seus instrumentos não vão salvá-lo."],["O gelo vai travar suas hélices.","Veja como o rio congela à sua volta."],["Minha frota emerge do fundo.","O rio inteiro está contra você."],["Todas as minhas minas estão armadas.","Cada curva é uma armadilha."],["Você entrou no território das sombras.","Não atire no reflexo errado."],["Meu enxame já cercou sua aeronave.","Drones: interceptar e destruir."],["Minha blindagem não conhece rachaduras.","Seu arsenal é apenas um arranhão."],["Fogo cruzado em todos os quadrantes.","Não há rota segura para fugir."],["A correnteza obedece às minhas máquinas.","O próprio terreno será sua prisão."],["Meu escudo aprende com seus ataques.","Continue atirando, estou coletando dados."],["Você chegou longe, piloto. Não o bastante.","Prepare-se para a última patrulha."],["Todos os sistemas em sobrecarga!","Veja a verdadeira potência deste núcleo."],["O comando final está diante de você.","Este será seu último combate, piloto."]];
         let sarcasmLevel=2;
         function showBossTaunt(name){
             if(sarcasmLevel===0)return;
-            const bucket=bossLines[(sector+Math.floor(missionTicks/250))%bossLines.length];
+            const bucket=sectorBossLines[Math.max(0,Math.min(19,sector-1))]||bossLines[(sector+Math.floor(missionTicks/250))%bossLines.length];
             const line=bucket[Math.floor(missionTicks/310)%bucket.length];
             bossTaunt={name,line,ticks:Math.max(250,390-sarcasmLevel*18)};
             bossRobotVoice(enemies.find(e=>e.type==='BOSS'),false);
@@ -2957,7 +2958,7 @@ function updateTerrainEvent(){
         }
         function updateCriticalShieldWarning(){
           const fraction=player.maxShield>0?player.shield/player.maxShield:0;
-          const low=gameState==='PLAYING'&&fraction>0&&fraction<=.20;
+          const low=gameState==='PLAYING'&&fraction<=.20;
           const cell=document.getElementById('hud-shield-cell');
           if(cell)cell.classList.toggle('rs-shield-critical',low);
           if(low){
