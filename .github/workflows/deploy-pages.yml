@@ -58,6 +58,8 @@ jobs:
           test -s dist/assets/sprites/bosses/iron-wasp.svg
           test -s dist/assets/sprites/enemies/mecha-gun.svg
           test -s dist/assets/sprites/projectiles/plasma-blue.svg
+          test -s dist/assets/sprites/premium/runtime/player/fighter_candidate.png
+          test -s dist/assets/sprites/premium/runtime/fx/explosion_atlas_4x3.png
           for sprite in assets/sprites/terrain/water-detail.svg assets/sprites/terrain/river-island-detail.svg assets/sprites/terrain/bridge-steel-detail.svg assets/sprites/fx/explosion-ring.svg assets/sprites/player/riverstorm-fighter.svg; do
             test -s "dist/$sprite" || { echo "::error::Sprite novo ausente: $sprite"; exit 1; }
           done
