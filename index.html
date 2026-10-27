@@ -1369,6 +1369,8 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
           const kind=bossSkillEquipped,skill=BOSS_SKILLS[kind],foe=boss.skillAffinity;
           const advantage=skill.strong===foe;
           let damage=kind==='EMP'||kind==='PRISM'||kind==='SHADOW'?0:(advantage?Math.round(skill.damage*1.55):Math.max(4,Math.round(skill.damage*.28)));
+          const skillResistance=(()=>{const weather=sectorWeather(),phase=sectorTime();if(kind==='FIRE')return weather==='SNOW'?.78:weather==='HEAT'?1.18:1;if(kind==='ICE')return weather==='HEAT'?.82:weather==='SNOW'?1.18:1;if(kind==='LIGHTNING'||kind==='EMP')return weather==='RAIN'?1.13:1;if(kind==='SHADOW')return phase==='NIGHT'?1.18:.92;if(kind==='PRISM')return phase==='MORNING'?1.15:1;return 1})();
+          damage*=skillResistance;
           if(boss.gravityTicks>0)damage*=2;
           if(boss.parryVulnerableTicks>0)damage*=1.25;
           damage=Math.min(damage,boss.maxHp*(advantage?.075:.025));
@@ -2192,8 +2194,8 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
           }
         }
         // Ciclo determinístico por setor, sem relógio externo nem dependência de FPS.
-        const sectorTime=()=>['MORNING','AFTERNOON','NIGHT'][(Math.max(1,sector)-1)%3];
-        const sectorWeather=()=>['RAIN','WIND','HEAT','FOG','SNOW'][(Math.max(1,sector)-1)%5];
+        const sectorTime=()=>['MORNING','AFTERNOON','NIGHT'][Math.floor((missionTicks/1800)+(sector-1))%3];
+        const sectorWeather=()=>['RAIN','WIND','HEAT','FOG','SNOW'][Math.floor(missionTicks/2700+sector-1)%5];
         const nightHunters=new Set(['ALLIGATOR','PIRANHA','EEL']);
         const dayFlyers=new Set(['EAGLE','TUCANO']);
         const coldHunters=new Set(['ICE_RAY','WALRUS','NARWHAL']);
@@ -2543,6 +2545,7 @@ function updateTerrainEvent(){
                 const eb=enemyBullets[index];
                 if(!eb||!Number.isFinite(eb.x)||!Number.isFinite(eb.y)||!Number.isFinite(eb.vx)||!Number.isFinite(eb.vy)){enemyBullets.splice(index,1);continue;}
                 const previousEnemyX=eb.x,previousEnemyY=eb.y;
+                if(sectorWeather()==='WIND')eb.vx=Math.max(-8,Math.min(8,eb.vx+Math.sin(sector*1.7+missionTicks*.002)*.009));
                 eb.x += eb.vx + (eb.waveStyle===2?Math.sin(missionTicks*.12+(eb.phase||0))*.45:0);
                 eb.y += eb.vy;
                 if(riverIslandBlocks(previousEnemyX,previousEnemyY,eb.x,eb.y)){
