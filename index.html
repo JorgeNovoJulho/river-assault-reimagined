@@ -2884,7 +2884,7 @@ function updateTerrainEvent(){
         function playCriticalShieldAlert(){
           try{
             const control=document.getElementById('sound-toggle');
-            if(control && /SOM:\\s*DES|SOM:\\s*OFF/i.test(control.textContent))return;
+            if(control && /SOM:\s*(?:DES|OFF)/i.test(control.textContent))return;
             const AC=window.AudioContext||window.webkitAudioContext;
             if(!AC)return;
             const ac=playCriticalShieldAlert.ctx||(playCriticalShieldAlert.ctx=new AC());
