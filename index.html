@@ -1440,6 +1440,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
         }
         skillUseButton.addEventListener('pointerdown',event=>{event.preventDefault();if(bossActive)useBossSkill();else activateSwordRush()});
         // --- HABILIDADES E PADRÕES DE TIROS DOS CHEFÕES ---
+        let shieldEnemyFlash=0,shieldShotFlash=0;
         let parryTicks=0,parryCooldown=0,parryHeld=false,parryHeldTicks=0,parryPrecisionTicks=0;
         const BOSS_STRIKES={1:'impact',3:'energy',5:'energy',7:'blade',8:'blade',9:'impact',10:'energy',12:'blade',14:'blade',16:'blade',19:'blade',20:'energy'};
         function defendCharge(attacker){if(parryTicks<=0)return false;const precise=parryPrecisionTicks>0;if(precise&&attacker?.type==='BOSS'){attacker.stunnedTicks=Math.max(attacker.stunnedTicks||0,180);attacker.parryVulnerableTicks=180;attacker.swordDash=0;attacker.swordCharge=0;createFloatingText(attacker.x,attacker.y-45,'PARRY! IMÓVEL 3 S · +50% DANO','#fef08a');addExplosion(attacker.x,attacker.y,'#fde68a',26);}else createFloatingText(player.x,player.y-35,'ESCUDO: DEFESA TOTAL','#67e8f9');addExplosion(player.x,player.y,'#67e8f9',12);return true;}
@@ -1732,6 +1733,19 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
                 ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.lineTo(q.x,q.y);ctx.stroke();
             }
             ctx.restore();
+        }
+        function drawShieldContactFlash(){
+          if(parryTicks<=0)return;
+          const maxFlash=Math.max(shieldEnemyFlash,shieldShotFlash);
+          const color=shieldEnemyFlash>=shieldShotFlash?'#39ff92':'#bb70ff';
+          ctx.save();ctx.translate(player.x,player.y);
+          ctx.globalAlpha=.28+.24*Math.sin(missionTicks*.2);
+          ctx.strokeStyle='#79deed';ctx.lineWidth=2;ctx.beginPath();ctx.ellipse(0,0,47,40,0,0,Math.PI*2);ctx.stroke();
+          if(maxFlash>0){
+            ctx.globalAlpha=Math.min(1,maxFlash/12);
+            ctx.shadowColor=color;ctx.shadowBlur=qualitySelect.value==='eco'?0:20;
+            for(let i=0;i<3;i++){ctx.strokeStyle=i===0?'#ffffff':color;ctx.lineWidth=4-i;ctx.beginPath();ctx.ellipse(0,0,42+i*5,36+i*4,0,Math.PI*(i*.47+missionTicks*.06),Math.PI*(i*.47+missionTicks*.06+1.15));ctx.stroke();}
+          }ctx.restore();
         }
         function drawBullets() {
             bullets.forEach(b => {
@@ -2856,7 +2870,7 @@ function updateTerrainEvent(){
                     continue;
                 }
 
-                if((parryTicks>0||rollFrames>0)&&Math.hypot(eb.x-player.x,eb.y-player.y)<(rollFrames>0?67:53)){enemyBullets.splice(index,1);const boss=enemies.find(e=>e.type==='BOSS'&&e.hp>0),target=boss||enemies.find(e=>e.hp>0);const tx=target?.x??eb.x,ty=target?.y??0,dx=tx-eb.x,dy=ty-eb.y,len=Math.max(1,Math.hypot(dx,dy));bullets.push({x:eb.x,y:eb.y,vx:dx/len*11,speed:-dy/len*11,type:'REFLECTED',color:rollFrames>0?'#ff4dd8':'#22f7c4',damage:rollFrames>0?Math.max(1,eb.damage||25)*1.10:37.5,reflected:true,homing:true,dodgeReflect:rollFrames>0});addExplosion(eb.x,eb.y,'#67e8f9',8);createFloatingText(player.x,player.y-40,rollFrames>0?'ESQUIVA + REFLEXO 110%!':'REFLETIDO!',rollFrames>0?'#ff4dd8':'#67e8f9');continue;}
+                if((parryTicks>0||rollFrames>0)&&Math.hypot(eb.x-player.x,eb.y-player.y)<(rollFrames>0?67:53)){enemyBullets.splice(index,1);const boss=enemies.find(e=>e.type==='BOSS'&&e.hp>0),target=boss||enemies.find(e=>e.hp>0);const tx=target?.x??eb.x,ty=target?.y??0,dx=tx-eb.x,dy=ty-eb.y,len=Math.max(1,Math.hypot(dx,dy));bullets.push({x:eb.x,y:eb.y,vx:dx/len*11,speed:-dy/len*11,type:'REFLECTED',color:rollFrames>0?'#ff4dd8':'#22f7c4',damage:rollFrames>0?Math.max(1,eb.damage||25)*1.10:37.5,reflected:true,homing:true,dodgeReflect:rollFrames>0});shieldShotFlash=15;addExplosion(eb.x,eb.y,'#b76aff',11);createFloatingText(player.x,player.y-40,rollFrames>0?'ESQUIVA + REFLEXO 110%!':'REFLETIDO!',rollFrames>0?'#ff4dd8':'#67e8f9');continue;}
                 const hitWingman=wingmen.find(w=>Math.hypot(eb.x-(player.x+w.side*36),eb.y-(player.y+10))<14);
                 if(hitWingman){
                     enemyBullets.splice(index,1);
@@ -2875,10 +2889,13 @@ function updateTerrainEvent(){
             }
 
             // Escudo cinético: contato arremessa inimigos e ricochetes causam colisões entre si.
+            // Efeitos de contato mantêm entidades inimigas no render de inimigos.
+            if(shieldEnemyFlash>0)shieldEnemyFlash--;
+            if(shieldShotFlash>0)shieldShotFlash--;
             if(parryTicks>0){for(const e of enemies){
               if(e.hp<=0||e.type==='BOSS'||e.reflectTicks>0||Math.hypot(e.x-player.x,e.y-player.y)>53)continue;
               const dx=e.x-player.x,dy=e.y-player.y,d=Math.max(1,Math.hypot(dx,dy));
-              e.reflectVX=dx/d*15;e.reflectVY=dy/d*15;e.reflectTicks=32;e.reflectHits=[];e.hp-=Math.max(2,(e.maxHp||e.hp)*.30);
+              e.reflectVX=dx/d*15;e.reflectVY=dy/d*15;e.reflectTicks=32;e.reflectHits=[];e.hp=Math.max(1,e.hp-Math.max(1,(e.maxHp||e.hp)*.20));shieldEnemyFlash=15;
               addExplosion(e.x,e.y,'#67e8f9',14);screenShake=Math.max(screenShake,4);
               for(let n=0;n<8;n++){const a=n*Math.PI/4;particles.push({x:e.x+Math.cos(a)*12,y:e.y+Math.sin(a)*12,vx:Math.cos(a)*5,vy:Math.sin(a)*5,size:3,color:n%2?'#f472b6':'#67e8f9',life:1});}
             }}
@@ -3673,6 +3690,7 @@ function updateTerrainEvent(){
             drawBombs();drawBombAftershock();
             drawRescueBoats();
             drawWingmen();
+            drawShieldContactFlash();
             drawPowerups();
             drawBullets();
             drawParticles();
