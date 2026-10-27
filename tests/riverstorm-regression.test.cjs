@@ -143,3 +143,17 @@ test('sprites de chefes 4 a 6 integrados',()=>{
 test('chefes 7 a 12 possuem sprites integrados',()=>{const render=fs.readFileSync('src/render/scene2d5.js','utf8'),vite=fs.readFileSync('vite.config.js','utf8');for(const name of ['storm-mantis','neon-leviathan','inferno-dredger','glacier-titan','solar-vulture','night-harvester']){const p='assets/sprites/bosses/'+name+'.svg';assert.ok(fs.existsSync(p),p);assert.ok(render.includes(name+'.svg'));assert.ok(vite.includes(p));}assert.ok(render.includes('Number(d.sector)<=20'));});
 
 test('chefes 13 a 20: sprites integrados e inclusos em Vite',()=>{const render=fs.readFileSync('src/render/scene2d5.js','utf8'),vite=fs.readFileSync('vite.config.js','utf8');for(const name of ["thunder-serpent","blizzard-hydra","desert-reaper","abyssal-jellyfish","forge-colossus","polar-scythe","phantom-fortress","omega-overlord"]){const p='assets/sprites/bosses/'+name+'.svg';assert.ok(fs.existsSync(p),p);assert.ok(render.includes(name+'.svg'),name);assert.ok(vite.includes(p),p);}assert.ok(render.includes('Number(d.sector)<=20'));});
+
+test('ilhas e travessias renderizam sprites reais sem fechar o leito central',()=>{
+ const render=fs.readFileSync('src/render/scene2d5.js','utf8');
+ const vite=fs.readFileSync('vite.config.js','utf8');
+ for(const name of ['island-tropical.svg','island-rock.svg','bridge-industrial.svg','dam-concrete.svg']){
+  const path='assets/sprites/terrain/'+name;
+  assert.ok(fs.existsSync(path),path);
+  assert.ok(vite.includes(path),path);
+ }
+ assert.match(render,/islandSpriteImages/);
+ assert.match(game,/terrainStructureImages/);
+ assert.match(game,/ctx\.rect\(-half,slabY,half-gate,p\.height\)/);
+ assert.match(game,/ctx\.rect\(gate,slabY,half-gate,p\.height\)/);
+});
