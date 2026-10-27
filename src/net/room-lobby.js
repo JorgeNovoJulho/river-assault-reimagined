@@ -46,8 +46,8 @@ function register(conn,fromHost){
 }
 function setupPeer(id){
  return new Promise((resolve,reject)=>{
-  peer=new window.Peer(id,{debug:1});
-  peer.on('open',resolve);peer.on('error',err=>{show('Falha na rede: '+(err.message||err.type));reject(err)});
+  peer=new window.Peer(id,{host:'0.peerjs.com',port:443,path:'/',secure:true,debug:1});
+  peer.on('open',resolve);peer.on('error',err=>{const reason=err.message||err.type||'erro desconhecido';show('Servidor de conexão indisponível: '+reason+'. Verifique internet, firewall e tente novamente.');reject(err)});
   peer.on('disconnected',()=>show('Sinalização desconectada; confira a internet.'));
   peer.on('connection',conn=>{if(!host){conn.close();return;}register(conn,true)});
  });
