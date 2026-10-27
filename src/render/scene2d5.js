@@ -142,12 +142,8 @@ function landscape(c,data,t){
  const climate=CLIMATE[mission-1],weather=climate[1];
  const weatherNames={mist:'NEBLINA',drizzle:'GAROA',sand:'TEMPESTADE DE AREIA',breeze:'BRISA',snow:'NEVE',storm:'TEMPESTADE',neon:'LUZES NEON',ash:'CINZAS VULCÂNICAS',rain:'CHUVA',blizzard:'NEVASCA',lightning:'TEMPESTADE ELÉTRICA'};
  const periodNames={dawn:'AMANHECER',night:'NOITE',noon:'MEIO-DIA',dusk:'ANOITECER',sunset:'PÔR DO SOL',twilight:'CREPÚSCULO',afternoon:'TARDE',morning:'MANHÃ',golden:'HORA DOURADA',midnight:'MADRUGADA'};
- if(quality!=='eco'){
-   c.save();c.font='bold 8px monospace';c.textAlign='right';
-   c.fillStyle='rgba(4,14,31,.65)';c.fillRect(Math.max(0,w-185),15,177,17);
-   c.fillStyle='rgba(232,247,255,.88)';c.fillText(periodNames[climate[2]]+' · '+(weatherNames[weather]||'CÉU LIMPO'),w-13,26);
-   c.restore();
- }
+ // Estado para o HUD inferior. O renderer não deve desenhar texto no topo da arena.
+ root.RiverStormEnvironment={period:periodNames[climate[2]]||'DIA',weather:weatherNames[weather]||'CÉU LIMPO',sector:mission};
  const cycle=((distance*.00012+mission*.071)%1+1)%1;
  // Transição suave entre duas iluminações por operação; o céu nunca obstrui tiros e HUD.
  const dayGlow=(Math.sin(cycle*Math.PI*2-Math.PI*.5)+1)*.5;
