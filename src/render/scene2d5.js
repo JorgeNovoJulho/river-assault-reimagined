@@ -1336,9 +1336,34 @@ function bossPresentation(c,d){
   c.restore();
  }
 }
+function livingSetDressing(c,d,t){
+ const kinds=['TREES','DOCKS','DUNES','SWAMP','ISLAND','ICE','TREES','CITY','LAVA','CLIFF','FIELDS','NEON','SWAMP','ICE','DUNES','GLOW','DOCKS','ICE','FACTORY','CITADEL'];
+ const kind=kinds[((d.sector-1)%20+20)%20],count=d.quality==='eco'?4:9,tick=d.missionTicks||0;
+ c.save();
+ for(let side of [-1,1])for(let i=0;i<count;i++){
+   const y=(i*111+tick*.32+d.sector*23)%(d.h+120)-60;
+   const x=side<0?15+(i*31+d.sector*17)%62:d.w-15-(i*31+d.sector*17)%62;
+   c.save();c.translate(x,y);c.globalAlpha=.65;c.lineWidth=2;c.strokeStyle=t.accent;
+   if(['TREES','SWAMP','GLOW','FIELDS'].includes(kind)){
+     c.fillStyle='#315b48';c.fillRect(-3,-3,6,29);
+     c.fillStyle=kind==='GLOW'?'#54c9af':t.foliage;
+     for(let j=0;j<3;j++){c.beginPath();c.ellipse((j-1)*9,-j*8,12,8,0,0,Math.PI*2);c.fill();}
+   }else if(['DOCKS','CITY','NEON','FACTORY','CITADEL'].includes(kind)){
+     c.fillStyle=kind==='NEON'?'#334077':'#33485b';c.fillRect(-12,-28,24,43);c.strokeRect(-12,-28,24,43);
+     c.fillStyle=kind==='NEON'?'#fa78d4':'#ffd18c';for(let j=0;j<3;j++)c.fillRect(-8+j*7,-18,3,7);
+     if(kind==='DOCKS'||kind==='FACTORY'){c.beginPath();c.moveTo(0,-28);c.lineTo(0,-44);c.lineTo(18,-44);c.stroke();}
+   }else if(['ICE','CLIFF'].includes(kind)){
+     c.fillStyle=kind==='ICE'?'#ccebf9':'#6d808b';c.beginPath();c.moveTo(-16,15);c.lineTo(-5,-13);c.lineTo(0,-31);c.lineTo(17,15);c.closePath();c.fill();c.stroke();
+   }else{
+     c.fillStyle=kind==='LAVA'?'#a34f36':'#bca07a';c.beginPath();c.moveTo(-22,16);c.quadraticCurveTo(0,-26,22,16);c.closePath();c.fill();
+   }
+   c.restore();
+ }
+ c.restore();
+}
 function draw(c,d){
  const t=THEMES[((d.sector-1)%THEMES.length+THEMES.length)%THEMES.length];
- landscape(c,d,t);terrainSignature(c,d,t);landmark(c,d,t);mapSetPieces(c,d,t);biomeAtmosphere(c,d,t);enhancedWorld(c,d,t);
+ landscape(c,d,t);terrainSignature(c,d,t);landmark(c,d,t);mapSetPieces(c,d,t);biomeAtmosphere(c,d,t);enhancedWorld(c,d,t);livingSetDressing(c,d,t);
  // Culling explícito: evitar traçar sprites fora da tela e preservar FPS em ondas intensas.
  islands(c,(d.islands||[]).filter(p=>p.y+(p.height||0)>-32&&p.y-(p.height||0)<d.h+32&&p.x+(p.width||0)>-32&&p.x-(p.width||0)<d.w+32),t);
  for(const e of d.enemies||[]){
