@@ -4090,7 +4090,7 @@ function updateTerrainEvent(){
                 ctx.save();ctx.fillStyle='rgba(3,12,25,.82)';ctx.fillRect(left-2,y-2,width+4,15);
                 ctx.fillStyle='#1c3347';ctx.fillRect(left,y,width,5);ctx.fillRect(left,y+9,width,3);
                 ctx.fillStyle=hp>.6?'#4ade80':hp>.3?'#facc15':'#ef4444';ctx.fillRect(left,y,width*hp,5);
-                if(hp<.45){ctx.strokeStyle='#ef4444';ctx.lineWidth=3;ctx.globalAlpha=.4+(1-hp)*.5;ctx.strokeRect(e.x-e.width/2,e.y-e.height/2,e.width,e.height);ctx.globalAlpha=1;}
+                if(hp<.45){ctx.strokeStyle='#ef4444';ctx.lineWidth=2;ctx.globalAlpha=.4+(1-hp)*.4;ctx.beginPath();ctx.arc(e.x,e.y,Math.min(34,e.width*.28),Math.PI*.13,Math.PI*.87);ctx.stroke();ctx.globalAlpha=1;}
                 ctx.fillStyle=charge>=.99?'#f87171':'#67e8f9';ctx.fillRect(left,y+9,width*charge,3);
                 ctx.restore();
             }
@@ -4224,7 +4224,7 @@ function updateTerrainEvent(){
                 }
                 ctx.restore();
             }
-            for(const e of enemies){if(e.type==='BOSS'&&e.warningTicks>0){ctx.save();ctx.strokeStyle='#facc15';ctx.lineWidth=4;ctx.globalAlpha=.5+Math.sin(missionTicks*.4)*.5;ctx.strokeRect(e.x-e.width/2-5,e.y-e.height/2-5,e.width+10,e.height+10);ctx.restore();}}
+            for(const e of enemies){if(e.type==='BOSS'&&e.warningTicks>0){ctx.save();ctx.strokeStyle='#facc15';ctx.lineWidth=4;ctx.globalAlpha=.5+Math.sin(missionTicks*.4)*.5;ctx.lineCap='round';ctx.beginPath();ctx.arc(e.x,e.y,Math.min(e.width*.45,e.height*.65)+8,Math.PI*1.15,Math.PI*1.85);ctx.stroke();ctx.restore();}}
             for(const e of enemies){if(e.type==='BOSS'&&e.stunnedTicks>0){ctx.save();ctx.globalAlpha=.28+.19*Math.sin(missionTicks*.2);ctx.fillStyle='#a855f7';ctx.beginPath();ctx.ellipse(e.x,e.y,e.width*.57,e.height*.58,0,0,Math.PI*2);ctx.fill();ctx.restore();}}
             if(player.disabledTimer>0&&player.effectType==='EMP'){ctx.save();ctx.globalAlpha=.3+.2*Math.sin(missionTicks*.2);ctx.fillStyle='#a855f7';ctx.beginPath();ctx.ellipse(player.x,player.y,23,28,0,0,Math.PI*2);ctx.fill();ctx.restore();}
             for(const e of enemies){if(e.type!=='BOSS'||e.statusTicks<=0)continue;ctx.save();ctx.globalAlpha=.34;ctx.fillStyle=e.statusKind==='POISON'?'#4ade80':'#fb233a';ctx.beginPath();ctx.ellipse(e.x,e.y,e.width*.55,e.height*.56,0,0,Math.PI*2);ctx.fill();ctx.restore();}
