@@ -94,3 +94,10 @@ Atualizado: 2026-10-27. Regra: só considerar "homologado" após build, ensaio n
 - Vite configurado para produzir entrada separada; `npm run check:phaser` incluído no CI.
 - O jogo principal continua Canvas para manter as funcionalidades durante a migração.
 - **Pendente:** garantir compilação/execução no Pages, depois portar mecânicas, sprites, cenas e chefes ao Phaser. Ver `docs/ENGINE_DECISION.md`.
+
+## 27/10/2026 — Phaser Nova Geração: primeira arena jogável
+- **Implementado no código:** `src/phaser/main.ts` agora contém entrada jogável com setas/WASD/toque, disparos, inimigos, HP, colisões, boss e pontuação.
+- **Preservação:** `index.html` continua entregando jogo Canvas Original; Phaser está em `phaser-lab.html`, evitando regressão de funcionalidades legadas.
+- **Validação:** testes estáticos de sistemas de jogabilidade do Phaser adicionados, além da exigência no CI de `dist/phaser-lab.html`.
+- **Sem comprovação de homologação até aqui:** compilação CI concluída, navegador real, FPS sustentado, Android/Windows, 20 fases e paridade de mecânicas com Original.
+- **Próximo marco:** teste dinâmico automatizado da arena; migração de padrões de disparo, boss, cenário, HUD, saves e controles da Original; habilitar Nova Geração como escolha do usuário somente após validar paridade.
