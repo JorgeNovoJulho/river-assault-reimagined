@@ -504,7 +504,7 @@ function enemy(c,e,time){
  c.restore();
  // HP e recarga dos bosses são desenhados uma única vez em drawEnemies().
 }
-const islandSpriteFiles=['island-tropical.svg','island-rock.svg'];
+const islandSpriteFiles=['island-tropical.svg','island-rock.svg','island-scorched.svg'];
 const islandSpriteImages=islandSpriteFiles.map(name=>{const img=new Image();img.src='./assets/sprites/terrain/'+name;return img;});
 function islands(c,items,t){
  // Materiais de relevo: renderizacao deterministica em camadas, sem sprites vetoriais lisos.
@@ -513,7 +513,7 @@ function islands(c,items,t){
  const industrial=/CIDADE|INDUSTRIAL|ESTALEIRO|RUÍNAS|PORTO/.test(t.name);
  const volcanic=/LAVA|VULC|MAGMA/.test(t.name);
  for(const p of items){
-  const terrainSprite=islandSpriteImages[((p.shape||0)%2+2)%2];
+  const terrainSprite=(p.maxHp>0&&p.hp/p.maxHp<=.45)?islandSpriteImages[2]:islandSpriteImages[((p.shape||0)%2+2)%2];
   if(terrainSprite.complete&&terrainSprite.naturalWidth){
     c.save();c.drawImage(terrainSprite,p.x-p.width*.52,p.y-p.height*.52,p.width*1.04,p.height*1.04);c.restore();
     continue;
