@@ -1,0 +1,4 @@
+const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs');const src=fs.readFileSync('index.html','utf8');
+test('fusão aceita teclado mouse gamepad e toque',()=>{assert.ok(src.includes('gamepadState.fire||touchFireHeld)&&activateFusion()'));assert.ok(src.includes("getElementById('btn-bomb').addEventListener('pointerdown'"));});
+test('boss com casco ampliado e torretas independentes',()=>{assert.ok(src.includes('Math.round(bossConfig.width*1.18)'));assert.ok(src.includes('Math.round(bossConfig.height*1.18)'));assert.ok(src.includes('turretLeftHp'));assert.ok(src.includes('turretRightHp'));});
+test('fusão de 6 segundos com recarga e tiro do boss em seis pulsos',()=>{assert.ok(src.includes('fusionTicks=360;fusionCooldown=bossActive?0:360'));assert.ok(src.includes('elapsed%60===0'));assert.ok(src.includes('boss.hp-boss.maxHp*.05'));assert.ok(src.includes('fusionBossUsed=!!bossActive'));});
