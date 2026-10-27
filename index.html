@@ -2504,6 +2504,10 @@ function updateTerrainEvent(){
                 const previousX=b.x,previousY=b.y;
                 b.y -= b.speed;
                 if (b.vx) b.x += b.vx;
+                // Corrente lateral ambiental também desloca projéteis do piloto;
+                // mísseis guiados corrigem essa deriva normalmente.
+                if(sectorWeather()==='WIND'&&b.type!=='REFLECTED')
+                  b.x+=Math.sin(sector*1.7+missionTicks*.002)*.28;
                 if (b.type === 'MISSILE'||b.type==='REFLECTED') {
                     // Steering 2D: busca alvos vivos, limita curva e mantém velocidade estável.
                     // O movimento base acontece antes; ajustar a direção para o próximo quadro.
