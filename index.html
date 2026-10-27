@@ -1398,7 +1398,11 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
           if(!target)return;
           swordRushCooldown=240;swordRushTarget=target;swordRushFrames=18;
           player.invulnerable=Math.max(player.invulnerable,22);
-          launchSkillTrajectory('BLEED',player.x,player.y,target.x,target.y,'#f8fafc');
+          // Espada energética com arcos de plasma e som metálico de impacto.
+          launchSkillTrajectory('BLEED',player.x,player.y,target.x,target.y,'#ff73b8');
+          launchSkillTrajectory('PRISM',player.x,player.y,target.x,target.y,'#7dd3fc');
+          try{window.RiverSFX?.blade?.()||window.RiverSFX?.impact?.()}catch(error){}
+          for(let i=0;i<18;i++){const angle=i*Math.PI/9;particles.push({x:player.x+Math.cos(angle)*14,y:player.y+Math.sin(angle)*14,vx:Math.cos(angle)*3.2,vy:Math.sin(angle)*3.2,size:3+i%3,color:i%2?'#67e8f9':'#ff83be',life:1});}
           createFloatingText(player.x,player.y-35,'INVESTIDA DE ESPADA','#fef08a');
         }
         function useBossSkill(){
@@ -2722,7 +2726,15 @@ function updateTerrainEvent(){
             if(parryPrecisionTicks>0)parryPrecisionTicks--;
             if(parryCooldown>0)parryCooldown--;
             if(swordRushCooldown>0)swordRushCooldown--;
-            if(swordRushFrames>0){const target=swordRushTarget;swordRushFrames--;if(target&&target.hp>0){player.x+=(target.x-player.x)*.24;player.y+=(target.y-player.y)*.24;player.invulnerable=Math.max(player.invulnerable,3);if(swordRushFrames===0||Math.hypot(target.x-player.x,target.y-player.y)<22){addExplosion(target.x,target.y,'#f472b6',24);createFloatingText(target.x,target.y-32,'CORTE FATAL','#fef08a');target.hp=0;score+=awardEnemyPoints(target.score||100);kills++;grantEnemyXP(target);enemies=enemies.filter(e=>e!==target);swordRushFrames=0;}}else swordRushFrames=0;if(swordRushFrames===0)swordRushTarget=null;}
+            if(swordRushFrames>0){const target=swordRushTarget;swordRushFrames--;if(target&&target.hp>0){player.x+=(target.x-player.x)*.24;player.y+=(target.y-player.y)*.24;player.invulnerable=Math.max(player.invulnerable,3);if(swordRushFrames===0||Math.hypot(target.x-player.x,target.y-player.y)<22){addExplosion(target.x,target.y,'#f472b6',34);createFloatingText(target.x,target.y-32,'CORTE DEVASTADOR!','#fef08a');
+                    screenShake=Math.max(screenShake,11);
+                    try{window.RiverSFX?.blade?.()||window.RiverSFX?.impact?.()}catch(error){}
+                    for(const foe of enemies){if(foe===target||foe.hp<=0||foe.type==='BOSS'||Math.hypot(foe.x-target.x,foe.y-target.y)>95)continue;
+                      const dx=foe.x-target.x,dy=foe.y-target.y,d=Math.max(1,Math.hypot(dx,dy));
+                      foe.hp-=Math.max(3,(foe.maxHp||6)*.35);foe.reflectVX=dx/d*13;foe.reflectVY=dy/d*13;
+                      foe.reflectTicks=28;foe.reflectHits=[];addExplosion(foe.x,foe.y,'#67e8f9',8);
+                    }
+                    target.hp=0;score+=awardEnemyPoints(target.score||100);kills++;grantEnemyXP(target);enemies=enemies.filter(e=>e!==target);swordRushFrames=0;}}else swordRushFrames=0;if(swordRushFrames===0)swordRushTarget=null;}
             skillUseButton.textContent=bossActive?'⚡ PODER [C]':'⚔ INVESTIDA [C] '+(swordRushCooldown>0?Math.ceil(swordRushCooldown/60)+'s':'PRONTO');
             skillUseButton.classList.remove('hidden');
             parryButton.textContent=parryTicks>0?'🛡 ESCUDO '+Math.max(1,Math.ceil(parryTicks/60))+'s':parryCooldown>0?'🛡 '+Math.ceil(parryCooldown/60)+'s':'🛡 PARRY [V]';
