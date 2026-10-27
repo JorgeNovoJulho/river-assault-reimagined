@@ -2879,7 +2879,8 @@ function updateTerrainEvent(){
               if(e.hp<=0||e.type==='BOSS'||e.reflectTicks>0||Math.hypot(e.x-player.x,e.y-player.y)>53)continue;
               const dx=e.x-player.x,dy=e.y-player.y,d=Math.max(1,Math.hypot(dx,dy));
               e.reflectVX=dx/d*15;e.reflectVY=dy/d*15;e.reflectTicks=32;e.reflectHits=[];e.hp-=Math.max(2,(e.maxHp||e.hp)*.30);
-              addExplosion(e.x,e.y,'#67e8f9',7);
+              addExplosion(e.x,e.y,'#67e8f9',14);screenShake=Math.max(screenShake,4);
+              for(let n=0;n<8;n++){const a=n*Math.PI/4;particles.push({x:e.x+Math.cos(a)*12,y:e.y+Math.sin(a)*12,vx:Math.cos(a)*5,vy:Math.sin(a)*5,size:3,color:n%2?'#f472b6':'#67e8f9',life:1});}
             }}
             for(let i=0;i<enemies.length;i++){
               const a=enemies[i];if(!a.reflectTicks||a.hp<=0)continue;
@@ -3395,8 +3396,7 @@ function updateTerrainEvent(){
             try{window.RiverSFX?.impact()}catch(e){}
             screenShake=15;bombFlash=13;bombAftershockFrames=180;bombAftershockOrigin={x:b.x,y:b.y};
             enemyBullets=[];
-            // Os danos não são instantâneos: cada um dos três pulsos aplica a destruição.
-            updateBombAftershock();
+            // O loop principal processa os pulsos, sem avanço duplicado no frame inicial.
             addExplosion(b.x,b.y,'#fff3ad',34);
             createFloatingText(b.x,b.y,'BOMBA IMPACTOU!','#fbbf24');
         }
