@@ -32,3 +32,9 @@ Atualizado: 2026-10-27. Regra: só considerar "homologado" após build, ensaio n
 - **Regressões:** verificações adicionadas a `tests/riverstorm-regression.test.cjs`; scripts verificados quanto a sintaxe.
 - **Pendente de homologação:** rodar o workflow, testar cada habilidade com o jogo aberto, comparar screenshot após publicação, testar Windows/Android e medir FPS em bosses.
 - **Observação importante:** a substituição dos gráficos procedurais por sprites individuais continua **parcial**; apenas alguns sprites já estão efetivamente ligados ao jogo. Não marcar como concluído até finalizar assets, integrar e testar cada bioma/boss/inimigo.
+
+## Atualização — 27/10/2026 (continuação)
+- Sprites distintos acrescentados para os chefes das missões 2 e 3: `assets/sprites/bosses/abyss-manta.svg` e `assets/sprites/bosses/crimson-rotor.svg`.
+- Renderizador seleciona `iron-wasp.svg`, `abyss-manta.svg`, `crimson-rotor.svg` conforme missão 1, 2 ou 3; mantém fallback legado se a imagem não carregar.
+- Pipeline Vite copia os sprites para `dist/`; adicionado teste de regressão de referências e existência.
+- **Pendentes:** 17 sprites de chefes, demais inimigos, 20 cenários e FX definitivos, medição FPS, execução real dos testes e verificação da publicação; multiplayer integral segue pendente.
