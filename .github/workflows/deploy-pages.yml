@@ -54,6 +54,16 @@ jobs:
           grep -q 'drawIslands' dist/src/render/scene2d5.js
           for n in $(seq -w 1 14); do test -f "dist/music/track-$n.opus"; done
           echo 'HUD, cenarios e musicas presentes na build'
+      - name: Conferir sprites reais e mecanismos audiovisuais publicados
+        shell: bash
+        run: |
+          for file in assets/sprites/projectiles/plasma-blue.svg assets/sprites/projectiles/plasma-red.svg assets/sprites/bosses/iron-wasp.svg; do
+            test -s "dist/$file" || { echo "::error::Sprite não incluído na build: $file"; exit 1; }
+          done
+          grep -q 'drawPlayerStatusEffect' dist/index.html
+          grep -q 'bossMaxBullets' dist/index.html
+          grep -q 'status(kind)' dist/src/audio/sfx-modern.js
+          echo "Sprites e efeitos do jogador presentes na build"
       - uses: actions/configure-pages@v5
         with:
           enablement: true
