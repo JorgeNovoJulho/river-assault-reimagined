@@ -9,12 +9,17 @@ const assets=[
  ['enemy-heli','assets/sprites/enemies/helicopter.svg'],
  ['enemy-sub','assets/sprites/enemies/submarine.svg'],
  ['island','assets/sprites/terrain/island-tropical.svg'],
- ['beam','assets/sprites/projectiles/plasma-blue.svg']
+ ['beam','assets/sprites/projectiles/plasma-blue.svg'],
+ ['fighter','assets/sprites/player/riverstorm-fighter.svg'],
+ ['bank-left','assets/sprites/terrain/river-bank-left.svg'],
+ ['bank-right','assets/sprites/terrain/river-bank-right.svg']
 ] as const;
 type Enemy={sprite:Phaser.GameObjects.Image;hp:number;speed:number;fireAt:number};
 type Bullet={sprite:Phaser.GameObjects.Image;vy:number;damage:number;hostile:boolean};
 class PhaserArena extends Phaser.Scene {
  private ship!:Phaser.GameObjects.Triangle;
+ private shipVisual!:Phaser.GameObjects.Image;
+ private banks:Phaser.GameObjects.Image[]=[];
  private boss!:Phaser.GameObjects.Image;
  private hud!:Phaser.GameObjects.Text;
  private keys!:Phaser.Types.Input.Keyboard.CursorKeys;
@@ -42,11 +47,17 @@ class PhaserArena extends Phaser.Scene {
  create(){
   this.cameras.main.setBackgroundColor('#0c233c');
   this.add.rectangle(WIDTH/2,HEIGHT/2,270,HEIGHT,0x12546a);
+  for(let i=0;i<3;i++){
+   this.banks.push(this.add.image(65,i*480-240,'bank-left').setDisplaySize(130,480));
+   this.banks.push(this.add.image(WIDTH-65,i*480-240,'bank-right').setDisplaySize(130,480));
+  }
   for(let i=0;i<9;i++)this.islands.push(this.add.image(i%2?388:149,120+i*120,'island').setDisplaySize(125,85).setAlpha(.9));
   this.boss=this.add.image(WIDTH/2,145,'boss-1').setDisplaySize(160,160);
   this.boss.setInteractive();
   this.ship=this.add.triangle(WIDTH/2,HEIGHT-130,0,42,28,0,56,42,0x96e7f2);
   this.ship.setStrokeStyle(3,0xfed084);
+  this.ship.setAlpha(0); // Hitbox original intacta; a nave SVG e somente visual.
+  this.shipVisual=this.add.image(this.ship.x,this.ship.y,'fighter').setDisplaySize(52,61).setDepth(5);
   this.hud=this.add.text(12,14,'',{fontFamily:'monospace',fontSize:'17px',color:'#f2f9ff'}).setDepth(10);
   this.add.text(12,61,'SETAS/WASD mover · ESPAÇO atirar · toque arrastar e atirar · R reiniciar',{fontFamily:'monospace',fontSize:'12px',color:'#c6eaff',wordWrap:{width:WIDTH-24}}).setDepth(10);
   this.keys=this.input.keyboard!.createCursorKeys();
@@ -90,6 +101,8 @@ class PhaserArena extends Phaser.Scene {
   if(this.pointerActive){this.ship.x+=(this.pointerX-this.ship.x)*Math.min(.25*dt,1);this.ship.y+=(this.pointerY-this.ship.y)*Math.min(.25*dt,1);}
   this.ship.x=Phaser.Math.Clamp(this.ship.x,26,WIDTH-26);this.ship.y=Phaser.Math.Clamp(this.ship.y,100,HEIGHT-30);
   this.ship.setFillStyle(time<this.invulnerableUntil?0xff6b71:0x96e7f2);
+  this.shipVisual.setPosition(this.ship.x,this.ship.y).setTint(time<this.invulnerableUntil?0xff899a:0xffffff);
+  for(const bank of this.banks){bank.y+=1.25*dt;if(bank.y>HEIGHT+240)bank.y-=1440;}
   for(const island of this.islands){island.y+=1.25*dt;if(island.y>HEIGHT+70)island.y=-85;}
   if(time>this.nextShot&&(this.keys.space.isDown||this.wasd.SPACE.isDown||this.pointerActive)){
    this.shoot(this.ship.x,this.ship.y-22,false,1);this.nextShot=time+135;
