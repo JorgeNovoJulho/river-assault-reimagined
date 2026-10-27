@@ -1863,13 +1863,15 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
         }
         function drawBullets() {
             bullets.forEach(b => {
-                if(b.weaponId&&b.weaponId!=='SINGLE')drawBulletTrail(b);
+                if(b.weaponId&&b.weaponId!=='SINGLE'&&b.weaponId!=='CIRCLE')drawBulletTrail(b);
                 ctx.save();
                 ctx.translate(b.x, b.y);
 
                 // Render de sprite por arma, com silhueta e material identificáveis.
                 if(b.type!=='REFLECTED'){
                   ctx.save();ctx.rotate(Math.atan2(b.vx||0,-(b.speed||7)));
+                  const isCircle=(b.weaponId==='CIRCLE'||b.type==='CIRCLE');
+                  if(isCircle){ctx.scale(.48,.48);ctx.globalAlpha=.78;}
                   drawProjectileSprite(b.weaponId||b.type||'SINGLE',b.color,missionTicks);ctx.restore();
                   ctx.restore();return;
                 }
@@ -3918,6 +3920,8 @@ function updateTerrainEvent(){
             drawBossSkillEffect();
             drawSkillTrajectories();
             drawClimateOverlay();
+            // Reforça a silhueta do jogador acima dos disparos CIRCLE e do clima.
+            window.RiverVisuals.drawPlayerForeground?.(ctx,player.x,player.y,player.aircraftType||selectedPlane,player.invulnerable);
             drawFloatingTexts();
             drawHUD();
             drawActiveAircraftLabel();
