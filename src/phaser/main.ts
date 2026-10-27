@@ -45,7 +45,8 @@ class PhaserArena extends Phaser.Scene {
   for(let i=0;i<9;i++)this.islands.push(this.add.image(i%2?388:149,120+i*120,'island').setDisplaySize(125,85).setAlpha(.9));
   this.boss=this.add.image(WIDTH/2,145,'boss-1').setDisplaySize(160,160);
   this.boss.setInteractive();
-  this.ship=this.add.triangle(WIDTH/2,HEIGHT-130,0,42,28,0,56,42,0x96e7f2).setStrokeStyle(3,0xfed084);
+  this.ship=this.add.triangle(WIDTH/2,HEIGHT-130,0,42,28,0,56,42,0x96e7f2);
+  this.ship.setStrokeStyle(3,0xfed084);
   this.hud=this.add.text(12,14,'',{fontFamily:'monospace',fontSize:'17px',color:'#f2f9ff'}).setDepth(10);
   this.add.text(12,61,'SETAS/WASD mover · ESPAÇO atirar · toque arrastar e atirar · R reiniciar',{fontFamily:'monospace',fontSize:'12px',color:'#c6eaff',wordWrap:{width:WIDTH-24}}).setDepth(10);
   this.keys=this.input.keyboard!.createCursorKeys();
