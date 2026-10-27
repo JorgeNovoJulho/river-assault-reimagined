@@ -65,3 +65,21 @@ test('acertos, notas e adaptacao persistem por campanha',()=>{
  assert.match(game,/damageBlinkFrames=16/);
  assert.match(game,/adaptiveThreat/);
 });
+
+test('gravidade termina e restitui movimento independente',()=>{
+ assert.match(game,/if\(player\.effectTimer===0\)\{player\.effectType=''/);
+ assert.match(game,/e\.gravityTicks===0/);
+ assert.match(game,/player\.effectType==='GRAVITY'&&player\.effectTimer>0/);
+});
+test('sprite assets existem e build os distribui',()=>{
+ const vite=fs.readFileSync('vite.config.js','utf8');
+ for(const p of ['assets/sprites/projectiles/plasma-blue.svg','assets/sprites/projectiles/plasma-red.svg','assets/sprites/bosses/iron-wasp.svg']){
+  assert.ok(fs.existsSync(p),p);
+  assert.ok(vite.includes(p),p);
+ }
+ assert.match(game,/projectileArt\.blue\.src/);
+});
+test('piscar vermelho em cima do sprite do piloto',()=>{
+ assert.match(game,/damageBlinkFrames=16/);
+ assert.match(game,/rgba\(255,22,41,\.88\)/);
+});
