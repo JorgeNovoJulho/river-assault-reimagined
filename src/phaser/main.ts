@@ -12,7 +12,9 @@ const assets=[
  ['beam','assets/sprites/projectiles/plasma-blue.svg'],
  ['fighter','assets/sprites/player/riverstorm-fighter.svg'],
  ['bank-left','assets/sprites/terrain/river-bank-left.svg'],
- ['bank-right','assets/sprites/terrain/river-bank-right.svg']
+ ['bank-right','assets/sprites/terrain/river-bank-right.svg'],
+ ['water-detail','assets/sprites/terrain/water-detail.svg'],
+ ['island-detail','assets/sprites/terrain/river-island-detail.svg']
 ] as const;
 type Enemy={sprite:Phaser.GameObjects.Image;hp:number;speed:number;fireAt:number};
 type Bullet={sprite:Phaser.GameObjects.Image;vy:number;damage:number;hostile:boolean};
@@ -20,6 +22,8 @@ class PhaserArena extends Phaser.Scene {
  private ship!:Phaser.GameObjects.Triangle;
  private shipVisual!:Phaser.GameObjects.Image;
  private banks:Phaser.GameObjects.Image[]=[];
+ private waterTiles:Phaser.GameObjects.Image[]=[];
+ private islandDetails:Phaser.GameObjects.Image[]=[];
  private boss!:Phaser.GameObjects.Image;
  private hud!:Phaser.GameObjects.Text;
  private keys!:Phaser.Types.Input.Keyboard.CursorKeys;
@@ -47,6 +51,9 @@ class PhaserArena extends Phaser.Scene {
  create(){
   this.cameras.main.setBackgroundColor('#0c233c');
   this.add.rectangle(WIDTH/2,HEIGHT/2,270,HEIGHT,0x12546a);
+  for(let i=0;i<3;i++)this.waterTiles.push(this.add.image(WIDTH/2,i*480-240,'water-detail').setDisplaySize(280,480).setDepth(-1));
+  this.islandDetails.push(this.add.image(157,-90,'island-detail').setDisplaySize(102,63).setDepth(0));
+  this.islandDetails.push(this.add.image(378,-560,'island-detail').setDisplaySize(110,66).setDepth(0));
   for(let i=0;i<3;i++){
    this.banks.push(this.add.image(65,i*480-240,'bank-left').setDisplaySize(130,480));
    this.banks.push(this.add.image(WIDTH-65,i*480-240,'bank-right').setDisplaySize(130,480));
@@ -103,6 +110,8 @@ class PhaserArena extends Phaser.Scene {
   this.ship.setFillStyle(time<this.invulnerableUntil?0xff6b71:0x96e7f2);
   this.shipVisual.setPosition(this.ship.x,this.ship.y).setTint(time<this.invulnerableUntil?0xff899a:0xffffff);
   for(const bank of this.banks){bank.y+=1.25*dt;if(bank.y>HEIGHT+240)bank.y-=1440;}
+  for(const tile of this.waterTiles){tile.y+=1.25*dt;if(tile.y>HEIGHT+240)tile.y-=1440;}
+  for(const island of this.islandDetails){island.y+=1.25*dt;if(island.y>HEIGHT+75)island.y-=1250;}
   for(const island of this.islands){island.y+=1.25*dt;if(island.y>HEIGHT+70)island.y=-85;}
   if(time>this.nextShot&&(this.keys.space.isDown||this.wasd.SPACE.isDown||this.pointerActive)){
    this.shoot(this.ship.x,this.ship.y-22,false,1);this.nextShot=time+135;
