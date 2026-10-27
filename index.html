@@ -3790,7 +3790,15 @@ function updateTerrainEvent(){
                 sub.frequency.exponentialRampToValueAtTime(31,now+duration);
                 gain.gain.setValueAtTime(.0001,now);gain.gain.exponentialRampToValueAtTime(injured?.075:.03,now+.025);
                 gain.gain.exponentialRampToValueAtTime(.0001,now+duration);
-                osc.connect(filter);sub.connect(filter);filter.connect(gain);gain.connect(ctxAudio.destination);
+                osc.connect(filter);sub.connect(filter);filter.connect(gain);
+                // Compressão suave + eco curto com feedback controlado, preservando inteligibilidade.
+                const compressor=ctxAudio.createDynamicsCompressor();
+                compressor.threshold.value=-23;compressor.knee.value=18;compressor.ratio.value=2.5;
+                compressor.attack.value=.006;compressor.release.value=.22;
+                const delay=ctxAudio.createDelay(.5),wet=ctxAudio.createGain(),feedback=ctxAudio.createGain();
+                delay.delayTime.value=.12+variant*.009;wet.gain.value=injured?.11:.075;feedback.gain.value=.12;
+                gain.connect(compressor);gain.connect(delay);delay.connect(wet);wet.connect(compressor);
+                delay.connect(feedback);feedback.connect(delay);compressor.connect(ctxAudio.destination);
                 osc.start(now);sub.start(now);osc.stop(now+duration+.01);sub.stop(now+duration+.01);
             }catch(error){console.warn('Boss voice unavailable',error)}
         }
