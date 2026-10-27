@@ -35,7 +35,7 @@ function copyAndVersionRuntime() {
         .join('href="./src/styles/tailwind.css?build='+buildId+'"');
       html = html.replace('</head>',
         '<meta name="riverstorm-build" content="'+buildId+'">\n</head>');
-      for(const file of ['assets/sprites/projectiles/plasma-blue.svg','assets/sprites/projectiles/plasma-red.svg','assets/sprites/bosses/iron-wasp.svg','assets/sprites/bosses/abyss-manta.svg','assets/sprites/bosses/crimson-rotor.svg','assets/sprites/bosses/granite-dam.svg','assets/sprites/bosses/crimson-spider.svg','assets/sprites/bosses/frost-sentinel.svg']){
+      for(const file of ['assets/sprites/projectiles/plasma-blue.svg','assets/sprites/projectiles/plasma-red.svg','assets/sprites/bosses/iron-wasp.svg','assets/sprites/bosses/abyss-manta.svg','assets/sprites/bosses/crimson-rotor.svg','assets/sprites/bosses/granite-dam.svg','assets/sprites/bosses/crimson-spider.svg','assets/sprites/bosses/frost-sentinel.svg','assets/sprites/bosses/storm-mantis.svg','assets/sprites/bosses/neon-leviathan.svg','assets/sprites/bosses/inferno-dredger.svg','assets/sprites/bosses/glacier-titan.svg','assets/sprites/bosses/solar-vulture.svg','assets/sprites/bosses/night-harvester.svg']){
         const source=resolve(file),target=resolve('dist',file);
         if(!existsSync(source))throw new Error('Sprite obrigatorio ausente: '+file);
         mkdirSync(dirname(target),{recursive:true});copyFileSync(source,target);
