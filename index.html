@@ -7,8 +7,10 @@
     <link rel="stylesheet" href="./src/styles/tailwind.css">
     <!-- Fallback mínimo para execução estática sem compilação Tailwind. -->
     <style id="riverstorm-boss-dialogue-visibility">
-      #boss-dialogue-strip:not(.hidden){display:block!important;position:absolute;left:50%;bottom:8px;top:auto;transform:translateX(-50%);z-index:120;pointer-events:none;width:min(88%,580px)!important;max-width:88%;opacity:1}
       #boss-dialogue-strip.hidden{display:none!important}
+      #boss-dialogue-strip:not(.hidden){display:block!important;position:relative!important;inset:auto!important;top:auto!important;bottom:auto!important;left:auto!important;right:auto!important;transform:none!important;width:min(100%,920px)!important;max-width:920px!important;min-height:0!important;max-height:none!important;margin:0 auto 4px!important;padding:8px 12px!important;z-index:1;pointer-events:none;box-sizing:border-box;flex:none!important;background:rgba(7,20,39,.96)!important;border:2px solid #d69e34!important;border-radius:10px!important;text-align:center!important;line-height:1.35!important;font:600 clamp(11px,1.5vw,15px) monospace!important;color:#fff;box-shadow:0 2px 12px #000a!important}
+      #boss-dialogue-name{color:#fbbf24;display:block}
+      #boss-dialogue-text{color:#fff;display:block;overflow-wrap:anywhere}
     </style>
     <style id="riverstorm-overlay-safety">
       .hidden{display:none!important}
@@ -141,7 +143,7 @@
  <button id="boss-skill-use" type="button" class="hidden absolute bottom-16 right-2 z-20" style="background:#312e81;border:2px solid #a78bfa;color:white;padding:9px;border-radius:10px;font:bold 11px monospace">⚡ PODER [C]</button>
 
     <button id="parry-btn" type="button" style="position:absolute;bottom:116px;right:8px;z-index:25;background:#0e7490;color:#fff;border:2px solid #67e8f9;border-radius:12px;padding:10px;font:bold 12px system-ui">🛡 PARRY [V]</button>
-    <div id="boss-dialogue-strip" aria-live="polite" class="hidden absolute top-0 left-1/2 -translate-x-1/2 z-20 pointer-events-none" style="width:min(92%,450px);min-height:0;max-height:unset;padding:6px 10px;font-size:12px;box-sizing:border-box;flex:0 0 auto;width:min(100%,960px);min-height:80px;max-height:94px;overflow:hidden;background:#0d1c34;border:2px solid #d69e34;border-radius:12px;padding:12px 16px;text-align:center;line-height:1.4;font-size:clamp(14px,2.9vw,18px);box-shadow:0 3px 14px #0007"><b id="boss-dialogue-name" style="display:block;color:#fbbf24"></b><span id="boss-dialogue-text" style="color:#fff"></span></div>
+
 
         <div id="controller-settings" class="hidden absolute inset-0 bg-slate-950/95 z-50 p-4 overflow-auto text-sm" role="dialog" aria-modal="true" aria-label="Configuração do controle">
             <h2 class="text-xl font-bold text-cyan-300 mb-2">CONFIGURAR CONTROLE</h2>
@@ -289,6 +291,7 @@
         </div>
     </div>
 
+    <div id="boss-dialogue-strip" aria-live="polite" class="hidden" role="status"><b id="boss-dialogue-name" style="display:block;color:#fbbf24"></b><span id="boss-dialogue-text" style="color:#fff"></span></div>
     <!-- HUD compacto unificado: fora do Canvas para preservar toda a área de combate. -->
     <section id="compact-hud" aria-label="Painel de combate RiverStorm">
       <div class="rs-hud-grid">
@@ -326,7 +329,6 @@
       .rs-hud-footer{display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:21px;margin-top:3px;padding:1px 6px;border:1px solid #224e73;border-radius:4px;font-size:inherit}
       #sector-hud{color:#67e8f9} #hud-environment{color:#9be6f7;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:28%}
       #hud-rank{color:#fde68a} #hud-pilot-name{color:#8de8ff;max-width:23%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-      #boss-dialogue-strip:not(.hidden){top:auto!important;bottom:8px!important;left:50%!important;transform:translateX(-50%)!important;min-height:44px!important;max-height:110px!important;overflow:hidden!important;padding:9px 14px!important;background:linear-gradient(105deg,rgba(5,14,28,.94),rgba(29,42,64,.92))!important;border:2px solid #e5a34f!important;border-radius:12px!important;box-shadow:0 8px 32px #000c,0 0 20px #f59e0b44!important;text-align:center!important}
       #hud-shield-cell.rs-shield-critical{border-color:#ef4444!important;background:#5c101a!important;animation:rsShieldDanger .38s steps(2,end) infinite}
       #hud-shield-cell.rs-shield-critical .rs-label,#hud-shield-cell.rs-shield-critical b{color:#fff!important}
       #hud-shield-cell.rs-shield-critical #hud-shield-fill{background:#ff2323!important;box-shadow:0 0 12px #ff0000}
