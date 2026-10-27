@@ -54,3 +54,9 @@ Atualizado: 2026-10-27. Regra: só considerar "homologado" após build, ensaio n
 - Sprites SVG individuais criados, salvos e integrados para missões 13 a 20.
 - **20 de 20 missões com sprite dedicado no código e Vite**; arte ainda provisória e sem homologação visual, animações e benchmarks.
 - Restam cenários, inimigos, demais efeitos, teste jogável e publicação confirmada.
+
+## Atualização: primeiros sprites de cenário realmente aplicados
+- `assets/sprites/terrain/island-tropical.svg` e `island-rock.svg`: renderização das ilhas via imagens carregadas, com fallback procedural.
+- `assets/sprites/terrain/bridge-industrial.svg` e `dam-concrete.svg`: estruturas renderizadas a partir de sprites, recortadas para manter a passagem central e o HP.
+- `src/render/scene2d5.js`, `index.html` e `vite.config.js` atualizados; novo teste de regressão em `tests/riverstorm-regression.test.cjs`.
+- **Ainda pendente:** outros biomas, cenários dos 20 mapas, variações danificadas/destruídas, outros inimigos, animações, FPS e homologação web/Windows/Android.
