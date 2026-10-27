@@ -37,6 +37,7 @@ body{margin:0;min-height:100vh;background:#06101f;color:#d8e9f8;font:14px system
         // Carregamento visual opcional: a jogabilidade nunca depende destes PNGs.
         // Ativar a skin premium somente se TODOS os recursos necessários existirem.
         this.premiumReady=false;
+        this.premiumExplosionReady=false;
         this.premiumManifest={
           fighter:'./assets/sprites/premium/runtime/player/fighter_candidate.png',
           explosion:'./assets/sprites/premium/runtime/fx/explosion_atlas_4x3.png'
@@ -59,9 +60,10 @@ body{margin:0;min-height:100vh;background:#06101f;color:#d8e9f8;font:14px system
           this.banks.push(this.add.image(W-65,j*480-240,'bank-right').setDisplaySize(130,480).setDepth(0));
         }
         this.boss=this.add.image(W/2,170,'boss').setDisplaySize(170,130);
-        this.premiumReady=this.textures.exists('premium-fighter')&&this.textures.exists('premium-explosion');
+        this.premiumReady=this.textures.exists('premium-fighter');
+        this.premiumExplosionReady=this.textures.exists('premium-explosion');
         this.player=this.add.image(W/2,H-120,this.premiumReady?'premium-fighter':'fighter').setDisplaySize(52,61).setDepth(2);
-        if(this.premiumReady){
+        if(this.premiumExplosionReady){
           this.anims.create({key:'premium-boom',frames:this.anims.generateFrameNumbers('premium-explosion',{start:0,end:11}),frameRate:20,repeat:0});
         }
         this.keys=this.input.keyboard.createCursorKeys();
@@ -79,11 +81,11 @@ body{margin:0;min-height:100vh;background:#06101f;color:#d8e9f8;font:14px system
           output.textContent='ATENÇÃO: texturas com falha: '+[...new Set([...mandatoryFailures,...missing])].join(', ')+'. Verifique recursos no GitHub Pages.';
           output.style.color='#ffb384';
         }else{
-          output.textContent='Arena Phaser: 8/8 sprites legados OK; skin '+(this.premiumReady?'PREMIUM ativa':'SVG de segurança ativo (PNG premium ainda não publicado)')+'. Campanha preservada.';
+          output.textContent='Arena Phaser: 8/8 sprites legados OK; skin '+(this.premiumReady?'NAVE PREMIUM ativa':'SVG legado (nave premium não publicada)')+'; explosão '+(this.premiumExplosionReady?'premium ativa':'premium ausente')+'. Campanha preservada.';
         }
       }
       playVisualExplosion(x,y){
-        if(!this.premiumReady)return;
+        if(!this.premiumExplosionReady)return;
         const effect=this.add.sprite(x,y,'premium-explosion',0).setDisplaySize(66,66).setDepth(8);
         effect.once('animationcomplete',()=>effect.destroy());
         effect.play('premium-boom');
