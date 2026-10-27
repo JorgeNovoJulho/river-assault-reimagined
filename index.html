@@ -1275,8 +1275,8 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
                 name: bossConfig.name,
                 x: VIRTUAL_WIDTH / 2,
                 y: 110,
-                width: bossConfig.width,
-                height: bossConfig.height,
+                width: Math.min(VIRTUAL_WIDTH*.64,Math.round(bossConfig.width*1.18)),
+                height: Math.round(bossConfig.height*1.18),
                 hp: calculatedHp,
                 maxHp: calculatedHp,
                 score: bossConfig.score,
@@ -3648,7 +3648,7 @@ function updateTerrainEvent(){
             }
         }
         function triggerBomb() {
-            if((keys.Space||keys.KeyZ||mouseInput.fire||gamepadState.fire)&&activateFusion())return;
+            if((keys.Space||keys.KeyZ||mouseInput.fire||gamepadState.fire||touchFireHeld)&&activateFusion())return;
             if(gameState!=='PLAYING'||player.bombs<=0||player.disabledTimer>0)return;
             player.bombs--;
             document.getElementById('bomb-count-touch').innerText='('+player.bombs+')';
@@ -4495,7 +4495,7 @@ function updateTerrainEvent(){
         touchFireButton.addEventListener('pointerdown',e=>{e.preventDefault();touchFireHeld=true;sound.init();fireWeapon();try{touchFireButton.setPointerCapture(e.pointerId)}catch(_){}});
         for(const ev of ['pointerup','pointercancel','lostpointercapture'])touchFireButton.addEventListener(ev,()=>{touchFireHeld=false});
 
-        document.getElementById('btn-bomb').addEventListener('touchstart', (e) => {
+        document.getElementById('btn-bomb').addEventListener('pointerdown', (e) => {
             e.preventDefault();
             sound.init();
             triggerBomb();
