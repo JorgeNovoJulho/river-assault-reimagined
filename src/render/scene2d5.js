@@ -1166,10 +1166,19 @@ function biomeMicroDetail(c,id,age){
  }
  c.restore();
 }
+// Atlas individual por identidade: cache offscreen e nenhum custo de reconstrução por frame.
+const BIOME_FINAL_ATLAS=new Map();
+function finalBiomeStamp(id){
+ if(BIOME_FINAL_ATLAS.has(id))return BIOME_FINAL_ATLAS.get(id);
+ const cv=document.createElement('canvas');cv.width=160;cv.height=160;
+ const g=cv.getContext('2d');g.translate(80,80);g.scale(1.28,1.28);
+ biomeIdentity(g,id);biomeMicroDetail(g,id,0);
+ BIOME_FINAL_ATLAS.set(id,cv);return cv;
+}
 function drawBiomeOverlay(c,e){
  if(!detailEnabled||e.type!=='BIOME_ENEMY')return;
  const sprite=biomeSprite(e.biomeId||'HYBRID_HUNTER'),bob=Math.sin(Date.now()*.005+(e.biomeAge||0)*.02)*1.5;
- c.save();c.globalAlpha=.96;c.drawImage(sprite,e.x-24,e.y-26+bob,48,52);c.translate(e.x,e.y+bob);c.scale(.48,.48);biomeIdentity(c,e.biomeId||'HYBRID_HUNTER');biomeMicroDetail(c,e.biomeId||'HYBRID_HUNTER',e.biomeAge||0);
+ c.save();c.globalAlpha=.98;c.drawImage(finalBiomeStamp(e.biomeId||'HYBRID_HUNTER'),e.x-27,e.y-27+bob,54,54);c.translate(e.x,e.y+bob);c.scale(.48,.48);
  const tick=Date.now()*.005,flap=Math.sin(tick*2+(e.biomeAge||0)*.035),id=e.biomeId||'HYBRID_HUNTER';
  c.lineCap='round';c.lineJoin='round';c.lineWidth=3;
  if(id==='ALLIGATOR'){c.fillStyle='#b4cc78';for(let k=0;k<7;k++){c.beginPath();c.ellipse(0,-21+k*8,6,2,0,0,7);c.fill()}c.strokeStyle='#b1dca1';c.beginPath();c.moveTo(-12,-36);c.lineTo(-10,-40);c.moveTo(12,-36);c.lineTo(10,-40);c.stroke()}
