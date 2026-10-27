@@ -82,6 +82,12 @@ body{margin:0;min-height:100vh;background:#06101f;color:#d8e9f8;font:14px system
           output.textContent='Arena Phaser: 8/8 sprites legados OK; skin '+(this.premiumReady?'PREMIUM ativa':'SVG de segurança ativo (PNG premium ainda não publicado)')+'. Campanha preservada.';
         }
       }
+      playVisualExplosion(x,y){
+        if(!this.premiumReady)return;
+        const effect=this.add.sprite(x,y,'premium-explosion',0).setDisplaySize(66,66).setDepth(8);
+        effect.once('animationcomplete',()=>effect.destroy());
+        effect.play('premium-boom');
+      }
       update(time,delta){
         const dt=Math.min(2,delta/16.7);
         for(const bank of this.banks){bank.y+=1.25*dt;if(bank.y>H+240)bank.y-=1440;}
@@ -107,7 +113,7 @@ body{margin:0;min-height:100vh;background:#06101f;color:#d8e9f8;font:14px system
         for(let i=this.shots.length-1;i>=0;i--){
           const b=this.shots[i];b.y-=12*dt;
           if(b.y<0){b.destroy();this.shots.splice(i,1);continue;}
-          for(let j=this.enemies.length-1;j>=0;j--){const e=this.enemies[j];if(Math.abs(e.x-b.x)<25&&Math.abs(e.y-b.y)<30){e.destroy();b.destroy();this.enemies.splice(j,1);this.shots.splice(i,1);this.points+=100;break;}}
+          for(let j=this.enemies.length-1;j>=0;j--){const e=this.enemies[j];if(Math.abs(e.x-b.x)<25&&Math.abs(e.y-b.y)<30){this.playVisualExplosion(e.x,e.y);e.destroy();b.destroy();this.enemies.splice(j,1);this.shots.splice(i,1);this.points+=100;break;}}
         }
         this.status.setText('PHASER 4 | '+Math.round(this.game.loop.actualFps)+' FPS | VIDAS '+this.hp+' | PONTOS '+this.points);
       }
