@@ -66,3 +66,10 @@ Atualizado: 2026-10-27. Regra: só considerar "homologado" após build, ensaio n
 - Pontes, represas e ilhas usam sprites de avaria quando a durabilidade restante chega a 45% ou menos, com imagem original em bom estado.
 - Novos arquivos incluídos no Vite e cobertos por teste estático.
 - Próximas etapas: estados de destruição animados, sprites de vegetação e prédios por bioma, inimigos e testes reais de FPS/publicação.
+
+## Atualização — primeiros sprites reais de inimigos comuns
+- Quatro imagens SVG individuais criadas em `assets/sprites/enemies/`: `mecha-gun.svg`, `mecha-sword.svg`, `helicopter.svg` e `submarine.svg`.
+- Renderizador agora prefere imagens reais para `MECHA_GUN`, `MECHA_SWORD`, `HELI` e `SUB`, usando o desenho anterior apenas como fallback de carregamento.
+- Desligadas as camadas procedurais sobrepostas nesses tipos quando a imagem estiver carregada; colisões e lógica de comportamento não foram modificadas.
+- Vite empacota os quatro novos arquivos; adicionados testes de regressão.
+- **Pendente:** sprites individuais para outros tipos comuns, efeitos, cenários completos dos 20 mapas; executar suíte de testes em CI e benchmark jogável FPS.
