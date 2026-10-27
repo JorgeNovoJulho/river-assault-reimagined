@@ -23,3 +23,12 @@ Atualizado: 2026-10-27. Regra: só considerar "homologado" após build, ensaio n
 3. Compatibilidade com colisão independente da arte.
 4. Testes de sintaxe e regressão; depois teste jogável e medição de FPS.
 5. Não declarar conclusão de todo o projeto antes da homologação.
+
+
+## Auditoria adicional — 27/10/2026: interface e efeitos
+- **Código aplicado:** molduras quadradas de alerta e baixa vida do boss substituídas por arcos finos no `index.html`; coroa geométrica de `bossPresentation` substituída por arcos/indicadores finos em `src/render/scene2d5.js`.
+- **Código aplicado:** `drawPlayerStatusEffect()` espelha visualmente os nove efeitos do chefe no jogador: EMP, LIGHTNING, ICE, FIRE, BLEED, POISON, PRISM, SHADOW e GRAVITY.
+- **Código aplicado:** `RiverSFX.status(kind)` com sinal sonoro específico ao início de cada status; sem novas instâncias de áudio em cada quadro.
+- **Regressões:** verificações adicionadas a `tests/riverstorm-regression.test.cjs`; scripts verificados quanto a sintaxe.
+- **Pendente de homologação:** rodar o workflow, testar cada habilidade com o jogo aberto, comparar screenshot após publicação, testar Windows/Android e medir FPS em bosses.
+- **Observação importante:** a substituição dos gráficos procedurais por sprites individuais continua **parcial**; apenas alguns sprites já estão efetivamente ligados ao jogo. Não marcar como concluído até finalizar assets, integrar e testar cada bioma/boss/inimigo.
