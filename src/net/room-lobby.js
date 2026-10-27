@@ -2,11 +2,11 @@
 (()=>{
 'use strict';
 const maxPlayers=8;
-let peer=null,host=false,roomCode='',secret='',connections=new Map(),name='Piloto';
+let peer=null,host=false,roomCode='',secret='',connections=new Map(),name='Piloto',peerReady=false;
 const el=(tag,attrs={},children=[])=>{const n=document.createElement(tag);Object.assign(n,attrs);children.forEach(c=>n.append(c));return n;};
 const css='background:#0b2137;color:#e2faff;border:1px solid #38bdf8;border-radius:8px;padding:8px;font:600 12px sans-serif;';
 function show(message){const status=document.getElementById('river-room-status');if(status)status.textContent=message;}
-function count(){const out=document.getElementById('river-room-count');if(out)out.textContent='Participantes conectados: '+((peer&&!peer.destroyed)?1:0)+connections.size+' / '+maxPlayers;const b=document.getElementById('river-room-start');if(b){b.hidden=!host||!peer||peer.destroyed;b.disabled=!host||!peer||peer.destroyed;}}
+function count(){const out=document.getElementById('river-room-count');if(out)out.textContent='Participantes conectados: '+(peerReady?1:0)+connections.size+' / '+maxPlayers;const b=document.getElementById('river-room-start');if(b){b.hidden=!host||!peerReady;b.disabled=!host||!peerReady;}}
 function code(){return Array.from(crypto.getRandomValues(new Uint8Array(4))).map(n=>(n%10)).join('');}
 function loadPeer(){
  return new Promise((resolve,reject)=>{
@@ -22,7 +22,7 @@ function disconnect(){
  for(const c of connections.values())try{c.close()}catch(_){}
  connections.clear();
  if(peer){try{peer.destroy()}catch(_){}peer=null;}
- host=false;count();
+ host=false;peerReady=false;count();
 }
 function register(conn,fromHost){
  conn.on('open',()=>{
@@ -52,20 +52,21 @@ function launchChallenge(mission){
  if(start)start.click();else show('Botão de iniciar missão indisponível.');
 }
 function startChallenge(){
- if(!host||!peer||peer.destroyed){show('Crie sua sala antes de começar.');return;}
+ if(!host||!peerReady||!peer||peer.destroyed){show('A sala precisa estar conectada antes de começar.');return;}
  const mission=Number(document.getElementById('level-select')?.value)||1;
  for(const c of connections.values())if(c.open)c.send({type:'start-challenge',mission});
  launchChallenge(mission);
 }
 function setupPeer(id){
  return new Promise((resolve,reject)=>{
-  peer=id?new window.Peer(id,{debug:1}):new window.Peer({debug:1});
+  peerReady=false;
+  peer=id?new window.Peer(id,{host:'0.peerjs.com',port:443,path:'/',secure:true,debug:1}):new window.Peer({host:'0.peerjs.com',port:443,path:'/',secure:true,debug:1});
   let settled=false;
   const guard=setTimeout(()=>{if(!settled){settled=true;reject(new Error('Tempo esgotado na sinalização PeerJS'));}},12000);
-  peer.on('open',id=>{if(settled)return;settled=true;clearTimeout(guard);resolve(id);});
-  peer.on('error',err=>{const reason=err.message||err.type||'erro desconhecido';show('Falha na rede: '+reason);if(!settled){settled=true;clearTimeout(guard);reject(err);}});
+  peer.on('open',id=>{if(settled)return;settled=true;peerReady=true;clearTimeout(guard);count();resolve(id);});
+  peer.on('error',err=>{const reason=err.message||err.type||'erro desconhecido';peerReady=false;count();show('Falha na sinalização: '+reason+'. Sala não criada.');if(!settled){settled=true;clearTimeout(guard);reject(err);}});
 
-  peer.on('disconnected',()=>show('Sinalização desconectada; confira a internet.'));
+  peer.on('disconnected',()=>{peerReady=false;count();show('Servidor PeerJS desconectado: sessão indisponível.');});
   peer.on('connection',conn=>{if(!host){conn.close();return;}register(conn,true)});
  });
 }
@@ -79,8 +80,8 @@ async function create(){
   const id='riverstorm-'+roomCode+'-'+code();
   show('Criando sala na rede…');await setupPeer(id);
   document.getElementById('river-room-code').value=id;
-  show('Sala criada! Envie o código completo e a senha.');count();
- }catch(error){show('Não foi possível criar sala: '+error.message);disconnect();}
+  show('Sala confirmada no servidor! Compartilhe código e senha.');count();
+ }catch(error){disconnect();document.getElementById('river-room-code').value='';show('Sala NÃO criada: '+error.message+'. O PeerJS público pode estar indisponível.');}
  finally{button.disabled=false;}
 }
 async function join(){
@@ -95,7 +96,7 @@ async function join(){
   const conn=peer.connect(id,{reliable:true,serialization:'json'});
   if(!conn)throw Error('Não foi possível abrir canal de dados');
   register(conn,false);
-  setTimeout(()=>{if(!conn.open&&!connections.has(id))show('Aguardando anfitrião: confira código, senha e conexão dos dois dispositivos.');},8000);
+  setTimeout(()=>{if(!connections.has(id))show('Ainda não entrou na sala: confira o anfitrião, código, senha e a rede.');},8000);
  }catch(error){show('Não foi possível entrar: '+error.message);disconnect();}
  finally{button.disabled=false;}
 }
