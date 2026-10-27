@@ -57,8 +57,12 @@ jobs:
       - name: Conferir sprites reais e mecanismos audiovisuais publicados
         shell: bash
         run: |
-          for file in assets/sprites/projectiles/plasma-blue.svg assets/sprites/projectiles/plasma-red.svg assets/sprites/bosses/iron-wasp.svg; do
-            test -s "dist/$file" || { echo "::error::Sprite não incluído na build: $file"; exit 1; }
+          assets=(assets/sprites/projectiles/*.svg assets/sprites/bosses/*.svg assets/sprites/terrain/*.svg assets/sprites/enemies/*.svg)
+          echo "Inspecionando ${#assets[@]} sprites individuais"
+          test "${#assets[@]}" -ge 38 || { echo "::error::Biblioteca de sprites incompleta"; exit 1; }
+          for file in "${assets[@]}"; do
+            test -s "$file" && test -s "dist/$file" || { echo "::error::Sprite ausente na build: $file"; exit 1; }
+            grep -q '<svg' "dist/$file" || { echo "::error::Arquivo nao parece SVG: $file"; exit 1; }
           done
           grep -q 'drawPlayerStatusEffect' dist/index.html
           grep -q 'bossMaxBullets' dist/index.html
