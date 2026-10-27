@@ -1140,7 +1140,18 @@ function biomeIdentity(c,id){
 function drawBiomeOverlay(c,e){
  if(!detailEnabled||e.type!=='BIOME_ENEMY')return;
  const sprite=biomeSprite(e.biomeId||'HYBRID_HUNTER'),bob=Math.sin(Date.now()*.005+(e.biomeAge||0)*.02)*1.5;
- c.save();c.globalAlpha=.91;c.drawImage(sprite,e.x-24,e.y-26+bob,48,52);c.translate(e.x,e.y+bob);c.scale(.48,.48);biomeIdentity(c,e.biomeId||'HYBRID_HUNTER');c.restore();
+ c.save();c.globalAlpha=.96;c.drawImage(sprite,e.x-24,e.y-26+bob,48,52);c.translate(e.x,e.y+bob);c.scale(.48,.48);biomeIdentity(c,e.biomeId||'HYBRID_HUNTER');
+ const tick=Date.now()*.005,flap=Math.sin(tick*2+(e.biomeAge||0)*.035),id=e.biomeId||'HYBRID_HUNTER';
+ c.lineCap='round';c.lineJoin='round';c.lineWidth=3;
+ if(id==='ALLIGATOR'){c.fillStyle='#b4cc78';for(let k=0;k<7;k++){c.beginPath();c.ellipse(0,-21+k*8,6,2,0,0,7);c.fill()}c.strokeStyle='#b1dca1';c.beginPath();c.moveTo(-12,-36);c.lineTo(-10,-40);c.moveTo(12,-36);c.lineTo(10,-40);c.stroke()}
+ else if(id==='SCORPION'){c.strokeStyle='#f5c177';c.lineWidth=5;c.beginPath();c.moveTo(1,29);c.quadraticCurveTo(22+flap*4,44,12,-36);c.stroke();c.fillStyle='#321d1a';c.beginPath();c.arc(12,-36,5,0,7);c.fill()}
+ else if(id==='PIRANHA'||id==='EEL'){c.strokeStyle='#cffdff';c.beginPath();c.moveTo(-14,21);c.quadraticCurveTo(12*flap,32,16,42);c.stroke();c.fillStyle='#f8f9dd';c.beginPath();c.arc(-8,-26,3,0,7);c.fill()}
+ else if(id==='TUCANO'||id==='EAGLE'){c.save();c.rotate(flap*.09);c.strokeStyle=id==='TUCANO'?'#48e6cc':'#ffe8a6';for(const side of [-1,1]){c.beginPath();c.moveTo(side*13,-8);c.quadraticCurveTo(side*35,flap*9,side*46,12);c.stroke()}c.restore()}
+ else if(id==='ICE_RAY'||id==='NARWHAL'||id==='WALRUS'){c.fillStyle='rgba(220,252,255,.8)';for(let k=0;k<4;k++){c.beginPath();c.arc(Math.sin(tick+k)*32,Math.cos(tick+k*2)*25,2+k%2,0,7);c.fill()}}
+ else if(id==='MANTIS'||id==='BEETLE'||id==='PRISM_WASP'){c.strokeStyle='#daffbd';for(const side of [-1,1]){c.beginPath();c.moveTo(side*16,-9);c.lineTo(side*(27+flap*4),-28);c.lineTo(side*37,-14);c.stroke()}}
+ else if(id==='SALAMANDER'){c.fillStyle='#ffdf7e';for(let k=0;k<5;k++){c.beginPath();c.arc(Math.sin(tick+k)*15,29+k*4,2.5,0,7);c.fill()}}
+ else if(['HOVERCAR','MOTOJET','CORSAIR','CRANE','DREDGER','WELDER','HYBRID_HUNTER'].includes(id)){c.fillStyle='#72f6ff';for(const side of [-1,1]){c.beginPath();c.arc(side*24,20,3+Math.abs(flap)*2,0,7);c.fill()}c.strokeStyle='#e6f7ff';c.beginPath();c.moveTo(-9,-17);c.lineTo(9,-17);c.stroke()}
+ c.restore();
 }
 function mechArticulation(c,e){
  if(!detailEnabled||!['MECHA_SWORD','MECHA_GUN'].includes(e.type))return;
