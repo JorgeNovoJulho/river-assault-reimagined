@@ -18,14 +18,26 @@ body{margin:0;min-height:100vh;background:#06101f;color:#d8e9f8;font:14px system
     class RecoveryArena extends Phaser.Scene {
       constructor(){super('RecoveryArena');this.enemies=[];this.shots=[];this.hp=3;this.points=0;this.cooldown=0;}
       preload(){
-        this.load.svg('boss','./assets/sprites/bosses/iron-wasp.svg');
-        this.load.svg('enemy','./assets/sprites/enemies/mecha-gun.svg');
-        this.load.svg('bullet','./assets/sprites/projectiles/plasma-blue.svg');
-        this.load.svg('fighter','./assets/sprites/player/riverstorm-fighter.svg');
-        this.load.svg('bank-left','./assets/sprites/terrain/river-bank-left.svg');
-        this.load.svg('bank-right','./assets/sprites/terrain/river-bank-right.svg');
-        this.load.svg('water-detail','./assets/sprites/terrain/water-detail.svg');
-        this.load.svg('island-detail','./assets/sprites/terrain/river-island-detail.svg');
+        // SVGs originais usam viewBox sem tamanho físico. Forçar dimensões evita
+        // texturas vazias/pretas ao rasterizar no pipeline Phaser 4.
+        this.assetFailures=[];
+        const sprites=[
+          ['boss','bosses/iron-wasp.svg',180,180],
+          ['enemy','enemies/mecha-gun.svg',80,92],
+          ['bullet','projectiles/plasma-blue.svg',20,46],
+          ['fighter','player/riverstorm-fighter.svg',96,112],
+          ['bank-left','terrain/river-bank-left.svg',130,480],
+          ['bank-right','terrain/river-bank-right.svg',130,480],
+          ['water-detail','terrain/water-detail.svg',260,480],
+          ['island-detail','terrain/river-island-detail.svg',180,110]
+        ];
+        for(const [key,file,width,height] of sprites){
+          this.load.svg(key,'./assets/sprites/'+file,{width,height});
+        }
+        this.load.on('loaderror',file=>{
+          this.assetFailures.push(file.key);
+          console.error('[RiverStorm] Sprite não carregado:',file.key,file.src);
+        });
       }
       create(){
         this.add.rectangle(W/2,H/2,265,H,0x126078);
@@ -46,7 +58,13 @@ body{margin:0;min-height:100vh;background:#06101f;color:#d8e9f8;font:14px system
         this.input.on('pointerdown',p=>{this.pressed=true;this.target={x:p.x,y:p.y};});
         this.input.on('pointermove',p=>{if(this.pressed)this.target={x:p.x,y:p.y};});
         this.input.on('pointerup',()=>{this.pressed=false;});
-        output.textContent='Arena Phaser iniciada (modo de recuperação independente de Vite).';
+        const missing=['boss','enemy','bullet','fighter','bank-left','bank-right','water-detail','island-detail'].filter(key=>!this.textures.exists(key));
+        if(this.assetFailures.length||missing.length){
+          output.textContent='ATENÇÃO: texturas com falha: '+[...new Set([...this.assetFailures,...missing])].join(', ')+'. Verifique recursos no GitHub Pages.';
+          output.style.color='#ffb384';
+        }else{
+          output.textContent='Arena Phaser carregada: 8/8 sprites disponíveis. Motor de recuperação; campanha preservada.';
+        }
       }
       update(time,delta){
         const dt=Math.min(2,delta/16.7);
