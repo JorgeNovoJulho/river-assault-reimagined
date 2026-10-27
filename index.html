@@ -2537,12 +2537,33 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
         }
 
         // Parte 03: pontes e represas compartilham o mesmo corredor físico e visual.
+        const terrainStructureImages={};
+        for(const [type,file] of [['BRIDGE','bridge-industrial.svg'],['DAM','dam-concrete.svg']]){
+          const image=new Image();image.src='./assets/sprites/terrain/'+file;terrainStructureImages[type]=image;
+        }
         function drawStructures(){
             const detailed=qualitySelect.value!=='eco';
             for(const p of structures){
                 ctx.save();ctx.translate(p.x,p.y);
                 const half=p.width/2,gate=Math.min(half-12,Math.max(28,(p.opening||100)/2));
                 const slabY=-p.height/2;
+                const terrainImage=terrainStructureImages[p.type];
+                if(terrainImage&&terrainImage.complete&&terrainImage.naturalWidth){
+                  // A travessia permanece aberta: renderizar apenas as duas faixas sólidas.
+                  ctx.save();ctx.beginPath();
+                  ctx.rect(-half,slabY,half-gate,p.height);
+                  ctx.rect(gate,slabY,half-gate,p.height);
+                  ctx.clip();
+                  ctx.drawImage(terrainImage,-half,slabY,p.width,p.height);
+                  ctx.restore();
+                  ctx.fillStyle='rgba(42,160,203,.20)';ctx.fillRect(-gate+2,slabY,2*gate-4,p.height);
+                  ctx.strokeStyle='#a5f3fc';ctx.lineWidth=1.5;ctx.setLineDash([8,7]);
+                  ctx.beginPath();ctx.moveTo(0,slabY-15);ctx.lineTo(0,slabY+p.height+15);ctx.stroke();ctx.setLineDash([]);
+                  ctx.fillStyle='#e2f4ff';ctx.font='bold 10px monospace';ctx.textAlign='center';
+                  ctx.fillText('PASSAGEM',0,slabY-13);
+                  ctx.fillStyle='#fb7185';ctx.fillRect(-half,slabY-11,p.width*Math.max(0,p.hp/p.maxHp),3);
+                  ctx.restore();continue;
+                }
                 ctx.shadowColor='rgba(1,12,27,.5)';ctx.shadowBlur=detailed?9:3;ctx.shadowOffsetY=4;
                 ctx.fillStyle=p.type==='DAM'?'#324859':'#3b4653';
                 ctx.fillRect(-half,slabY,half-gate,p.height);
