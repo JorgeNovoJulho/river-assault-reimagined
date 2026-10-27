@@ -59,16 +59,8 @@ body{margin:0;min-height:100vh;background:#06101f;color:#d8e9f8;font:14px system
         // das texturas SVG. Objetos não têm colisão e não alteram a jogabilidade.
         this.waterBase=this.add.rectangle(W/2,H/2,280,H,0x145771).setDepth(-2);
         this.waterOverlay=this.add.graphics().setDepth(-1);
-        this.waterOverlay.lineStyle(1,0x7dd4db,0.13);
-        for(let k=0;k<22;k++){
-          const y=26+k*44;
-          const x=158+(k*73)%215;
-          this.waterOverlay.beginPath();
-          this.waterOverlay.moveTo(x,y);
-          this.waterOverlay.lineTo(x+15,y-3);
-          this.waterOverlay.lineTo(x+31,y);
-          this.waterOverlay.strokePath();
-        }
+        this.waterPhase=0;
+        this.waterDetailRows=22;
         // Tiles antigos mantidos em preload para rollback; não desenhados, pois suas emendas eram visíveis.
         this.islandVisuals=[this.add.image(157,-90,'island-detail').setDisplaySize(102,63).setDepth(0),this.add.image(378,-560,'island-detail').setDisplaySize(110,66).setDepth(0)];
         this.banks=[];
@@ -111,6 +103,20 @@ body{margin:0;min-height:100vh;background:#06101f;color:#d8e9f8;font:14px system
       }
       update(time,delta){
         const dt=Math.min(2,delta/16.7);
+        // Detalhe aquático animado de baixo custo: somente renderização.
+        // O padrão não altera projéteis, inimigos, velocidade ou hitboxes.
+        this.waterPhase=(this.waterPhase+delta*.035)%44;
+        this.waterOverlay.clear();
+        this.waterOverlay.lineStyle(1,0xa2edf0,.19);
+        for(let k=0;k<this.waterDetailRows;k++){
+          const y=(k*44+this.waterPhase)%H;
+          const x=158+(k*73)%215;
+          this.waterOverlay.beginPath();
+          this.waterOverlay.moveTo(x,y);
+          this.waterOverlay.lineTo(x+15,y-3);
+          this.waterOverlay.lineTo(x+31,y);
+          this.waterOverlay.strokePath();
+        }
         for(const bank of this.banks){bank.y+=1.25*dt;if(bank.y>H+240)bank.y-=1440;}
         for(const tile of this.waterTiles){tile.y+=1.25*dt;if(tile.y>H+240)tile.y-=1440;}
         for(const island of this.islandVisuals){island.y+=1.25*dt;if(island.y>H+75)island.y-=1250;}
