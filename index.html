@@ -2026,7 +2026,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
                     // emissores e insígnia próprios sobre o casco do arquétipo.
                     // Não altera colisões nem o balanceamento e respeita o perfil ECO.
                     {
-                        const bossIdentity=Math.max(0,Math.min(19,((e.sectorId||sector||1)-1)%20));
+                        const bossIdentity=Math.max(0,Math.min(19,((e.bossId||sector||1)-1)%20));
                         const palette=['#fb923c','#22d3ee','#c084fc','#f87171','#a3e635','#facc15','#67e8f9','#f472b6','#60a5fa','#e879f9','#34d399','#fda4af','#a5b4fc','#eab308','#fb7185','#2dd4bf','#d8b4fe','#fde68a','#93c5fd','#ff7849'];
                         const tint=palette[bossIdentity],tick=missionTicks*.045;
                         const mode=bossIdentity%5;
