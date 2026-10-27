@@ -3346,33 +3346,37 @@ function updateTerrainEvent(){
         let bombAftershockFrames=0,bombAftershockOrigin={x:200,y:300};
         function updateBombAftershock(){
           if(bombAftershockFrames<=0)return;
-          bombAftershockFrames--;enemyBullets.length=0;
-          // Limpa também alvos destruíveis recém-criados, sem repetir recompensa.
-          for(let i=islands.length-1;i>=0;i--){
-            const island=islands[i];
-            if(island.width<=80&&island.height<=100){
-              addExplosion(island.x,island.y,'#ffc36a',8);
-              islands.splice(i,1);
+          const elapsed=180-bombAftershockFrames;
+          if(elapsed%60===0){
+            const wave=elapsed/60+1;
+            enemyBullets.length=0;screenShake=Math.max(screenShake,12);
+            try{window.RiverSFX?.impact?.()}catch(error){}
+            for(let i=islands.length-1;i>=0;i--){
+              const item=islands[i];if(item.destructible===false)continue;
+              addExplosion(item.x,item.y,'#ffca80',14);islands.splice(i,1);score+=150;
             }
+            for(let i=enemies.length-1;i>=0;i--){
+              const e=enemies[i];if(!e||e.hp<=0)continue;
+              if(e.type==='BOSS'){e.hp=Math.max(1,e.hp-Math.max(12,Math.round(e.maxHp*.035)));addExplosion(e.x,e.y,'#ffd17f',16);continue;}
+              e.hp=0;addExplosion(e.x,e.y,'#ffad50',18);score+=awardEnemyPoints(e.score||0);kills++;grantEnemyXP(e);enemies.splice(i,1);
+            }
+            createFloatingText(bombAftershockOrigin.x,bombAftershockOrigin.y-42,'ONDA '+wave+'/3','#ffe6a3');
           }
-          for(let i=enemies.length-1;i>=0;i--){
-            const e=enemies[i];if(!e||e.hp<=0)continue;
-            if(e.type==='BOSS'){if(bombAftershockFrames%30===0){e.hp=Math.max(1,e.hp-2);addExplosion(e.x,e.y,'#ffca87',3)}continue}
-            if(e.bombAftershockTagged)continue;
-            e.bombAftershockTagged=true;e.hp=0;addExplosion(e.x,e.y,'#ffca87',12);
-            score+=awardEnemyPoints(e.score);kills++;grantEnemyXP(e);enemies.splice(i,1);
-          }
+          bombAftershockFrames--;
         }
         function drawBombAftershock(){
           if(bombAftershockFrames<=0)return;
-          const age=180-bombAftershockFrames,alpha=Math.min(.85,bombAftershockFrames/35);
-          ctx.save();ctx.globalCompositeOperation='screen';ctx.globalAlpha=alpha;
-          const rad=Math.hypot(VIRTUAL_WIDTH,VIRTUAL_HEIGHT)*(1-Math.exp(-age/19));
-          const grad=ctx.createRadialGradient(bombAftershockOrigin.x,bombAftershockOrigin.y,rad*.4,bombAftershockOrigin.x,bombAftershockOrigin.y,rad);
-          grad.addColorStop(0,'rgba(255,202,95,0)');grad.addColorStop(.8,'rgba(255,189,76,.05)');grad.addColorStop(.95,'rgba(255,231,173,.45)');grad.addColorStop(1,'rgba(255,255,255,0)');
-          ctx.fillStyle=grad;ctx.beginPath();ctx.arc(bombAftershockOrigin.x,bombAftershockOrigin.y,rad,0,Math.PI*2);ctx.fill();
-          ctx.strokeStyle='#ffebaf';ctx.lineWidth=Math.max(1,6-age*.02);ctx.shadowColor='#ff9c48';ctx.shadowBlur=20;
-          ctx.beginPath();ctx.arc(bombAftershockOrigin.x,bombAftershockOrigin.y,rad,0,Math.PI*2);ctx.stroke();ctx.restore();
+          const age=180-bombAftershockFrames;
+          ctx.save();ctx.globalCompositeOperation='screen';
+          for(let i=0;i<3;i++){
+            const t=(age-i*60)/60;if(t<0||t>1)continue;
+            const radius=Math.hypot(VIRTUAL_WIDTH,VIRTUAL_HEIGHT)*t;
+            ctx.globalAlpha=(1-t)*.85;ctx.strokeStyle=['#7deaff','#ffe28a','#ff83be'][i];
+            ctx.lineWidth=8*(1-t)+2;ctx.shadowColor=ctx.strokeStyle;ctx.shadowBlur=qualitySelect.value==='eco'?0:22;
+            ctx.beginPath();ctx.arc(bombAftershockOrigin.x,bombAftershockOrigin.y,radius,0,Math.PI*2);ctx.stroke();
+            ctx.lineWidth=2;ctx.globalAlpha=(1-t)*.5;ctx.beginPath();ctx.arc(bombAftershockOrigin.x,bombAftershockOrigin.y,Math.max(0,radius-13),0,Math.PI*2);ctx.stroke();
+          }
+          ctx.restore();
         }
         function explodeBomb(b,directTarget=null){
             try{window.RiverSFX?.impact()}catch(e){}
