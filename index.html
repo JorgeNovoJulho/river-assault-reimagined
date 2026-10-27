@@ -2633,6 +2633,83 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
         // Ciclo determinístico por setor, sem relógio externo nem dependência de FPS.
         const sectorTime=()=>['MORNING','AFTERNOON','NIGHT'][Math.floor((missionTicks/1800)+(sector-1))%3];
         const sectorWeather=()=>['RAIN','WIND','HEAT','FOG','SNOW'][Math.floor(missionTicks/2700+sector-1)%5];
+        // Microclima audiovisual: efeitos suaves, cumulativos e por setor.
+        let climateFlash=0,climateSnow=0,climateHeat=0,climateThunderLast=-9999;
+        let weatherAudioLast=-9999;
+        function updateClimateGameplay(){
+          const weather=sectorWeather(),night=sectorTime()==='NIGHT';
+          climateSnow=Math.max(0,Math.min(1,climateSnow+(weather==='SNOW'?.0018:-.003)));
+          climateHeat=Math.max(0,Math.min(1,climateHeat+(weather==='HEAT'?.002:-.003)));
+          if(weather==='HEAT'){
+            player.fuel=Math.max(8,player.fuel-.006*climateHeat);
+            if(parryTicks<=0&&missionTicks%120===0)player.shield=Math.max(1,player.shield-.13*climateHeat);
+          }
+          if(weather==='SNOW'&&climateSnow>.4&&missionTicks%150===0){
+            player.currentScrollSpeed=Math.max(player.baseScrollSpeed*.88,player.currentScrollSpeed-.035*climateSnow);
+          }
+          if(weather==='WIND'&&missionTicks%6===0){
+            for(const e of enemies)if(e.hp>0&&e.type!=='BOSS')e.x=Math.max(18,Math.min(VIRTUAL_WIDTH-18,e.x+Math.sin(missionTicks*.025+sector)*.33));
+          }
+          if(weather==='RAIN'&&missionTicks%390===0){
+            climateFlash=15;climateThunderLast=missionTicks;
+            try{playClimateSound('THUNDER')}catch(error){}
+          }
+          if(weather==='RAIN'&&missionTicks%510===70)climateFlash=7;
+          if(climateFlash>0)climateFlash--;
+          if((weather==='WIND'||weather==='SNOW'||weather==='RAIN')&&missionTicks-weatherAudioLast>310){
+            weatherAudioLast=missionTicks;try{playClimateSound(weather)}catch(error){}
+          }
+        }
+        function playClimateSound(kind){
+          const C=window.AudioContext||window.webkitAudioContext;if(!C)return;
+          const ac=window.RiverClimateAudio||(window.RiverClimateAudio=new C());
+          if(ac.state==='suspended')return;
+          const now=ac.currentTime,osc=ac.createOscillator(),gain=ac.createGain(),filter=ac.createBiquadFilter();
+          const thunder=kind==='THUNDER',snow=kind==='SNOW',wind=kind==='WIND';
+          const len=thunder?.85:snow?.18:.42;
+          osc.type=thunder?'sawtooth':wind?'triangle':'sine';
+          osc.frequency.setValueAtTime(thunder?78:wind?145:snow?540:260,now);
+          osc.frequency.exponentialRampToValueAtTime(thunder?32:wind?72:snow?370:170,now+len);
+          filter.type='lowpass';filter.frequency.value=thunder?430:wind?320:snow?920:620;
+          gain.gain.setValueAtTime(.0001,now);gain.gain.exponentialRampToValueAtTime(thunder?.075:.019,now+.025);
+          gain.gain.exponentialRampToValueAtTime(.0001,now+len);
+          osc.connect(filter);filter.connect(gain);gain.connect(ac.destination);
+          osc.start(now);osc.stop(now+len+.01);
+        }
+        function drawClimateOverlay(){
+          const weather=sectorWeather(),night=sectorTime()==='NIGHT';
+          ctx.save();
+          if(night){ctx.fillStyle='rgba(10,16,56,.12)';ctx.fillRect(0,0,VIRTUAL_WIDTH,VIRTUAL_HEIGHT);}
+          if(weather==='HEAT'){
+            const intensity=.035+climateHeat*.065;
+            ctx.fillStyle='rgba(255,118,21,'+intensity+')';ctx.fillRect(0,0,VIRTUAL_WIDTH,VIRTUAL_HEIGHT);
+            for(let i=0;i<5;i++){let x=(i*109+sector*17)%VIRTUAL_WIDTH,y=(missionTicks*1.3+i*137)%VIRTUAL_HEIGHT;
+              ctx.strokeStyle='rgba(255,198,97,.14)';ctx.beginPath();ctx.moveTo(x-45,y);ctx.quadraticCurveTo(x+Math.sin(missionTicks*.025+i)*18,y-25,x+45,y-40);ctx.stroke();}
+          }else if(weather==='FOG'){
+            for(let i=0;i<6;i++){const x=(i*119+missionTicks*.12+sector*19)%(VIRTUAL_WIDTH+180)-90,y=(i*145+missionTicks*.06)%VIRTUAL_HEIGHT;
+              const grad=ctx.createRadialGradient(x,y,12,x,y,115);grad.addColorStop(0,'rgba(201,225,234,.22)');grad.addColorStop(1,'rgba(201,225,234,0)');
+              ctx.fillStyle=grad;ctx.beginPath();ctx.arc(x,y,115,0,Math.PI*2);ctx.fill();}
+          }else if(weather==='SNOW'){
+            ctx.fillStyle='rgba(215,235,255,'+(.035+climateSnow*.09)+')';ctx.fillRect(0,0,VIRTUAL_WIDTH,VIRTUAL_HEIGHT);
+            ctx.fillStyle='rgba(245,250,255,.8)';
+            const count=qualitySelect.value==='eco'?32:78;
+            for(let i=0;i<count;i++){const x=(i*77+Math.sin(i*2.4)*39+missionTicks*(.22+i%3*.07))%VIRTUAL_WIDTH,y=(i*53+missionTicks*(.7+i%4*.17))%VIRTUAL_HEIGHT;
+              ctx.beginPath();ctx.arc(x,y,i%6===0?2:1,0,Math.PI*2);ctx.fill();}
+            ctx.fillStyle='rgba(242,249,255,'+(climateSnow*.32)+')';ctx.fillRect(0,VIRTUAL_HEIGHT-12,VIRTUAL_WIDTH,12);
+          }else if(weather==='RAIN'){
+            ctx.strokeStyle='rgba(157,213,255,.37)';ctx.lineWidth=1;
+            const count=qualitySelect.value==='eco'?36:86;
+            for(let i=0;i<count;i++){const x=(i*71+missionTicks*(1.6+i%3))%VIRTUAL_WIDTH,y=(i*127+missionTicks*(4+i%3))%VIRTUAL_HEIGHT;
+              ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x-5,y+19);ctx.stroke();}
+            if(climateFlash>0){
+              ctx.fillStyle='rgba(229,242,255,'+(climateFlash/15*.31)+')';ctx.fillRect(0,0,VIRTUAL_WIDTH,VIRTUAL_HEIGHT);
+              ctx.strokeStyle='#d5eaff';ctx.lineWidth=3;ctx.shadowColor='#9cdcff';ctx.shadowBlur=14;
+              ctx.beginPath();let x=VIRTUAL_WIDTH*(.25+.45*Math.sin(sector*3));ctx.moveTo(x,0);
+              for(let i=1;i<=8;i++){x+=Math.sin(i*13+sector)*21;ctx.lineTo(x,i*VIRTUAL_HEIGHT/10);}ctx.stroke();
+            }
+          }
+          ctx.restore();
+        }
         const nightHunters=new Set(['ALLIGATOR','PIRANHA','EEL']);
         const dayFlyers=new Set(['EAGLE','TUCANO']);
         const coldHunters=new Set(['ICE_RAY','WALRUS','NARWHAL']);
@@ -2728,6 +2805,7 @@ function updateTerrainEvent(){
             }
             spawnTerrainTarget(getRiverBoundariesAt(-42).center);
             updateTerrainEvent();
+            updateClimateGameplay();
             trackPilotProgress();
             const skillActive=!!(bossActive&&bossSkillEquipped);
             skillUseButton.classList.remove('hidden');
@@ -3831,6 +3909,7 @@ function updateTerrainEvent(){
             drawParticles();
             drawBossSkillEffect();
             drawSkillTrajectories();
+            drawClimateOverlay();
             drawFloatingTexts();
             drawHUD();
             drawActiveAircraftLabel();
