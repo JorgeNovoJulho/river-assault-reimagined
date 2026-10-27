@@ -1584,7 +1584,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
                 else if(pattern===5){player.effectType='BLEED';player.effectTimer=600;applyDamage(25,'SANGRAMENTO');createFloatingText(player.x,player.y,'SANGRAMENTO','#fb7185')}
                 else if(pattern===7||pattern===8){player.effectType=pattern===7?'PRISM':'SHADOW';player.effectTimer=600;player.dualRate=pattern===7?.005:.005;player.dualTimer=600;for(let n=-2;n<=2;n++)enemyBullets.push({x:e.x+n*18,y:e.y+27,vx:n*.85,vy:4.1,color:pattern===7?'#fde68a':'#a78bfa'});createFloatingText(player.x,player.y-34,pattern===7?'LUZ PRISMÁTICA':'SOMBRA ABISSAL',pattern===7?'#fde68a':'#a78bfa');}
                 else if(pattern===6){player.effectType='POISON';player.effectTimer=600;applyDamage(20,'VENENO');createFloatingText(player.x,player.y,'ENVENENADO','#4ade80')}
-                else{player.effectType='SWORD';player.effectTimer=600;wingmen=[];applyDamage(55,'GOLPE FRONTAL DO CHEFE');e.x+=(player.x-e.x)*.3;enemyBullets.push({x:e.x,y:e.y+20,vx:0,vy:6,color:'#fef08a'})}
+                else{player.effectType='SWORD';player.effectTimer=600;if(fusionTicks<=0)wingmen.forEach(w=>{w.hp=Math.max(0,w.hp-45)});applyDamage(55,'GOLPE FRONTAL DO CHEFE');e.x+=(player.x-e.x)*.3;enemyBullets.push({x:e.x,y:e.y+20,vx:0,vy:6,color:'#fef08a'})}
             }
 
             // Troca de Padrão Principal a cada 150 frames (~2.5s)
@@ -2882,8 +2882,8 @@ function updateTerrainEvent(){
             if(redAlertTicks>0)redAlertTicks--;
             for(let i=wingmen.length-1;i>=0;i--){
                 const w=wingmen[i];
-                if(w.ttl>0)w.ttl--;
-                else {w.detach=(w.detach||0)+1;if(w.detach>36){launchWingmanMissile(w);wingmen.splice(i,1)}}
+                if(w.hp<=0){w.detach=(w.detach||0)+1;if(w.detach>36){launchWingmanMissile(w);wingmen.splice(i,1)}}
+                else {w.ttl=Math.max(1200,w.ttl||0);w.detach=0;}
             }
             // Reforços pontuais impedem longos intervalos sem combate sem criar amontoados.
             if(!bossActive && missionTicks%205===0){
@@ -3249,7 +3249,7 @@ function updateTerrainEvent(){
                         [-2,-1,0,1,2].forEach(i=>enemyBullets.push({x:e.x+i*11,y:e.y+28,vx:i*.8,vy:4.5,color:'#fb923c'}));
                     }
                     if(e.meleeTick%135===0 && Math.abs(e.x-player.x)<100 && Math.abs(e.y-player.y)<155){
-                        applyDamage(55,'ESPADA DO MEGAZORD');wingmen=[];addExplosion(player.x,player.y,'#f97316',12);
+                        applyDamage(55,'ESPADA DO MEGAZORD');if(fusionTicks<=0)wingmen.forEach(w=>{w.hp=Math.max(0,w.hp-45)});addExplosion(player.x,player.y,'#f97316',12);
                     }
                 }
                 if(e.type==='MECHA_SWORD'){
@@ -3352,9 +3352,9 @@ function updateTerrainEvent(){
                     const config = aircraftCatalog.PLANES[selectedPlane];
                     const index = ['SINGLE','DOUBLE','SPREAD','LASER','MISSILE'].indexOf(p.type);
                     if(p.type==='DRONES'){
-                        for(const side of [-1,1])if(!wingmen.some(w=>w.side===side))wingmen.push({side,hp:75,maxHp:75,ttl:900,detach:0});
+                        for(const side of [-1,1])if(!wingmen.some(w=>w.side===side))wingmen.push({side,hp:175,maxHp:175,ttl:1200,detach:0});
                     }else if(p.type==='REPAIR'){
-                        if(!wingmen.length)wingmen=[-1,1].map(side=>({side,hp:75,maxHp:75,ttl:900,detach:0}));
+                        if(!wingmen.length)wingmen=[-1,1].map(side=>({side,hp:175,maxHp:175,ttl:1200,detach:0}));
                         else wingmen.forEach(w=>{w.hp=w.maxHp;w.ttl=900;w.detach=0});
                     }else if(p.type==='LIFE'){
                         lives=Math.min(9,lives+1);createFloatingText(player.x,player.y,'VIDA EXTRA!','#60a5fa');
@@ -3663,6 +3663,7 @@ function updateTerrainEvent(){
         }
         function updateFusion(){
           if(fusionTicks<=0){if(fusionCooldown>0)fusionCooldown--;return;}
+          for(const w of wingmen){w.maxHp=Math.max(175,w.maxHp||0);w.hp=w.maxHp;w.ttl=Math.max(w.ttl||0,1200);w.detach=0;}
           const elapsed=360-fusionTicks;
           if(bossActive){
             if(elapsed%60===0&&fusionLastBossTick!==elapsed){
