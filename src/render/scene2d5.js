@@ -386,7 +386,17 @@ function drawBiomeEnemy(c,e){
  c.globalAlpha=.3+Math.sin(age*.12)*.14;c.strokeStyle=light;c.beginPath();c.ellipse(0,0,23,27,0,0,Math.PI*2);c.stroke();
  c.restore();
 }
+const commonEnemySprites={};
+for(const [kind,name] of [['MECHA_GUN','mecha-gun.svg'],['MECHA_SWORD','mecha-sword.svg'],['HELI','helicopter.svg'],['SUB','submarine.svg']]){
+ const sprite=new Image();sprite.src='./assets/sprites/enemies/'+name;commonEnemySprites[kind]=sprite;
+}
 function enemy(c,e,time){
+ const art=commonEnemySprites[e.type];
+ if(art&&art.complete&&art.naturalWidth){
+  const w=e.width||44,h=e.height||48;
+  c.drawImage(art,e.x-w*.55,e.y-h*.55,w*1.1,h*1.1);
+  return;
+ }
  if(e.type==='BIOME_ENEMY'){drawBiomeEnemy(c,e);return;}
  c.save();c.translate(e.x,e.y);let type=e.type||'JET';
  // Silhuetas volumetricas das unidades terrestres e navais.
