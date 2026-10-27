@@ -18,3 +18,12 @@ Fonte aprovada: prancha com nave, margens esquerda e direita, ilhas, ponte, expl
 6. Validar build, URL publicada, carga de assets, áudio original e comandos antes de integrar na campanha.
 
 **Nota de sincronização:** as imagens raster individuais estão atualmente no pacote de revisão gerado na conversa; o catálogo neste repositório não significa que esses PNGs já foram enviados. Só declarar cada asset disponível no jogo depois de confirmar seu caminho e SHA no GitHub.
+
+## Revisão técnica v3 (27/10/2026)
+- Separados **12 quadros de explosão**, normalizados em células transparentes de **128 × 128 px** e atlas **4 colunas × 3 linhas**.
+- Exportado PNG individual da nave premium e preservados todos os PNGs candidatos e os recortes da prancha aprovada.
+- Manifesto de SHA-256 e tamanhos acompanha o pacote `RiverStorm_Premium_Preparacao_v3.zip` disponibilizado na conversa.
+- **Status dos binários:** pacote local, ainda não transferido para este repositório. As entradas PNG não podem ser ativadas no runtime enquanto não forem efetivamente publicadas e verificadas.
+- Margens, ponte e água ainda contêm cenários compostos / bordas; não homologados como texturas repetíveis ou transparências utilizáveis diretamente.
+- **Proteção:** nenhum script de campanha, áudio, playlist, música, controles, colisões ou dano foi modificado nesta revisão.
+- Próxima aprovação obrigatória: arquivos transparentes e sem artefatos, atlas e pré-visualização da arena Phaser, antes de substituição.
