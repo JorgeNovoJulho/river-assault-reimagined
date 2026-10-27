@@ -387,7 +387,7 @@ function drawBiomeEnemy(c,e){
  c.restore();
 }
 const commonEnemySprites={};
-for(const [kind,name] of [['MECHA_GUN','mecha-gun.svg'],['MECHA_SWORD','mecha-sword.svg'],['HELI','helicopter.svg'],['SUB','submarine.svg']]){
+for(const [kind,name] of [['MECHA_GUN','mecha-gun.svg'],['MECHA_SWORD','mecha-sword.svg'],['HELI','helicopter.svg'],['SUB','submarine.svg'],['TANK','tank.svg'],['TURRET','turret.svg'],['SHIP','ship.svg'],['JET','jet.svg'],['ZIGZAG','zigzag.svg']]){
  const sprite=new Image();sprite.src='./assets/sprites/enemies/'+name;commonEnemySprites[kind]=sprite;
 }
 function enemy(c,e,time){
