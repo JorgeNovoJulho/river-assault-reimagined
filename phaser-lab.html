@@ -60,7 +60,7 @@ body{margin:0;min-height:100vh;background:#06101f;color:#d8e9f8;font:14px system
           this.load.svg(key,'./assets/sprites/'+file,{width,height});
         }
         // Carregamento visual opcional: a jogabilidade nunca depende destes PNGs.
-        // Ativar a skin premium somente se TODOS os recursos necessários existirem.
+        // Texturas da nave e explosão são independentes. Cenários abaixo ainda são SVGs provisórios.
         this.premiumReady=false;
         this.premiumExplosionReady=false;
         this.premiumManifest={
@@ -135,7 +135,7 @@ body{margin:0;min-height:100vh;background:#06101f;color:#d8e9f8;font:14px system
           output.textContent='ATENÇÃO: texturas com falha: '+[...new Set([...mandatoryFailures,...missing])].join(', ')+'. Verifique recursos no GitHub Pages.';
           output.style.color='#ffb384';
         }else{
-          output.textContent='Arena Phaser: 8/8 sprites legados OK; skin '+(this.premiumReady?'NAVE PREMIUM ativa':'SVG legado (nave premium não publicada)')+'; explosão '+(this.premiumExplosionReady?'premium ativa':'premium ausente')+'; cenário '+(this.enhancedEnvironment?'NOVO':'legado de segurança')+'. Campanha preservada.';
+          output.textContent='Arena Phaser: 8/8 sprites legados OK; skin '+(this.premiumReady?'NAVE PREMIUM ativa':'SVG legado (nave premium não publicada)')+'; explosão '+(this.premiumExplosionReady?'premium ativa':'premium ausente')+'; cenário '+(this.enhancedEnvironment?'SVG INTERMEDIÁRIO (raster premium pendente)':'SVG legado')+'. Campanha preservada.';
         }
       }
       playVisualExplosion(x,y){
