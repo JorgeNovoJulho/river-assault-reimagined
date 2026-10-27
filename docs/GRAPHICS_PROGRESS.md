@@ -73,3 +73,9 @@ Atualizado: 2026-10-27. Regra: só considerar "homologado" após build, ensaio n
 - Desligadas as camadas procedurais sobrepostas nesses tipos quando a imagem estiver carregada; colisões e lógica de comportamento não foram modificadas.
 - Vite empacota os quatro novos arquivos; adicionados testes de regressão.
 - **Pendente:** sprites individuais para outros tipos comuns, efeitos, cenários completos dos 20 mapas; executar suíte de testes em CI e benchmark jogável FPS.
+
+## Inimigos comuns — segunda leva
+- Adicionados e integrados `tank.svg`, `turret.svg`, `ship.svg`, `jet.svg` e `zigzag.svg` em `assets/sprites/enemies/`.
+- **9 tipos de inimigos comuns** com sprites dedicados no renderer; seleção por tipo, fallback de desenho legado.
+- Arquivos incluídos no Vite e testes de regressão atualizados.
+- Pendentes: tipos biome especiais, outros obstáculos, animações, testes reais de FPS e imagens no navegador.
