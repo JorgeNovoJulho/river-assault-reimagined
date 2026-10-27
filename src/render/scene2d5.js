@@ -1091,10 +1091,56 @@ function biomeSprite(id){
  p.save();p.shadowColor=light;p.shadowBlur=14;p.fillStyle=light;p.beginPath();p.arc(0,-13,5,0,7);p.fill();p.restore();
  BIOME_ATLAS.set(id,cv);return cv;
 }
+// Assinaturas específicas: cada bioma utiliza uma silhueta identificável sobre seu atlas.
+function biomeIdentity(c,id){
+ c.save();c.lineWidth=3;c.lineCap='round';c.lineJoin='round';
+ const oval=(x,y,rx,ry,col)=>{c.fillStyle=col;c.beginPath();c.ellipse(x,y,rx,ry,0,0,Math.PI*2);c.fill()};
+ const path=(pts,col)=>{c.fillStyle=col;c.beginPath();pts.forEach(([x,y],i)=>i?c.lineTo(x,y):c.moveTo(x,y));c.closePath();c.fill()};
+ const limb=(pts,col='#263e43',w=4)=>{c.strokeStyle=col;c.lineWidth=w;c.beginPath();pts.forEach(([x,y],i)=>i?c.lineTo(x,y):c.moveTo(x,y));c.stroke()};
+ const water='#8acbde',leaf='#426f48',metal='#516b80';
+ switch(id){
+ case 'ALLIGATOR':
+  path([[-8,26],[-5,11],[-15,0],[-16,-25],[-9,-39],[9,-39],[16,-25],[15,0],[5,11],[8,26],[0,43]],'#3d774d');
+  oval(0,-19,17,21,'#60965b');oval(0,-32,15,14,'#87a86c');
+  for(const side of [-1,1]){limb([[side*11,-11],[side*25,-6],[side*29,3]],leaf,6);limb([[side*12,14],[side*26,19],[side*28,26]],leaf,6);oval(side*9,-36,3,3,'#f9dd83')}
+  path([[-12,-41],[12,-41],[9,-24],[-9,-24]],'#4d8a62');limb([[-9,-29],[9,-29]],'#203d33',2);break;
+ case 'SCORPION':
+  for(const side of [-1,1]){for(let k=0;k<3;k++)limb([[side*10,k*10],[side*26,k*11-9],[side*33,k*11]],'#b87948',4);limb([[side*12,-22],[side*31,-31],[side*37,-21]],'#bf8852',5);oval(side*38,-20,8,7,'#d7a160')}
+  oval(0,0,14,25,'#a56839');for(let k=0;k<5;k++)oval(0,-18+k*9,11,3,'#edb878');limb([[0,23],[4,36],[0,46],[-6,39]],'#a15c35',7);break;
+ case 'PIRANHA':
+  path([[0,-39],[21,-18],[24,11],[0,35],[-22,11],[-19,-19]],'#4c936d');path([[0,-39],[13,-20],[0,-12]],'#a2db9a');path([[-23,1],[-37,13],[-16,20]],'#356d73');path([[20,6],[33,19],[12,20]],'#356d73');
+  oval(-10,-21,4,4,'#ffec9d');path([[0,-34],[13,-25],[0,-19],[12,-13],[0,-9]],'#effaff');break;
+ case 'EEL':
+  limb([[0,-46],[15,-30],[-14,-12],[15,9],[-14,27],[0,44]],'#2c75b8',17);limb([[0,-46],[15,-30],[-14,-12],[15,9],[-14,27],[0,44]],'#8ce5fe',6);oval(0,-43,11,9,'#27739f');break;
+ case 'NARWHAL':
+  oval(0,5,22,39,'#6dc6e5');path([[-8,-27],[0,-57],[8,-27]],'#fff9dc');for(const side of [-1,1])path([[side*17,-2],[side*37,10],[side*14,20]],'#4f9bb9');oval(-8,-18,3,3,'#183348');oval(8,-18,3,3,'#183348');break;
+ case 'ICE_RAY':
+  path([[0,-27],[-43,4],[-29,24],[0,12],[29,24],[43,4]],'#ade5f5');limb([[0,12],[0,45]],'#bfefff',7);oval(0,-16,10,10,'#e6ffff');break;
+ case 'TUCANO':case 'EAGLE':
+  path([[-7,-15],[-43,6],[-30,22],[-6,10],[6,10],[30,22],[43,6],[7,-15]],id==='TUCANO'?'#05b7bd':'#c6a154');oval(0,-10,12,22,id==='TUCANO'?'#103958':'#f1ce78');path([[-6,-28],[4,-38],[17,-27],[5,-20]],id==='TUCANO'?'#ffd14d':'#eef4f6');break;
+ case 'MANTIS':case 'PRISM_WASP':case 'BEETLE':
+  for(const side of [-1,1]){for(let k=0;k<3;k++)limb([[side*12,k*13-12],[side*25,k*16-15],[side*36,k*14-10]],metal,3)}
+  oval(0,4,16,28,id==='PRISM_WASP'?'#ac78d7':id==='MANTIS'?'#83b448':'#ba823e');oval(0,-25,13,12,'#d3ebc0');
+  if(id==='PRISM_WASP'){for(const side of [-1,1])oval(side*19,-5,13,22,'#a2e7fc88')}break;
+ case 'SALAMANDER':
+  limb([[0,-43],[7,-24],[-6,0],[8,24],[0,43]],'#bc502b',16);for(const side of [-1,1]){limb([[side*8,-19],[side*23,-12]],'#ea9b48',5);limb([[side*8,17],[side*23,24]],'#ea9b48',5)}oval(0,-38,13,10,'#ffbd69');break;
+ case 'WALRUS':
+  oval(0,4,30,35,'#899eae');oval(0,-20,23,22,'#c6d7dc');for(const side of [-1,1]){path([[side*13,-16],[side*24,-4],[side*18,25]],'#fff1d1');oval(side*16,-27,3,3,'#223949')}break;
+ case 'CRANE':case 'DREDGER':case 'WELDER':
+  path([[-27,-28],[27,-28],[30,24],[-30,24]],'#566575');path([[-19,-15],[19,-15],[16,12],[-16,12]],'#c69a52');
+  limb([[0,-15],[27,-42],[38,-36]],'#e6b954',6);oval(0,1,10,10,'#a7e6ed');break;
+ case 'HOVERCAR':case 'MOTOJET':case 'CORSAIR':
+  path([[-25,-27],[25,-27],[33,22],[0,34],[-33,22]],id==='CORSAIR'?'#ac4850':'#6864a9');oval(0,-10,13,17,'#b9edff');
+  for(const side of [-1,1])oval(side*25,17,6,12,'#4ff0e0');break;
+ default:
+  path([[-35,-9],[-12,-21],[0,-38],[12,-21],[35,-9],[15,24],[-15,24]],'#9b6474');oval(0,-14,13,14,'#76dded');break;
+ }
+ c.restore();
+}
 function drawBiomeOverlay(c,e){
  if(!detailEnabled||e.type!=='BIOME_ENEMY')return;
  const sprite=biomeSprite(e.biomeId||'HYBRID_HUNTER'),bob=Math.sin(Date.now()*.005+(e.biomeAge||0)*.02)*1.5;
- c.save();c.globalAlpha=.91;c.drawImage(sprite,e.x-24,e.y-26+bob,48,52);c.restore();
+ c.save();c.globalAlpha=.91;c.drawImage(sprite,e.x-24,e.y-26+bob,48,52);c.translate(e.x,e.y+bob);c.scale(.48,.48);biomeIdentity(c,e.biomeId||'HYBRID_HUNTER');c.restore();
 }
 function mechArticulation(c,e){
  if(!detailEnabled||!['MECHA_SWORD','MECHA_GUN'].includes(e.type))return;
