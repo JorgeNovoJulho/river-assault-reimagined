@@ -1211,7 +1211,13 @@ function cinematicBossSkill(c,f){
  halo.addColorStop(0,'rgba(255,255,255,.80)');halo.addColorStop(.18,color);halo.addColorStop(.45,color+'55');halo.addColorStop(1,'rgba(0,0,0,0)');
  c.globalCompositeOperation='lighter';c.fillStyle=halo;c.beginPath();c.arc(0,0,radius*1.55,0,Math.PI*2);c.fill();
  c.shadowColor=color;c.shadowBlur=14;c.strokeStyle=color;
- if(f.kind==='FIRE'){
+ if(f.kind==='GRAVITY'){
+  c.globalCompositeOperation='source-over';
+  const well=c.createRadialGradient(0,0,2,0,0,radius);
+  well.addColorStop(0,'rgba(3,4,17,.94)');well.addColorStop(.46,'rgba(33,28,83,.65)');well.addColorStop(1,'rgba(130,158,255,0)');
+  c.fillStyle=well;c.beginPath();c.arc(0,0,radius,0,7);c.fill();
+  for(let i=0;i<4;i++){const a=t*(i%2?1:-1)+i*.9;c.save();c.rotate(a);c.strokeStyle=i%2?'#b9b8ff':'#6f7de0';c.lineWidth=1.7;c.beginPath();c.ellipse(0,0,radius*(.65+i*.15),radius*(.18+i*.06),0,0,7);c.stroke();c.restore()}
+ }else if(f.kind==='FIRE'){
   for(let i=0;i<24;i++){const x=Math.sin(i*8.3+age*.13)*radius*.6,y=Math.cos(i*2.8)*radius*.35;const height=14+((i*13+age*2)%39);const fire=c.createLinearGradient(x,y,x,y-height);fire.addColorStop(0,'#ff531b');fire.addColorStop(.5,'#ffc246');fire.addColorStop(1,'rgba(255,233,149,0)');c.fillStyle=fire;c.beginPath();c.ellipse(x,y-height*.5,3+i%3,height*.55,Math.sin(age*.12+i)*.24,0,Math.PI*2);c.fill()}
  }else if(f.kind==='BLEED'){
   c.globalCompositeOperation='source-over';
