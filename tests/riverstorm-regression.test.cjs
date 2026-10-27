@@ -129,3 +129,13 @@ test('bosses 1 a 3 usam sprites diferentes e distribuidos na build',()=>{
  }
  assert.match(renderer,/Number\(d\.sector\)<=3/);
 });
+
+test('sprites de chefes 4 a 6 integrados',()=>{
+ const renderer=fs.readFileSync('src/render/scene2d5.js','utf8');
+ const vite=fs.readFileSync('vite.config.js','utf8');
+ for(const file of ['granite-dam.svg','crimson-spider.svg','frost-sentinel.svg']){
+  const p='assets/sprites/bosses/'+file;
+  assert.ok(fs.existsSync(p),p);assert.ok(renderer.includes(file));assert.ok(vite.includes(p));
+ }
+ assert.match(renderer,/Number\\(d\\.sector\\)<=6/);
+});
