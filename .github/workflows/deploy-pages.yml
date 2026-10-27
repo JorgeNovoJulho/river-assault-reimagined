@@ -32,6 +32,8 @@ jobs:
       - name: Verificar se o HUD novo entrou na build
         shell: bash
         run: |
+          test -f dist/phaser-lab.html
+          grep -q 'phaser-stage' dist/phaser-lab.html
           test -f dist/index.html
           grep -q 'id="compact-hud"' dist/index.html
           grep -q 'HUD 0.7.6' dist/index.html
