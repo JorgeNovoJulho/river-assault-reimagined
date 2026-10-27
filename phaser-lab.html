@@ -77,6 +77,8 @@ body{margin:0;min-height:100vh;background:#06101f;color:#d8e9f8;font:14px system
       create(){
         // Fundo aquático contínuo sob todas as margens: elimina faixas pretas
         // causadas pela transparência dos SVGs, sem afetar hitboxes ou lógica.
+        // Cor de segurança sob as bordas: evita vazios pretos em transparências.
+        this.add.rectangle(W/2,H/2,W,H,0x174958).setDepth(-4);
         this.add.rectangle(W/2,H/2,W,H,0x0c3448).setDepth(-3);
         this.add.rectangle(W/2,H/2,265,H,0x126078).setDepth(-2);
         this.waterTiles=[];
@@ -92,6 +94,9 @@ body{margin:0;min-height:100vh;background:#06101f;color:#d8e9f8;font:14px system
         // Tiles antigos mantidos em preload para rollback; não desenhados, pois suas emendas eram visíveis.
         this.islandVisuals=[this.add.image(157,-90,'island-detail').setDisplaySize(102,63).setDepth(0),this.add.image(378,-560,'island-detail').setDisplaySize(110,66).setDepth(0)];
         this.banks=[];
+        // Faixas de base preenchidas atrás dos SVGs: sem contorno preto.
+        this.add.rectangle(65,H/2,130,H,0x285c43).setDepth(-1);
+        this.add.rectangle(W-65,H/2,130,H,0x285c43).setDepth(-1);
         for(let j=0;j<3;j++){
           this.banks.push(this.add.image(65,j*480-240,'bank-left').setDisplaySize(130,480).setDepth(0));
           this.banks.push(this.add.image(W-65,j*480-240,'bank-right').setDisplaySize(130,480).setDepth(0));
