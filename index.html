@@ -1176,7 +1176,8 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
             const bossConfig = {...BOSS_TYPES[mission.bossPattern],name:mission.boss,hp:mission.bossHp,score:1000+sector*240};
             const cycleMultiplier = 1 + Math.floor((sector - 1) / BOSS_TYPES.length) * 0.4;
             // Boss é confronto prolongado; escala por dificuldade, missão e jornada.
-            const calculatedHp = Math.round((540+mission.difficulty*160+sector*38)*cycleMultiplier*Math.pow(1.16,journey-1)*1.20*1.20);
+            const bossClimateStrength=sectorTime()==='NIGHT'?1.10:sectorWeather()==='HEAT'?1.06:.94;
+            const calculatedHp = Math.round((540+mission.difficulty*160+sector*38)*cycleMultiplier*Math.pow(1.16,journey-1)*1.20*1.20*bossClimateStrength);
 
             enemies.push({
                 type: 'BOSS',
@@ -1199,7 +1200,8 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
                 attackPattern: 0,
                 attackTimer: 0,
                 specialCharge: 0,
-                specialCooldown: 480,
+                specialCooldown: Math.round(480/bossClimateStrength),
+                environmentalStrength:bossClimateStrength,
                 specialCount:0,
                 laserCharging: false,
                 laserTimer: 0
@@ -2179,7 +2181,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
           else if(m==='phase'){e.x=center+Math.sin(age*.013)*room;e.y+=Math.sin(age*.029)*1.2}
           e.x=Math.max(e.width/2+3,Math.min(VIRTUAL_WIDTH-e.width/2-3,e.x));
           e.biomeShoot=(e.biomeShoot||0)+1;
-          const cooldown=e.biomeAttack==='tri'?95:e.biomeAttack==='lunge'?155:130;
+          const cooldown=Math.round((e.biomeAttack==='tri'?95:e.biomeAttack==='lunge'?155:130)/Math.max(.8,e.environmentStrength||1));
           if(e.biomeShoot>=cooldown && e.y>30 && e.y<VIRTUAL_HEIGHT-115){
             e.biomeShoot=0;const dx=player.x-e.x,dy=player.y-e.y,len=Math.max(1,Math.hypot(dx,dy));
             const speed=['rocket','plasma','laser'].includes(e.biomeAttack)?4.4:3.3;
@@ -2188,6 +2190,22 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
             createFloatingText(e.x,e.y-30,e.biomeAttack.toUpperCase(),e.biomeColor);
             playBiomeEnemySound(e);
           }
+        }
+        // Ciclo determinístico por setor, sem relógio externo nem dependência de FPS.
+        const sectorTime=()=>['MORNING','AFTERNOON','NIGHT'][(Math.max(1,sector)-1)%3];
+        const sectorWeather=()=>['RAIN','WIND','HEAT','FOG','SNOW'][(Math.max(1,sector)-1)%5];
+        const nightHunters=new Set(['ALLIGATOR','PIRANHA','EEL']);
+        const dayFlyers=new Set(['EAGLE','TUCANO']);
+        const coldHunters=new Set(['ICE_RAY','WALRUS','NARWHAL']);
+        const heatHunters=new Set(['SALAMANDER','PRISM_WASP','MANTIS']);
+        function environmentalStrength(id){
+          const time=sectorTime(),weather=sectorWeather();
+          let factor=1;
+          if(nightHunters.has(id))factor*=time==='NIGHT'?1.22:.94;
+          if(dayFlyers.has(id))factor*=time==='NIGHT'?.88:1.13;
+          if(coldHunters.has(id))factor*=weather==='SNOW'?1.24:time==='AFTERNOON'?.92:1.05;
+          if(heatHunters.has(id))factor*=weather==='HEAT'?1.22:weather==='SNOW'?.85:1;
+          return Math.max(.8,Math.min(1.3,factor));
         }
         function spawnBiomeEnemy(center,level){
           // Ritmos diferentes por bioma: patrulhas, emboscadas, ondas e intervalos de calmaria.
@@ -2199,7 +2217,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
           const def=BIOME_ENEMIES[(sector-1)%20];
           enemies.push({type:'BIOME_ENEMY',biomeId:def.id,biomeName:def.name,biomeColor:def.color,biomeMotion:def.motion,biomeAttack:def.attack,biomeSector:def.sector,
             x:center+(Math.random()-.5)*70,y:-48,width:def.id==='HOVERCAR'?42:34,height:def.id==='ALLIGATOR'?42:34,
-            vx:0,vy:.35,hp:4+Math.floor(sector/5),maxHp:4+Math.floor(sector/5),score:350+sector*15,shootTimer:0});
+            vx:0,vy:.35,hp:Math.max(1,Math.round((4+Math.floor(sector/5))*environmentalStrength(def.id))),maxHp:Math.max(1,Math.round((4+Math.floor(sector/5))*environmentalStrength(def.id))),environmentStrength:environmentalStrength(def.id),score:350+sector*15,shootTimer:0});
         }
 
 // Eventos de jogabilidade específicos de cada bioma. Todos são temporários e sem alocações contínuas.
@@ -3197,7 +3215,7 @@ function updateTerrainEvent(){
             window.RiverVisuals.draw(ctx,{
                 w: VIRTUAL_WIDTH, h: VIRTUAL_HEIGHT, riverPoints, islands, enemies, player,
                 sector, aircraft:player.aircraftType||selectedPlane, distance, invulnerable:player.invulnerable,
-                quality:qualitySelect.value
+                quality:qualitySelect.value,dayPhase:sectorTime(),weather:sectorWeather()
             });
             // Sprites de alvos destrutíveis em três estados; formas variam por bioma.
             for(const target of enemies){
