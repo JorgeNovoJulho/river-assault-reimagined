@@ -141,7 +141,7 @@ body{margin:0;min-height:100vh;background:#06101f;color:#d8e9f8;font:14px system
         const missing=['boss','enemy','bullet','fighter','bank-left','bank-right','water-detail','island-detail'].filter(key=>!this.textures.exists(key));
         // A ausência dos PNGs premium é esperada enquanto não forem publicados;
         // não classificar essa ausência como falha dos SVGs ativos.
-        const mandatoryFailures=this.assetFailures.filter(k=>!k.startsWith('premium-'));
+        const mandatoryFailures=this.assetFailures.filter(k=>!k.startsWith('premium-')&&!k.startsWith('raster-'));
         if(mandatoryFailures.length||missing.length){
           output.textContent='ATENÇÃO: texturas com falha: '+[...new Set([...mandatoryFailures,...missing])].join(', ')+'. Verifique recursos no GitHub Pages.';
           output.style.color='#ffb384';
