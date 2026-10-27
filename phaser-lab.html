@@ -7,4 +7,61 @@ body{margin:0;min-height:100vh;background:#06101f;color:#d8e9f8;font:14px system
  window.addEventListener('error',e=>fail(e.message||'Erro desconhecido'));
  window.addEventListener('unhandledrejection',e=>fail(String(e.reason||'Falha de carregamento')));
 })();
-</script><script type="module" src="./src/phaser/main.ts"></script></body></html>
+</script><script type="module">
+  // Entrada independente: funciona mesmo quando o pipeline TS/Vite ainda não foi publicado.
+  // Mantém Phaser 4 como motor e não altera a campanha Original.
+  const output=document.getElementById('phaser-status');
+  try {
+    const engine=await import('https://cdn.jsdelivr.net/npm/phaser@4.2.1/dist/phaser.esm.js');
+    const Phaser=engine.default||engine;
+    const W=540,H=960;
+    class RecoveryArena extends Phaser.Scene {
+      constructor(){super('RecoveryArena');this.enemies=[];this.shots=[];this.hp=3;this.points=0;this.cooldown=0;}
+      preload(){
+        this.load.svg('boss','./assets/sprites/bosses/iron-wasp.svg');
+        this.load.svg('enemy','./assets/sprites/enemies/mecha-gun.svg');
+        this.load.svg('bullet','./assets/sprites/projectiles/plasma-blue.svg');
+      }
+      create(){
+        this.add.rectangle(W/2,H/2,265,H,0x126078);
+        this.boss=this.add.image(W/2,170,'boss').setDisplaySize(170,130);
+        this.player=this.add.triangle(W/2,H-120,0,42,26,0,52,42,0x90eaff);
+        this.keys=this.input.keyboard.createCursorKeys();
+        this.keyboardSpace=this.input.keyboard.addKey('SPACE');
+        this.status=this.add.text(10,10,'PHASER 4 | RECUPERAÇÃO',{fontFamily:'monospace',fontSize:'17px',color:'#ffffff'});
+        this.add.text(10,42,'Setas: mover | Espaço: atirar | toque: mover e atirar',{fontFamily:'monospace',fontSize:'12px',color:'#d6efff'});
+        this.input.on('pointerdown',p=>{this.pressed=true;this.target={x:p.x,y:p.y};});
+        this.input.on('pointermove',p=>{if(this.pressed)this.target={x:p.x,y:p.y};});
+        this.input.on('pointerup',()=>{this.pressed=false;});
+        output.textContent='Arena Phaser iniciada (modo de recuperação independente de Vite).';
+      }
+      update(time,delta){
+        const dt=Math.min(2,delta/16.7);
+        if(this.keys.left.isDown)this.player.x-=5*dt;
+        if(this.keys.right.isDown)this.player.x+=5*dt;
+        if(this.keys.up.isDown)this.player.y-=5*dt;
+        if(this.keys.down.isDown)this.player.y+=5*dt;
+        if(this.pressed&&this.target){this.player.x+=(this.target.x-this.player.x)*.25;this.player.y+=(this.target.y-this.player.y)*.25;}
+        this.player.x=Phaser.Math.Clamp(this.player.x,24,W-24);
+        this.player.y=Phaser.Math.Clamp(this.player.y,85,H-25);
+        if((this.keyboardSpace.isDown||this.pressed)&&time>this.cooldown){
+          this.shots.push(this.add.image(this.player.x,this.player.y-25,'bullet').setDisplaySize(9,25));
+          this.cooldown=time+140;
+        }
+        if(this.enemies.length<5&&Math.random()<.012*dt)this.enemies.push(this.add.image(40+Math.random()*(W-80),-35,'enemy').setDisplaySize(58,70));
+        for(let i=this.enemies.length-1;i>=0;i--){
+          const e=this.enemies[i];e.y+=2.4*dt;
+          if(e.y>H+40){e.destroy();this.enemies.splice(i,1);continue;}
+          if(Math.abs(e.x-this.player.x)<30&&Math.abs(e.y-this.player.y)<32){e.destroy();this.enemies.splice(i,1);this.hp--;if(this.hp<=0){this.hp=3;this.points=0;}}
+        }
+        for(let i=this.shots.length-1;i>=0;i--){
+          const b=this.shots[i];b.y-=12*dt;
+          if(b.y<0){b.destroy();this.shots.splice(i,1);continue;}
+          for(let j=this.enemies.length-1;j>=0;j--){const e=this.enemies[j];if(Math.abs(e.x-b.x)<25&&Math.abs(e.y-b.y)<30){e.destroy();b.destroy();this.enemies.splice(j,1);this.shots.splice(i,1);this.points+=100;break;}}
+        }
+        this.status.setText('PHASER 4 | '+Math.round(this.game.loop.actualFps)+' FPS | VIDAS '+this.hp+' | PONTOS '+this.points);
+      }
+    }
+    new Phaser.Game({type:Phaser.AUTO,parent:'phaser-stage',width:W,height:H,scene:[RecoveryArena],scale:{mode:Phaser.Scale.FIT,autoCenter:Phaser.Scale.CENTER_BOTH}});
+  }catch(error){output.textContent='Falha ao iniciar Phaser: '+String(error);output.style.color='#ff9d8b';console.error(error);}
+</script></body></html>
