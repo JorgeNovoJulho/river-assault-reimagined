@@ -40,6 +40,17 @@ function copyAndVersionRuntime() {
         if(!existsSync(source))throw new Error('Sprite obrigatorio ausente: '+file);
         mkdirSync(dirname(target),{recursive:true});copyFileSync(source,target);
       }
+      // Texturas da arena experimental, versionadas na biblioteca oficial.
+      for (const file of [
+        'assets/sprites/premium/environment/river-water-v1.svg',
+        'assets/sprites/premium/environment/river-bank-left-v1.svg',
+        'assets/sprites/premium/environment/river-bank-right-v1.svg'
+      ]) {
+        const source = resolve(file), target = resolve('dist', file);
+        if (!existsSync(source)) throw new Error('Cenário premium ausente: ' + file);
+        mkdirSync(dirname(target), { recursive: true });
+        copyFileSync(source, target);
+      }
       // Copiar as texturas premium aprovadas; os SVGs legados continuam intactos.
       for (const file of [
         'assets/sprites/premium/runtime/player/fighter_candidate.png',
