@@ -51,3 +51,20 @@ test('shoreline decorative obstacles are relocated outside water bounds',()=>{
  assert.match(html,/boundaries.leftBank-half-9/);
  assert.match(html,/boundaries.rightBank\+half\+9/);
 });
+
+test('city props are clipped to both river shores',()=>{
+ const scene=fs.readFileSync('src/render/scene2d5.js','utf8');
+ assert.match(scene,/Clip decoracao terrestre pela geometria REAL/);
+ assert.match(scene,/c\.clip\(\)/);
+ assert.match(scene,/fim da mascara terrestre/);
+});
+test('multiplayer lobby is included in web build and contains create/join actions',()=>{
+ const lobby=fs.readFileSync('src/net/room-lobby.js','utf8');
+ const vite=fs.readFileSync('vite.config.js','utf8');
+ assert.match(html,/src\/net\/room-lobby\.js/);
+ assert.match(vite,/src\/net\/room-lobby\.js/);
+ assert.match(lobby,/async function create\(\)/);
+ assert.match(lobby,/async function join\(\)/);
+ assert.match(lobby,/const maxPlayers=8/);
+ assert.match(lobby,/Senha incorreta/);
+});
