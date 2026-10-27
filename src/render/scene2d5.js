@@ -115,6 +115,18 @@ function landscape(c,data,t){
      }
    }
  }
+ // Clip decoracao terrestre pela geometria REAL de ambas as margens.
+ // Isso impede que qualquer parte dos predios/arvores ultrapasse a calha,
+ // inclusive nas curvas, mesmo quando o centro do sprite fica em terra.
+ c.save();
+ c.beginPath();
+ c.moveTo(0,0);
+ for(let yy=0;yy<=h+8;yy+=8){const b=bankAt(points,Math.min(h,yy),w);c.lineTo(b[0],Math.min(h,yy));}
+ c.lineTo(0,h);c.closePath();
+ c.moveTo(w,0);
+ for(let yy=0;yy<=h+8;yy+=8){const b=bankAt(points,Math.min(h,yy),w);c.lineTo(b[1],Math.min(h,yy));}
+ c.lineTo(w,h);c.closePath();
+ c.clip();
  const tile=quality==='eco'?70:quality==='enhanced'?34:42, phase=(distance*.17)%tile;
  for(let y=-tile+phase;y<h+tile;y+=tile){
    let banks=bankAt(points,y,w);
@@ -132,6 +144,7 @@ function landscape(c,data,t){
      }
    }
  }
+ c.restore(); // fim da mascara terrestre
  c.save();if(riverPath(c,points)){c.clip();c.strokeStyle='rgba(205,249,244,.12)';c.lineWidth=1;for(let y=(distance*.26)%35;y<h;y+=35){let b=bankAt(points,y,w);let x=lerp(b[0],b[1],.17+hash(y|0)*.66);c.beginPath();c.ellipse(x,y,12,2,-.2,0,Math.PI);c.stroke()}}c.restore();
  waterMotion(c,points,w,h,distance,quality,t);
  bankDetails(c,points,w,h,distance,quality,t);
