@@ -1220,6 +1220,20 @@ function cinematicBossSkill(c,f){
  }
  c.restore();
 }
+function combatAtmosphere(c,d){
+ if(!detailEnabled)return;
+ const {w,h}=d,weather=d.weather||'RAIN',time=Date.now()*.001;
+ c.save();c.globalCompositeOperation='screen';
+ if(weather==='RAIN'){
+   c.strokeStyle='rgba(186,231,255,.23)';c.lineWidth=1;
+   for(let i=0;i<18;i++){const x=(hash(i*19+Number(d.sector))*w+time*62)%w,y=(hash(i*61)*h+time*90)%h;c.beginPath();c.ellipse(x,y,5+Math.sin(time+i)*2,2,0,Math.PI,Math.PI*2);c.stroke()}
+ }else if(weather==='SNOW'){
+   const fog=c.createLinearGradient(0,0,0,h);fog.addColorStop(0,'rgba(213,240,255,.12)');fog.addColorStop(1,'rgba(194,227,255,.02)');c.fillStyle=fog;c.fillRect(0,0,w,h);
+ }else if(weather==='HEAT'){
+   c.fillStyle='rgba(255,123,54,.035)';c.fillRect(0,0,w,h);
+ }
+ c.restore();
+}
 function atmosphereByTime(c,d){
  if(!detailEnabled)return;
  const {w,h}=d,weather=d.weather||'RAIN',day=d.dayPhase||'MORNING',time=Date.now()*.001;
@@ -1306,7 +1320,7 @@ function draw(c,d){
    if(e.hp<=0||e.y+(e.height||40)<-45||e.y-(e.height||40)>d.h+45||e.x+(e.width||40)<-45||e.x-(e.width||40)>d.w+45)continue;
    enemy(c,e,t.time);highDetailEnemy(c,e,t.time);drawAtlasVehicle(c,e);drawBiomeOverlay(c,e);mechArticulation(c,e);
  }
- if(!d.invulnerable||Math.floor(Date.now()/110)%2){plane(c,d.player.x,d.player.y,d.player.aircraftType||d.aircraft,0.85);highDetailPlane(c,d.player.x,d.player.y,d.player.aircraftType||d.aircraft)}enhancedBattleLight(c,d);enhancedWeaponGlints(c,d);bossPresentation(c,d);atmosphereByTime(c,d);
+ if(!d.invulnerable||Math.floor(Date.now()/110)%2){plane(c,d.player.x,d.player.y,d.player.aircraftType||d.aircraft,0.85);highDetailPlane(c,d.player.x,d.player.y,d.player.aircraftType||d.aircraft)}enhancedBattleLight(c,d);enhancedWeaponGlints(c,d);bossPresentation(c,d);atmosphereByTime(c,d);combatAtmosphere(c,d);
 }
 root.RiverVisuals={cinematicBossSkill,draw,plane,enemy,THEMES,BIOME_DETAILS,drawIslands(c,items,sector){const t=THEMES[((sector-1)%THEMES.length+THEMES.length)%THEMES.length];islands(c,items,t)}};
 })(window);
