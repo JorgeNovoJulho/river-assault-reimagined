@@ -3037,6 +3037,14 @@ function updateTerrainEvent(){
         function updateBombAftershock(){
           if(bombAftershockFrames<=0)return;
           bombAftershockFrames--;enemyBullets.length=0;
+          // Limpa também alvos destruíveis recém-criados, sem repetir recompensa.
+          for(let i=islands.length-1;i>=0;i--){
+            const island=islands[i];
+            if(island.width<=80&&island.height<=100){
+              addExplosion(island.x,island.y,'#ffc36a',8);
+              islands.splice(i,1);
+            }
+          }
           for(let i=enemies.length-1;i>=0;i--){
             const e=enemies[i];if(!e||e.hp<=0)continue;
             if(e.type==='BOSS'){if(bombAftershockFrames%30===0){e.hp=Math.max(1,e.hp-2);addExplosion(e.x,e.y,'#ffca87',3)}continue}
