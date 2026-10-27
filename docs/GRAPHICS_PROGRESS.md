@@ -60,3 +60,9 @@ Atualizado: 2026-10-27. Regra: só considerar "homologado" após build, ensaio n
 - `assets/sprites/terrain/bridge-industrial.svg` e `dam-concrete.svg`: estruturas renderizadas a partir de sprites, recortadas para manter a passagem central e o HP.
 - `src/render/scene2d5.js`, `index.html` e `vite.config.js` atualizados; novo teste de regressão em `tests/riverstorm-regression.test.cjs`.
 - **Ainda pendente:** outros biomas, cenários dos 20 mapas, variações danificadas/destruídas, outros inimigos, animações, FPS e homologação web/Windows/Android.
+
+## Nova atualização — avarias de estruturas
+- Adicionados sprites `bridge-damaged.svg`, `dam-damaged.svg`, `island-scorched.svg`, na pasta `assets/sprites/terrain/`.
+- Pontes, represas e ilhas usam sprites de avaria quando a durabilidade restante chega a 45% ou menos, com imagem original em bom estado.
+- Novos arquivos incluídos no Vite e cobertos por teste estático.
+- Próximas etapas: estados de destruição animados, sprites de vegetação e prédios por bioma, inimigos e testes reais de FPS/publicação.
