@@ -1590,11 +1590,17 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
               o.connect(g);g.connect(ac.destination);o.start(now);o.stop(now+.19);}}
               catch(error){}
             const spec=patterns[missionId-1];
+            // Ritmo deliberado: rajada, pausa e abertura. Evita padrões colados e
+            // excesso de tiros que escondem o jogador.
+            const attackPhase=e.shootTimer%330;
+            const firingWindow=attackPhase>=46&&attackPhase<154&&e.swordDash<=0&&e.swordCharge<=0;
+            const safeGap=missionId%2===0?.44:.56;
             const bossProjectileElement=e.skillAffinity||BOSS_AFFINITIES[(sector-1)%BOSS_AFFINITIES.length];
-            if(e.shootTimer%spec[0]===0 && enemyBullets.length<60){
+            if(firingWindow&&e.shootTimer%Math.max(45,spec[0])===0 && enemyBullets.length<27){
               const target=Math.atan2(player.y-e.y,player.x-e.x);
-              for(let n=0;n<spec[1];n++){
-                const normalized=spec[1]===1?0:n/(spec[1]-1)-.5;
+              for(let n=0;n<Math.min(5,spec[1]);n++){
+                const normalized=(n-(Math.min(5,spec[1])-1)/2)/Math.max(1,Math.min(5,spec[1])-1);
+                if(Math.abs(normalized)<safeGap*.37)continue; // corredor central legível
                 const wave=Math.floor(e.shootTimer/(spec[0]*3))%4;
                 const spread=wave===0?spec[3]*1.3:wave===1?spec[3]*.5:wave===2?spec[3]*1.9:spec[3];
                 const angle=target+normalized*spread*2+(wave===2?Math.sin(e.attackTimer*.09+n)*.25:0);
@@ -1615,7 +1621,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
               if(Math.hypot(player.x-e.x,player.y-e.y)<55 && !e.swordHit){if(!defendCharge(e))applyDamage(35,'INVESTIDA DO BOSS');e.swordHit=true;}
               if(e.swordDash<=0){e.swordHit=false;e.swordDash=0;e.swordTargetY=110;}
             }
-            if(missionId>4)return; // Evita empilhar ataques legados em bosses avançados.
+            if(missionId>4||!firingWindow||enemyBullets.length>=27)return; // Padrões legados somente nas janelas leves
             const bossId = e.bossSubType;
 
             // CHEFE 0: PONTE FORTIFICADA - HABILIDADE EMP / PARALISAR NAVE
@@ -3109,7 +3115,7 @@ function updateTerrainEvent(){
             for(const boss of enemies){
               if(boss.type!=='BOSS'||boss.hp<=0)continue;
               boss.turretTimer=(boss.turretTimer||0)+1;
-              if(boss.turretTimer%155===0&&enemyBullets.length<38){
+              if(boss.turretTimer%330===190&&enemyBullets.length<22){
                 for(const side of [-1,1]){
                   const hp=side<0?boss.turretLeftHp:boss.turretRightHp;
                   if(hp<=0)continue;
