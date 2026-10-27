@@ -1,0 +1,4 @@
+const test=require('node:test');const assert=require('node:assert/strict');const fs=require('node:fs');const src=fs.readFileSync('index.html','utf8');
+test('20 inimigos de bioma definidos',()=>{const part=src.slice(src.indexOf('const BIOME_ENEMIES='),src.indexOf('function playBiomeEnemySound'));assert.equal((part.match(/\{id:'/g)||[]).length,20)});
+test('inimigos tem acessorios com 10 variacoes e animacao',()=>{assert.ok(src.includes('const accessory=id%10'));for(let i of [0,1,2,3,4])assert.ok(src.includes('accessory==='+i));assert.ok(src.includes('const t=missionTicks*.075'));});
+test('armas por bioma com cadencias diferenciadas',()=>{assert.ok(src.includes('const attackIntervals={tri:95'));assert.ok(src.includes('attackIntervals[e.biomeAttack]||130'));assert.ok(src.includes("e.biomeAttack==='plasma'?2:1"));});
