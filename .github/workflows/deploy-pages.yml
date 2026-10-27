@@ -53,7 +53,12 @@ jobs:
           set -euo pipefail
           test -s dist/index.html
           cp phaser-lab.html dist/phaser-lab.html
+          # Identificador imutável da revisão publicada, inclusive em fallback estático.
+          sed -i "s/__RIVERSTORM_DEPLOY_SHA__/$GITHUB_SHA/g" dist/phaser-lab.html
           test -s dist/phaser-lab.html
+          if grep -q '__RIVERSTORM_DEPLOY_SHA__' dist/phaser-lab.html; then
+            echo '::error::Versão da arena não foi injetada'; exit 1
+          fi
           grep -q 'phaser-stage' dist/phaser-lab.html
           test -s dist/assets/sprites/bosses/iron-wasp.svg
           test -s dist/assets/sprites/enemies/mecha-gun.svg
@@ -85,6 +90,7 @@ jobs:
             if curl -fsSL --max-time 20 "$ROOT/phaser-lab.html?sha=$GITHUB_SHA" -o /tmp/arena.html &&
                curl -fsSL --max-time 20 "$ROOT/deployment-health.json?sha=$GITHUB_SHA" -o /tmp/deployment-health.json &&
                grep -q 'phaser-stage' /tmp/arena.html &&
+               grep -q "$GITHUB_SHA" /tmp/arena.html &&
                grep -q "$GITHUB_SHA" /tmp/deployment-health.json; then
               echo "Arena HTML publicada no commit $GITHUB_SHA"
               exit 0
