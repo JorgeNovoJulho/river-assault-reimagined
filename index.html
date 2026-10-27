@@ -1906,7 +1906,33 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
                     ctx.shadowColor='#fb923c';ctx.shadowBlur=4+Math.sin(ticks*3)*2;
                   }
                 }
-                if(e.type==='MEGAZORD'){
+                if(e.type==='BIOME_ENEMY'){
+                    // Vinte silhuetas procedurais individualizadas e animadas pelo relógio da missão.
+                    const id=Math.max(0,Math.min(19,(e.biomeSector||sector||1)-1));
+                    const t=missionTicks*.075+id*.37, wing=Math.sin(t*2)*(3+id%4);
+                    const c=e.biomeColor||'#38bdf8', w=Math.max(24,e.width||34),h=Math.max(24,e.height||34);
+                    ctx.fillStyle='#0f172a';ctx.strokeStyle=c;ctx.lineWidth=2;
+                    const family=id%5;
+                    ctx.beginPath();
+                    if(family===0){ctx.moveTo(0,-h*.48);ctx.lineTo(w*.25,-h*.12);ctx.lineTo(w*.46,h*.19+wing*.15);ctx.lineTo(0,h*.38);ctx.lineTo(-w*.46,h*.19-wing*.15);ctx.lineTo(-w*.25,-h*.12);}
+                    else if(family===1){ctx.ellipse(0,0,w*.37,h*.38,Math.sin(t)*.07,0,Math.PI*2);}
+                    else if(family===2){for(let n=0;n<8;n++){let a=n*Math.PI/4,r=n%2?w*.25:w*.47;let x=Math.cos(a)*r,y=Math.sin(a)*h*.45;if(!n)ctx.moveTo(x,y);else ctx.lineTo(x,y);}}
+                    else if(family===3){ctx.moveTo(0,-h*.5);ctx.lineTo(w*.38,0);ctx.lineTo(w*.24,h*.36);ctx.lineTo(0,h*.49);ctx.lineTo(-w*.24,h*.36);ctx.lineTo(-w*.38,0);}
+                    else{ctx.moveTo(-w*.42,-h*.2);ctx.lineTo(0,-h*.48);ctx.lineTo(w*.42,-h*.2);ctx.lineTo(w*.27,h*.32);ctx.lineTo(-w*.27,h*.32);}
+                    ctx.closePath();ctx.fill();ctx.stroke();
+                    // Acessórios exclusivos para cada setor: antenas, garras, propulsores e asas.
+                    ctx.strokeStyle=c;ctx.fillStyle=c;
+                    for(let side of [-1,1]){
+                      const extension=(id%4+1)*2;
+                      ctx.beginPath();ctx.moveTo(side*w*.2,0);
+                      ctx.lineTo(side*(w*.43+extension),wing*.35);
+                      ctx.lineTo(side*(w*.32+extension),h*.24);ctx.stroke();
+                      if(id%3===0){ctx.beginPath();ctx.arc(side*w*.29,h*.27,2.5,0,Math.PI*2);ctx.fill();}
+                    }
+                    ctx.fillStyle='#f8fafc';ctx.beginPath();ctx.arc(0,-h*.12,3+id%3,0,Math.PI*2);ctx.fill();
+                    ctx.fillStyle=c;ctx.fillRect(-w*.08,h*.2,w*.16,4);
+                }
+                else if(e.type==='MEGAZORD'){
                     ctx.fillStyle='#25354e';ctx.fillRect(-29,-34,58,68);
                     ctx.fillStyle='#f97316';ctx.fillRect(-19,-52,38,24);
                     ctx.fillStyle='#67e8f9';ctx.fillRect(-13,-45,26,7);
