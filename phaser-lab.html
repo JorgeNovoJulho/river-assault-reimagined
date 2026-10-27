@@ -55,7 +55,21 @@ body{margin:0;min-height:100vh;background:#06101f;color:#d8e9f8;font:14px system
         this.add.rectangle(W/2,H/2,W,H,0x0c3448).setDepth(-3);
         this.add.rectangle(W/2,H/2,265,H,0x126078).setDepth(-2);
         this.waterTiles=[];
-        for(let j=0;j<3;j++)this.waterTiles.push(this.add.image(W/2,j*480-240,'water-detail').setDisplaySize(280,480).setDepth(-1));
+        // Fundo de rio contínuo: mantém aparência uniforme mesmo nas junções
+        // das texturas SVG. Objetos não têm colisão e não alteram a jogabilidade.
+        this.waterBase=this.add.rectangle(W/2,H/2,280,H,0x145771).setDepth(-2);
+        this.waterOverlay=this.add.graphics().setDepth(-1);
+        this.waterOverlay.lineStyle(1,0x7dd4db,0.13);
+        for(let k=0;k<22;k++){
+          const y=26+k*44;
+          const x=158+(k*73)%215;
+          this.waterOverlay.beginPath();
+          this.waterOverlay.moveTo(x,y);
+          this.waterOverlay.lineTo(x+15,y-3);
+          this.waterOverlay.lineTo(x+31,y);
+          this.waterOverlay.strokePath();
+        }
+        // Tiles antigos mantidos em preload para rollback; não desenhados, pois suas emendas eram visíveis.
         this.islandVisuals=[this.add.image(157,-90,'island-detail').setDisplaySize(102,63).setDepth(0),this.add.image(378,-560,'island-detail').setDisplaySize(110,66).setDepth(0)];
         this.banks=[];
         for(let j=0;j<3;j++){
