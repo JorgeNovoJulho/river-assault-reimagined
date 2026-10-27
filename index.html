@@ -1920,6 +1920,25 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
                     else if(family===3){ctx.moveTo(0,-h*.5);ctx.lineTo(w*.38,0);ctx.lineTo(w*.24,h*.36);ctx.lineTo(0,h*.49);ctx.lineTo(-w*.24,h*.36);ctx.lineTo(-w*.38,0);}
                     else{ctx.moveTo(-w*.42,-h*.2);ctx.lineTo(0,-h*.48);ctx.lineTo(w*.42,-h*.2);ctx.lineTo(w*.27,h*.32);ctx.lineTo(-w*.27,h*.32);}
                     ctx.closePath();ctx.fill();ctx.stroke();
+                    // Módulos móveis vinculados ao comportamento real de cada inimigo.
+                    // Desenho local: não modifica colisão nem velocidade lógica.
+                    ctx.save();
+                    const accessory=id%10, pulse=.6+.4*Math.sin(t*1.5);
+                    ctx.strokeStyle=c;ctx.fillStyle=c;ctx.lineWidth=2;
+                    if(accessory===0||accessory===5){ // Asas articuladas e rotores
+                      for(const side of [-1,1]){ctx.beginPath();ctx.moveTo(side*w*.18,0);ctx.quadraticCurveTo(side*w*.57,-h*.36+wing,side*w*.62,h*.07);ctx.stroke();}
+                    }else if(accessory===1||accessory===6){ // Guindastes ou pinças
+                      for(const side of [-1,1]){ctx.beginPath();ctx.moveTo(side*w*.25,-h*.12);ctx.lineTo(side*w*.5,-h*.3);ctx.lineTo(side*w*.56,h*.10+wing*.2);ctx.stroke();}
+                    }else if(accessory===2||accessory===7){ // Ferrões e lâminas
+                      for(const side of [-1,1]){ctx.beginPath();ctx.moveTo(side*w*.12,-h*.05);ctx.lineTo(side*w*.52,-h*.35);ctx.lineTo(side*w*.35,h*.24);ctx.stroke();}
+                    }else if(accessory===3||accessory===8){ // Nadadeiras e propulsores
+                      for(const side of [-1,1]){ctx.beginPath();ctx.moveTo(side*w*.2,h*.02);ctx.lineTo(side*w*.5,h*.3+wing*.2);ctx.lineTo(side*w*.12,h*.4);ctx.closePath();ctx.stroke();}
+                    }else{ // Dispositivos prismáticos / antenas
+                      for(const side of [-1,1]){ctx.beginPath();ctx.moveTo(side*w*.15,-h*.14);ctx.lineTo(side*w*.45,-h*.44);ctx.stroke();ctx.beginPath();ctx.arc(side*w*.45,-h*.44,2+pulse*2,0,Math.PI*2);ctx.fill();}
+                    }
+                    // Cada inimigo usa uma assinatura diferente de tamanho e pulso do núcleo.
+                    ctx.globalAlpha=.3+.45*pulse;ctx.beginPath();ctx.arc(0,h*.08,2+(id%5),0,Math.PI*2);ctx.fill();
+                    ctx.restore();
                     // Acessórios exclusivos para cada setor: antenas, garras, propulsores e asas.
                     ctx.strokeStyle=c;ctx.fillStyle=c;
                     for(let side of [-1,1]){
@@ -2452,11 +2471,12 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
           else if(m==='phase'){e.x=center+Math.sin(age*.013)*room;e.y+=Math.sin(age*.029)*1.2}
           e.x=Math.max(e.width/2+3,Math.min(VIRTUAL_WIDTH-e.width/2-3,e.x));
           e.biomeShoot=(e.biomeShoot||0)+1;
-          const cooldown=Math.round((e.biomeAttack==='tri'?95:e.biomeAttack==='lunge'?155:130)/Math.max(.8,e.environmentStrength||1));
+          const attackIntervals={tri:95,lunge:155,rocket:175,plasma:115,laser:165,mine:200,burst:125,bomb:185,ice:165,fire:135,blade:145,dive:155};
+          const cooldown=Math.max(85,Math.round((attackIntervals[e.biomeAttack]||130)/Math.max(.8,e.environmentStrength||1)));
           if(e.biomeShoot>=cooldown && e.y>30 && e.y<VIRTUAL_HEIGHT-115){
             e.biomeShoot=0;const dx=player.x-e.x,dy=player.y-e.y,len=Math.max(1,Math.hypot(dx,dy));
             const speed=['rocket','plasma','laser'].includes(e.biomeAttack)?4.4:3.3;
-            const count=e.biomeAttack==='tri'?3:e.biomeAttack==='burst'?2:1;
+            const count=e.biomeAttack==='tri'?3:e.biomeAttack==='burst'?2:e.biomeAttack==='plasma'?2:1;
             for(let n=0;n<count;n++)enemyBullets.push({x:e.x+(n-(count-1)/2)*9,y:e.y+12,vx:dx/len*speed+(n-(count-1)/2)*.75,vy:dy/len*speed,color:e.biomeColor,isMissile:e.biomeAttack==='rocket'||e.biomeAttack==='mine'});
             createFloatingText(e.x,e.y-30,e.biomeAttack.toUpperCase(),e.biomeColor);
             playBiomeEnemySound(e);
