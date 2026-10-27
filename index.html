@@ -3772,9 +3772,11 @@ function updateTerrainEvent(){
               }
             }
             for(const e of enemies){
-              if(e.hp<=0||e.type==='BOSS')continue;
+              if(e.hp<=0)continue;
               if(Math.abs(e.y-p.y)>(e.height||22)/2+tolerance||e.x+(e.width||22)/2<xmin||e.x-(e.width||22)/2>xmax)continue;
-              e.hp=0;addExplosion(e.x,e.y,'#a5f3fc',7);
+              if(e.type==='BOSS'){e.hp=Math.max(1,e.hp-Math.max(2,e.maxHp*.003));}
+              else e.hp=0;
+              addExplosion(e.x,e.y,'#a5f3fc',7);
             }
           }
         }
