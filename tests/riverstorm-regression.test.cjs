@@ -157,3 +157,15 @@ test('ilhas e travessias renderizam sprites reais sem fechar o leito central',()
  assert.match(game,/ctx\.rect\(-half,slabY,half-gate,p\.height\)/);
  assert.match(game,/ctx\.rect\(gate,slabY,half-gate,p\.height\)/);
 });
+
+test('damage states of bridges dams and islands use packaged sprites',()=>{
+ const render=fs.readFileSync('src/render/scene2d5.js','utf8');
+ const vite=fs.readFileSync('vite.config.js','utf8');
+ for(const name of ['bridge-damaged.svg','dam-damaged.svg','island-scorched.svg']){
+  const p='assets/sprites/terrain/'+name;
+  assert.ok(fs.existsSync(p),p);
+  assert.ok(vite.includes(p),p);
+ }
+ assert.match(game,/p\.hp\/p\.maxHp<=\.45/);
+ assert.match(render,/p\.hp\/p\.maxHp<=\.45/);
+});
