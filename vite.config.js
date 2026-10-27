@@ -40,6 +40,16 @@ function copyAndVersionRuntime() {
         if(!existsSync(source))throw new Error('Sprite obrigatorio ausente: '+file);
         mkdirSync(dirname(target),{recursive:true});copyFileSync(source,target);
       }
+      // Copiar as texturas premium aprovadas; os SVGs legados continuam intactos.
+      for (const file of [
+        'assets/sprites/premium/runtime/player/fighter_candidate.png',
+        'assets/sprites/premium/runtime/fx/explosion_atlas_4x3.png'
+      ]) {
+        const source = resolve(file), target = resolve('dist', file);
+        if (!existsSync(source)) throw new Error('Imagem premium obrigatória ausente: ' + file);
+        mkdirSync(dirname(target), { recursive: true });
+        copyFileSync(source, target);
+      }
       writeFileSync(indexPath, html);
       writeFileSync(resolve('dist/build-info.json'), JSON.stringify({
         build: buildId, release: '0.5.6', timestamp: new Date().toISOString()
