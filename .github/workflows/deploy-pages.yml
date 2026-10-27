@@ -15,17 +15,15 @@ jobs:
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: '22'
+          node-version: '24'
       - name: Instalar dependências
         run: npm install
-      - name: Executar testes e registrar falhas
-        id: tests
-        continue-on-error: true
+      - name: Executar testes obrigatórios
         run: npm test
       - name: Compilar página jogável
         run: npm run build
@@ -56,9 +54,6 @@ jobs:
           grep -q 'drawIslands' dist/src/render/scene2d5.js
           for n in $(seq -w 1 14); do test -f "dist/music/track-$n.opus"; done
           echo 'HUD, cenarios e musicas presentes na build'
-      - name: Aviso de regressões
-        if: steps.tests.outcome == 'failure'
-        run: echo "::warning::Há testes reprovados; a versão web foi compilada e publicada para permitir diagnóstico do HUD."
       - uses: actions/configure-pages@v5
         with:
           enablement: true
