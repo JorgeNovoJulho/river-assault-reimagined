@@ -35,7 +35,7 @@ function copyAndVersionRuntime() {
         .join('href="./src/styles/tailwind.css?build='+buildId+'"');
       html = html.replace('</head>',
         '<meta name="riverstorm-build" content="'+buildId+'">\n</head>');
-      for(const file of ['assets/sprites/projectiles/plasma-blue.svg','assets/sprites/projectiles/plasma-red.svg','assets/sprites/bosses/iron-wasp.svg']){
+      for(const file of ['assets/sprites/projectiles/plasma-blue.svg','assets/sprites/projectiles/plasma-red.svg','assets/sprites/bosses/iron-wasp.svg','assets/sprites/bosses/abyss-manta.svg','assets/sprites/bosses/crimson-rotor.svg']){
         const source=resolve(file),target=resolve('dist',file);
         if(!existsSync(source))throw new Error('Sprite obrigatorio ausente: '+file);
         mkdirSync(dirname(target),{recursive:true});copyFileSync(source,target);
