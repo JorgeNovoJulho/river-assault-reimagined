@@ -1422,7 +1422,7 @@ function draw(c,d){
  for(const e of d.enemies||[]){
    if(e.hp<=0||e.y+(e.height||40)<-45||e.y-(e.height||40)>d.h+45||e.x+(e.width||40)<-45||e.x-(e.width||40)>d.w+45)continue;
    if(e.type==='BOSS'&&Number(d.sector)>=1&&Number(d.sector)<=20&&bossSpriteImages[Number(d.sector)-1].complete&&bossSpriteImages[Number(d.sector)-1].naturalWidth){const sprite=bossSpriteImages[Number(d.sector)-1];c.drawImage(sprite,e.x-(e.width||90)*.5,e.y-(e.height||90)*.5,e.width||90,e.height||90);bossAccessories(c,e,d);}
-   else {enemy(c,e,t.time);highDetailEnemy(c,e,t.time);drawAtlasVehicle(c,e);drawBiomeOverlay(c,e);mechArticulation(c,e);bossAccessories(c,e,d);}
+   else {const replacement=commonEnemySprites[e.type];if(replacement&&replacement.complete&&replacement.naturalWidth){enemy(c,e,t.time);}else{enemy(c,e,t.time);highDetailEnemy(c,e,t.time);drawAtlasVehicle(c,e);drawBiomeOverlay(c,e);mechArticulation(c,e);}bossAccessories(c,e,d);}
  }
  if(!d.invulnerable||Math.floor(Date.now()/110)%2){plane(c,d.player.x,d.player.y,d.player.aircraftType||d.aircraft,0.85);highDetailPlane(c,d.player.x,d.player.y,d.player.aircraftType||d.aircraft)}enhancedBattleLight(c,d);enhancedWeaponGlints(c,d);bossPresentation(c,d);atmosphereByTime(c,d);combatAtmosphere(c,d);
 }
