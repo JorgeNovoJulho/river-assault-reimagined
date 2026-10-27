@@ -3614,8 +3614,21 @@ function updateTerrainEvent(){
             launch(player.x,player.y-24,0,-12);launch(player.x-24,player.y-6,-11,0);launch(player.x+24,player.y-6,11,0);
             // As auxiliares têm arma independente; fireWingmen() cuida apenas de mísseis.
         }
+        function pulseDestroyTerrain(){
+            // Pulso atravessa a faixa frontal, destruindo estruturas e ilhas com um acerto.
+            const top=0,bottom=player.y+25;
+            for(const collection of [structures,islands]){
+                for(let i=collection.length-1;i>=0;i--){
+                    const o=collection[i];
+                    if(o.destructible===false||o.y>bottom+30||o.y<-45)continue;
+                    if(Math.abs((o.x||0)-player.x)>Math.max(52,(o.width||20)/2+16))continue;
+                    addExplosion(o.x,o.y,'#67e8f9',24);collection.splice(i,1);score+=150;
+                }
+            }
+        }
         function fireWeapon() {
             if (gameState !== 'PLAYING' || player.disabledTimer > 0) return;
+            if(player.weapon==='PULSE')pulseDestroyTerrain();
             const baseWeapon=aircraftCatalog.PLANES[player.aircraftType||selectedPlane].weapons[0];
             if(player.weapon!==baseWeapon){
                 if(player.specialShots<=0)player.weapon=baseWeapon;
@@ -3688,12 +3701,25 @@ function updateTerrainEvent(){
             bombProjectiles.push({x:player.x,y:player.y-16,vy:-9,life:52});
         }
         let bombAftershockFrames=0,bombAftershockOrigin={x:200,y:300};
+        // Destruicao unificada de estruturas para onda da bomba e armas de pulso.
+        function destroyTerrainByBlast(source, radius=Infinity){
+            const inside=o=>radius===Infinity||Math.hypot((o.x||0)-source.x,(o.y||0)-source.y)<=radius+Math.max(o.width||0,o.height||0)/2;
+            for(const collection of [structures,islands]){
+                for(let i=collection.length-1;i>=0;i--){
+                    const o=collection[i];if(o.destructible===false||!inside(o))continue;
+                    addExplosion(o.x,o.y,'#ffe19a',22);
+                    createFloatingText(o.x,o.y-20,(o.type==='BRIDGE'?'PONTE':o.type==='DAM'?'REPRESA':'ILHA')+' DESTRUIDA!','#fef08a');
+                    collection.splice(i,1);score+=150;
+                }
+            }
+        }
         function updateBombAftershock(){
           if(bombAftershockFrames<=0)return;
           const elapsed=180-bombAftershockFrames;
           if(elapsed%60===0){
             const wave=elapsed/60+1;
             enemyBullets.length=0;screenShake=Math.max(screenShake,12);
+            destroyTerrainByBlast(bombAftershockOrigin);
             try{window.RiverSFX?.impact?.()}catch(error){}
             for(let i=islands.length-1;i>=0;i--){
               const item=islands[i];if(item.destructible===false)continue;
@@ -3726,6 +3752,7 @@ function updateTerrainEvent(){
             try{window.RiverSFX?.impact()}catch(e){}
             screenShake=15;bombFlash=13;bombAftershockFrames=180;bombAftershockOrigin={x:b.x,y:b.y};
             enemyBullets=[];
+            destroyTerrainByBlast({x:b.x,y:b.y});
             // O loop principal processa os pulsos, sem avanço duplicado no frame inicial.
             addExplosion(b.x,b.y,'#fff3ad',34);
             createFloatingText(b.x,b.y,'BOMBA IMPACTOU!','#fbbf24');
