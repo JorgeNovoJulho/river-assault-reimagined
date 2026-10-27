@@ -191,3 +191,19 @@ test('tank turret ship jet and zigzag sprites integrated',()=>{
   assert.ok(fs.existsSync(p),p);assert.ok(renderer.includes(name+'.svg'));assert.ok(vite.includes(p));
  }
 });
+
+test('Phaser TypeScript has isolated entry without replacing original campaign',()=>{
+ const pkg=JSON.parse(fs.readFileSync('package.json','utf8'));
+ const vite=fs.readFileSync('vite.config.js','utf8');
+ const lab=fs.readFileSync('phaser-lab.html','utf8');
+ const module=fs.readFileSync('src/phaser/main.ts','utf8');
+ assert.ok(pkg.dependencies.phaser);
+ assert.ok(pkg.devDependencies.typescript);
+ assert.ok(pkg.scripts['check:phaser']);
+ assert.match(vite,/phaserLab: resolve\('phaser-lab\.html'\)/);
+ assert.match(lab,/src\/phaser\/main\.ts/);
+ assert.match(module,/import Phaser from 'phaser'/);
+ assert.match(module,/new Phaser\.Game/);
+ assert.match(module,/assets\/sprites\/bosses/);
+ assert.match(game,/id="gameCanvas"/);
+});
