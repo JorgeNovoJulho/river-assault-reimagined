@@ -45,7 +45,15 @@ class PhaserArena extends Phaser.Scene {
  private pointerY=HEIGHT-135;
  constructor(){super('PhaserArena')}
  preload(){
-  for(const [key,file] of assets)this.load.svg(key,'./'+file);
+  const rasterSizes:Record<string,{width:number;height:number}>={
+   'boss-1':{width:180,height:180},'boss-2':{width:180,height:180},'boss-3':{width:180,height:180},
+   'enemy-gun':{width:80,height:92},'enemy-heli':{width:96,height:96},'enemy-sub':{width:100,height:90},
+   'island':{width:180,height:110},'beam':{width:20,height:46},
+   'fighter':{width:96,height:112},'bank-left':{width:130,height:480},
+   'bank-right':{width:130,height:480},'water-detail':{width:260,height:480},
+   'island-detail':{width:180,height:110}
+  };
+  for(const [key,file] of assets)this.load.svg(key,'./'+file,rasterSizes[key]);
   this.load.on('loaderror',(file:Phaser.Loader.File)=>console.warn('Phaser sprite:',file.key));
  }
  create(){
