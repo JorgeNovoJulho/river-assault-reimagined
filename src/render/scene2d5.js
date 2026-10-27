@@ -1255,6 +1255,22 @@ function bossPresentation(c,d){
   c.save();c.translate(e.x,e.y);
   const damaged=e.maxHp>0&&e.hp/e.maxHp<.4;
   const glow=['#6ee7ff','#ffb37b','#b2ff8c','#d1a6ff','#ffe19b'][phase];
+  // Cada um dos vinte chefes recebe uma coroa/armadura de assinatura diferente.
+  const identity=Math.max(1,Math.min(20,e.bossId||d.sector||1));
+  c.save();c.rotate(Math.sin(now*.55+identity)*.065);
+  c.lineWidth=2;c.strokeStyle=glow;c.fillStyle=glow;
+  const blades=3+identity%6,span=radius*(.78+(identity%4)*.11);
+  for(let j=0;j<blades;j++){
+    const a=(j/blades)*Math.PI*2+identity*.17;
+    const px=Math.cos(a)*span,py=Math.sin(a)*span;
+    c.save();c.translate(px,py);c.rotate(a+Math.PI/2);
+    if(identity%4===0){c.strokeRect(-5,-8,10,16);c.fillRect(-2,-11,4,8)}
+    else if(identity%4===1){c.beginPath();c.moveTo(0,-14);c.lineTo(6,6);c.lineTo(-6,6);c.closePath();c.stroke()}
+    else if(identity%4===2){c.beginPath();c.arc(0,0,5,0,Math.PI*2);c.stroke();c.fillRect(-2,-12,4,5)}
+    else{c.beginPath();c.moveTo(-7,-6);c.lineTo(0,-14);c.lineTo(7,-6);c.lineTo(0,10);c.closePath();c.stroke()}
+    c.restore();
+  }
+  c.restore();
   c.globalCompositeOperation='screen';
   const halo=c.createRadialGradient(0,0,radius*.2,0,0,radius*1.42);
   halo.addColorStop(0,'rgba(255,255,255,.12)');halo.addColorStop(.38,glow+'44');halo.addColorStop(1,'rgba(0,0,0,0)');
