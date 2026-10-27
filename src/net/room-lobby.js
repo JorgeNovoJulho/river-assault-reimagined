@@ -6,7 +6,7 @@ let peer=null,host=false,roomCode='',secret='',connections=new Map(),name='Pilot
 const el=(tag,attrs={},children=[])=>{const n=document.createElement(tag);Object.assign(n,attrs);children.forEach(c=>n.append(c));return n;};
 const css='background:#0b2137;color:#e2faff;border:1px solid #38bdf8;border-radius:8px;padding:8px;font:600 12px sans-serif;';
 function show(message){const status=document.getElementById('river-room-status');if(status)status.textContent=message;}
-function count(){const out=document.getElementById('river-room-count');if(out)out.textContent='Participantes conectados: '+(1+connections.size)+' / '+maxPlayers;}
+function count(){const out=document.getElementById('river-room-count');if(out)out.textContent='Participantes conectados: '+((peer&&!peer.destroyed)?1:0)+connections.size+' / '+maxPlayers;const b=document.getElementById('river-room-start');if(b){b.hidden=!host||!peer||peer.destroyed;b.disabled=!host||!peer||peer.destroyed;}}
 function code(){return Array.from(crypto.getRandomValues(new Uint8Array(4))).map(n=>(n%10)).join('');}
 function loadPeer(){
  return new Promise((resolve,reject)=>{
@@ -39,15 +39,32 @@ function register(conn,fromHost){
    show('Piloto '+String(msg.name||'visitante').slice(0,24)+' entrou na sala.');count();
   }else if(!host&&msg.type==='welcome'){
    connections.set(conn.peer,conn);show('Conectado à sala '+msg.room+'. Lobby pronto para teste.');count();
-  }else if(msg.type==='reject'){show(msg.reason||'Entrada recusada');conn.close();}
+  }else if(msg.type==='start-challenge'){show('Desafio iniciado pelo anfitrião!');launchChallenge(msg.mission);}
+  else if(msg.type==='reject'){show(msg.reason||'Entrada recusada');conn.close();}
  });
  conn.on('close',()=>{connections.delete(conn.peer);show('Conexão encerrada.');count();});
  conn.on('error',e=>show('Erro de conexão: '+(e.message||e.type||'desconhecido')));
 }
+function launchChallenge(mission){
+ const select=document.getElementById('level-select');if(select&&mission)select.value=String(mission);
+ document.getElementById('mode-selection')?.classList.add('hidden');
+ const start=document.getElementById('start-btn');
+ if(start)start.click();else show('Botão de iniciar missão indisponível.');
+}
+function startChallenge(){
+ if(!host||!peer||peer.destroyed){show('Crie sua sala antes de começar.');return;}
+ const mission=Number(document.getElementById('level-select')?.value)||1;
+ for(const c of connections.values())if(c.open)c.send({type:'start-challenge',mission});
+ launchChallenge(mission);
+}
 function setupPeer(id){
  return new Promise((resolve,reject)=>{
-  peer=new window.Peer(id,{host:'0.peerjs.com',port:443,path:'/',secure:true,debug:1});
-  peer.on('open',resolve);peer.on('error',err=>{const reason=err.message||err.type||'erro desconhecido';show('Servidor de conexão indisponível: '+reason+'. Verifique internet, firewall e tente novamente.');reject(err)});
+  peer=id?new window.Peer(id,{debug:1}):new window.Peer({debug:1});
+  let settled=false;
+  const guard=setTimeout(()=>{if(!settled){settled=true;reject(new Error('Tempo esgotado na sinalização PeerJS'));}},12000);
+  peer.on('open',id=>{if(settled)return;settled=true;clearTimeout(guard);resolve(id);});
+  peer.on('error',err=>{const reason=err.message||err.type||'erro desconhecido';show('Falha na rede: '+reason);if(!settled){settled=true;clearTimeout(guard);reject(err);}});
+
   peer.on('disconnected',()=>show('Sinalização desconectada; confira a internet.'));
   peer.on('connection',conn=>{if(!host){conn.close();return;}register(conn,true)});
  });
@@ -75,7 +92,10 @@ async function join(){
   const id=document.getElementById('river-room-code').value.trim();
   if(!/^riverstorm-[0-9]{4}-[0-9]{4}$/.test(id)||!secret)throw Error('Preencha código válido e senha');
   show('Conectando…');await setupPeer();
-  register(peer.connect(id,{reliable:true,serialization:'json'}),false);
+  const conn=peer.connect(id,{reliable:true,serialization:'json'});
+  if(!conn)throw Error('Não foi possível abrir canal de dados');
+  register(conn,false);
+  setTimeout(()=>{if(!conn.open&&!connections.has(id))show('Aguardando anfitrião: confira código, senha e conexão dos dois dispositivos.');},8000);
  }catch(error){show('Não foi possível entrar: '+error.message);disconnect();}
  finally{button.disabled=false;}
 }
@@ -96,12 +116,15 @@ function init(){
  for(const b of [createBtn,joinBtn])b.style.cssText=css+'cursor:pointer;flex:1';
  createBtn.addEventListener('click',create);joinBtn.addEventListener('click',join);
  buttons.append(createBtn,joinBtn);
+ const startBtn=el('button',{id:'river-room-start',textContent:'INICIAR DESAFIO COM A SALA',type:'button'});
+ startBtn.style.cssText=css+'width:100%;margin-top:6px;cursor:pointer;background:#14532d';
+ startBtn.hidden=true;startBtn.addEventListener('click',startChallenge);
  const status=el('div',{id:'river-room-status',textContent:'A sala usa internet (WebRTC). Código e senha são necessários para entrar.'});
  status.style.marginTop='7px';
  const participants=el('div',{id:'river-room-count',textContent:'Participantes conectados: 0 / 8'});
- panel.append(heading,row,buttons,status,participants);
+ panel.append(heading,row,buttons,startBtn,status,participants);
  const notice=root.querySelector('p');if(root.id==='mode-multi-info'&&notice)notice.textContent='Crie uma sala ou participe usando código e senha. Requer internet.';
- const actions=root.id==='mode-multi-info'?document.getElementById('mode-multi-back'):document.getElementById('start-actions');root.insertBefore(panel,actions&&actions.parentNode===root?actions:null);
+ const actions=root.id==='mode-multi-info'?document.getElementById('mode-multi-back'):document.getElementById('start-actions');root.insertBefore(panel,actions&&actions.parentNode===root?actions:null);count();
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
 })();
