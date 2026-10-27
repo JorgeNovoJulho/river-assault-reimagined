@@ -1224,9 +1224,16 @@ function atmosphereByTime(c,d){
  if(!detailEnabled)return;
  const {w,h}=d,weather=d.weather||'RAIN',day=d.dayPhase||'MORNING',time=Date.now()*.001;
  c.save();
- if(day==='NIGHT'){c.fillStyle='rgba(3,10,39,.29)';c.fillRect(0,0,w,h)}
- else if(day==='MORNING'){c.fillStyle='rgba(255,192,111,.075)';c.fillRect(0,0,w,h)}
- else{c.fillStyle='rgba(255,222,146,.04)';c.fillRect(0,0,w,h)}
+ const cycle=((Number(d.missionTicks)||0)%1800)/1800;
+ const smooth=Math.max(0,Math.min(1,(cycle-.82)/.18));
+ const phases=['MORNING','AFTERNOON','NIGHT'],idx=Math.max(0,phases.indexOf(day));
+ const tint=(phase,alpha)=>{
+   const color=phase==='NIGHT'?'3,10,39':phase==='MORNING'?'255,192,111':'255,222,146';
+   const strength=phase==='NIGHT'?.29:phase==='MORNING'?.075:.04;
+   c.fillStyle='rgba('+color+','+(alpha*strength)+')';c.fillRect(0,0,w,h);
+ };
+ tint(day,1-smooth);tint(phases[(idx+1)%3],smooth);
+ c.globalAlpha=.6+.4*Math.min(1,Math.min((Number(d.missionTicks)||0)%2700,2700-((Number(d.missionTicks)||0)%2700))/160);
  const count=d.quality==='eco'?22:56;
  if(weather==='RAIN'||weather==='SNOW'){
   c.strokeStyle=weather==='RAIN'?'rgba(178,221,255,.39)':'rgba(241,251,255,.74)';
