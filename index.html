@@ -3315,7 +3315,7 @@ function updateTerrainEvent(){
                         bullets.splice(bIndex, 1);
                         if(e.type==='BOSS'&&bossDefeatedThisMission) return;
                         if(e.type==='BOSS')dropBossReward(e,1);
-                        e.hp=Math.max(0,e.hp-(e.type==='BOSS'?Math.min(e.maxHp*.012,(b.damage||1)*(b.reflected?1:pilotBonus().damage)*(b.iceWeak?.5:1)*(e.gravityTicks>0?1.3:1)*(e.dualTicks>0&&e.dualElement==='PRISM'?1+Math.min(.25,e.dualAmp||0):1)*(e.parryVulnerableTicks>0?1.25:1)):(b.damage||1)*(b.reflected?1:pilotBonus().damage)*(b.iceWeak?.5:1)*(e.gravityTicks>0?2:1)));
+                        e.hp=Math.max(0,e.hp-(e.type==='BOSS'?Math.min(e.maxHp*.012,(b.damage||1)*(b.reflected?1:pilotBonus().damage)*(b.iceWeak?.5:1)*(e.gravityTicks>0?.25:1)*(e.dualTicks>0&&e.dualElement==='PRISM'?1+Math.min(.25,e.dualAmp||0):1)*(e.parryVulnerableTicks>0?1.25:1)):(b.damage||1)*(b.reflected?1:pilotBonus().damage)*(b.iceWeak?.5:1)*(e.gravityTicks>0?.25:1)));
                         addExplosion(b.x, b.y, b.type==='BANK_MISSILE'?'#fb923c':'#fba518', b.type==='BANK_MISSILE'?16:4);
 
                         if (e.hp <= 0) {
@@ -3513,8 +3513,7 @@ function updateTerrainEvent(){
             if (player.invulnerable > 0 || parryTicks>0 || rollFrames>0) return;
             // Naves auxiliares têm escudo independente e só sofrem dano quando atingidas.
 
-            const gravityIncomingMultiplier=player.gravityDebuffTicks>0?.25:1;
-            player.shield -= Math.round(amount*gravityIncomingMultiplier*(bossActive||reason.includes('BOSS')?1.15:.7)*pilotBonus().resistance);
+            player.shield -= Math.round(amount*(bossActive||reason.includes('BOSS')?1.15:.7)*pilotBonus().resistance);
             player.invulnerable = 40;
 
             const container = document.getElementById('game-container');
