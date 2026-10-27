@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="./src/styles/tailwind.css">
     <!-- Fallback mínimo para execução estática sem compilação Tailwind. -->
     <style id="riverstorm-boss-dialogue-visibility">
-      #boss-dialogue-strip:not(.hidden){display:block!important;position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:120;pointer-events:none;width:min(88%,580px)!important;max-width:88%;opacity:1}
+      #boss-dialogue-strip:not(.hidden){display:block!important;position:absolute;left:50%;bottom:8px;top:auto;transform:translateX(-50%);z-index:120;pointer-events:none;width:min(88%,580px)!important;max-width:88%;opacity:1}
       #boss-dialogue-strip.hidden{display:none!important}
     </style>
     <style id="riverstorm-overlay-safety">
@@ -300,7 +300,7 @@
         <div class="rs-hud-cell"><span class="rs-label">♟ RESGATES <b id="hud-rescues">0</b></span><span class="rs-label">✈ <b id="hud-plane">FALCÃO</b></span></div>
       </div>
       <div id="pilot-progress" style="padding:4px 10px;background:#07172b;display:flex;align-items:center;gap:8px;flex-wrap:wrap;color:#e2e8f0;font:900 11px monospace"><span>⭐ NÍVEL <b id="hud-pilot-level" style="color:#facc15">0 / 100</b></span><span id="hud-pilot-xp">0 XP</span><span id="hud-next-xp" style="color:#67e8f9">100 p/ próximo</span><div style="flex:1;min-width:65px;height:7px;background:#1e293b;border-radius:6px;overflow:hidden"><div id="hud-xp-fill" style="height:100%;width:0%;background:linear-gradient(90deg,#0891b2,#facc15)"></div></div></div>
-      <div class="rs-hud-footer"><span id="hud-version" style="color:#38bdf8;font-size:8px">HUD 0.7.6</span><span id="mission-hud">SELVA DA AURORA</span><b id="sector-hud">SETOR 1</b><span id="hud-pilot-name" title="Piloto">PILOTO</span><span id="hud-rank">J1 SOLDADO</span></div>
+      <div class="rs-hud-footer"><span id="hud-version" style="color:#38bdf8;font-size:8px">HUD 0.7.6</span><span id="mission-hud">SELVA DA AURORA</span><b id="sector-hud">SETOR 1</b><span id="hud-environment" title="Período do dia e clima">☀ DIA · CÉU LIMPO</span><span id="hud-pilot-name" title="Piloto">PILOTO</span><span id="hud-rank">J1 SOLDADO</span></div>
     </section>
     <div id="rs-bottom-actions" aria-label="Opções rápidas">
       <button id="crt-toggle" type="button">CRT: LIG</button>
@@ -324,9 +324,9 @@
       .rs-meter{height:5px;background:#20384b;border:1px solid #47677b;border-radius:2px;overflow:hidden;margin-top:4px}
       .rs-meter span{display:block;height:100%}
       .rs-hud-footer{display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:21px;margin-top:3px;padding:1px 6px;border:1px solid #224e73;border-radius:4px;font-size:inherit}
-      #sector-hud{color:#67e8f9}
+      #sector-hud{color:#67e8f9} #hud-environment{color:#9be6f7;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:28%}
       #hud-rank{color:#fde68a} #hud-pilot-name{color:#8de8ff;max-width:23%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-      #boss-dialogue-strip:not(.hidden){top:50%!important;left:50%!important;transform:translate(-50%,-50%)!important;min-height:48px!important;padding:12px 16px!important;background:linear-gradient(105deg,rgba(5,14,28,.94),rgba(29,42,64,.92))!important;border:2px solid #e5a34f!important;border-radius:12px!important;box-shadow:0 8px 32px #000c,0 0 20px #f59e0b44!important;text-align:center!important}
+      #boss-dialogue-strip:not(.hidden){top:auto!important;bottom:8px!important;left:50%!important;transform:translateX(-50%)!important;min-height:44px!important;max-height:110px!important;overflow:hidden!important;padding:9px 14px!important;background:linear-gradient(105deg,rgba(5,14,28,.94),rgba(29,42,64,.92))!important;border:2px solid #e5a34f!important;border-radius:12px!important;box-shadow:0 8px 32px #000c,0 0 20px #f59e0b44!important;text-align:center!important}
       #hud-shield-cell.rs-shield-critical{border-color:#ef4444!important;background:#5c101a!important;animation:rsShieldDanger .38s steps(2,end) infinite}
       #hud-shield-cell.rs-shield-critical .rs-label,#hud-shield-cell.rs-shield-critical b{color:#fff!important}
       #hud-shield-cell.rs-shield-critical #hud-shield-fill{background:#ff2323!important;box-shadow:0 0 12px #ff0000}
@@ -2930,6 +2930,8 @@ function updateTerrainEvent(){
             set('sector-hud','SETOR '+sector);
             set('hud-rank','J'+journey+' '+rankName().slice(0,16));
             set('hud-pilot-name',(pilotProfile.nickname||'PILOTO').slice(0,24));
+            const env=window.RiverStormEnvironment;
+            set('hud-environment',env&&env.sector===sector?'◷ '+env.period+' · '+env.weather:'◷ DIA · CÉU LIMPO');
             updateCriticalShieldWarning();
             document.getElementById('hud-fuel-fill').style.width=Math.max(0,Math.min(100,player.fuel))+'%';
             document.getElementById('hud-shield-fill').style.width=Math.max(0,Math.min(100,player.shield/player.maxShield*100))+'%';
