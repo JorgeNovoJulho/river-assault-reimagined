@@ -2833,6 +2833,12 @@ function updateTerrainEvent(){
             if (gameState !== 'PLAYING') return;
             if(!enemies.some(e=>e.type==='BOSS'))document.getElementById('boss-special-hud').classList.add('hidden');
             missionTicks++;
+            // Orçamento visual por arena: protege CPU/GPU em resoluções altas.
+            if(bossActive){
+              if(enemyBullets.length>125)enemyBullets.splice(0,enemyBullets.length-125);
+              if(particles.length>150)particles.splice(0,particles.length-150);
+              if(floatingTexts.length>24)floatingTexts.splice(0,floatingTexts.length-24);
+            }
             updateBombAftershock();
             updateFusion();
             // Falas periódicas na arena, preservando as reações de dor de maior prioridade.
@@ -3845,6 +3851,9 @@ function updateTerrainEvent(){
         }
 
         function addExplosion(x, y, color, count = 10) {
+            const maxParticles=bossActive?150:240;
+            if(particles.length>=maxParticles)return;
+            count=Math.min(count,bossActive?14:28,maxParticles-particles.length);
             for (let i = 0; i < count; i++) {
                 particles.push({
                     x: x, y: y,
