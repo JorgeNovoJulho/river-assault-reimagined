@@ -127,7 +127,7 @@ test('bosses 1 a 3 usam sprites diferentes e distribuidos na build',()=>{
   assert.ok(vite.includes(p),p);
   assert.ok(renderer.includes(file),file);
  }
- assert.match(renderer,/Number\(d\.sector\)<=3/);
+ assert.match(renderer,/Number\(d\.sector\)<=6/);
 });
 
 test('sprites de chefes 4 a 6 integrados',()=>{
@@ -137,5 +137,5 @@ test('sprites de chefes 4 a 6 integrados',()=>{
   const p='assets/sprites/bosses/'+file;
   assert.ok(fs.existsSync(p),p);assert.ok(renderer.includes(file));assert.ok(vite.includes(p));
  }
- assert.match(renderer,/Number\\(d\\.sector\\)<=6/);
+ assert.ok(renderer.includes('Number(d.sector)<=6'));
 });
