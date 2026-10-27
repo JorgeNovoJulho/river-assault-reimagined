@@ -2104,6 +2104,40 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
                         ctx.stroke();
                         ctx.restore();
                     }
+                    // Assinaturas estruturais exclusivas dos vinte chefes: silhuetas, armas e cinemática.
+                    // Componentes desenhados em coordenadas locais acompanham o boss sem afetar hitboxes.
+                    {
+                      const id=Math.max(0,Math.min(19,(e.bossId||sector||1)-1));
+                      const motion=missionTicks*.052;
+                      const color=['#ff9b54','#4fe4ff','#dda4ff','#ff6e73','#b3f568','#ffe375','#7fdcff','#ff8bd0','#85b6ff','#e39bff','#65f0bd','#ffb8bd','#bfd4ff','#ffd64d','#ff8199','#5cf4ed','#e1beff','#ffe7ac','#abd9ff','#ff885f'][id];
+                      const family=Math.floor(id/5),variant=id%5;
+                      ctx.save();ctx.lineWidth=1.6;ctx.strokeStyle=color;ctx.fillStyle=color;
+                      ctx.globalAlpha=.83;
+                      const mountX=w*(.28+variant*.015),mountY=h*(family%2?.16:-.06);
+                      // Torres, propulsores e braços apresentam perfis distintos a cada missão.
+                      for(const side of [-1,1]){
+                        ctx.save();ctx.translate(side*mountX,mountY);
+                        ctx.rotate(side*(Math.sin(motion*(.5+variant*.06)+side)*(.10+family*.025)));
+                        ctx.beginPath();
+                        if(family===0){ctx.moveTo(0,0);ctx.lineTo(side*13,-11-variant*2);ctx.lineTo(side*(21+variant*3),-5);ctx.lineTo(side*12,7);ctx.closePath();}
+                        else if(family===1){ctx.rect(side>0?0:-21,-5,21+variant*3,10);ctx.moveTo(0,0);ctx.lineTo(side*26,0);}
+                        else if(family===2){ctx.moveTo(0,0);ctx.lineTo(side*9,-17);ctx.lineTo(side*23,-22+variant*3);ctx.lineTo(side*17,2);ctx.closePath();}
+                        else{ctx.ellipse(side*12,0,9+variant*2,5+family,side*.35,0,Math.PI*2);ctx.moveTo(side*10,-8);ctx.lineTo(side*10,8);}
+                        ctx.stroke();ctx.globalAlpha=.24;ctx.fill();ctx.restore();
+                      }
+                      // Núcleo central exclusivo: 20 geometrias obtidas do número de aletas e fase.
+                      const blades=3+id%7, coreSize=7+(id%4)*2;
+                      ctx.save();ctx.rotate(motion*(id%2?-.22:.18));
+                      ctx.beginPath();for(let n=0;n<blades*2;n++){const a=n*Math.PI/blades,r=n%2?coreSize*.5:coreSize;const x=Math.cos(a)*r,y=Math.sin(a)*r;if(n===0)ctx.moveTo(x,y);else ctx.lineTo(x,y)}ctx.closePath();
+                      ctx.fillStyle='#142135';ctx.globalAlpha=.98;ctx.fill();ctx.strokeStyle=color;ctx.stroke();
+                      ctx.beginPath();ctx.arc(0,0,2.5+Math.sin(motion*2+id)*.8,0,Math.PI*2);ctx.fillStyle=color;ctx.fill();ctx.restore();
+                      if(qualitySelect.value!=='eco'){
+                        ctx.globalAlpha=.65;ctx.strokeStyle=color;
+                        const pulses=2+(id%3);
+                        for(let n=0;n<pulses;n++){const y=h*(.24+n*.045);ctx.beginPath();ctx.moveTo(-w*.12,y);ctx.lineTo(0,y+Math.sin(motion*3+n)*2);ctx.lineTo(w*.12,y);ctx.stroke();}
+                      }
+                      ctx.restore();
+                    }
                     // RiverStorm: desgaste visual progressivo individual por chefe.
                     // O dano altera o próprio sprite renderizado, sem criar objetos nem mudar hitbox.
                     {
