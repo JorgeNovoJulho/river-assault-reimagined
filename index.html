@@ -95,7 +95,22 @@
         }
     </style>
 
-</head>
+<style id="riverstorm-menu-redesign">
+#start-brand .brand-top h1{font-family:Impact,'Arial Black',system-ui,sans-serif!important;font-weight:950!important;letter-spacing:.055em!important;line-height:.98!important;text-shadow:0 4px 18px #071629!important}
+#start-brand .brand-top h1 span:first-child{background:linear-gradient(180deg,#f4fcff,#71dcff 42%,#1385ca 92%);background-clip:text;-webkit-background-clip:text;color:transparent}
+#start-brand .brand-top h1 span:last-child{background:linear-gradient(180deg,#f4f4ff,#b8b4ff 40%,#7762d7 80%,#ee8d61);background-clip:text;-webkit-background-clip:text;color:transparent}
+#start-pilot-identity{margin:16px 0 12px;display:flex;align-items:center;gap:12px;padding:14px;background:linear-gradient(130deg,#112e49,#071a30);border:1px solid #46c5e77a;border-radius:14px;text-align:left;min-height:128px}
+#start-pilot-avatar{height:86px;width:86px;object-fit:cover;flex-shrink:0;border-radius:12px;background:linear-gradient(140deg,#1a5268,#102337);border:2px solid #62dffc}
+#start-pilot-identity .identity-copy{min-width:0;display:flex;flex-direction:column;gap:5px}
+#start-pilot-identity small{font:700 10px system-ui;letter-spacing:.13em;color:#72dbff}
+#start-pilot-name{font:900 clamp(14px,2.4vw,23px) system-ui;color:#f4fbff;overflow-wrap:anywhere}
+#start-pilot-rank{font:700 12px system-ui;color:#ffcd74}
+.identity-stats{display:flex;flex-wrap:wrap;gap:7px}.identity-stats b{font:800 11px system-ui;color:#81efcd;background:#122f42;border-radius:6px;padding:5px 7px}
+#start-main{gap:9px}#start-main button{font-family:system-ui,sans-serif;letter-spacing:.018em}
+#start-main select,#start-main details{border-color:#4a9ebc!important;background-color:#0a2136!important;color:#e8f8ff!important}
+#playlist-status{font:600 12px/1.4 system-ui;color:#8ae9f3!important}
+@media(max-width:600px){#start-pilot-identity{padding:10px}#start-pilot-avatar{height:66px;width:66px}}
+</style></head>
 <body class="h-screen w-screen flex flex-col items-center justify-center p-2 sm:p-4">
 
     <!-- Moldura Principal do Jogo -->
@@ -177,7 +192,7 @@
             <p class="text-xs sm:text-sm text-cyan-400 font-semibold tracking-widest mb-6">EDIÇÃO REIMAGINADA (PT-BR)</p>
 
             <p class="text-slate-300 text-sm max-w-md">20 missões • 7 aeronaves • resgates • chefes épicos</p>
-            <aside id="start-brand"><div class="brand-top"><h1><span>RIVER</span><span>STORM</span></h1><p>EDIÇÃO REIMAGINADA</p><div class="brand-summary">20 missões · 7 aeronaves · pilotos exclusivos · chefes épicos</div></div><div class="brand-feature"><strong>MISSÃO DE COMBATE</strong><p>Domine os rios, resgate aliados e enfrente os chefes dos vinte setores.</p></div><div class="brand-feature"><strong>SEU ARSENAL</strong><p>Sete aeronaves, pilotos exclusivos e habilidades conquistadas nas batalhas.</p></div><div class="brand-hint">Escolha sua aeronave no hangar e inicie a missão. Mouse, teclado e controle disponíveis.</div></aside>
+            <aside id="start-brand"><div class="brand-top"><h1><span>RIVER</span><span>STORM</span></h1><p>EDIÇÃO REIMAGINADA</p><div class="brand-summary">20 missões · 7 aeronaves · pilotos exclusivos · chefes épicos</div></div><div class="brand-feature"><strong>MISSÃO DE COMBATE</strong><p>Domine os rios, resgate aliados e enfrente os chefes dos vinte setores.</p></div><div class="brand-feature"><strong>SEU ARSENAL</strong><p>Sete aeronaves, pilotos exclusivos e habilidades conquistadas nas batalhas.</p></div><section id="start-pilot-identity" aria-label="Identidade do piloto"><img id="start-pilot-avatar" alt="Foto do piloto"><div class="identity-copy"><small>IDENTIFICAÇÃO DO PILOTO</small><strong id="start-pilot-name">PILOTO</strong><span id="start-pilot-rank">PATENTE · SOLDADO</span><div class="identity-stats"><b id="start-pilot-level">NÍVEL 1</b><b id="start-pilot-xp">0 XP</b></div></div></section><div class="brand-hint">Escolha sua aeronave no hangar e inicie a missão. Mouse, teclado e controle disponíveis.</div></aside>
             <div id="start-main" role="region" aria-label="Seleção da missão e hangar">
             <details class="w-full max-w-sm text-left rounded-xl border border-slate-600 bg-slate-900/80 px-3 py-2 text-xs">
               <summary class="cursor-pointer font-bold text-cyan-300">COMO JOGAR ▾</summary>
@@ -640,6 +655,19 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
           pilotProfile.bestByJourney[key]=Math.max(pilotProfile.bestByJourney[key]||0,score);
           if(missionTicks%300===0)savePilotProfile();
         }
+        function refreshStartPilotIdentity(){
+          const node=id=>document.getElementById(id);
+          if(!node('start-pilot-name'))return;
+          node('start-pilot-name').textContent=pilotProfile.nickname||'PILOTO';
+          node('start-pilot-rank').textContent='PATENTE · '+rankName();
+          node('start-pilot-level').textContent='NÍVEL '+(pilotLevel+1);
+          node('start-pilot-xp').textContent=Math.floor(pilotXP).toLocaleString('pt-BR')+' XP';
+          const avatar=node('start-pilot-avatar');
+          if(pilotProfile.photo){avatar.src=pilotProfile.photo}else{
+            avatar.removeAttribute('src');avatar.alt='Piloto sem foto cadastrada';
+          }
+        }
+        document.addEventListener('DOMContentLoaded',refreshStartPilotIdentity);
         function renderPilotProfile(){
           const fmt=n=>Math.floor(Number(n)||0).toLocaleString('pt-BR');
           const duration=Math.floor(pilotProfile.playSeconds||0),hours=Math.floor(duration/3600),minutes=Math.floor(duration%3600/60),seconds=duration%60;
