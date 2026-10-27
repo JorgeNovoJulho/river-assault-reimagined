@@ -58,6 +58,12 @@ jobs:
           test -s dist/assets/sprites/bosses/iron-wasp.svg
           test -s dist/assets/sprites/enemies/mecha-gun.svg
           test -s dist/assets/sprites/projectiles/plasma-blue.svg
+          for sprite in assets/sprites/terrain/water-detail.svg assets/sprites/terrain/river-island-detail.svg assets/sprites/terrain/bridge-steel-detail.svg assets/sprites/fx/explosion-ring.svg assets/sprites/player/riverstorm-fighter.svg; do
+            test -s "dist/$sprite" || { echo "::error::Sprite novo ausente: $sprite"; exit 1; }
+          done
+          if [ -d music ]; then
+            test -d dist/music || { echo '::error::Trilhas de audio ausentes da publicacao'; exit 1; }
+          fi
           touch dist/.nojekyll
           printf '{"build":"%s","published_by":"github-actions","build_outcome":"%s"}\n' "$GITHUB_SHA" "${{ steps.build.outcome }}" > dist/deployment-health.json
       - uses: actions/configure-pages@v5
