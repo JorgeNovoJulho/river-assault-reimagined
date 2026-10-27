@@ -182,3 +182,12 @@ test('four common enemy sprites are drawn without legacy overlays',()=>{
  assert.match(render,/commonEnemySprites/);
  assert.match(render,/if\(replacement&&replacement\.complete&&replacement\.naturalWidth\)/);
 });
+
+test('tank turret ship jet and zigzag sprites integrated',()=>{
+ const renderer=fs.readFileSync('src/render/scene2d5.js','utf8');
+ const vite=fs.readFileSync('vite.config.js','utf8');
+ for(const name of ['tank','turret','ship','jet','zigzag']){
+  const p='assets/sprites/enemies/'+name+'.svg';
+  assert.ok(fs.existsSync(p),p);assert.ok(renderer.includes(name+'.svg'));assert.ok(vite.includes(p));
+ }
+});
