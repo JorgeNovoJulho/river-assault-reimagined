@@ -112,3 +112,8 @@ test('all boss statuses have sound and visible feedback on pilot',()=>{
   assert.ok(game.includes(effect+':'),effect+' visual palette');
  }
 });
+
+test('boss low-health and special warning use arcs, never rectangle outlines',()=>{
+ assert.doesNotMatch(game,/ctx\.strokeRect\(e\.x-e\.width\/2/);
+ assert.match(game,/ctx\.arc\(e\.x,e\.y,Math\.min\(34,e\.width\*\.28\)/);
+});
