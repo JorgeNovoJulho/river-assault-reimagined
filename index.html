@@ -1872,6 +1872,12 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
                   const blades=eb.element==='ICE'?6:eb.element==='PRISM'?7:eb.element==='SHADOW'?3:5;
                   ctx.beginPath();for(let n=0;n<blades*2;n++){const a=n*Math.PI/blades+missionTicks*.045,r=n%2?5:11;const x=Math.cos(a)*r,y=Math.sin(a)*r;if(n)ctx.lineTo(x,y);else ctx.moveTo(x,y);}ctx.closePath();ctx.stroke();ctx.restore();
                 }
+                // Mesma identidade de sprite do armamento elemental, independentemente da trajetória.
+                if(eb.element){
+                  ctx.save();ctx.rotate(Math.atan2(eb.vx||0,-(eb.vy||4)));
+                  drawProjectileSprite(eb.element,eb.color||'#f8fafc',missionTicks);ctx.restore();
+                  ctx.restore();return;
+                }
                 const element=eb.element||'';
                 const time=missionTicks*.12,angle=Math.atan2(eb.vy||1,eb.vx||0)+Math.PI/2;
                 ctx.rotate(angle);ctx.shadowColor=eb.color||'#ef4444';ctx.shadowBlur=12;
