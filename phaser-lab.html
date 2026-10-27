@@ -86,6 +86,9 @@ body{margin:0;min-height:100vh;background:#06101f;color:#d8e9f8;font:14px system
         this.waterOverlay=this.add.graphics().setDepth(-1);
         this.waterPhase=0;
         this.waterDetailRows=22;
+        // Espuma discreta das margens: camada visual independente, sem colisões.
+        this.shoreFoam=this.add.graphics().setDepth(1);
+        this.foamPhase=0;
         // Tiles antigos mantidos em preload para rollback; não desenhados, pois suas emendas eram visíveis.
         this.islandVisuals=[this.add.image(157,-90,'island-detail').setDisplaySize(102,63).setDepth(0),this.add.image(378,-560,'island-detail').setDisplaySize(110,66).setDepth(0)];
         this.banks=[];
@@ -141,6 +144,22 @@ body{margin:0;min-height:100vh;background:#06101f;color:#d8e9f8;font:14px system
           this.waterOverlay.lineTo(x+15,y-3);
           this.waterOverlay.lineTo(x+31,y);
           this.waterOverlay.strokePath();
+        }
+        // Espuma acompanha a ondulação das margens, sem alterar gameplay.
+        this.foamPhase=(this.foamPhase+delta*.00045)%(Math.PI*2);
+        this.shoreFoam.clear();
+        this.shoreFoam.lineStyle(2,0xc7eff0,.30);
+        for(let side=0;side<2;side++){
+          for(let segment=0;segment<23;segment++){
+            const y=segment*46-30;
+            const sway=Math.sin(y*.018+this.foamPhase)*7;
+            const x=(side===0?143:W-143)+(side===0?1:-1)*sway;
+            this.shoreFoam.beginPath();
+            this.shoreFoam.moveTo(x-9,y);
+            this.shoreFoam.lineTo(x,y+5);
+            this.shoreFoam.lineTo(x+9,y+1);
+            this.shoreFoam.strokePath();
+          }
         }
         for(const bank of this.banks){bank.y+=1.25*dt;if(bank.y>H+240)bank.y-=1440;}
         for(const tile of this.waterTiles){tile.y+=1.25*dt;if(tile.y>H+240)tile.y-=1440;}
