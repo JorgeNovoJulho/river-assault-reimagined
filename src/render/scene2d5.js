@@ -1246,6 +1246,26 @@ function atmosphereByTime(c,d){
  }
  c.restore();
 }
+function bossPresentation(c,d){
+ if(!detailEnabled)return;
+ const now=Date.now()*.001;
+ for(const e of d.enemies||[]){
+  if(e.type!=='BOSS'||e.hp<=0)continue;
+  const radius=Math.max(32,(e.width||90)*.39),phase=(e.bossId||d.sector||1)%5;
+  c.save();c.translate(e.x,e.y);
+  const damaged=e.maxHp>0&&e.hp/e.maxHp<.4;
+  const glow=['#6ee7ff','#ffb37b','#b2ff8c','#d1a6ff','#ffe19b'][phase];
+  c.globalCompositeOperation='screen';
+  const halo=c.createRadialGradient(0,0,radius*.2,0,0,radius*1.42);
+  halo.addColorStop(0,'rgba(255,255,255,.12)');halo.addColorStop(.38,glow+'44');halo.addColorStop(1,'rgba(0,0,0,0)');
+  c.fillStyle=halo;c.beginPath();c.arc(0,0,radius*1.42,0,Math.PI*2);c.fill();
+  c.globalCompositeOperation='source-over';c.lineWidth=2.5;c.strokeStyle=damaged?'#ff6c54':glow;
+  c.globalAlpha=.55+.2*Math.sin(now*4+phase);
+  c.beginPath();c.ellipse(0,0,radius*1.14,radius*.78,Math.sin(now*.35)*.18,0,Math.PI*2);c.stroke();
+  if(damaged){for(let i=0;i<7;i++){const x=Math.sin(now*1.5+i*2)*radius*.57,y=-radius*.8-((now*15+i*13)%(radius*.9));c.fillStyle=i%2?'#fe935f':'#cdd6de';c.globalAlpha=.25+.1*i;c.beginPath();c.arc(x,y,2+i%3,0,7);c.fill()}}
+  c.restore();
+ }
+}
 function draw(c,d){
  const t=THEMES[((d.sector-1)%THEMES.length+THEMES.length)%THEMES.length];
  landscape(c,d,t);terrainSignature(c,d,t);landmark(c,d,t);mapSetPieces(c,d,t);biomeAtmosphere(c,d,t);enhancedWorld(c,d,t);
@@ -1255,7 +1275,7 @@ function draw(c,d){
    if(e.hp<=0||e.y+(e.height||40)<-45||e.y-(e.height||40)>d.h+45||e.x+(e.width||40)<-45||e.x-(e.width||40)>d.w+45)continue;
    enemy(c,e,t.time);highDetailEnemy(c,e,t.time);drawAtlasVehicle(c,e);drawBiomeOverlay(c,e);mechArticulation(c,e);
  }
- if(!d.invulnerable||Math.floor(Date.now()/110)%2){plane(c,d.player.x,d.player.y,d.player.aircraftType||d.aircraft,0.85);highDetailPlane(c,d.player.x,d.player.y,d.player.aircraftType||d.aircraft)}enhancedBattleLight(c,d);enhancedWeaponGlints(c,d);atmosphereByTime(c,d);
+ if(!d.invulnerable||Math.floor(Date.now()/110)%2){plane(c,d.player.x,d.player.y,d.player.aircraftType||d.aircraft,0.85);highDetailPlane(c,d.player.x,d.player.y,d.player.aircraftType||d.aircraft)}enhancedBattleLight(c,d);enhancedWeaponGlints(c,d);bossPresentation(c,d);atmosphereByTime(c,d);
 }
 root.RiverVisuals={cinematicBossSkill,draw,plane,enemy,THEMES,BIOME_DETAILS,drawIslands(c,items,sector){const t=THEMES[((sector-1)%THEMES.length+THEMES.length)%THEMES.length];islands(c,items,t)}};
 })(window);
