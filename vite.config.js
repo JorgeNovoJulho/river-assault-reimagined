@@ -11,7 +11,8 @@ const legacyScripts = [
   'src/render/scene2d5.js',
   'src/audio/music.js',
   'src/audio/sfx-modern.js',
-  'src/audio/playlist.js'
+  'src/audio/playlist.js',
+  'src/net/room-lobby.js'
 ];
 
 function copyAndVersionRuntime() {
