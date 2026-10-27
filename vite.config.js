@@ -51,6 +51,18 @@ function copyAndVersionRuntime() {
         mkdirSync(dirname(target), { recursive: true });
         copyFileSync(source, target);
       }
+      // Copiar texturas raster opcionais do cenário quando homologadas.
+      for (const file of [
+        'assets/sprites/premium/runtime/environment/water_calm.png',
+        'assets/sprites/premium/runtime/environment/riverbank_left.png',
+        'assets/sprites/premium/runtime/environment/riverbank_right.png'
+      ]) {
+        const source=resolve(file), target=resolve('dist',file);
+        if (existsSync(source)) {
+          mkdirSync(dirname(target),{recursive:true});
+          copyFileSync(source,target);
+        }
+      }
       // Copiar as texturas premium aprovadas; os SVGs legados continuam intactos.
       for (const file of [
         'assets/sprites/premium/runtime/player/fighter_candidate.png',
