@@ -1751,8 +1751,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
                         ctx.beginPath();ctx.moveTo(0,-10);ctx.lineTo(4,4);ctx.lineTo(0,1);ctx.lineTo(-4,4);ctx.closePath();ctx.fill();
                         ctx.fillStyle='#ffcb70';ctx.beginPath();ctx.moveTo(-2,5);ctx.lineTo(0,10);ctx.lineTo(2,5);ctx.fill();
                     }else if(['PULSE','CIRCLE','SPREAD'].includes(w)){
-                        ctx.beginPath();ctx.arc(0,0,w==='PULSE'?5:3,0,Math.PI*2);ctx.stroke();
-                        ctx.beginPath();ctx.arc(0,0,1.5,0,Math.PI*2);ctx.fill();
+                        if(w==='CIRCLE'){for(let n=0;n<8;n++){const a=n*Math.PI/4;ctx.beginPath();ctx.moveTo(Math.cos(a)*5,Math.sin(a)*5);ctx.lineTo(Math.cos(a)*9,Math.sin(a)*9);ctx.stroke();}ctx.beginPath();ctx.arc(0,0,5.5,0,Math.PI*2);ctx.stroke();ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(0,0,2,0,Math.PI*2);ctx.fill();}else{ctx.beginPath();ctx.moveTo(0,-8);ctx.lineTo(4,3);ctx.lineTo(0,6);ctx.lineTo(-4,3);ctx.closePath();ctx.stroke();ctx.fillStyle='#fff';ctx.fillRect(-1,-4,2,7);}
                     }else if(['TRIDENT','DIAGONAL','HYBRID'].includes(w)){
                         ctx.beginPath();ctx.moveTo(0,-9);ctx.lineTo(-5,5);ctx.lineTo(0,2);ctx.lineTo(5,5);ctx.closePath();ctx.fill();
                     }else{
@@ -3332,11 +3331,10 @@ function updateTerrainEvent(){
             if(missionTicks%4!==0)return;
             for(const w of wingmen){
                 if(w.ttl<=0)continue;
-                const guided=['TRACKER','MISSILE','ROCKET','PRECISION','MULTI'].includes(player.weapon);
-                const turbo=['BEAM','LASER','PULSE'].includes(player.weapon);
+                // Naves auxiliares usam sempre mísseis, independentemente do armamento principal.
                 for(const direction of [-1,1]){
-                    bullets.push({x:player.x+w.side*36,y:player.y+10,vx:w.side*5.8,speed:direction*(turbo?11:8),
-                        type:guided?'MISSILE':turbo?'LASER':'SINGLE',color:guided?'#fbbf24':turbo?'#67e8f9':'#a7f3d0'});
+                    bullets.push({x:player.x+w.side*36,y:player.y+10,vx:w.side*5.8,speed:direction*8.6,
+                        type:'MISSILE',weaponId:'MISSILE',color:'#ffb65c',isWingmanMissile:true});
                 }
             }
         }
@@ -3444,7 +3442,7 @@ function updateTerrainEvent(){
             createFloatingText(e.x,e.y,'ITEM LIBERADO!','#67e8f9');
         }
         function spawnPowerupCheck(x, y) {
-            if (Math.random() < 0.18 && powerups.length<4) {
+            if (Math.random() < 0.205 && powerups.length<5) {
                 const types = [
                     { type: 'DOUBLE', color: '#60a5fa', label: '2X' },
                     { type: 'SPREAD', color: '#f59e0b', label: '3X' },
@@ -3459,8 +3457,8 @@ function updateTerrainEvent(){
                 { type: 'DRONES', color:'#67e8f9',label:'2A' },
                 { type: 'REPAIR', color:'#a7f3d0',label:'R+' }
                 ];
-                // Disparo circular é raro: 1 em aproximadamente 45 coletas.
-                const selected = Math.random()<.022?types.find(t=>t.type==='CIRCLE'):types.filter(t=>t.type!=='CIRCLE')[Math.floor(Math.random()*(types.length-1))];
+                // CIRCLE mais acessível: chance dirigida de 5,5% a cada seleção e maior oferta geral.
+                const selected = Math.random()<.055?types.find(t=>t.type==='CIRCLE'):types.filter(t=>t.type!=='CIRCLE')[Math.floor(Math.random()*(types.length-1))];
                 powerups.push({ x: x, y: y, ...selected });
             }
         }
