@@ -1438,6 +1438,30 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
             osc.connect(gain);gain.connect(context.destination);osc.start(start);osc.stop(start+.48);
           }catch(error){console.warn('Som da habilidade indisponível',error)}
         }
+        // Mesmo vocabulário de VFX do boss, reduzido para o contorno da nave.
+        function drawPlayerStatusEffect(){
+          if(!player.effectType||player.effectTimer<=0)return;
+          const kind=player.effectType, t=missionTicks, x=player.x,y=player.y;
+          const colors={FIRE:'#ff842e',ICE:'#b7efff',LIGHTNING:'#9de9ff',EMP:'#55eaff',GRAVITY:'#a9a1ff',BLEED:'#fa4667',POISON:'#89ef58',PRISM:'#ffa9ef',SHADOW:'#8b62c8'};
+          const col=colors[kind];if(!col)return;
+          ctx.save();ctx.translate(x,y);ctx.lineWidth=2;ctx.strokeStyle=col;ctx.fillStyle=col;
+          ctx.globalAlpha=.78+.16*Math.sin(t*.34);
+          if(kind==='FIRE'){
+            for(let i=0;i<5;i++){const px=(i-2)*8,dy=Math.sin(t*.22+i*2)*6;ctx.beginPath();ctx.moveTo(px,15);ctx.quadraticCurveTo(px-7+dy,-2,px+dy*.3,-24-(i%3)*4);ctx.stroke();}
+          }else if(kind==='BLEED'||kind==='POISON'){
+            for(let i=0;i<6;i++){const xx=Math.sin(i*2.4+t*.04)*22,yy=((t*.8+i*15)%60)-30;ctx.beginPath();ctx.arc(xx,yy,kind==='BLEED'?2:3+i%2,0,Math.PI*2);ctx.fill();}
+          }else if(kind==='ICE'){
+            for(let i=0;i<6;i++){const a=i*Math.PI/3,px=Math.cos(a)*23,py=Math.sin(a)*25;ctx.beginPath();ctx.moveTo(px,py-6);ctx.lineTo(px+4,py);ctx.lineTo(px,py+6);ctx.lineTo(px-4,py);ctx.closePath();ctx.stroke();}
+          }else if(kind==='LIGHTNING'||kind==='EMP'){
+            for(let i=0;i<3;i++){const side=i-1;ctx.beginPath();ctx.moveTo(side*10,-22);ctx.lineTo(side*13+4,-9);ctx.lineTo(side*8-5,2);ctx.lineTo(side*15,18);ctx.stroke();}
+            if(kind==='EMP'){ctx.setLineDash([4,4]);ctx.strokeRect(-23,-27,46,55);ctx.setLineDash([]);}
+          }else if(kind==='GRAVITY'||kind==='SHADOW'){
+            for(let i=0;i<2;i++){ctx.beginPath();ctx.ellipse(0,0,26+i*5,13+i*5,(t*.02)*(i?1:-1),0,Math.PI*2);ctx.stroke();}
+          }else if(kind==='PRISM'){
+            for(let i=0;i<4;i++){ctx.strokeStyle=['#ff7389','#ffd76f','#69e9ed','#b398ff'][i];const a=i*Math.PI/2+t*.012;ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(Math.cos(a)*29,Math.sin(a)*29);ctx.stroke();}
+          }
+          ctx.restore();
+        }
         function drawBossSkillEffect(){
           const f=bossSkillEffect;if(!f)return;
           const tracked=enemies.find(e=>e.type==='BOSS'&&e.hp>0);if(tracked){f.x=tracked.x;f.y=tracked.y;}else if(!bossActive){bossSkillEffect=null;return;}
@@ -2848,6 +2872,13 @@ function updateTerrainEvent(){
         function update() {
             if (gameState !== 'PLAYING') return;
             if(player.damageBlinkFrames>0)player.damageBlinkFrames--;
+            if(player.effectType!==player.lastAudibleEffect){
+              player.lastAudibleEffect=player.effectType;
+              if(player.effectType&&player.effectTimer>0){
+                try{window.RiverSFX?.impact?.()}catch(_){}
+                createFloatingText(player.x,player.y-42,'AFETADO: '+player.effectType,'#ffcc7f');
+              }
+            }
             if(!enemies.some(e=>e.type==='BOSS'))document.getElementById('boss-special-hud').classList.add('hidden');
             missionTicks++;
             if(player.gravityDebuffTicks>0)player.gravityDebuffTicks--;
@@ -4225,6 +4256,7 @@ function updateTerrainEvent(){
             drawClimateOverlay();
             // Reforça a silhueta do jogador acima dos disparos CIRCLE e do clima.
             window.RiverVisuals.drawPlayerForeground?.(ctx,player.x,player.y,player.aircraftType||selectedPlane,player.invulnerable);
+            drawPlayerStatusEffect();
             if(player.damageBlinkFrames>0&&missionTicks%4<2){ctx.save();ctx.globalCompositeOperation='source-over';ctx.fillStyle='rgba(255,22,41,.88)';ctx.beginPath();ctx.ellipse(player.x,player.y,18,23,0,0,Math.PI*2);ctx.fill();ctx.restore();}
             if(player.damageBlinkFrames>0&&missionTicks%4<2){
               ctx.save();ctx.globalCompositeOperation='screen';ctx.fillStyle='rgba(255,30,45,.8)';
