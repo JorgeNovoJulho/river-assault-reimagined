@@ -213,6 +213,7 @@
 
             <div class="w-full max-w-sm mb-2 text-left"><label for="level-select" class="text-xs text-amber-400 font-bold">MISSÃO PARA TESTE</label><select id="level-select" class="w-full bg-slate-800 text-white border border-slate-600 p-2 rounded"></select><p id="level-summary" class="text-xs text-cyan-200 mt-1"></p></div>
             <div class="w-full max-w-sm mb-2 text-left"><label for="quality-select" class="text-xs text-cyan-300">QUALIDADE VISUAL</label><select id="quality-select" class="w-full bg-slate-800 text-white border border-slate-600 p-2 rounded"><option value="eco">Econômico — celulares antigos</option><option value="balanced">Equilibrado — mais detalhes</option><option value="enhanced">Aprimorado — PC e celulares rápidos</option></select></div>
+            <div class="w-full max-w-sm mb-2 text-left"><label for="resolution-select" class="text-xs text-cyan-300">RESOLUÇÃO INTERNA DO JOGO (PC)</label><select id="resolution-select" class="w-full bg-slate-800 text-white border border-slate-600 p-2 rounded"><option value="auto">Automática (recomendada)</option><option value="1080p">Full HD — renderização 1080p vertical</option><option value="4k">Ultra HD — alta densidade 4K vertical</option></select><p class="text-xs text-slate-400 mt-1">Mantém proporção vertical 2:3. A qualidade 4K exige mais GPU/memória; tamanho da janela é independente da renderização.</p><span id="resolution-effective" class="text-xs text-green-300"></span></div>
             <div class="w-full max-w-sm mb-4 text-left">
                 <label for="plane-select" class="text-amber-400 block text-xs mb-2 font-bold">ESCOLHA SEU AVIÃO</label>
                 <select id="plane-select" class="w-full p-3 bg-slate-800 text-white rounded border border-cyan-500">
@@ -4347,7 +4348,13 @@ function updateTerrainEvent(){
 
         function resizeCanvas() {
             const targetDpr=activeVisualProfile().dprMax;
-            const density=Math.min(targetDpr,Math.max(1,window.devicePixelRatio||1),Math.sqrt(4000000/(VIRTUAL_WIDTH*VIRTUAL_HEIGHT)));
+            const requested=document.getElementById('resolution-select')?.value||'auto';
+            const preset=requested==='4k'?5.4:requested==='1080p'?2.7:null;
+            // 400x600 (2:3): 1080x1620 ou 2160x3240. 4K representa a largura
+            // interna de 2160 pixels; nao muda a resolucao fisica da tela.
+            const density=preset||Math.min(targetDpr,Math.max(1,window.devicePixelRatio||1),Math.sqrt(4000000/(VIRTUAL_WIDTH*VIRTUAL_HEIGHT)));
+            const indicator=document.getElementById('resolution-effective');
+            if(indicator)indicator.textContent='Renderização: '+Math.round(VIRTUAL_WIDTH*density)+' × '+Math.round(VIRTUAL_HEIGHT*density)+' pixels';
             // A base lógica permanece 400x600; o backing store em maior resolução melhora antialiasing sem alterar hitboxes.
             const nextWidth=Math.round(VIRTUAL_WIDTH*density);
             const nextHeight=Math.round(VIRTUAL_HEIGHT*density);
@@ -4357,7 +4364,10 @@ function updateTerrainEvent(){
             beginLogicalFrame();
         }
 
-        window.addEventListener('resize', resizeCanvas);
+        const resolutionSelect=document.getElementById('resolution-select');
+        try{const stored=localStorage.getItem('riverstorm_resolution_v1');if(['auto','1080p','4k'].includes(stored))resolutionSelect.value=stored;}catch(error){}
+        resolutionSelect.addEventListener('change',()=>{try{localStorage.setItem('riverstorm_resolution_v1',resolutionSelect.value);}catch(error){}resizeCanvas();});
+                window.addEventListener('resize', resizeCanvas);
         resizeCanvas();
 
         // --- MOUSE: mover para pilotar, botão esquerdo atira, direito lança bomba.
