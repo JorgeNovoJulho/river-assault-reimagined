@@ -37,3 +37,17 @@ test('every referenced local JS resource exists', () => {
  const refs=[...html.matchAll(/<script[^>]+src="([^"]+)"/g)].map(x=>x[1]);
  for(const ref of refs){if(/^https?:/.test(ref))continue;assert.ok(fs.existsSync(path.resolve(ref)),ref);}
 });
+
+test('alternate J and K keyboard controls are mapped for fusion',()=>{
+ assert.match(html,/KeyJ: false/);
+ assert.match(html,/KeyK: false/);
+ assert.match(html,/e.code === 'KeyJ'/);
+ assert.match(html,/e.code === 'KeyK'/);
+ assert.match(html,/keys\.KeyJ\|\|touchFireHeld/);
+});
+test('shoreline decorative obstacles are relocated outside water bounds',()=>{
+ assert.match(html,/function constrainShoreDecorations\(/);
+ assert.match(html,/constrainShoreDecorations\(\)/);
+ assert.match(html,/boundaries.leftBank-half-9/);
+ assert.match(html,/boundaries.rightBank\+half\+9/);
+});
