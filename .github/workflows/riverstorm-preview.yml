@@ -19,13 +19,27 @@ jobs:
         with:
           node-version: '22'
       - run: npm install --no-package-lock --no-audit --no-fund
-      - run: npm test
-      - run: npm run build -- --base=./
+      - name: Verify runtime versions and project paths
+        run: |
+          node --version
+          npm --version
+          test -f index.html
+          test -f vite.config.js
+          test -d tests
+      - name: Execute unit and regression tests
+        run: npm test
+      - name: Build web game
+        run: npm run build -- --base=./
       - name: Prepare browser build for Pages
         run: |
           mkdir -p public-preview
           cp -r dist/. public-preview/
           test -f public-preview/index.html
+      - name: Verify deployed bundle
+        run: |
+          test -s public-preview/index.html
+          test -s public-preview/build-info.json
+          node -e "const fs=require('fs'); const html=fs.readFileSync('public-preview/index.html','utf8'); if(!html.includes('riverstorm-build'))process.exit(1); console.log('Versioned game bundle confirmed')"
       - uses: actions/upload-artifact@v4
         with:
           name: riverstorm-web-test
