@@ -30,3 +30,24 @@ test('lobby e renderer compilam',()=>{
   assert.doesNotThrow(()=>new vm.Script(fs.readFileSync(p,'utf8')));
  }
 });
+
+test('auxiliares possuem formacoes adaptativas para 19 armas',()=>{
+ const segment=game.match(/const AUX_FORMATIONS=\{([\s\S]*?)\};/);
+ assert.ok(segment,'tabela de formacoes');
+ for(const weapon of ['SINGLE','DOUBLE','SPREAD','LASER','MISSILE','BURST','ALTERNATE','NEEDLE','PULSE','ROCKET','RAPID','DIAGONAL','TRIDENT','BEAM','PRECISION','HYBRID','CIRCLE','TRACKER','MULTI'])
+  assert.match(segment[1],new RegExp('\\b'+weapon+':'));
+ assert.match(game,/function wingPosition\(/);
+});
+test('CIRCLE usa raios horizontais com impacto em estruturas, ilhas e inimigos',()=>{
+ assert.match(game,/CIRCLE:'SIDE_RAYS'/);
+ assert.match(game,/function fireCircleSideRays\(/);
+ assert.match(game,/function drawCircleSideRays\(/);
+ assert.match(game,/for\(const collection of \[structures,islands\]\)/);
+ assert.match(game,/if\(e.type==='BOSS'\)/);
+});
+test('fusao tem contador de duracao e recarga independente',()=>{
+ assert.match(game,/function drawFusionStatus\(/);
+ assert.match(game,/fusionTicks=360;fusionCooldown=0/);
+ assert.match(game,/fusionCooldown=360/);
+ assert.match(game,/FUSÃO RECARGA/);
+});
