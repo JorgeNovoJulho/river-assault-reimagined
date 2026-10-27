@@ -1,0 +1,6 @@
+const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs');const s=fs.readFileSync('index.html','utf8');
+test('fusão de 6 segundos e recarga de mais 6 segundos',()=>{assert.ok(s.includes('fusionTicks=360;fusionCooldown=bossActive?0:360'));assert.ok(s.includes('fusionTicks--;'));assert.ok(s.includes('if(fusionCooldown>0)fusionCooldown--'));});
+test('boss recebe 5 por cento por pulso de segundo',()=>{assert.ok(s.includes('elapsed%60===0'));assert.ok(s.includes('boss.hp-boss.maxHp*.05'));assert.ok(s.includes('fusionBossUsed=!!bossActive'));assert.ok(s.includes('bossActive = true;fusionBossUsed=false'));});
+test('auxiliares e cor preservada',()=>{assert.ok(s.includes('fusionTicks>0?17:36'));assert.ok(s.includes('fusionTicks>0?-33:10'));assert.ok(s.includes('drawFusion();'));assert.ok(s.includes('player.weapon'));});
+test('duas torretas destrutiveis nos bosses',()=>{for(const q of ['turretLeftHp','turretRightHp','TORRETA DESTRUÍDA!','boss.parryVulnerableTicks','boss.turretTimer%72===0'])assert.ok(s.includes(q),q);});
+test('jogo preservado',()=>{assert.ok(s.length>330000);for(const q of ['function finishFullCampaign()','function drawEnemies()','function drawClimateOverlay()'])assert.ok(s.includes(q));});
