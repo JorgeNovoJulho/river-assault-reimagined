@@ -2185,7 +2185,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
             launchSkillTrajectory('FIRE',sourceX,sourceY,tx,ty,'#67e8f9');
         }
                 function drawWingmen(){
-            for(const w of wingmen){ctx.save();ctx.globalAlpha=w.ttl<=0?Math.max(0,1-(w.detach||0)/36):1;ctx.translate(player.x+w.side*(36+(w.detach||0)*2),player.y+10+(w.detach||0)*1.1);ctx.fillStyle='#18425e';ctx.strokeStyle='#67e8f9';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(0,-14);ctx.lineTo(-13,9);ctx.lineTo(0,3);ctx.lineTo(13,9);ctx.closePath();ctx.fill();ctx.stroke();ctx.fillStyle='#67e8f9';ctx.fillRect(-12,14,24*w.hp/w.maxHp,3);ctx.restore()}
+            for(const w of wingmen){ctx.save();ctx.globalAlpha=w.ttl<=0?Math.max(0,1-(w.detach||0)/36):1;ctx.translate(player.x+w.side*((fusionBeamTicks>0?39:36)+(w.detach||0)*2),player.y+10+(w.detach||0)*1.1);ctx.fillStyle='#18425e';ctx.strokeStyle='#67e8f9';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(0,-14);ctx.lineTo(-13,9);ctx.lineTo(0,3);ctx.lineTo(13,9);ctx.closePath();ctx.fill();ctx.stroke();ctx.fillStyle='#67e8f9';ctx.fillRect(-12,14,24*w.hp/w.maxHp,3);ctx.restore()}
         }
         function drawRescueBoats(){
             for(const b of rescueBoats){
@@ -2384,7 +2384,8 @@ function updateTerrainEvent(){
             if (gameState !== 'PLAYING') return;
             if(!enemies.some(e=>e.type==='BOSS'))document.getElementById('boss-special-hud').classList.add('hidden');
             missionTicks++;
-            updateContinuousLaser();
+            updateFusionBeam();
+            if(fusionBeamTicks<=0)updateContinuousLaser();
             updateBombAftershock();
             // Falas periódicas na arena, preservando as reações de dor de maior prioridade.
             if(bossActive&&missionTicks%460===0&&!bossDefeatedThisMission&&(!bossTaunt||bossTaunt.ticks<110)){
@@ -2662,7 +2663,7 @@ function updateTerrainEvent(){
                 }
 
                 if((parryTicks>0||rollFrames>0)&&Math.hypot(eb.x-player.x,eb.y-player.y)<(rollFrames>0?67:53)){enemyBullets.splice(index,1);const boss=enemies.find(e=>e.type==='BOSS'&&e.hp>0),target=boss||enemies.find(e=>e.hp>0);const tx=target?.x??eb.x,ty=target?.y??0,dx=tx-eb.x,dy=ty-eb.y,len=Math.max(1,Math.hypot(dx,dy));bullets.push({x:eb.x,y:eb.y,vx:dx/len*11,speed:-dy/len*11,type:'REFLECTED',color:rollFrames>0?'#ff4dd8':'#22f7c4',damage:rollFrames>0?Math.max(1,eb.damage||25)*1.10:37.5,reflected:true,homing:true,dodgeReflect:rollFrames>0});addExplosion(eb.x,eb.y,'#67e8f9',8);createFloatingText(player.x,player.y-40,rollFrames>0?'ESQUIVA + REFLEXO 110%!':'REFLETIDO!',rollFrames>0?'#ff4dd8':'#67e8f9');continue;}
-                const hitWingman=wingmen.find(w=>Math.hypot(eb.x-(player.x+w.side*36),eb.y-(player.y+10))<14);
+                const hitWingman=fusionBeamTicks>0?null:wingmen.find(w=>Math.hypot(eb.x-(player.x+w.side*36),eb.y-(player.y+10))<14);
                 if(hitWingman){
                     enemyBullets.splice(index,1);
                     hitWingman.hp-=25;
@@ -3046,7 +3047,7 @@ function updateTerrainEvent(){
             bossDefeatedThisMission=false;
             redAlertTicks=0;
             redAlertTriggered=false;
-            wingmen=[];
+            wingmen=[];fusionBeamTicks=0;fusionSavedWeapon=null;laserImpact=null;
             bossDropPhase=0;
             previousPlayerPosition=null;
             hazardWaveCooldown=0;
@@ -3138,6 +3139,52 @@ function updateTerrainEvent(){
                 if(player.specialShots===0)player.weapon=aircraftCatalog.PLANES[player.aircraftType||selectedPlane].weapons[0];
             }
         }
+        function updateFusionBeam(){
+            if(fusionBeamTicks<=0)return;
+            fusionBeamTicks--;
+            const left=player.x-39,right=player.x+39,top=0,bottom=player.y+22;
+            // A rajada preenche toda a largura entre as auxiliares e atravessa todos os alvos no comprimento.
+            if(missionTicks%4===0){
+                for(const e of enemies){
+                    if(e.hp<=0||e.y>bottom||e.y+(e.height||30)/2<top||Math.abs(e.x-player.x)>(e.width||30)/2+46)continue;
+                    if(e.type==='BOSS'){e.hp=Math.max(0,e.hp-Math.min(e.maxHp*.009,7));if(e.hp===0&&!bossDefeatedThisMission)finishBossDefeatedBySkill(e);}
+                    else {e.hp=0;addExplosion(e.x,e.y,'#67e8f9',12);}
+                }
+                for(const collection of [structures,islands]){
+                    for(let i=collection.length-1;i>=0;i--){
+                        const o=collection[i];if(o.y>bottom+40||o.y<-60)continue;
+                        const half=(o.width||45)/2;
+                        if(o.x-half>right||o.x+half<left)continue;
+                        addExplosion(o.x,o.y,'#fef08a',20);
+                        collection.splice(i,1);
+                    }
+                }
+            }
+            if(fusionBeamTicks===0)endFusionBeam();
+        }
+        function drawFusionBeam(){
+            if(fusionBeamTicks<=0)return;
+            const left=player.x-39,right=player.x+39,y=player.y+13,t=missionTicks;
+            ctx.save();ctx.globalCompositeOperation='screen';
+            const glow=ctx.createLinearGradient(left-12,0,right+12,0);
+            glow.addColorStop(0,'rgba(34,211,238,0)');glow.addColorStop(.2,'rgba(34,211,238,.38)');
+            glow.addColorStop(.5,'rgba(255,255,255,.70)');glow.addColorStop(.8,'rgba(34,211,238,.38)');glow.addColorStop(1,'rgba(34,211,238,0)');
+            ctx.fillStyle=glow;ctx.fillRect(left-12,0,right-left+24,y);
+            for(const x of [left,right]){
+                ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x+Math.sin(t*.5)*3,0);
+                ctx.lineWidth=7;ctx.strokeStyle='#fff';ctx.shadowColor='#22d3ee';ctx.shadowBlur=22;ctx.stroke();
+            }
+            ctx.lineWidth=2;ctx.strokeStyle='#fef08a';ctx.shadowColor='#fff';ctx.shadowBlur=8;
+            for(let j=0;j<4;j++){
+                const bx=left+(j+.5)*(right-left)/4+Math.sin(t*.6+j)*6;
+                ctx.beginPath();ctx.moveTo(bx,y);ctx.lineTo(bx+Math.sin(t+j*2)*10,0);ctx.stroke();
+            }
+            for(const e of enemies){if(e.hp>0&&e.y<y&&Math.abs(e.x-player.x)<(e.width||20)/2+46){
+                ctx.beginPath();ctx.arc(e.x,e.y,9+Math.sin(t*.7)*3,0,Math.PI*2);
+                ctx.strokeStyle='#fff';ctx.lineWidth=3;ctx.stroke();
+            }}
+            ctx.restore();
+        }
         function drawContinuousLaser(){
             if(!laserImpact)return;
             const t=laserImpact,ox=player.x,oy=player.y-22,wobble=Math.sin(missionTicks*.77)*2.8;
@@ -3153,7 +3200,7 @@ function updateTerrainEvent(){
         }
         function fireWeapon() {
             if (gameState !== 'PLAYING' || player.disabledTimer > 0) return;
-            if(player.weapon==='LASER')return;
+            if(fusionBeamTicks>0||player.weapon==='LASER')return;
             const baseWeapon=aircraftCatalog.PLANES[player.aircraftType||selectedPlane].weapons[0];
             if(player.weapon!==baseWeapon){
                 if(player.specialShots<=0)player.weapon=baseWeapon;
@@ -3173,7 +3220,7 @@ function updateTerrainEvent(){
         }
 
         function fireWingmen(){
-            if(missionTicks%4!==0)return;
+            if(fusionBeamTicks>0||missionTicks%4!==0)return;
             for(const w of wingmen){
                 if(w.ttl<=0)continue;
                 const guided=['TRACKER','MISSILE','ROCKET','PRECISION','MULTI'].includes(player.weapon);
@@ -3186,19 +3233,30 @@ function updateTerrainEvent(){
         }
         // Combo unificado: TIRO + BOMBA acopla/reagrupa as duas auxiliares.
         // Não consome bomba. Prioridade sobre o disparo normal da bomba.
-        let lastWingCoupleAt=-99999;
+        let lastWingCoupleAt=-99999, fusionBeamTicks=0, fusionSavedWeapon=null;
+        const FUSION_DURATION=360;
+        function endFusionBeam(){
+            if(fusionBeamTicks<=0&&!fusionSavedWeapon)return;
+            fusionBeamTicks=0;laserImpact=null;
+            for(const w of wingmen){w.maxHp=Math.max(175,w.maxHp||175);w.hp=w.maxHp;w.ttl=Math.max(1200,w.ttl||0);w.detach=0;}
+            if(fusionSavedWeapon){player.weapon=fusionSavedWeapon.weapon;player.specialShots=Math.max(100,fusionSavedWeapon.specialShots||0);fusionSavedWeapon=null;}
+            createFloatingText(player.x,player.y-40,'ARMAMENTO RESTAURADO','#a7f3d0');
+        }
         function fireInputHeld(){
             return !!(keys.Space||keys.KeyZ||touchFireHeld||mouseFireHeld||mouseInput.fire||gamepadState.fire);
         }
         function coupleWingmen(){
             if(gameState!=='PLAYING'||player.disabledTimer>0)return false;
-            if(missionTicks-lastWingCoupleAt<24)return true;
+            if(fusionBeamTicks>0||missionTicks-lastWingCoupleAt<45)return true;
             lastWingCoupleAt=missionTicks;
+            fusionSavedWeapon={weapon:player.weapon,specialShots:player.specialShots};
+            fusionBeamTicks=FUSION_DURATION;
+            bullets.length=0;
             const existing=new Map(wingmen.filter(w=>w.hp>0).map(w=>[w.side,w]));
             wingmen=[-1,1].map(side=>{
-                const w=existing.get(side)||{side,hp:75,maxHp:75,ttl:900,detach:0};
-                w.ttl=Math.max(w.ttl,900);w.detach=0;
-                w.hp=Math.min(w.maxHp,Math.max(w.hp,Math.ceil(w.maxHp*.5)));
+                const w=existing.get(side)||{side,hp:175,maxHp:175,ttl:1200,detach:0};
+                w.maxHp=Math.max(175,w.maxHp||175);w.ttl=Math.max(w.ttl,1200);w.detach=0;
+                w.hp=w.maxHp;
                 return w;
             });
             createFloatingText(player.x,player.y-44,'AUXILIARES ACOPLADAS','#67e8f9');
@@ -3210,7 +3268,7 @@ function updateTerrainEvent(){
             triggerBomb();
         }
         function triggerBomb() {
-            if(gameState!=='PLAYING'||player.bombs<=0||player.disabledTimer>0)return;
+            if(gameState!=='PLAYING'||fusionBeamTicks>0||player.bombs<=0||player.disabledTimer>0)return;
             player.bombs--;
             document.getElementById('bomb-count-touch').innerText='('+player.bombs+')';
             bombProjectiles.push({x:player.x,y:player.y-16,vy:-9,life:52});
@@ -3543,6 +3601,7 @@ function updateTerrainEvent(){
             drawPowerups();
             drawBullets();
             drawContinuousLaser();
+            drawFusionBeam();
             drawParticles();
             drawBossSkillEffect();
             drawSkillTrajectories();
