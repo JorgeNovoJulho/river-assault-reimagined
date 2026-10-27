@@ -2538,7 +2538,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
 
         // Parte 03: pontes e represas compartilham o mesmo corredor físico e visual.
         const terrainStructureImages={};
-        for(const [type,file] of [['BRIDGE','bridge-industrial.svg'],['DAM','dam-concrete.svg']]){
+        for(const [type,file] of [['BRIDGE','bridge-industrial.svg'],['DAM','dam-concrete.svg'],['BRIDGE_DAMAGED','bridge-damaged.svg'],['DAM_DAMAGED','dam-damaged.svg']]){
           const image=new Image();image.src='./assets/sprites/terrain/'+file;terrainStructureImages[type]=image;
         }
         function drawStructures(){
@@ -2547,7 +2547,8 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
                 ctx.save();ctx.translate(p.x,p.y);
                 const half=p.width/2,gate=Math.min(half-12,Math.max(28,(p.opening||100)/2));
                 const slabY=-p.height/2;
-                const terrainImage=terrainStructureImages[p.type];
+                const condition=(p.maxHp>0&&p.hp/p.maxHp<=.45)?'_DAMAGED':'';
+                const terrainImage=terrainStructureImages[p.type+condition]||terrainStructureImages[p.type];
                 if(terrainImage&&terrainImage.complete&&terrainImage.naturalWidth){
                   // A travessia permanece aberta: renderizar apenas as duas faixas sólidas.
                   ctx.save();ctx.beginPath();
