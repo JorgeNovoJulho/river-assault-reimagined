@@ -217,3 +217,15 @@ test('Phaser experimental arena has real gameplay systems, not only showroom',()
  assert.match(src,/this\.shots\.splice\(i,1\)/);
  assert.match(src,/this\.enemies\.splice\(i,1\)/);
 });
+
+test('Phaser Pages publishes compiled entry and never an unbundled fallback',()=>{
+ const workflow=fs.readFileSync('.github/workflows/deploy-pages.yml','utf8');
+ const html=fs.readFileSync('phaser-lab.html','utf8');
+ assert.match(html,/type="module" src="\.\/src\/phaser\/main\.ts"/);
+ assert.doesNotMatch(html,/cdn\.jsdelivr\.net\/npm\/phaser/);
+ assert.doesNotMatch(workflow,/cp phaser-lab\.html dist\/phaser-lab\.html/);
+ assert.doesNotMatch(workflow,/continue-on-error: true/);
+ assert.match(workflow,/run: npm run build/);
+ assert.match(workflow,/src="\/\?assets/);
+ assert.match(workflow,/curl -fsSL.*phaser-lab\.html/);
+});
