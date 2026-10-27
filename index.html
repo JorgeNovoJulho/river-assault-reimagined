@@ -958,7 +958,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
         const scoreMultiplier=()=>Math.pow(1.1,journey-1);
         function finishFullCampaign(){
           const legitimate=campaignVerified&&sector===20;
-          showMissionReport();
+
           const completedJourney=journey,oldRank=rankName(),oldLevel=pilotLevel;
           const pointsBonus=legitimate?5000:0,xpBonus=legitimate?5000:0;
           if(legitimate){
@@ -978,6 +978,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
           campaignVerified=false;
           try{localStorage.removeItem(CHECKPOINT_KEY)}catch(err){}
           gameState='VICTORY';playlist.pause();
+          showMissionReport();
           const atMax=journey===RANKS.length;
           const screen=document.getElementById('victory-screen');
           screen.querySelector('h2').textContent=legitimate?'PLANETA SALVO • MISSÃO CUMPRIDA!':'MISSÃO 20 CONCLUÍDA — TREINAMENTO';
@@ -4216,6 +4217,11 @@ function updateTerrainEvent(){
             drawClimateOverlay();
             // Reforça a silhueta do jogador acima dos disparos CIRCLE e do clima.
             window.RiverVisuals.drawPlayerForeground?.(ctx,player.x,player.y,player.aircraftType||selectedPlane,player.invulnerable);
+            if(player.damageBlinkFrames>0&&missionTicks%4<2){
+              ctx.save();ctx.globalCompositeOperation='screen';ctx.fillStyle='rgba(255,30,45,.8)';
+              ctx.shadowColor='#ff182e';ctx.shadowBlur=14;
+              ctx.beginPath();ctx.ellipse(player.x,player.y,20,24,0,0,Math.PI*2);ctx.fill();ctx.restore();
+            }
             drawFloatingTexts();
             drawHUD();
             drawActiveAircraftLabel();
