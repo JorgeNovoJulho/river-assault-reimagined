@@ -1137,10 +1137,39 @@ function biomeIdentity(c,id){
  }
  c.restore();
 }
+// Acabamento específico de unidades: texturas e marcações variam por identidade.
+function biomeMicroDetail(c,id,age){
+ c.save();c.strokeStyle='#e9f9ff';c.lineWidth=1.8;c.lineCap='round';
+ const dot=(x,y,color,r=2)=>{c.fillStyle=color;c.beginPath();c.arc(x,y,r,0,7);c.fill()};
+ const stripe=(a,b)=>{c.beginPath();c.moveTo(...a);c.lineTo(...b);c.stroke()};
+ switch(id){
+ case 'ALLIGATOR':for(let i=0;i<7;i++){dot(-8+(i%2)*16,-23+i*7,'#bed38e',2.4)}stripe([-11,-35],[11,-35]);break;
+ case 'SCORPION':for(let i=0;i<5;i++)stripe([-9,-18+i*9],[9,-18+i*9]);dot(11,-35,'#ffda87',4);break;
+ case 'PIRANHA':for(let i=0;i<5;i++)dot(-12+i*5,-32+i*2,'#f6ffff',2);stripe([-16,7],[13,7]);break;
+ case 'EEL':for(let i=0;i<6;i++)dot(Math.sin(i*1.7+age*.02)*8,-32+i*13,'#c3f9ff',3);break;
+ case 'NARWHAL':for(let i=0;i<5;i++)stripe([-4+i*2,-52+i*5],[5+i*2,-52+i*5]);break;
+ case 'ICE_RAY':for(let i=0;i<4;i++){stripe([-32+i*9,6],[-9+i*5,17]);stripe([32-i*9,6],[9-i*5,17])}break;
+ case 'TUCANO':stripe([-6,-32],[20,-28]);dot(3,-31,'#fff3a0',3);break;
+ case 'EAGLE':for(let i=0;i<4;i++){stripe([-32+i*4,9],[-22+i*4,19]);stripe([32-i*4,9],[22-i*4,19])}break;
+ case 'MANTIS':stripe([-11,-28],[-20,-39]);stripe([11,-28],[20,-39]);break;
+ case 'PRISM_WASP':for(let i=0;i<4;i++)stripe([-9,-12+i*10],[9,-12+i*10]);dot(0,-37,'#f5beff',5);break;
+ case 'BEETLE':stripe([0,-28],[0,28]);for(let i=0;i<4;i++)dot(i%2?-10:10,-17+i*11,'#ffe7a1');break;
+ case 'SALAMANDER':for(let i=0;i<8;i++)dot(i%2?-7:7,-30+i*9,'#ffda81',2.6);break;
+ case 'WALRUS':stripe([-8,-11],[-14,18]);stripe([8,-11],[14,18]);break;
+ case 'CRANE':for(let i=0;i<4;i++)stripe([-19+i*9,-17],[-11+i*9,-7]);break;
+ case 'DREDGER':for(let i=0;i<5;i++)dot(-17+i*8,20,'#e6b954');break;
+ case 'WELDER':dot(25,-24,'#ffea87',4);for(let i=0;i<4;i++)dot(25+Math.sin(age*.1+i)*7,-27+i*6,'#ffb852',1.8);break;
+ case 'HOVERCAR':stripe([-12,-22],[12,-22]);dot(-21,19,'#71f3ff',4);dot(21,19,'#71f3ff',4);break;
+ case 'MOTOJET':stripe([0,-36],[0,17]);dot(0,24,'#ff89ee',5);break;
+ case 'CORSAIR':for(let i=0;i<3;i++)stripe([-20+i*20,-16],[-18+i*18,10]);break;
+ case 'HYBRID_HUNTER':for(let i=0;i<4;i++)dot(i%2?-13:13,-22+i*14,i%2?'#fca3c4':'#7ff9fe',3);break;
+ }
+ c.restore();
+}
 function drawBiomeOverlay(c,e){
  if(!detailEnabled||e.type!=='BIOME_ENEMY')return;
  const sprite=biomeSprite(e.biomeId||'HYBRID_HUNTER'),bob=Math.sin(Date.now()*.005+(e.biomeAge||0)*.02)*1.5;
- c.save();c.globalAlpha=.96;c.drawImage(sprite,e.x-24,e.y-26+bob,48,52);c.translate(e.x,e.y+bob);c.scale(.48,.48);biomeIdentity(c,e.biomeId||'HYBRID_HUNTER');
+ c.save();c.globalAlpha=.96;c.drawImage(sprite,e.x-24,e.y-26+bob,48,52);c.translate(e.x,e.y+bob);c.scale(.48,.48);biomeIdentity(c,e.biomeId||'HYBRID_HUNTER');biomeMicroDetail(c,e.biomeId||'HYBRID_HUNTER',e.biomeAge||0);
  const tick=Date.now()*.005,flap=Math.sin(tick*2+(e.biomeAge||0)*.035),id=e.biomeId||'HYBRID_HUNTER';
  c.lineCap='round';c.lineJoin='round';c.lineWidth=3;
  if(id==='ALLIGATOR'){c.fillStyle='#b4cc78';for(let k=0;k<7;k++){c.beginPath();c.ellipse(0,-21+k*8,6,2,0,0,7);c.fill()}c.strokeStyle='#b1dca1';c.beginPath();c.moveTo(-12,-36);c.lineTo(-10,-40);c.moveTo(12,-36);c.lineTo(10,-40);c.stroke()}
