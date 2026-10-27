@@ -3672,7 +3672,7 @@ function updateTerrainEvent(){
             for(const collection of [structures,islands]){
               for(let i=collection.length-1;i>=0;i--){
                 const o=collection[i];
-                if(!o||o.destructible===false)continue;
+                if(!o)continue;
                 const halfW=Math.max(8,(o.width||24)/2),halfH=Math.max(8,(o.height||24)/2);
                 if(o.y-halfH>beamBottom||o.y+halfH<beamTop)continue;
                 // Pontes/represas cobrem todo o rio: basta cruzar qualquer parte da faixa.
