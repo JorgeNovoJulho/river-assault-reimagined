@@ -1372,5 +1372,13 @@ function draw(c,d){
  }
  if(!d.invulnerable||Math.floor(Date.now()/110)%2){plane(c,d.player.x,d.player.y,d.player.aircraftType||d.aircraft,0.85);highDetailPlane(c,d.player.x,d.player.y,d.player.aircraftType||d.aircraft)}enhancedBattleLight(c,d);enhancedWeaponGlints(c,d);bossPresentation(c,d);atmosphereByTime(c,d);combatAtmosphere(c,d);
 }
-root.RiverVisuals={cinematicBossSkill,draw,plane,enemy,THEMES,BIOME_DETAILS,drawIslands(c,items,sector){const t=THEMES[((sector-1)%THEMES.length+THEMES.length)%THEMES.length];islands(c,items,t)}};
+function drawPlayerForeground(c,x,y,aircraft,invulnerable){
+ if(invulnerable>0&&Math.floor(Date.now()/160)%6===0)return;
+ c.save();
+ c.shadowColor='#69eaff';c.shadowBlur=detailEnabled?8:3;
+ plane(c,x,y,aircraft,1.01);
+ highDetailPlane(c,x,y,aircraft);
+ c.restore();
+}
+root.RiverVisuals={cinematicBossSkill,draw,plane,enemy,drawPlayerForeground,THEMES,BIOME_DETAILS,drawIslands(c,items,sector){const t=THEMES[((sector-1)%THEMES.length+THEMES.length)%THEMES.length];islands(c,items,t)}};
 })(window);
