@@ -27,3 +27,10 @@
 6. Promover a Nova Geração ao motor Phaser apenas com testes comparativos completos e rollback seguro.
 
 **Não declarar Phaser ativo na campanha principal até a troca real do motor de jogo.**
+
+## Implementação incremental — arena Phaser jogável
+- `src/phaser/main.ts` agora inclui movimentação com setas/WASD/toque, disparo contínuo por espaço/toque, ondas de três tipos de inimigo, tiros hostis, colisões por distância, invulnerabilidade curta, vidas, pontuação e dano a chefe.
+- Cap de 90 tiros e 10 inimigos simultâneos no laboratório; delta de movimento limitado para evitar grandes saltos após travamento do navegador.
+- Medidor de FPS no HUD; reinício com R; troca de três texturas de chefe com teclas 1/2/3.
+- A cena é **experimental e isolada**: não tem 20 fases da campanha, habilidades completas, salvamento, multiplayer nem paridade funcional com a Original.
+- CI contém verificação de tipos `check:phaser`, mas é necessário confirmar execução bem-sucedida do workflow e abertura real da página.
