@@ -21,11 +21,19 @@ body{margin:0;min-height:100vh;background:#06101f;color:#d8e9f8;font:14px system
         this.load.svg('boss','./assets/sprites/bosses/iron-wasp.svg');
         this.load.svg('enemy','./assets/sprites/enemies/mecha-gun.svg');
         this.load.svg('bullet','./assets/sprites/projectiles/plasma-blue.svg');
+        this.load.svg('fighter','./assets/sprites/player/riverstorm-fighter.svg');
+        this.load.svg('bank-left','./assets/sprites/terrain/river-bank-left.svg');
+        this.load.svg('bank-right','./assets/sprites/terrain/river-bank-right.svg');
       }
       create(){
         this.add.rectangle(W/2,H/2,265,H,0x126078);
+        this.banks=[];
+        for(let j=0;j<3;j++){
+          this.banks.push(this.add.image(65,j*480-240,'bank-left').setDisplaySize(130,480).setDepth(0));
+          this.banks.push(this.add.image(W-65,j*480-240,'bank-right').setDisplaySize(130,480).setDepth(0));
+        }
         this.boss=this.add.image(W/2,170,'boss').setDisplaySize(170,130);
-        this.player=this.add.triangle(W/2,H-120,0,42,26,0,52,42,0x90eaff);
+        this.player=this.add.image(W/2,H-120,'fighter').setDisplaySize(52,61).setDepth(2);
         this.keys=this.input.keyboard.createCursorKeys();
         this.keyboardSpace=this.input.keyboard.addKey('SPACE');
         this.status=this.add.text(10,10,'PHASER 4 | RECUPERAÇÃO',{fontFamily:'monospace',fontSize:'17px',color:'#ffffff'});
@@ -37,6 +45,7 @@ body{margin:0;min-height:100vh;background:#06101f;color:#d8e9f8;font:14px system
       }
       update(time,delta){
         const dt=Math.min(2,delta/16.7);
+        for(const bank of this.banks){bank.y+=1.25*dt;if(bank.y>H+240)bank.y-=1440;}
         if(this.keys.left.isDown)this.player.x-=5*dt;
         if(this.keys.right.isDown)this.player.x+=5*dt;
         if(this.keys.up.isDown)this.player.y-=5*dt;
