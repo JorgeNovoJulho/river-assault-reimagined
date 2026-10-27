@@ -1390,8 +1390,8 @@ function bossAccessories(c,e,d){
  }
  c.restore();
 }
-const newBossSprite=new Image();
-newBossSprite.src='./assets/sprites/bosses/iron-wasp.svg';
+const bossSpriteFiles=['iron-wasp.svg','abyss-manta.svg','crimson-rotor.svg'];
+const bossSpriteImages=bossSpriteFiles.map(name=>{const im=new Image();im.src='./assets/sprites/bosses/'+name;return im;});
 function draw(c,d){
  const t=THEMES[((d.sector-1)%THEMES.length+THEMES.length)%THEMES.length];
  landscape(c,d,t);
@@ -1404,7 +1404,7 @@ function draw(c,d){
  islands(c,(d.islands||[]).filter(p=>p.y+(p.height||0)>-32&&p.y-(p.height||0)<d.h+32&&p.x+(p.width||0)>-32&&p.x-(p.width||0)<d.w+32),t);
  for(const e of d.enemies||[]){
    if(e.hp<=0||e.y+(e.height||40)<-45||e.y-(e.height||40)>d.h+45||e.x+(e.width||40)<-45||e.x-(e.width||40)>d.w+45)continue;
-   if(e.type==='BOSS'&&Number(d.sector)===1&&newBossSprite.complete&&newBossSprite.naturalWidth){c.drawImage(newBossSprite,e.x-(e.width||90)*.5,e.y-(e.height||90)*.5,e.width||90,e.height||90);bossAccessories(c,e,d);}
+   if(e.type==='BOSS'&&Number(d.sector)>=1&&Number(d.sector)<=3&&bossSpriteImages[Number(d.sector)-1].complete&&bossSpriteImages[Number(d.sector)-1].naturalWidth){const sprite=bossSpriteImages[Number(d.sector)-1];c.drawImage(sprite,e.x-(e.width||90)*.5,e.y-(e.height||90)*.5,e.width||90,e.height||90);bossAccessories(c,e,d);}
    else {enemy(c,e,t.time);highDetailEnemy(c,e,t.time);drawAtlasVehicle(c,e);drawBiomeOverlay(c,e);mechArticulation(c,e);bossAccessories(c,e,d);}
  }
  if(!d.invulnerable||Math.floor(Date.now()/110)%2){plane(c,d.player.x,d.player.y,d.player.aircraftType||d.aircraft,0.85);highDetailPlane(c,d.player.x,d.player.y,d.player.aircraftType||d.aircraft)}enhancedBattleLight(c,d);enhancedWeaponGlints(c,d);bossPresentation(c,d);atmosphereByTime(c,d);combatAtmosphere(c,d);
