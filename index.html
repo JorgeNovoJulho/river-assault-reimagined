@@ -958,6 +958,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
         const scoreMultiplier=()=>Math.pow(1.1,journey-1);
         function finishFullCampaign(){
           const legitimate=campaignVerified&&sector===20;
+          showMissionReport();
           const completedJourney=journey,oldRank=rankName(),oldLevel=pilotLevel;
           const pointsBonus=legitimate?5000:0,xpBonus=legitimate?5000:0;
           if(legitimate){
@@ -1280,7 +1281,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
         }
         function spawnBoss(y,confirmed=false) {
             if(!confirmed){openBossSkillPicker();return;}
-            bossActive = true;fusionBossUsed=false;
+            bossActive = true;fusionBossUsed=false;bossStartTick=missionTicks;
             try{if(!playlist.bossMode)playlist.beginBossTheme?.()}catch(audioError){console.warn('Áudio do chefe:',audioError)}
             redAlertTicks=0;
             const mission=campaign.at(sector);
@@ -1290,7 +1291,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
             // Boss é confronto prolongado; escala por dificuldade, missão e jornada.
             const bossClimateStrength=sectorTime()==='NIGHT'?1.10:sectorWeather()==='HEAT'?1.06:.94;
             const bossBalance=BOSS_BALANCE_20[Math.max(0,Math.min(19,sector-1))];
-            const calculatedHp = Math.round((540+mission.difficulty*160+sector*38)*cycleMultiplier*Math.pow(1.16,journey-1)*1.20*1.20*bossClimateStrength*bossBalance[0]);
+            const calculatedHp = Math.round((540+mission.difficulty*160+sector*38)*cycleMultiplier*Math.pow(1.16,journey-1)*1.20*1.20*bossClimateStrength*bossBalance[0]*adaptiveThreat);
 
             enemies.push({
                 type: 'BOSS',
@@ -1366,6 +1367,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
           recordSequentialMission();
           if(sector<20)writeCheckpoint(sector+1);else try{localStorage.removeItem(CHECKPOINT_KEY)}catch(err){}
           bossTaunt={name:e.name,line:'MEUS SISTEMAS... DERROTADOS!',ticks:175};
+          adaptAfterBoss();
           if(sector===20){finishFullCampaign();}else{missionTransitionTicks=180;document.getElementById('mission-banner').textContent='PRÓXIMA MISSÃO: '+campaign.at(sector+1).name;createFloatingText(e.x,e.y,'CHEFE DERROTADO!','#22c55e')}
         }
         function openBossSkillPicker(){
@@ -2839,6 +2841,7 @@ function updateTerrainEvent(){
 
         function update() {
             if (gameState !== 'PLAYING') return;
+            if(player.damageBlinkFrames>0)player.damageBlinkFrames--;
             if(!enemies.some(e=>e.type==='BOSS'))document.getElementById('boss-special-hud').classList.add('hidden');
             missionTicks++;
             if(player.gravityDebuffTicks>0)player.gravityDebuffTicks--;
@@ -3449,6 +3452,7 @@ function updateTerrainEvent(){
 
         function drawHUD(){
             drawFusionStatus();
+            ctx.save();ctx.fillStyle='#f1f5f9';ctx.font='bold 11px system-ui';ctx.fillText('ACERTOS: '+missionHits[Math.max(0,Math.min(19,sector-1))]+'  '+hitGrade(missionHits[Math.max(0,Math.min(19,sector-1))]),14,119);ctx.restore();
             const set=(id,value)=>{const el=document.getElementById(id);if(el && el.textContent!==String(value))el.textContent=String(value)};
             set('hud-score',String(score).padStart(6,'0'));
             set('hud-pilot-level',pilotLevel+' / 100');
@@ -3509,12 +3513,30 @@ function updateTerrainEvent(){
           rsShieldAlertWasLow=low;
         }
 
+        let missionHits=Array(20).fill(0),adaptiveThreat=1,bossStartTick=0;
+        const hitGrade=n=>n===0?'SS':n<=2?'S':n<=4?'A':n<=7?'B':n<=11?'C':n<=16?'D':'E';
+        function adaptAfterBoss(){
+          const count=missionHits[Math.max(0,Math.min(19,sector-1))],quick=missionTicks-bossStartTick<900;
+          adaptiveThreat=Math.max(.75,Math.min(1.3,adaptiveThreat+(count<=2?(quick?.1:.06):count>9?-.1:count>5?-.05:0)));
+        }
+        function showMissionReport(){
+          const root=document.getElementById('victory-screen');if(!root)return;
+          let panel=document.getElementById('mission-damage-report');
+          if(!panel){panel=document.createElement('div');panel.id='mission-damage-report';panel.style.cssText='max-height:220px;overflow:auto;background:#071a2b;color:#d9f5ff;border:1px solid #38bdf8;border-radius:10px;padding:10px;font:12px system-ui;margin:9px auto;width:min(96%,430px)';root.append(panel);}
+          const points={SS:100,S:92,A:82,B:70,C:55,D:35,E:10};
+          const avg=missionHits.reduce((sum,n)=>sum+points[hitGrade(n)],0)/20;
+          const rank=avg>=99?'SS':avg>=90?'S':avg>=80?'A':avg>=68?'B':avg>=52?'C':avg>=30?'D':'E';
+          panel.replaceChildren();const heading=document.createElement('strong');heading.textContent='DANOS POR MISSÃO — CLASSIFICAÇÃO FINAL '+rank;panel.append(heading);
+          missionHits.forEach((hits,i)=>{const line=document.createElement('div');line.textContent='Missão '+String(i+1).padStart(2,'0')+' — '+hits+' acertos — '+hitGrade(hits);panel.append(line);});
+        }
         function applyDamage(amount, reason) {
             if (player.invulnerable > 0 || parryTicks>0 || rollFrames>0) return;
             // Naves auxiliares têm escudo independente e só sofrem dano quando atingidas.
 
             const suppressedBoss=enemies.some(e=>e.type==='BOSS'&&e.hp>0&&e.gravityTicks>0);
             player.shield -= Math.round(amount*(suppressedBoss?.25:1)*(bossActive||reason.includes('BOSS')?1.15:.7)*pilotBonus().resistance);
+            missionHits[Math.max(0,Math.min(19,sector-1))]++;
+            player.damageBlinkFrames=16;
             player.invulnerable = 40;
 
             const container = document.getElementById('game-container');
@@ -3560,6 +3582,7 @@ function updateTerrainEvent(){
             redAlertTicks=0;
             redAlertTriggered=false;
             wingmen=[];fusionTicks=0;fusionCooldown=0;fusionBossUsed=false;
+            missionHits=Array(20).fill(0);adaptiveThreat=1;bossStartTick=0;
             bossDropPhase=0;
             previousPlayerPosition=null;
             hazardWaveCooldown=0;
@@ -3683,6 +3706,7 @@ function updateTerrainEvent(){
           if(fusionTicks<=0){if(fusionCooldown>0)fusionCooldown--;return;}
           for(const w of wingmen){w.maxHp=Math.max(175,w.maxHp||0);w.hp=w.maxHp;w.ttl=Math.max(w.ttl||0,1200);w.detach=0;}
           const elapsed=360-fusionTicks;
+          for(let i=enemyBullets.length-1;i>=0;i--){const shot=enemyBullets[i];if(!shot||shot.y<0||shot.y>player.y+18||Math.abs(shot.x-player.x)>32)continue;addExplosion(shot.x,shot.y,'#7dd3fc',3);enemyBullets.splice(i,1);}
           if(bossActive){
             if(elapsed%60===0&&fusionLastBossTick!==elapsed){
               const boss=enemies.find(e=>e.type==='BOSS'&&e.hp>0);
