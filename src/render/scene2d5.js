@@ -1253,6 +1253,14 @@ function atmosphereByTime(c,d){
  }
  c.restore();
 }
+// Camada de sprites estáticos individuais: assets SVG embutidos, cacheados por identidade.
+// Não interfere em hitbox, IA, velocidade ou regras do original.
+const UNIQUE_BIOME_ICONS={
+ ALLIGATOR:'🐊',SCORPION:'🦂',PIRANHA:'🐟',EEL:'〰',NARWHAL:'🐋',ICE_RAY:'◇',
+ TUCANO:'🦜',EAGLE:'🦅',MANTIS:'🦗',PRISM_WASP:'🐝',BEETLE:'🪲',
+ SALAMANDER:'🦎',WALRUS:'🦭',CRANE:'🏗',DREDGER:'⚓',WELDER:'⚙',
+ HOVERCAR:'🚘',MOTOJET:'🏍',CORSAIR:'🚤',HYBRID_HUNTER:'☣'
+};
 function bossPresentation(c,d){
  if(!detailEnabled)return;
  const now=Date.now()*.001;
