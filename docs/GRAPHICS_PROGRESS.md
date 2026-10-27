@@ -38,3 +38,9 @@ Atualizado: 2026-10-27. Regra: só considerar "homologado" após build, ensaio n
 - Renderizador seleciona `iron-wasp.svg`, `abyss-manta.svg`, `crimson-rotor.svg` conforme missão 1, 2 ou 3; mantém fallback legado se a imagem não carregar.
 - Pipeline Vite copia os sprites para `dist/`; adicionado teste de regressão de referências e existência.
 - **Pendentes:** 17 sprites de chefes, demais inimigos, 20 cenários e FX definitivos, medição FPS, execução real dos testes e verificação da publicação; multiplayer integral segue pendente.
+
+## Atualização incremental — chefes 1 a 6
+- Confirmada a integração de seis sprites específicos por missão: `iron-wasp`, `abyss-manta`, `crimson-rotor`, `granite-dam`, `crimson-spider`, `frost-sentinel`.
+- Cada SVG está em `assets/sprites/bosses`, usado pelo renderer quando carregado e copiado ao `dist` pelo Vite.
+- Testes de regressão expandidos e ajustados de limite 3 para limite 6.
+- **Ainda faltam chefes 7 a 20, animações específicas, arte final dos inimigos/cenários, testes de imagem e FPS.**
