@@ -38,6 +38,8 @@ jobs:
           # Identificador da revisão publicada.
           sed -i "s/__RIVERSTORM_DEPLOY_SHA__/$GITHUB_SHA/g" dist/phaser-lab.html
           test -s dist/phaser-lab.html
+          test -s dist/boss01-test.html || { echo '::error::Teste boss01 nao foi incluido no artefato'; exit 1; }
+          grep -q 'PONTE FORTIFICADA' dist/boss01-test.html || { echo '::error::Conteudo da pagina boss01 ausente'; exit 1; }
           grep -Eq 'src="/?assets/[^"]+\.js"|src="\./assets/[^"]+\.js"' dist/phaser-lab.html || { echo "::error::Bundle da arena Phaser ausente"; exit 1; }
           if grep -q '__RIVERSTORM_DEPLOY_SHA__' dist/phaser-lab.html; then
             echo '::error::Versão da arena não foi injetada'; exit 1
@@ -71,7 +73,9 @@ jobs:
           ROOT="https://jorgenovojulho.github.io/river-assault-reimagined"
           for try in 1 2 3 4 5 6; do
             if curl -fsSL --max-time 20 "$ROOT/phaser-lab.html?sha=$GITHUB_SHA" -o /tmp/arena.html &&
+               curl -fsSL --max-time 20 "$ROOT/boss01-test.html?sha=$GITHUB_SHA" -o /tmp/boss01-test.html &&
                curl -fsSL --max-time 20 "$ROOT/deployment-health.json?sha=$GITHUB_SHA" -o /tmp/deployment-health.json &&
+               grep -q 'PONTE FORTIFICADA' /tmp/boss01-test.html &&
                grep -q 'phaser-stage' /tmp/arena.html &&
                grep -q "$GITHUB_SHA" /tmp/arena.html &&
                grep -q "$GITHUB_SHA" /tmp/deployment-health.json; then
