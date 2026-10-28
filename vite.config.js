@@ -83,6 +83,6 @@ function copyAndVersionRuntime() {
 
 export default defineConfig({
   base: './',
-  build: { target: 'es2020', rollupOptions: { input: { game: resolve('index.html'), phaserLab: resolve('phaser-lab.html') } } },
+  build: { target: 'es2020', rollupOptions: { input: { game: resolve('index.html'), phaserLab: resolve('phaser-lab.html'), boss01Test: resolve('boss01-test.html') } } },
   plugins: [copyAndVersionRuntime()]
 });
