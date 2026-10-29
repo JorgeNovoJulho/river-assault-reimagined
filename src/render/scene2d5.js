@@ -1415,11 +1415,15 @@ function draw(c,d){
  // Texturas PNG do pacote oficial de cenário: camadas separadas e presas às
  // margens calculadas pelo jogo original, preservando o corredor navegável.
  const env=window.RiverPremiumEnvironment;
- if(env?.ready()){
-   env.paint(c,d,bankAt,riverPath);
- }
+ const premiumEnvironment=Boolean(env?.ready()&&env.paint(c,d,bankAt,riverPath));
  c.save();clipShoreLand(c,d.riverPoints,d.w,d.h);
- terrainSignature(c,d,t);landmark(c,d,t);mapSetPieces(c,d,t);enhancedWorld(c,d,t);livingSetDressing(c,d,t);
+ // Com texturas premium carregadas, não desenhar novamente terreno procedural
+ // sobre as margens. Preservar somente elementos interativos e atmosfera.
+ if(!premiumEnvironment){
+   terrainSignature(c,d,t);landmark(c,d,t);mapSetPieces(c,d,t);enhancedWorld(c,d,t);livingSetDressing(c,d,t);
+ }else{
+   mapSetPieces(c,d,t);
+ }
  c.restore();
  // Atmosfera sobre todo o mapa, sem recorte costeiro.
  biomeAtmosphere(c,d,t);
