@@ -1412,6 +1412,12 @@ const bossSpriteImages=bossSpriteFiles.map(name=>{const im=new Image();im.src='.
 function draw(c,d){
  const t=THEMES[((d.sector-1)%THEMES.length+THEMES.length)%THEMES.length];
  landscape(c,d,t);
+ // Texturas PNG do pacote oficial de cenário: camadas separadas e presas às
+ // margens calculadas pelo jogo original, preservando o corredor navegável.
+ const env=window.RiverPremiumEnvironment;
+ if(env?.ready()){
+   env.paint(c,d,bankAt,riverPath);
+ }
  c.save();clipShoreLand(c,d.riverPoints,d.w,d.h);
  terrainSignature(c,d,t);landmark(c,d,t);mapSetPieces(c,d,t);enhancedWorld(c,d,t);livingSetDressing(c,d,t);
  c.restore();
