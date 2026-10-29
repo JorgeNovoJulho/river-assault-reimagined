@@ -5,10 +5,12 @@
 'use strict';
 const folder='./assets/sprites/premium/runtime/environment/';
 const textures={};
+let failed=false;
 for(const [key,file] of Object.entries({water:'water_calm.png',left:'riverbank_left.png',right:'riverbank_right.png'})){
- const img=new Image();img.src=folder+file;textures[key]=img;
+ const img=new Image();img.onerror=()=>{failed=true;console.warn('[RiverStorm Premium] Textura ausente:',file)};img.src=folder+file;textures[key]=img;
 }
-function ready(){return Object.values(textures).every(im=>im.complete&&im.naturalWidth>0);}
+function ready(){return !failed&&Object.values(textures).every(im=>im.complete&&im.naturalWidth>0);}
+function status(){return {ready:ready(),failed,images:Object.entries(textures).map(([key,im])=>({key,loaded:im.complete&&im.naturalWidth>0,width:im.naturalWidth,height:im.naturalHeight}))};}
 function paint(c,d,bankAt,riverPath){
  if(!ready()||!d.riverPoints||d.riverPoints.length<2)return false;
  const {w,h,riverPoints}=d;
@@ -37,5 +39,5 @@ function paint(c,d,bankAt,riverPath){
  }
  return true;
 }
-root.RiverPremiumEnvironment={ready,paint};
+root.RiverPremiumEnvironment={ready,paint,status};
 })(window);
