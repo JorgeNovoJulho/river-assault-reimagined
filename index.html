@@ -562,6 +562,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
     <script src="./src/game/pilot-progress.js"></script>
     <script src="./src/game/campaign.js"></script>
     <script src="./src/render/scene2d5.js"></script>
+    <script src="./src/render/premium-registry.js"></script>
     <script src="./src/audio/music.js"></script>
     <script src="./src/audio/sfx-modern.js"></script>
     <script src="./src/audio/playlist.js"></script>
@@ -2047,8 +2048,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
         }
 
         // Núcleo Premium: somente o FALCÃO usa o PNG candidato disponível; outras naves aguardam homologação de sprites individuais.
-        const premiumFalcaoSprite=new Image();
-        premiumFalcaoSprite.src='./assets/sprites/premium/runtime/player/fighter_candidate.png';
+        // O registro carrega apenas PNGs verificados na biblioteca Premium.
         function drawPlayer(x, y) {
             // Sobreposição gráfica sem modificar hitboxes, controles ou arma selecionada.
 
@@ -2071,8 +2071,8 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
                 ctx.shadowBlur=18;
                 ctx.globalAlpha=.86;
             }
-            if(selectedPlane==='falcao' && premiumFalcaoSprite.complete && premiumFalcaoSprite.naturalWidth){
-                ctx.drawImage(premiumFalcaoSprite,-27,-30,54,66);
+            if(selectedPlane==='falcao' && window.RiverPremium?.get('player','falcao')){
+                ctx.drawImage(window.RiverPremium.get('player','falcao'),-27,-30,54,66);
                 ctx.restore();
                 return;
             }
@@ -4037,11 +4037,10 @@ function updateTerrainEvent(){
         }
 
         // Atlas PNG 4x3 já versionado: camada visual separada, sem mudar dano nem colisões.
-        const premiumExplosionAtlas=new Image();
-        premiumExplosionAtlas.src='./assets/sprites/premium/runtime/fx/explosion_atlas_4x3.png';
         const premiumExplosionEvents=[];
         function drawPremiumExplosions(){
-            if(!premiumExplosionAtlas.complete||!premiumExplosionAtlas.naturalWidth)return;
+            const premiumExplosionAtlas=window.RiverPremium?.get('fx','explosion');
+            if(!premiumExplosionAtlas)return;
             const sw=premiumExplosionAtlas.naturalWidth/4,sh=premiumExplosionAtlas.naturalHeight/3;
             for(let i=premiumExplosionEvents.length-1;i>=0;i--){
                 const e=premiumExplosionEvents[i],age=missionTicks-e.start,frame=Math.floor(age/3);
