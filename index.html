@@ -3485,6 +3485,7 @@ function updateTerrainEvent(){
         }
 
         function drawParticles() {
+            drawPremiumExplosions();
             const enhanced=qualitySelect.value==='enhanced',eco=qualitySelect.value==='eco';
             for(const p of particles){
                 const alpha=Math.max(0,Math.min(1,p.life)),radius=Math.max(.7,p.size||2);
@@ -4035,7 +4036,26 @@ function updateTerrainEvent(){
             }
         }
 
+        // Atlas PNG 4x3 já versionado: camada visual separada, sem mudar dano nem colisões.
+        const premiumExplosionAtlas=new Image();
+        premiumExplosionAtlas.src='./assets/sprites/premium/runtime/fx/explosion_atlas_4x3.png';
+        const premiumExplosionEvents=[];
+        function drawPremiumExplosions(){
+            if(!premiumExplosionAtlas.complete||!premiumExplosionAtlas.naturalWidth)return;
+            const sw=premiumExplosionAtlas.naturalWidth/4,sh=premiumExplosionAtlas.naturalHeight/3;
+            for(let i=premiumExplosionEvents.length-1;i>=0;i--){
+                const e=premiumExplosionEvents[i],age=missionTicks-e.start,frame=Math.floor(age/3);
+                if(age<0||frame>=12){premiumExplosionEvents.splice(i,1);continue;}
+                ctx.save();
+                ctx.globalAlpha=Math.max(.35,1-age/40);
+                const size=e.size;
+                ctx.drawImage(premiumExplosionAtlas,(frame%4)*sw,Math.floor(frame/4)*sh,sw,sh,e.x-size/2,e.y-size/2,size,size);
+                ctx.restore();
+            }
+        }
         function addExplosion(x, y, color, count = 10) {
+            premiumExplosionEvents.push({x,y,size:Math.max(32,Math.min(100,count*2.8)),start:missionTicks});
+            if(premiumExplosionEvents.length>75)premiumExplosionEvents.shift();
             const maxParticles=bossActive?(qualitySelect.value==='eco'?75:qualitySelect.value==='enhanced'?135:100):240;
             if(particles.length>=maxParticles)return;
             count=Math.min(count,bossActive?14:28,maxParticles-particles.length);
