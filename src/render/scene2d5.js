@@ -1415,7 +1415,7 @@ function draw(c,d){
  // Texturas PNG do pacote oficial de cenário: camadas separadas e presas às
  // margens calculadas pelo jogo original, preservando o corredor navegável.
  const env=window.RiverPremiumEnvironment;
- const premiumEnvironment=Boolean(env?.ready()&&env.paint(c,d,bankAt,riverPath));
+ const premiumEnvironment=Boolean(env?.ready(d.sector)&&env.paint(c,d,bankAt,riverPath));
  c.save();clipShoreLand(c,d.riverPoints,d.w,d.h);
  // Com texturas premium carregadas, não desenhar novamente terreno procedural
  // sobre as margens. Preservar somente elementos interativos e atmosfera.
