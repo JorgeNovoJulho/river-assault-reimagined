@@ -1453,7 +1453,16 @@ function draw(c,d){
      bossAccessories(c,e,d);
    }
  }
- if(!d.invulnerable||Math.floor(Date.now()/110)%2){plane(c,d.player.x,d.player.y,d.player.aircraftType||d.aircraft,0.85);highDetailPlane(c,d.player.x,d.player.y,d.player.aircraftType||d.aircraft)}enhancedBattleLight(c,d);enhancedWeaponGlints(c,d);bossPresentation(c,d);atmosphereByTime(c,d);combatAtmosphere(c,d);
+ if(!d.invulnerable||Math.floor(Date.now()/110)%2){
+   const aircraft=d.player.aircraftType||d.aircraft;
+   const premiumAircraft=aircraft==='falcao'?root.RiverPremium?.get('player','falcao'):null;
+   if(premiumAircraft){
+     c.drawImage(premiumAircraft,d.player.x-27,d.player.y-32,54,64);
+   }else{
+     plane(c,d.player.x,d.player.y,aircraft,0.85);
+     highDetailPlane(c,d.player.x,d.player.y,aircraft);
+   }
+ }enhancedBattleLight(c,d);enhancedWeaponGlints(c,d);bossPresentation(c,d);atmosphereByTime(c,d);combatAtmosphere(c,d);
 }
 function drawPlayerForeground(c,x,y,aircraft,invulnerable){
  if(invulnerable>0&&Math.floor(Date.now()/160)%6===0)return;
