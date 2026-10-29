@@ -2140,6 +2140,14 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
                     ctx.shadowColor='#fb923c';ctx.shadowBlur=4+Math.sin(ticks*3)*2;
                   }
                 }
+                // Camada Premium: só substitui a silhueta quando existe PNG homologado.
+                // A lógica e o movimento do inimigo continuam sendo os originais.
+                const rasterEnemy=window.RiverPremium?.get('enemy',e.type);
+                if(rasterEnemy&&e.type!=='BOSS'&&e.type!=='MEGAZORD'){
+                    ctx.drawImage(rasterEnemy,-(e.width||32)/2,-(e.height||32)/2,e.width||32,e.height||32);
+                    ctx.restore();
+                    return;
+                }
                 if(e.type==='BIOME_ENEMY'){
                     // Vinte silhuetas procedurais individualizadas e animadas pelo relógio da missão.
                     const id=Math.max(0,Math.min(19,(e.biomeSector||sector||1)-1));
@@ -2558,7 +2566,8 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
                 const half=p.width/2,gate=Math.min(half-12,Math.max(28,(p.opening||100)/2));
                 const slabY=-p.height/2;
                 const condition=(p.maxHp>0&&p.hp/p.maxHp<=.45)?'_DAMAGED':'';
-                const terrainImage=terrainStructureImages[p.type+condition]||terrainStructureImages[p.type];
+                const premiumTerrainImage=window.RiverPremium?.get('terrain',p.type+condition)||window.RiverPremium?.get('terrain',p.type);
+                const terrainImage=premiumTerrainImage||terrainStructureImages[p.type+condition]||terrainStructureImages[p.type];
                 if(terrainImage&&terrainImage.complete&&terrainImage.naturalWidth){
                   // A travessia permanece aberta: renderizar apenas as duas faixas sólidas.
                   ctx.save();ctx.beginPath();
