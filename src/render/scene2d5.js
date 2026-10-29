@@ -1468,8 +1468,13 @@ function drawPlayerForeground(c,x,y,aircraft,invulnerable){
  if(invulnerable>0&&Math.floor(Date.now()/160)%6===0)return;
  c.save();
  c.shadowColor='#69eaff';c.shadowBlur=detailEnabled?8:3;
- plane(c,x,y,aircraft,1.01);
- highDetailPlane(c,x,y,aircraft);
+ const premiumAircraft=aircraft==='falcao'?root.RiverPremium?.get('player','falcao'):null;
+ if(premiumAircraft){
+   c.drawImage(premiumAircraft,x-27,y-32,54,64);
+ }else{
+   plane(c,x,y,aircraft,1.01);
+   highDetailPlane(c,x,y,aircraft);
+ }
  c.restore();
 }
 root.RiverVisuals={cinematicBossSkill,draw,plane,enemy,drawPlayerForeground,THEMES,BIOME_DETAILS,drawIslands(c,items,sector){const t=THEMES[((sector-1)%THEMES.length+THEMES.length)%THEMES.length];islands(c,items,t)}};
