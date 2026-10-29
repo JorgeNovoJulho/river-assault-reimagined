@@ -1812,6 +1812,12 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
             for(const p of powerups){
                 const st=styles[p.type]||{color:p.color||'#facc15',icon:p.label||'★',label:p.type.slice(0,3)};
                 ctx.save();ctx.translate(p.x,p.y+Math.sin(missionTicks*.075+p.x)*2);
+                const premiumPickup=window.RiverPremium?.get('pickup',p.type==='WINGMAN'||p.type==='DRONE'?'DRONES':p.type);
+                if(premiumPickup){
+                    ctx.drawImage(premiumPickup,-20,-24,40,48);
+                    ctx.restore();continue;
+                }
+
                 // Halo e ripples do coletavel, sem dependencias de imagens externas.
                 ctx.fillStyle='rgba(0,8,25,.38)';ctx.beginPath();ctx.ellipse(2,15,24,8,0,0,7);ctx.fill();
                 ctx.strokeStyle=st.color;ctx.globalAlpha=.35;ctx.lineWidth=1.5;ctx.beginPath();ctx.ellipse(0,14,23,8,0,0,7);ctx.stroke();ctx.globalAlpha=1;
@@ -1931,6 +1937,14 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
                 if(b.weaponId&&b.weaponId!=='SINGLE'&&b.weaponId!=='CIRCLE')drawBulletTrail(b);
                 ctx.save();
                 ctx.translate(b.x, b.y);
+                // PNG por tipo de arma, sem modificar trajetória/dano do jogo base.
+                const premiumShot=window.RiverPremium?.get('projectile',b.weaponId||b.sprite||b.type||'SINGLE');
+                if(premiumShot&&b.type!=='REFLECTED'&&!b.reflected){
+                    ctx.rotate(Math.atan2(b.vx||0,-(b.speed||7)));
+                    const sz=['MISSILE','TRACKER','ROCKET'].includes(b.weaponId)?18:12;
+                    ctx.drawImage(premiumShot,-sz/2,-sz,sz,sz*2);
+                    ctx.restore();return;
+                }
                 const projectileImage=(b.reflected||b.type==='REFLECTED')?null:(b.color&&/f[456]|e[f0]|ff[346]/i.test(b.color)?projectileArt.red:projectileArt.blue);
                 if(projectileImage&&projectileImage.complete&&projectileImage.naturalWidth){ctx.rotate(Math.atan2(b.vx||0,-(b.speed||7)));ctx.drawImage(projectileImage,-5,-13,10,26);ctx.restore();return;}
 
