@@ -1,0 +1,47 @@
+name: RiverStorm Premium - build isolado e auditoria
+
+on:
+  push:
+    branches: [riverstorm-premium-nucleo]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  premium-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Instalar dependências
+        run: npm ci
+      - name: Validar sintaxe dos módulos Premium
+        run: |
+          node --check src/render/premium-registry.js
+          node --check src/render/premium-environment.js
+          node --check src/render/scene2d5.js
+          node --check src/game/aircraft.js
+      - name: Executar suíte original
+        run: npm test
+      - name: Compilar sem tocar no site original
+        run: npm run build
+      - name: Conferir núcleo e entradas Premium
+        run: |
+          test -s dist/index.html
+          test -s dist/src/render/premium-registry.js || grep -qr 'RiverPremium' dist/assets
+          grep -q 'premium-environment' index.html
+      - name: Auditar sprites existentes (não bloquear compilação parcial)
+        run: |
+          node scripts/audit-premium-assets.cjs
+          node scripts/check-premium-environment.cjs || echo "::warning::Texturas de cenário ainda não instaladas no repositório; build de avaliação visual parcial"
+      - name: Publicar artefato de teste isolado
+        uses: actions/upload-artifact@v4
+        with:
+          name: riverstorm-premium-web-${{ github.sha }}
+          path: dist/
+          if-no-files-found: error
+          retention-days: 14
