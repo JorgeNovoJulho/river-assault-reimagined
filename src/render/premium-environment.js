@@ -12,7 +12,7 @@ function ready(){return Object.values(textures).every(im=>im.complete&&im.natura
 function paint(c,d,bankAt,riverPath){
  if(!ready()||!d.riverPoints||d.riverPoints.length<2)return false;
  const {w,h,riverPoints}=d;
- const dist=d.distance||d.scroll||d.scrollDistance||0;
+ const dist=Number(d.distance??d.scroll??d.scrollDistance??0)||0;
  // Agua: textura raster recortada pela mesma máscara sinuosa do rio original.
  c.save();riverPath(c,riverPoints);c.clip();
  const water=textures.water,scale=Math.max(1,w/water.naturalWidth);
