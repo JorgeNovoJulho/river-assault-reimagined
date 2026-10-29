@@ -4,10 +4,12 @@
 (function(root){
 'use strict';
 const folder='./assets/sprites/premium/runtime/environment/';
+const base=Array.from(document.querySelectorAll('script[src]')).find(el=>el.src.includes('premium-environment.js'))?.src;
+const assetRoot=base?new URL('../../assets/sprites/premium/runtime/environment/',base).href:folder;
 const textures={};
 let failed=false;
 for(const [key,file] of Object.entries({water:'water_calm.png',left:'riverbank_left.png',right:'riverbank_right.png'})){
- const img=new Image();img.onerror=()=>{failed=true;console.warn('[RiverStorm Premium] Textura ausente:',file)};img.src=folder+file;textures[key]=img;
+ const img=new Image();img.onerror=()=>{failed=true;console.warn('[RiverStorm Premium] Textura ausente:',file)};img.src=assetRoot+file;textures[key]=img;
 }
 function ready(){return !failed&&Object.values(textures).every(im=>im.complete&&im.naturalWidth>0);}
 function status(){return {ready:ready(),failed,images:Object.entries(textures).map(([key,im])=>({key,loaded:im.complete&&im.naturalWidth>0,width:im.naturalWidth,height:im.naturalHeight}))};}
