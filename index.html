@@ -2046,7 +2046,12 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
             });
         }
 
+        // Núcleo Premium: somente o FALCÃO usa o PNG candidato disponível; outras naves aguardam homologação de sprites individuais.
+        const premiumFalcaoSprite=new Image();
+        premiumFalcaoSprite.src='./assets/sprites/premium/runtime/player/fighter_candidate.png';
         function drawPlayer(x, y) {
+            // Sobreposição gráfica sem modificar hitboxes, controles ou arma selecionada.
+
             ctx.save();
             ctx.translate(x, y);
             if(rollFrames>0){
@@ -2065,6 +2070,11 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
                 ctx.shadowColor=player.effectType==='ICE'?'#7dd3fc':player.effectType==='FIRE'?'#ef4444':player.effectType==='POISON'?'#4ade80':player.effectType==='BLEED'?'#fb7185':player.effectType==='GRAVITY'?'#c4b5fd':'#22d3ee';
                 ctx.shadowBlur=18;
                 ctx.globalAlpha=.86;
+            }
+            if(selectedPlane==='falcao' && premiumFalcaoSprite.complete && premiumFalcaoSprite.naturalWidth){
+                ctx.drawImage(premiumFalcaoSprite,-27,-30,54,66);
+                ctx.restore();
+                return;
             }
             // Fogo do Pós-combustor
             ctx.fillStyle = Math.random() < 0.5 ? '#f97316' : '#ef4444';
