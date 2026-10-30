@@ -59,9 +59,13 @@ class PhaserArena extends Phaser.Scene {
   for(const [key,file] of assets)this.load.svg(key,'./'+file,rasterSizes[key]);
   // Sprite premium aprovado no laboratório Boss 01. Mantém SVG original como fallback.
   this.load.image('fighter-premium','./assets/sprites/premium/runtime/player/fighter_candidate.png');
+  this.load.spritesheet('explosion-premium','./assets/sprites/premium/runtime/fx/explosion_atlas_4x3.png',{frameWidth:128,frameHeight:128,endFrame:11});
   this.load.on('loaderror',(file:Phaser.Loader.File)=>console.warn('Phaser sprite:',file.key));
  }
  create(){
+  if(this.textures.exists('explosion-premium')&&!this.anims.exists('riverstorm-premium-explosion')){
+   this.anims.create({key:'riverstorm-premium-explosion',frames:this.anims.generateFrameNumbers('explosion-premium',{start:0,end:11}),frameRate:18,repeat:0});
+  }
   this.cameras.main.setBackgroundColor('#0c233c');
   this.add.rectangle(WIDTH/2,HEIGHT/2,270,HEIGHT,0x12546a);
   for(let i=0;i<3;i++)this.waterTiles.push(this.add.image(WIDTH/2,i*480-240,'water-detail').setDisplaySize(280,480).setDepth(-1));
@@ -98,6 +102,12 @@ class PhaserArena extends Phaser.Scene {
   const status=document.getElementById('phaser-status');
   if(status)status.textContent='Arena Phaser jogável experimental: movimento, tiros, danos e colisões. Campanha Original permanece intacta.';
  }
+ private burst(x:number,y:number,size=88){
+  if(!this.textures.exists('explosion-premium')||!this.anims.exists('riverstorm-premium-explosion'))return;
+  const fx=this.add.sprite(x,y,'explosion-premium').setDisplaySize(size,size).setDepth(8);
+  fx.once(Phaser.Animations.Events.ANIMATION_COMPLETE,()=>fx.destroy());
+  fx.play('riverstorm-premium-explosion');
+ }
  private shoot(x:number,y:number,hostile:boolean,damage:number){
   if(this.shots.length>=90)return;
   const sprite=this.add.image(x,y,'beam').setDisplaySize(hostile?12:9,hostile?22:29).setTint(hostile?0xff6f68:0x80eaff);
@@ -112,6 +122,7 @@ class PhaserArena extends Phaser.Scene {
  private damage(amount:number,time:number){
   if(this.ended||time<this.invulnerableUntil)return;
   this.lives-=amount;this.invulnerableUntil=time+900;
+  this.burst(this.ship.x,this.ship.y,70);
   this.ship.setFillStyle(0xff4b65);
   this.cameras.main.shake(100,.002);
   if(this.lives<=0){this.ended=true;this.add.text(WIDTH/2,HEIGHT/2,'NAVE DESTRUÍDA\nPRESSIONE R PARA RECOMEÇAR',{fontSize:'22px',align:'center',color:'#ffe2aa'}).setOrigin(.5).setDepth(20);}
@@ -150,12 +161,12 @@ class PhaserArena extends Phaser.Scene {
     if(Phaser.Math.Distance.Between(b.sprite.x,b.sprite.y,this.ship.x,this.ship.y)<28){this.damage(1,time);b.sprite.destroy();this.shots.splice(i,1);}
    }else{
     let hit=false;
-    for(let j=this.enemies.length-1;j>=0;j--){const e=this.enemies[j];if(Phaser.Math.Distance.Between(b.sprite.x,b.sprite.y,e.sprite.x,e.sprite.y)<35){e.hp-=b.damage;hit=true;if(e.hp<=0){e.sprite.destroy();this.enemies.splice(j,1);this.points+=100;}break;}}
+    for(let j=this.enemies.length-1;j>=0;j--){const e=this.enemies[j];if(Phaser.Math.Distance.Between(b.sprite.x,b.sprite.y,e.sprite.x,e.sprite.y)<35){e.hp-=b.damage;hit=true;if(e.hp<=0){this.burst(e.sprite.x,e.sprite.y,90);e.sprite.destroy();this.enemies.splice(j,1);this.points+=100;}break;}}
     if(!hit&&Math.abs(b.sprite.x-this.boss.x)<65&&Math.abs(b.sprite.y-this.boss.y)<63){this.bossHp-=b.damage;hit=true;this.points+=5;}
     if(hit){b.sprite.destroy();this.shots.splice(i,1);}
    }
   }
-  if(this.bossHp<=0){this.bossHp=180;this.points+=2000;this.boss.setTexture(['boss-1','boss-2','boss-3'][Math.floor(this.points/2000)%3]);}
+  if(this.bossHp<=0){this.burst(this.boss.x,this.boss.y,230);this.bossHp=180;this.points+=2000;this.boss.setTexture(['boss-1','boss-2','boss-3'][Math.floor(this.points/2000)%3]);}
   this.bossBar.clear();
   this.bossBar.fillStyle(0x071321,.94).fillRoundedRect(105,36,330,14,5);
   this.bossBar.fillStyle(0xff805a,1).fillRoundedRect(108,39,324*Phaser.Math.Clamp(this.bossHp/180,0,1),8,3);
