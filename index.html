@@ -344,6 +344,7 @@
       <div id="pilot-progress" style="padding:4px 10px;background:#07172b;display:flex;align-items:center;gap:8px;flex-wrap:wrap;color:#e2e8f0;font:900 11px monospace"><span>⭐ NÍVEL <b id="hud-pilot-level" style="color:#facc15">0 / 100</b></span><span id="hud-pilot-xp">0 XP</span><span id="hud-next-xp" style="color:#67e8f9">100 p/ próximo</span><div style="flex:1;min-width:65px;height:7px;background:#1e293b;border-radius:6px;overflow:hidden"><div id="hud-xp-fill" style="height:100%;width:0%;background:linear-gradient(90deg,#0891b2,#facc15)"></div></div></div>
       <div class="rs-hud-footer"><span id="hud-version" style="color:#38bdf8;font-size:8px">HUD 0.7.6</span><span id="mission-hud">SELVA DA AURORA</span><b id="sector-hud">SETOR 1</b><span id="hud-environment" title="Período do dia e clima">☀ DIA · CÉU LIMPO</span><span id="hud-pilot-name" title="Piloto">PILOTO</span><span id="hud-rank">J1 SOLDADO</span></div>
     </section>
+    <div id="rs-now-playing" aria-live="polite" title="Faixa musical atual" style="max-width:920px;margin:3px auto;padding:5px 12px;box-sizing:border-box;border:1px solid #177caa;border-radius:6px;background:#061522;color:#7de8ff;font:600 12px monospace;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">♫ TOCANDO: nenhuma faixa</div>
     <div id="rs-bottom-actions" aria-label="Opções rápidas">
       <button id="crt-toggle" type="button">CRT: LIG</button>
       <button id="controller-settings-btn" type="button">⚙ CONTROLE</button>
@@ -4490,9 +4491,10 @@ function updateTerrainEvent(){
         window.addEventListener('gamepaddisconnected',()=>{lastControllerStatus='';});
         const mouseInput = {active:false,x:VIRTUAL_WIDTH/2,y:VIRTUAL_HEIGHT-100,up:false,down:false,fire:false};
         let lastMouseShot = 0;
-        const playlist=new window.RiverPlaylist({onStatus:(message)=>{
-            const status=document.getElementById('playlist-status');if(status)status.textContent=message;
-        }});
+        const playlist=new window.RiverPlaylist({
+          onStatus:(message)=>{const status=document.getElementById('playlist-status');if(status)status.textContent=message;},
+          onTrackChange:(name)=>{const label=document.getElementById('rs-now-playing');if(label)label.textContent='♫ TOCANDO: '+name;}
+        });
         playlist.onReady=()=>{
           if(gameState!=='PLAYING'||!playlist.enabled)return;
           if(redAlertTriggered||bossActive){
