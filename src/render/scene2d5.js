@@ -516,13 +516,53 @@ function enemy(c,e,time){
 }
 const islandSpriteFiles=['island-tropical.svg','island-rock.svg','island-scorched.svg'];
 const islandSpriteImages=islandSpriteFiles.map(name=>{const img=new Image();img.src='./assets/sprites/terrain/'+name;return img;});
-function islands(c,items,t){
+// PNGs raster aprovados são usados apenas no Rio Verde (setor 1). Os SVGs
+// existentes continuam como fallback para os demais biomas sem arte final.
+const premiumRuntime={};
+for(const [key,file] of Object.entries({
+ water:'environment/water_calm.png',bankLeft:'environment/riverbank_left.png',bankRight:'environment/riverbank_right.png',
+ island:'terrain/island_river.png',bossCore:'boss01/core.png',tower1:'boss01/tower1.png',tower2:'boss01/tower2.png',
+ cannon:'boss01/cannon.png',cannonDamaged:'boss01/cannonDamaged.png',cannonDestroyed:'boss01/cannonDestroyed.png',
+ tank:'shore/tank.png',turret:'shore/turret.png',fighter:'player/fighter_candidate.png'
+})){const image=new Image();image.src='./assets/sprites/premium/runtime/'+file;premiumRuntime[key]=image;}
+function rasterReady(image){return !!(image&&image.complete&&image.naturalWidth);}
+function drawPremiumRioVerde(c,d){
+ if(Number(d.sector)!==1)return;
+ const scroll=((d.distance||0)*.16)%d.h;
+ if(rasterReady(premiumRuntime.water)){
+  c.save();if(riverPath(c,d.riverPoints)){c.clip();c.globalAlpha=.86;c.drawImage(premiumRuntime.water,0,scroll-d.h,d.w,d.h);c.drawImage(premiumRuntime.water,0,scroll,d.w,d.h);}c.restore();
+ }
+ // Margens raster ocupam somente a faixa terrestre; regras de margem e colisões não mudam.
+ if(rasterReady(premiumRuntime.bankLeft))c.drawImage(premiumRuntime.bankLeft,0,0,Math.min(118,d.w*.30),d.h);
+ if(rasterReady(premiumRuntime.bankRight))c.drawImage(premiumRuntime.bankRight,d.w-Math.min(118,d.w*.30),0,Math.min(118,d.w*.30),d.h);
+}
+function drawPremiumBoss01(c,e,d){
+ const w=Math.max(112,e.width||112),h=Math.max(62,e.height||62),hp=Math.max(0,e.hp/Math.max(1,e.maxHp));
+ if(!rasterReady(premiumRuntime.bossCore))return false;
+ c.save();c.drawImage(premiumRuntime.bossCore,e.x-w*.5,e.y-h*.5,w,h);
+ const towerW=w*.20,towerH=h*.78,cannon=hp<=.22?premiumRuntime.cannonDestroyed:hp<=.52?premiumRuntime.cannonDamaged:premiumRuntime.cannon;
+ if(rasterReady(premiumRuntime.tower1))c.drawImage(premiumRuntime.tower1,e.x-w*.40,e.y-h*.34,towerW,towerH);
+ if(rasterReady(premiumRuntime.tower2))c.drawImage(premiumRuntime.tower2,e.x+w*.20,e.y-h*.34,towerW,towerH);
+ if(rasterReady(cannon))c.drawImage(cannon,e.x-w*.12,e.y-h*.44,w*.24,h*.68);
+ c.restore();return true;
+}
+function drawPremiumMarginUnit(c,e,d){
+ if(Number(d.sector)!==1)return false;
+ const image=e.type==='TANK'?premiumRuntime.tank:e.type==='TURRET'?premiumRuntime.turret:null;
+ if(!rasterReady(image))return false;
+ const w=e.type==='TANK'?Math.max(34,(e.width||25)*1.7):Math.max(30,(e.width||22)*1.65),h=e.type==='TANK'?Math.max(25,(e.height||29)*1.25):Math.max(30,(e.height||22)*1.65);
+ c.save();c.translate(e.x,e.y);if(e.type==='TANK')c.rotate(Math.sin((d.missionTicks||0)*.035+e.x)*.06);c.drawImage(image,-w*.5,-h*.5,w,h);c.restore();return true;
+}
+function islands(c,items,t,sector){
  // Materiais de relevo: renderizacao deterministica em camadas, sem sprites vetoriais lisos.
  const icy=/ÁRTICO|GLACIAL|FIORDE|NEVE|ICE/.test(t.name);
  const desert=/DESERTO|OÁSIS|DUNAS/.test(t.name);
  const industrial=/CIDADE|INDUSTRIAL|ESTALEIRO|RUÍNAS|PORTO/.test(t.name);
  const volcanic=/LAVA|VULC|MAGMA/.test(t.name);
  for(const p of items){
+  if(Number(sector)===1&&rasterReady(premiumRuntime.island)){
+    c.save();c.drawImage(premiumRuntime.island,p.x-p.width*.52,p.y-p.height*.52,p.width*1.04,p.height*1.04);c.restore();continue;
+  }
   const terrainSprite=(p.maxHp>0&&p.hp/p.maxHp<=.45)?islandSpriteImages[2]:islandSpriteImages[((p.shape||0)%2+2)%2];
   if(terrainSprite.complete&&terrainSprite.naturalWidth){
     c.save();c.drawImage(terrainSprite,p.x-p.width*.52,p.y-p.height*.52,p.width*1.04,p.height*1.04);c.restore();
@@ -1412,16 +1452,19 @@ const bossSpriteImages=bossSpriteFiles.map(name=>{const im=new Image();im.src='.
 function draw(c,d){
  const t=THEMES[((d.sector-1)%THEMES.length+THEMES.length)%THEMES.length];
  landscape(c,d,t);
+ drawPremiumRioVerde(c,d);
  c.save();clipShoreLand(c,d.riverPoints,d.w,d.h);
  terrainSignature(c,d,t);landmark(c,d,t);mapSetPieces(c,d,t);enhancedWorld(c,d,t);livingSetDressing(c,d,t);
  c.restore();
  // Atmosfera sobre todo o mapa, sem recorte costeiro.
  biomeAtmosphere(c,d,t);
  // Culling explícito: evitar traçar sprites fora da tela e preservar FPS em ondas intensas.
- islands(c,(d.islands||[]).filter(p=>p.y+(p.height||0)>-32&&p.y-(p.height||0)<d.h+32&&p.x+(p.width||0)>-32&&p.x-(p.width||0)<d.w+32),t);
+ islands(c,(d.islands||[]).filter(p=>p.y+(p.height||0)>-32&&p.y-(p.height||0)<d.h+32&&p.x+(p.width||0)>-32&&p.x-(p.width||0)<d.w+32),t,d.sector);
  for(const e of d.enemies||[]){
    if(e.hp<=0||e.y+(e.height||40)<-45||e.y-(e.height||40)>d.h+45||e.x+(e.width||40)<-45||e.x-(e.width||40)>d.w+45)continue;
-   if(e.type==='BOSS'&&Number(d.sector)>=1&&Number(d.sector)<=20&&bossSpriteImages[Number(d.sector)-1].complete&&bossSpriteImages[Number(d.sector)-1].naturalWidth){const sprite=bossSpriteImages[Number(d.sector)-1];c.drawImage(sprite,e.x-(e.width||90)*.5,e.y-(e.height||90)*.5,e.width||90,e.height||90);bossAccessories(c,e,d);}
+   if(e.type==='BOSS'&&Number(d.sector)===1&&drawPremiumBoss01(c,e,d)){}
+   else if(drawPremiumMarginUnit(c,e,d)){}
+   else if(e.type==='BOSS'&&Number(d.sector)>=1&&Number(d.sector)<=20&&bossSpriteImages[Number(d.sector)-1].complete&&bossSpriteImages[Number(d.sector)-1].naturalWidth){const sprite=bossSpriteImages[Number(d.sector)-1];c.drawImage(sprite,e.x-(e.width||90)*.5,e.y-(e.height||90)*.5,e.width||90,e.height||90);bossAccessories(c,e,d);}
    else {const replacement=commonEnemySprites[e.type];if(replacement&&replacement.complete&&replacement.naturalWidth){enemy(c,e,t.time);}else{enemy(c,e,t.time);highDetailEnemy(c,e,t.time);drawAtlasVehicle(c,e);drawBiomeOverlay(c,e);mechArticulation(c,e);}bossAccessories(c,e,d);}
  }
  if(!d.invulnerable||Math.floor(Date.now()/110)%2){plane(c,d.player.x,d.player.y,d.player.aircraftType||d.aircraft,0.85);highDetailPlane(c,d.player.x,d.player.y,d.player.aircraftType||d.aircraft)}enhancedBattleLight(c,d);enhancedWeaponGlints(c,d);bossPresentation(c,d);atmosphereByTime(c,d);combatAtmosphere(c,d);
@@ -1430,6 +1473,10 @@ function drawPlayerForeground(c,x,y,aircraft,invulnerable){
  if(invulnerable>0&&Math.floor(Date.now()/160)%6===0)return;
  c.save();
  c.shadowColor='#69eaff';c.shadowBlur=detailEnabled?8:3;
+ if(String(aircraft||'').toLowerCase()==='falcao'&&rasterReady(premiumRuntime.fighter)){
+  c.drawImage(premiumRuntime.fighter,x-19,y-24,38,46);
+  c.restore();return;
+ }
  plane(c,x,y,aircraft,1.01);
  highDetailPlane(c,x,y,aircraft);
  c.restore();
