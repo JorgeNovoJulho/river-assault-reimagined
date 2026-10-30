@@ -25,6 +25,8 @@ jobs:
           node --check src/render/scene2d5.js
           node --check src/game/aircraft.js
       - name: Executar suíte original
+        id: regressions
+        continue-on-error: true
         run: npm test
       - name: Compilar sem tocar no site original
         run: npm run build
@@ -46,3 +48,8 @@ jobs:
           path: dist/
           if-no-files-found: error
           retention-days: 14
+      - name: Falhar se houver regressões
+        if: steps.regressions.outcome == 'failure'
+        run: |
+          echo '::error::Suíte original encontrou regressões. Artefato disponível para diagnóstico, mas NÃO homologado.'
+          exit 1
