@@ -1,5 +1,5 @@
 import { defineConfig } from 'vite';
-import { copyFileSync, mkdirSync, existsSync, readFileSync, writeFileSync } from 'node:fs';
+import { copyFileSync, mkdirSync, existsSync, readFileSync, writeFileSync, readdirSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 
 const legacyScripts = [
@@ -9,6 +9,8 @@ const legacyScripts = [
   'src/game/pilot-progress.js',
   'src/game/campaign.js',
   'src/render/scene2d5.js',
+  'src/render/premium-registry.js',
+  'src/render/premium-environment.js',
   'src/audio/music.js',
   'src/audio/sfx-modern.js',
   'src/audio/playlist.js',
@@ -72,6 +74,24 @@ function copyAndVersionRuntime() {
         if (!existsSync(source)) throw new Error('Imagem premium obrigatória ausente: ' + file);
         mkdirSync(dirname(target), { recursive: true });
         copyFileSync(source, target);
+      }
+      // Preservar PNGs opcionais de inimigos/biomas dentro do pacote final.
+      // Não transforma um atlas de referência em sprite de jogo.
+      const premiumRoot=resolve('assets/sprites/premium/runtime');
+      if (existsSync(premiumRoot)) {
+        const copyTree=(source)=>{
+          for(const ent of readdirSync(source,{withFileTypes:true})){
+            const current=resolve(source,ent.name);
+            if(ent.isDirectory())copyTree(current);
+            else if(ent.isFile()&&/\\.png$/i.test(ent.name)){
+              const rel=current.slice(resolve('.').length+1);
+              const target=resolve('dist',rel);
+              mkdirSync(dirname(target),{recursive:true});
+              copyFileSync(current,target);
+            }
+          }
+        };
+        copyTree(premiumRoot);
       }
       writeFileSync(indexPath, html);
       writeFileSync(resolve('dist/build-info.json'), JSON.stringify({
