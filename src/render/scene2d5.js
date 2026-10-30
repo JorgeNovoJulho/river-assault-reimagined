@@ -523,7 +523,8 @@ for(const [key,file] of Object.entries({
  water:'environment/water_calm.png',bankLeft:'environment/riverbank_left.png',bankRight:'environment/riverbank_right.png',
  island:'terrain/island_river.png',bossCore:'boss01/core.png',tower1:'boss01/tower1.png',tower2:'boss01/tower2.png',
  cannon:'boss01/cannon.png',cannonDamaged:'boss01/cannonDamaged.png',cannonDestroyed:'boss01/cannonDestroyed.png',
- tank:'shore/tank.png',turret:'shore/turret.png',fighter:'player/fighter_candidate.png'
+ tank:'shore/tank.png',turret:'shore/turret.png',fighter:'player/fighter_candidate.png',
+ mecha:'boss01/areaMecha.png',helicopter:'boss01/areaHelicopter.png',submarine:'boss01/areaSubmarine.png'
 })){const image=new Image();image.src='./assets/sprites/premium/runtime/'+file;premiumRuntime[key]=image;}
 function rasterReady(image){return !!(image&&image.complete&&image.naturalWidth);}
 function drawPremiumRioVerde(c,d){
@@ -1501,7 +1502,7 @@ function draw(c,d){
    if(e.type==='BOSS'&&Number(d.sector)===1&&drawPremiumBoss01(c,e,d)){}
    else if(drawPremiumMarginUnit(c,e,d)){}
    else if(e.type==='BOSS'&&Number(d.sector)>=1&&Number(d.sector)<=20&&bossSpriteImages[Number(d.sector)-1].complete&&bossSpriteImages[Number(d.sector)-1].naturalWidth){const sprite=bossSpriteImages[Number(d.sector)-1];c.drawImage(sprite,e.x-(e.width||90)*.5,e.y-(e.height||90)*.5,e.width||90,e.height||90);bossAccessories(c,e,d);}
-   else {const replacement=commonEnemySprites[e.type];if(replacement&&replacement.complete&&replacement.naturalWidth){c.save();c.drawImage(replacement,e.x-(e.width||40)*.5,e.y-(e.height||40)*.5,e.width||40,e.height||40);c.restore();}else{enemy(c,e,t.time);highDetailEnemy(c,e,t.time);drawAtlasVehicle(c,e);drawBiomeOverlay(c,e);mechArticulation(c,e);}bossAccessories(c,e,d);}
+   else {const premiumEnemy=Number(d.sector)===1?({MECHA_GUN:premiumRuntime.mecha,HELI:premiumRuntime.helicopter,SUB:premiumRuntime.submarine}[e.type]||null):null;const replacement=rasterReady(premiumEnemy)?premiumEnemy:commonEnemySprites[e.type];if(replacement&&replacement.complete&&replacement.naturalWidth){c.save();c.drawImage(replacement,e.x-(e.width||40)*.5,e.y-(e.height||40)*.5,e.width||40,e.height||40);c.restore();}else{enemy(c,e,t.time);highDetailEnemy(c,e,t.time);drawAtlasVehicle(c,e);drawBiomeOverlay(c,e);mechArticulation(c,e);}bossAccessories(c,e,d);}
  }
  if(!d.invulnerable||Math.floor(Date.now()/110)%2){drawPlayerForeground(c,d.player.x,d.player.y,d.player.aircraftType||d.aircraft,0)}
  // Efeitos legados procedurais cobriam o Boss 01 inteiro (anel, clarões e formas).
