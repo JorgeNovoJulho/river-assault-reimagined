@@ -125,7 +125,7 @@ class PhaserArena extends Phaser.Scene {
   if(this.keys.up.isDown||this.wasd.W.isDown)this.ship.y-=speed;
   if(this.keys.down.isDown||this.wasd.S.isDown)this.ship.y+=speed;
   if(this.pointerActive){this.ship.x+=(this.pointerX-this.ship.x)*Math.min(.25*dt,1);this.ship.y+=(this.pointerY-this.ship.y)*Math.min(.25*dt,1);}
-  this.ship.x=Phaser.Math.Clamp(this.ship.x,26,WIDTH-26);this.ship.y=Phaser.Math.Clamp(this.ship.y,100,HEIGHT-30);
+  this.ship.x=Phaser.Math.Clamp(this.ship.x,26,WIDTH-26);this.ship.y=Phaser.Math.Clamp(this.ship.y,110,HEIGHT-100);
   this.ship.setFillStyle(time<this.invulnerableUntil?0xff6b71:0x96e7f2);
   this.shipVisual.setPosition(this.ship.x,this.ship.y).setTint(time<this.invulnerableUntil?0xff899a:0xffffff);
   for(const bank of this.banks){bank.y+=1.25*dt;if(bank.y>HEIGHT+240)bank.y-=1440;}
