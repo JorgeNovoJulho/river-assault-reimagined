@@ -532,9 +532,16 @@ function drawPremiumRioVerde(c,d){
  if(rasterReady(premiumRuntime.water)){
   c.save();if(riverPath(c,d.riverPoints)){c.clip();c.globalAlpha=.86;c.drawImage(premiumRuntime.water,0,scroll-d.h,d.w,d.h);c.drawImage(premiumRuntime.water,0,scroll,d.w,d.h);}c.restore();
  }
- // Margens raster ocupam somente a faixa terrestre; regras de margem e colisões não mudam.
- if(rasterReady(premiumRuntime.bankLeft))c.drawImage(premiumRuntime.bankLeft,0,0,Math.min(118,d.w*.30),d.h);
- if(rasterReady(premiumRuntime.bankRight))c.drawImage(premiumRuntime.bankRight,d.w-Math.min(118,d.w*.30),0,Math.min(118,d.w*.30),d.h);
+ // Recorte contínuo no terreno gerado pela curva real do leito.
+ // A posição das entidades e a geometria de colisão permanecem intactas.
+ if(d.riverPoints&&d.riverPoints.length>1){
+  c.save();
+  if(clipShoreLand(c,d.riverPoints,d.w,d.h)){
+   if(rasterReady(premiumRuntime.bankLeft))c.drawImage(premiumRuntime.bankLeft,0,0,d.w*.50,d.h);
+   if(rasterReady(premiumRuntime.bankRight))c.drawImage(premiumRuntime.bankRight,d.w*.50,0,d.w*.50,d.h);
+  }
+  c.restore();
+ }
 }
 function drawPremiumBoss01(c,e,d){
  const w=Math.max(112,e.width||112),h=Math.max(62,e.height||62),hp=Math.max(0,e.hp/Math.max(1,e.maxHp));
@@ -553,7 +560,7 @@ function drawPremiumMarginUnit(c,e,d){
  const w=e.type==='TANK'?Math.max(34,(e.width||25)*1.7):Math.max(30,(e.width||22)*1.65),h=e.type==='TANK'?Math.max(25,(e.height||29)*1.25):Math.max(30,(e.height||22)*1.65);
  c.save();c.translate(e.x,e.y);if(e.type==='TANK')c.rotate(Math.sin((d.missionTicks||0)*.035+e.x)*.06);c.drawImage(image,-w*.5,-h*.5,w,h);c.restore();return true;
 }
-function islands(c,items,t,sector){
+function islands(c,items,t,sector,riverPoints){
  // Materiais de relevo: renderizacao deterministica em camadas, sem sprites vetoriais lisos.
  const icy=/ÁRTICO|GLACIAL|FIORDE|NEVE|ICE/.test(t.name);
  const desert=/DESERTO|OÁSIS|DUNAS/.test(t.name);
@@ -561,7 +568,10 @@ function islands(c,items,t,sector){
  const volcanic=/LAVA|VULC|MAGMA/.test(t.name);
  for(const p of items){
   if(Number(sector)===1&&rasterReady(premiumRuntime.island)){
-    c.save();c.drawImage(premiumRuntime.island,p.x-p.width*.52,p.y-p.height*.52,p.width*1.04,p.height*1.04);c.restore();continue;
+    c.save();
+    if(riverPoints&&riverPath(c,riverPoints))c.clip();
+    c.drawImage(premiumRuntime.island,p.x-p.width*.52,p.y-p.height*.52,p.width*1.04,p.height*1.04);
+    c.restore();continue;
   }
   const terrainSprite=(p.maxHp>0&&p.hp/p.maxHp<=.45)?islandSpriteImages[2]:islandSpriteImages[((p.shape||0)%2+2)%2];
   if(terrainSprite.complete&&terrainSprite.naturalWidth){
@@ -1459,7 +1469,7 @@ function draw(c,d){
  // Atmosfera sobre todo o mapa, sem recorte costeiro.
  biomeAtmosphere(c,d,t);
  // Culling explícito: evitar traçar sprites fora da tela e preservar FPS em ondas intensas.
- islands(c,(d.islands||[]).filter(p=>p.y+(p.height||0)>-32&&p.y-(p.height||0)<d.h+32&&p.x+(p.width||0)>-32&&p.x-(p.width||0)<d.w+32),t,d.sector);
+ islands(c,(d.islands||[]).filter(p=>p.y+(p.height||0)>-32&&p.y-(p.height||0)<d.h+32&&p.x+(p.width||0)>-32&&p.x-(p.width||0)<d.w+32),t,d.sector,d.riverPoints);
  for(const e of d.enemies||[]){
    if(e.hp<=0||e.y+(e.height||40)<-45||e.y-(e.height||40)>d.h+45||e.x+(e.width||40)<-45||e.x-(e.width||40)>d.w+45)continue;
    if(e.type==='BOSS'&&Number(d.sector)===1&&drawPremiumBoss01(c,e,d)){}
