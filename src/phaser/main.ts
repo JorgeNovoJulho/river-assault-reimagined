@@ -119,7 +119,6 @@ class PhaserArena extends Phaser.Scene {
   this.input.on('pointerup',()=>{this.pointerFiring=false;if(!this.pointerIsMouse)this.pointerActive=false});
   this.input.on('gameout',()=>{this.pointerActive=false;this.pointerFiring=false});
   this.game.events.once(Phaser.Core.Events.DESTROY,()=>{this.pointerActive=false;this.pointerFiring=false});
-  const status=document.getElementById('phaser-status');
   // O diagnóstico acima informa a ausência de PNGs, sem anunciar aprovação falsa.
  }
  private burst(x:number,y:number,size=88){
