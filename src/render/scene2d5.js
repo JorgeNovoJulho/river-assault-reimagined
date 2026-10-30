@@ -562,8 +562,25 @@ function drawPremiumRioVerde(c,d){
  }
  c.restore();
 }
+// Escalas apenas visuais: nenhuma mudança nas colisões, dano ou velocidade.
+function visualSizeForEnemy(e,d){
+ const type=String(e.type||'');
+ const baseW=Math.max(18,Number(e.width)||40),baseH=Math.max(18,Number(e.height)||40);
+ const shipW=Math.max(28,Number(d.player?.width)||28);
+ const sizes={
+  MECHA_GUN:[1.35,1.38],MECHA_SWORD:[1.35,1.38],
+  HELI:[1.45,1.35],SUB:[1.7,1.22],SHIP:[2.0,1.30],
+  TANK:[1.25,1.25],TURRET:[1.25,1.25],
+  JET:[1.25,1.25],DRONE:[.92,.92]
+ };
+ const factor=sizes[type]||[1.12,1.12];
+ let w=baseW*factor[0],h=baseH*factor[1];
+ if(type.startsWith('MECHA'))w=Math.max(w,shipW*1.20);
+ if(type==='SUB'||type==='SHIP')w=Math.max(w,shipW*1.7);
+ return {w:Math.min(w,d.w*.34),h:Math.min(h,d.h*.22)};
+}
 function drawPremiumBoss01(c,e,d){
- const w=Math.max(112,e.width||112),h=Math.max(62,e.height||62);
+ const w=Math.min(d.w*.86,Math.max(180,(e.width||112)*1.32)),h=Math.min(d.h*.32,Math.max(88,(e.height||62)*1.26));
  const hp=Math.max(0,e.hp/Math.max(1,e.maxHp));
  if(!rasterReady(premiumRuntime.bossCore))return false;
  const tick=Number(d.missionTicks)||0;
@@ -1516,8 +1533,8 @@ function draw(c,d){
    if(e.hp<=0||e.y+(e.height||40)<-45||e.y-(e.height||40)>d.h+45||e.x+(e.width||40)<-45||e.x-(e.width||40)>d.w+45)continue;
    if(e.type==='BOSS'&&Number(d.sector)===1&&drawPremiumBoss01(c,e,d)){}
    else if(drawPremiumMarginUnit(c,e,d)){}
-   else if(e.type==='BOSS'&&Number(d.sector)>=1&&Number(d.sector)<=20&&bossSpriteImages[Number(d.sector)-1].complete&&bossSpriteImages[Number(d.sector)-1].naturalWidth){const sprite=bossSpriteImages[Number(d.sector)-1];c.drawImage(sprite,e.x-(e.width||90)*.5,e.y-(e.height||90)*.5,e.width||90,e.height||90);bossAccessories(c,e,d);}
-   else {const premiumEnemy=Number(d.sector)===1?({MECHA_GUN:premiumRuntime.mecha,HELI:premiumRuntime.helicopter,SUB:premiumRuntime.submarine}[e.type]||null):null;const replacement=rasterReady(premiumEnemy)?premiumEnemy:commonEnemySprites[e.type];if(replacement&&replacement.complete&&replacement.naturalWidth){c.save();c.drawImage(replacement,e.x-(e.width||40)*.5,e.y-(e.height||40)*.5,e.width||40,e.height||40);c.restore();}else{enemy(c,e,t.time);highDetailEnemy(c,e,t.time);drawAtlasVehicle(c,e);drawBiomeOverlay(c,e);mechArticulation(c,e);}bossAccessories(c,e,d);}
+   else if(e.type==='BOSS'&&Number(d.sector)>=1&&Number(d.sector)<=20&&bossSpriteImages[Number(d.sector)-1].complete&&bossSpriteImages[Number(d.sector)-1].naturalWidth){const sprite=bossSpriteImages[Number(d.sector)-1];const bw=Math.min(d.w*.84,Math.max(160,(e.width||90)*1.25)),bh=Math.min(d.h*.30,Math.max(100,(e.height||90)*1.20));c.drawImage(sprite,e.x-bw*.5,e.y-bh*.5,bw,bh);bossAccessories(c,e,d);}
+   else {const premiumEnemy=Number(d.sector)===1?({MECHA_GUN:premiumRuntime.mecha,HELI:premiumRuntime.helicopter,SUB:premiumRuntime.submarine}[e.type]||null):null;const replacement=rasterReady(premiumEnemy)?premiumEnemy:commonEnemySprites[e.type];if(replacement&&replacement.complete&&replacement.naturalWidth){const size=visualSizeForEnemy(e,d);c.save();c.drawImage(replacement,e.x-size.w*.5,e.y-size.h*.5,size.w,size.h);c.restore();}else{enemy(c,e,t.time);highDetailEnemy(c,e,t.time);drawAtlasVehicle(c,e);drawBiomeOverlay(c,e);mechArticulation(c,e);}bossAccessories(c,e,d);}
  }
  if(!d.invulnerable||Math.floor(Date.now()/110)%2){drawPlayerForeground(c,d.player.x,d.player.y,d.player.aircraftType||d.aircraft,0)}
  // Efeitos legados procedurais cobriam o Boss 01 inteiro (anel, clarões e formas).
