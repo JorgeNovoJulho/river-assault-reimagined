@@ -2563,11 +2563,8 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
                   ctx.clip();
                   ctx.drawImage(terrainImage,-half,slabY,p.width,p.height);
                   ctx.restore();
-                  ctx.fillStyle='rgba(42,160,203,.20)';ctx.fillRect(-gate+2,slabY,2*gate-4,p.height);
-                  ctx.strokeStyle='#a5f3fc';ctx.lineWidth=1.5;ctx.setLineDash([8,7]);
-                  ctx.beginPath();ctx.moveTo(0,slabY-15);ctx.lineTo(0,slabY+p.height+15);ctx.stroke();ctx.setLineDash([]);
-                  ctx.fillStyle='#e2f4ff';ctx.font='bold 10px monospace';ctx.textAlign='center';
-                  ctx.fillText('PASSAGEM',0,slabY-13);
+                  // O corredor central é uma abertura real na ponte/represa.
+                  // Não desenhar faixas, tipografia ou guias de depuração sobre o sprite.
                   ctx.fillStyle='#fb7185';ctx.fillRect(-half,slabY-11,p.width*Math.max(0,p.hp/p.maxHp),3);
                   ctx.restore();continue;
                 }
