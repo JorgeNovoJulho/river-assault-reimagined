@@ -25,7 +25,7 @@ function paths(sector){
 }
 const fallback={water:'runtime/environment/water_calm.png',left:'runtime/environment/riverbank_left.png',right:'runtime/environment/riverbank_right.png'};
 function groupReady(paths){return Object.values(paths).every(path=>image(path).loaded);}
-function ready(sector){return groupReady(paths(sector))||groupReady(fallback);}
+function ready(sector){preload(sector);return groupReady(paths(sector))||groupReady(fallback);}
 function active(sector){
  const mission=paths(sector);
  if(groupReady(mission))return {mode:'biome',textures:mission};
@@ -39,6 +39,7 @@ function status(sector){
 }
 function paint(c,d,bankAt,riverPath){
  if(!d?.riverPoints||d.riverPoints.length<2)return false;
+ preload(d.sector);
  const item=active(d.sector);if(!item)return false;
  const {w,h,riverPoints}=d;
  const dist=Number(d.distance??d.scroll??d.scrollDistance??0)||0;
