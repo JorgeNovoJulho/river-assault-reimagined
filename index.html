@@ -2550,8 +2550,10 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
         // Carregar PNGs de estruturas quando forem publicados no acervo aprovado.
         // Não remover os arquivos históricos: eles permanecem como fallback visual.
         const premiumStructureImages={};
-        for(const [type,name] of [['BRIDGE','bridge.png'],['DAM','dam.png'],
-                                  ['BRIDGE_DAMAGED','bridge_damaged.png'],['DAM_DAMAGED','dam_damaged.png']]){
+        // Catálogo opt-in. Adicionar aqui apenas arquivos PNG verificados no GitHub.
+        // Evita requisições 404 enquanto as pranchas ainda aguardam recortes reais.
+        const availablePremiumStructures={};
+        for(const [type,name] of Object.entries(availablePremiumStructures)){
           const image=new Image();
           image.src='./assets/sprites/premium/runtime/structures/'+name;
           premiumStructureImages[type]=image;
