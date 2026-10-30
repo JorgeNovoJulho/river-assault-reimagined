@@ -344,10 +344,10 @@ test('mapas: marcos ambientais com cinco famílias, deslocamento e baixo custo',
  const render=read('src/render/scene2d5.js');
  assert.match(render,/function landmark\(c,d,t\)/);
  assert.match(render,/switch\(\(sector-1\)%5\)/);
- assert.match(render,/landscape\\(c,d,t\\)/);
-  assert.match(render,/if\\(!premiumEnvironment\\)/);
-  assert.match(render,/terrainSignature\\(c,d,t\\);landmark\\(c,d,t\\);mapSetPieces\\(c,d,t\\)/);
-  assert.match(render,/biomeAtmosphere\\(c,d,t\\)/);
+ assert.match(render,/landscape\(c,d,t\)/);
+  assert.match(render,/if\(!premiumEnvironment\)/);
+  assert.match(render,/terrainSignature\(c,d,t\);landmark\(c,d,t\);mapSetPieces\(c,d,t\)/);
+  assert.match(render,/biomeAtmosphere\(c,d,t\)/);
  assert.match(render,/d\.quality==='eco'\?2/);
 });
 
@@ -378,9 +378,9 @@ test('20 mapas têm set pieces específicos com limite de custo por perfil',()=>
  assert.equal((match[1].match(/'[^']+'/g)||[]).length,20);
  assert.match(render,/function mapSetPieces\(c,d,t\)/);
  assert.match(render,/d\.quality==='eco'\?2:d\.quality==='enhanced'\?6:4/);
- assert.match(render,/mapSetPieces\\(c,d,t\\)/);
-  assert.match(render,/biomeAtmosphere\\(c,d,t\\)/);
-  assert.match(render,/if\\(!premiumEnvironment\\)/);
+ assert.match(render,/mapSetPieces\(c,d,t\)/);
+  assert.match(render,/biomeAtmosphere\(c,d,t\)/);
+  assert.match(render,/if\(!premiumEnvironment\)/);
 });
 
 test('20 cenários têm margens e terrenos próprios com densidade ajustável',()=>{
