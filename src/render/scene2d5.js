@@ -1407,6 +1407,9 @@ function bossAccessories(c,e,d){
  }
  c.restore();
 }
+// Casco raster oficial da revisão Boss02 v53: opcional até instalação binária.
+const premiumBoss02=new Image();
+premiumBoss02.src='./assets/sprites/premium/runtime/bosses/boss02_casco_sem_quadro.png';
 const bossSpriteFiles=['iron-wasp.svg','abyss-manta.svg','crimson-rotor.svg','granite-dam.svg','crimson-spider.svg','frost-sentinel.svg','storm-mantis.svg','neon-leviathan.svg','inferno-dredger.svg','glacier-titan.svg','solar-vulture.svg','night-harvester.svg','thunder-serpent.svg','blizzard-hydra.svg','desert-reaper.svg','abyssal-jellyfish.svg','forge-colossus.svg','polar-scythe.svg','phantom-fortress.svg','omega-overlord.svg'];
 const bossSpriteImages=bossSpriteFiles.map(name=>{const im=new Image();im.src='./assets/sprites/bosses/'+name;return im;});
 function draw(c,d){
@@ -1431,7 +1434,12 @@ function draw(c,d){
  islands(c,(d.islands||[]).filter(p=>p.y+(p.height||0)>-32&&p.y-(p.height||0)<d.h+32&&p.x+(p.width||0)>-32&&p.x-(p.width||0)<d.w+32),t);
  for(const e of d.enemies||[]){
    if(e.hp<=0||e.y+(e.height||40)<-45||e.y-(e.height||40)>d.h+45||e.x+(e.width||40)<-45||e.x-(e.width||40)>d.w+45)continue;
-   if(e.type==='BOSS'&&Number(d.sector)>=1&&Number(d.sector)<=20&&bossSpriteImages[Number(d.sector)-1].complete&&bossSpriteImages[Number(d.sector)-1].naturalWidth){const sprite=bossSpriteImages[Number(d.sector)-1];c.drawImage(sprite,e.x-(e.width||90)*.5,e.y-(e.height||90)*.5,e.width||90,e.height||90);bossAccessories(c,e,d);}
+   if(e.type==='BOSS'&&Number(d.sector)===2&&premiumBoss02.complete&&premiumBoss02.naturalWidth>0){
+     // Imagem raster recortada, centrada na hitbox original; nao troca IA ou partes.
+     const bw=e.width||90,bh=e.height||90;
+     c.drawImage(premiumBoss02,e.x-bw/2,e.y-bh/2,bw,bh);
+     bossAccessories(c,e,d);
+   }else if(e.type==='BOSS'&&Number(d.sector)>=1&&Number(d.sector)<=20&&bossSpriteImages[Number(d.sector)-1].complete&&bossSpriteImages[Number(d.sector)-1].naturalWidth){const sprite=bossSpriteImages[Number(d.sector)-1];c.drawImage(sprite,e.x-(e.width||90)*.5,e.y-(e.height||90)*.5,e.width||90,e.height||90);bossAccessories(c,e,d);}
    else {
      // Um único render por entidade: PNG Premium substitui (não sobrepõe)
      // a silhueta procedural; IA, animações de posição e hitboxes intocadas.
