@@ -102,7 +102,7 @@ class PhaserArena extends Phaser.Scene {
    this.banks.push(this.add.image(WIDTH-65,i*493-246,'bank-right-premium').setDisplaySize(130,493));
   }
   // Ilhas compactas e irregulares, distribuídas pelo canal com corredores livres.
-  for(const [x,y,size] of [[165,-115,58],[352,88,74],[264,280,50],[190,474,82],[362,645,58],[276,830,68]] as const){
+  for(const [x,y,size] of [[165,-115,58],[352,88,74],[264,280,50],[190,474,82],[362,645,58],[176,830,68]] as const){
    this.islands.push(this.add.image(x,y,'island-premium').setDisplaySize(size,size).setDepth(1));
   }
   // Defesas de margem: duas torres estáveis e dois tanques que patrulham visualmente.
@@ -201,7 +201,7 @@ class PhaserArena extends Phaser.Scene {
   for(const tile of this.waterTiles){tile.y+=1.25*dt;if(tile.y>HEIGHT+205)tile.y-=1099;}
   for(const [index,island] of this.islands.entries()){
    island.y+=1.25*dt;
-   if(island.y>HEIGHT+75){island.y=-90-(index%3)*115;island.x=[165,352,264,190,362,276][index];}
+   if(island.y>HEIGHT+75){island.y=-90-(index%3)*115;island.x=[165,352,264,190,362,176][index];}
   }
   for(const unit of this.shoreUnits){
    unit.sprite.y+=1.25*dt;
