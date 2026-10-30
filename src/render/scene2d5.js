@@ -1485,9 +1485,13 @@ function draw(c,d){
  const t=THEMES[((d.sector-1)%THEMES.length+THEMES.length)%THEMES.length];
  landscape(c,d,t);
  drawPremiumRioVerde(c,d);
- c.save();clipShoreLand(c,d.riverPoints,d.w,d.h);
- terrainSignature(c,d,t);landmark(c,d,t);mapSetPieces(c,d,t);enhancedWorld(c,d,t);livingSetDressing(c,d,t);
- c.restore();
+ // Setor 1 usa margens raster oficiais: desabilitar apenas os ornamentos legados
+ // que aparecem sobre a floresta como setas, folhas e geometrias.
+ if(Number(d.sector)!==1){
+  c.save();clipShoreLand(c,d.riverPoints,d.w,d.h);
+  terrainSignature(c,d,t);landmark(c,d,t);mapSetPieces(c,d,t);enhancedWorld(c,d,t);livingSetDressing(c,d,t);
+  c.restore();
+ }
  // Atmosfera sobre todo o mapa, sem recorte costeiro.
  biomeAtmosphere(c,d,t);
  // Culling explícito: evitar traçar sprites fora da tela e preservar FPS em ondas intensas.
@@ -1497,9 +1501,9 @@ function draw(c,d){
    if(e.type==='BOSS'&&Number(d.sector)===1&&drawPremiumBoss01(c,e,d)){}
    else if(drawPremiumMarginUnit(c,e,d)){}
    else if(e.type==='BOSS'&&Number(d.sector)>=1&&Number(d.sector)<=20&&bossSpriteImages[Number(d.sector)-1].complete&&bossSpriteImages[Number(d.sector)-1].naturalWidth){const sprite=bossSpriteImages[Number(d.sector)-1];c.drawImage(sprite,e.x-(e.width||90)*.5,e.y-(e.height||90)*.5,e.width||90,e.height||90);bossAccessories(c,e,d);}
-   else {const replacement=commonEnemySprites[e.type];if(replacement&&replacement.complete&&replacement.naturalWidth){enemy(c,e,t.time);}else{enemy(c,e,t.time);highDetailEnemy(c,e,t.time);drawAtlasVehicle(c,e);drawBiomeOverlay(c,e);mechArticulation(c,e);}bossAccessories(c,e,d);}
+   else {const replacement=commonEnemySprites[e.type];if(replacement&&replacement.complete&&replacement.naturalWidth){c.save();c.drawImage(replacement,e.x-(e.width||40)*.5,e.y-(e.height||40)*.5,e.width||40,e.height||40);c.restore();}else{enemy(c,e,t.time);highDetailEnemy(c,e,t.time);drawAtlasVehicle(c,e);drawBiomeOverlay(c,e);mechArticulation(c,e);}bossAccessories(c,e,d);}
  }
- if(!d.invulnerable||Math.floor(Date.now()/110)%2){plane(c,d.player.x,d.player.y,d.player.aircraftType||d.aircraft,0.85);highDetailPlane(c,d.player.x,d.player.y,d.player.aircraftType||d.aircraft)}
+ if(!d.invulnerable||Math.floor(Date.now()/110)%2){drawPlayerForeground(c,d.player.x,d.player.y,d.player.aircraftType||d.aircraft,0)}
  // Efeitos legados procedurais cobriam o Boss 01 inteiro (anel, clarões e formas).
  // Preserva a IA, tiros e as mecânicas; somente o pós-processamento visual é limitado na arena premium.
  if(Number(d.sector)!==1||!(d.enemies||[]).some(e=>e.type==='BOSS'&&e.hp>0&&rasterReady(premiumRuntime.bossCore))){
