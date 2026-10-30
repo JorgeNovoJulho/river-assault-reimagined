@@ -80,7 +80,12 @@ function copyAndVersionRuntime() {
         'assets/sprites/premium/runtime/boss01/cannonDestroyed.png',
         'assets/sprites/premium/runtime/boss01/areaHelicopter.png',
         'assets/sprites/premium/runtime/boss01/areaMecha.png',
-        'assets/sprites/premium/runtime/boss01/areaSubmarine.png'
+        'assets/sprites/premium/runtime/boss01/areaSubmarine.png',
+        'assets/sprites/premium/runtime/terrain/island_river.png',
+        'assets/sprites/premium/runtime/shore/turret.png',
+        'assets/sprites/premium/runtime/shore/tank.png',
+        'assets/sprites/premium/runtime/weapons/player_bolt.png',
+        'assets/sprites/premium/runtime/weapons/enemy_bolt.png'
       ]) {
         const source = resolve(file), target = resolve('dist', file);
         if (!existsSync(source)) throw new Error('Imagem premium obrigatória ausente: ' + file);

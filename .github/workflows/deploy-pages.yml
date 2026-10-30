@@ -58,6 +58,11 @@ jobs:
           test -s dist/assets/sprites/premium/runtime/environment/water_calm.png
           test -s dist/assets/sprites/premium/runtime/environment/riverbank_left.png
           test -s dist/assets/sprites/premium/runtime/environment/riverbank_right.png
+          test -s dist/assets/sprites/premium/runtime/terrain/island_river.png
+          test -s dist/assets/sprites/premium/runtime/shore/turret.png
+          test -s dist/assets/sprites/premium/runtime/shore/tank.png
+          test -s dist/assets/sprites/premium/runtime/weapons/player_bolt.png
+          test -s dist/assets/sprites/premium/runtime/weapons/enemy_bolt.png
           for sprite in assets/sprites/terrain/water-detail.svg assets/sprites/terrain/river-island-detail.svg assets/sprites/terrain/bridge-steel-detail.svg assets/sprites/fx/explosion-ring.svg assets/sprites/player/riverstorm-fighter.svg; do
             test -s "dist/$sprite" || { echo "::error::Sprite novo ausente: $sprite"; exit 1; }
           done
