@@ -3693,8 +3693,10 @@ function updateTerrainEvent(){
             player.aircraftVisual=selectedPlane;
             try{localStorage.setItem('river_active_plane',selectedPlane)}catch(error){}
             player.speed = config.speed;
-            player.baseScrollSpeed = config.scroll;
-            player.currentScrollSpeed = config.scroll;
+            // Redução moderada do deslocamento do mundo; velocidade lateral da nave não muda.
+            // Mantém proporcionalidade dos controles de aceleração/frenagem e consumo de combustível.
+            player.baseScrollSpeed = config.scroll * 0.88;
+            player.currentScrollSpeed = player.baseScrollSpeed;
             player.fuelDepletionRate = config.fuel*.8*Math.max(.72,1-(journey-1)*.018);
             player.weapon = config.weapons[0];
             player.weaponTimer = 0;
