@@ -526,6 +526,13 @@ for(const [key,file] of Object.entries({
  tank:'shore/tank.png',turret:'shore/turret.png',fighter:'player/fighter_candidate.png',
  mecha:'boss01/areaMecha.png',helicopter:'boss01/areaHelicopter.png',submarine:'boss01/areaSubmarine.png'
 })){const image=new Image();image.src='./assets/sprites/premium/runtime/'+file;premiumRuntime[key]=image;}
+// Quadros recortados da prancha oficial do Boss 01; fallback ao núcleo aprovado.
+// Os arquivos entram em runtime/boss01/ e não alteram colisões nem cadência de ataque.
+const boss01MotionFrames=Array.from({length:8},(_,i)=>{
+ const im=new Image();
+ im.src='./assets/sprites/premium/runtime/boss01/move_'+String(i+1).padStart(2,'0')+'.png';
+ return im;
+});
 function rasterReady(image){return !!(image&&image.complete&&image.naturalWidth);}
 function drawPremiumRioVerde(c,d){
  if(Number(d.sector)!==1||!d.riverPoints||d.riverPoints.length<2)return;
@@ -560,6 +567,14 @@ function drawPremiumBoss01(c,e,d){
  const hp=Math.max(0,e.hp/Math.max(1,e.maxHp));
  if(!rasterReady(premiumRuntime.bossCore))return false;
  const tick=Number(d.missionTicks)||0;
+ // Animação principal apenas enquanto íntegro; quando danificado, manter
+ // os componentes independentes com estados de dano/destruição existentes.
+ const allFramesReady=boss01MotionFrames.every(rasterReady);
+ if(hp>.52&&allFramesReady){
+  const frame=boss01MotionFrames[Math.floor(tick/8)%boss01MotionFrames.length];
+  c.drawImage(frame,e.x-w*.5,e.y-h*.5,w,h);
+  return true;
+ }
  const turretW=w*.20,turretH=h*.78;
  const cannon=hp<=.22?premiumRuntime.cannonDestroyed:hp<=.52?premiumRuntime.cannonDamaged:premiumRuntime.cannon;
  const drawModule=(img,x,y,mw,mh,angle)=>{
