@@ -587,7 +587,7 @@ function visualSizeForEnemy(e,d){
  return {w:Math.min(w,d.w*.34),h:Math.min(h,d.h*.22)};
 }
 function drawPremiumBoss01(c,e,d){
- const w=Math.min(d.w*.86,Math.max(180,(e.width||112)*1.32)),h=Math.min(d.h*.32,Math.max(88,(e.height||62)*1.26));
+ const w=Math.min(d.w*.92,Math.max(210,(e.width||112)*1.50)),h=Math.min(d.h*.34,Math.max(96,(e.height||62)*1.36));
  const hp=Math.max(0,e.hp/Math.max(1,e.maxHp));
  if(!rasterReady(premiumRuntime.bossCore))return false;
  const tick=Number(d.missionTicks)||0;
@@ -1540,7 +1540,7 @@ function draw(c,d){
    if(e.hp<=0||e.y+(e.height||40)<-45||e.y-(e.height||40)>d.h+45||e.x+(e.width||40)<-45||e.x-(e.width||40)>d.w+45)continue;
    if(e.type==='BOSS'&&Number(d.sector)===1&&drawPremiumBoss01(c,e,d)){}
    else if(drawPremiumMarginUnit(c,e,d)){}
-   else if(e.type==='BOSS'&&Number(d.sector)>=1&&Number(d.sector)<=20&&bossSpriteImages[Number(d.sector)-1].complete&&bossSpriteImages[Number(d.sector)-1].naturalWidth){const sprite=bossSpriteImages[Number(d.sector)-1];const bw=Math.min(d.w*.84,Math.max(160,(e.width||90)*1.25)),bh=Math.min(d.h*.30,Math.max(100,(e.height||90)*1.20));c.drawImage(sprite,e.x-bw*.5,e.y-bh*.5,bw,bh);bossAccessories(c,e,d);}
+   else if(e.type==='BOSS'&&Number(d.sector)>=1&&Number(d.sector)<=20&&bossSpriteImages[Number(d.sector)-1].complete&&bossSpriteImages[Number(d.sector)-1].naturalWidth){const sprite=bossSpriteImages[Number(d.sector)-1];const bw=Math.min(d.w*.92,Math.max(200,(e.width||90)*1.42)),bh=Math.min(d.h*.34,Math.max(110,(e.height||90)*1.32));c.drawImage(sprite,e.x-bw*.5,e.y-bh*.5,bw,bh);bossAccessories(c,e,d);}
    else {const premiumEnemy=Number(d.sector)===1?({MECHA_GUN:premiumRuntime.mecha,HELI:premiumRuntime.helicopter,SUB:premiumRuntime.submarine}[e.type]||null):null;const replacement=rasterReady(premiumEnemy)?premiumEnemy:commonEnemySprites[e.type];if(replacement&&replacement.complete&&replacement.naturalWidth){const size=visualSizeForEnemy(e,d);c.save();drawSpriteContained(c,replacement,e.x,e.y,size.w,size.h);c.restore();}else{enemy(c,e,t.time);highDetailEnemy(c,e,t.time);drawAtlasVehicle(c,e);drawBiomeOverlay(c,e);mechArticulation(c,e);}bossAccessories(c,e,d);}
  }
  if(!d.invulnerable||Math.floor(Date.now()/110)%2){drawPlayerForeground(c,d.player.x,d.player.y,d.player.aircraftType||d.aircraft,0)}
