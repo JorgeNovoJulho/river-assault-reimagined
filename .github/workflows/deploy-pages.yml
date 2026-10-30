@@ -73,7 +73,7 @@ jobs:
             test -d dist/music || { echo '::error::Trilhas de audio ausentes da publicacao'; exit 1; }
           fi
           touch dist/.nojekyll
-          printf '{"build":"%s","published_by":"github-actions","build_outcome":"success"}\\n' "$GITHUB_SHA" > dist/deployment-health.json
+          printf '{"build":"%s","published_by":"github-actions","build_outcome":"success"}\n' "$GITHUB_SHA" > dist/deployment-health.json
       - uses: actions/configure-pages@v5
         with:
           enablement: true
