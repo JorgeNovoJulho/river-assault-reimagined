@@ -32,7 +32,9 @@ jobs:
       - name: Conferir núcleo e entradas Premium
         run: |
           test -s dist/index.html
-          test -s dist/src/render/premium-registry.js || grep -qr 'RiverPremium' dist/assets
+          test -s dist/src/render/premium-registry.js
+          test -s dist/src/render/premium-environment.js
+          test -s dist/src/render/scene2d5.js
           grep -q 'premium-environment' index.html
       - name: Auditar sprites existentes (não bloquear compilação parcial)
         run: |
