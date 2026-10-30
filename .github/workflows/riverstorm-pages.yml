@@ -1,8 +1,9 @@
 name: RiverStorm - validação e publicação web
 
+# A publicação canônica é feita por deploy-pages.yml. Este fluxo antigo fica
+# disponível somente para diagnóstico manual: dois deploys concorrentes podem
+# promover artefatos diferentes para o mesmo ambiente GitHub Pages.
 on:
-  push:
-    branches: [main]
   workflow_dispatch:
 
 permissions:

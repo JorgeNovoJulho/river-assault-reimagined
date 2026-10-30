@@ -37,6 +37,9 @@ jobs:
         run: |
           set -euo pipefail
           test -s dist/index.html
+          # A campanha precisa permanecer um HTML navegável no artefato; isto
+          # detecta imediatamente upload de conteúdo comprimido/corrompido.
+          grep -q '^<!DOCTYPE html>' dist/index.html
           # Manter HTML produzido pelo Vite (não sobrescrever pelo HTML de origem).
           # Identificador da revisão publicada.
           sed -i "s/__RIVERSTORM_DEPLOY_SHA__/$GITHUB_SHA/g" dist/phaser-lab.html
@@ -85,9 +88,11 @@ jobs:
           set -euo pipefail
           ROOT="https://jorgenovojulho.github.io/river-assault-reimagined"
           for try in 1 2 3 4 5 6; do
-            if curl -fsSL --max-time 20 "$ROOT/phaser-lab.html?sha=$GITHUB_SHA" -o /tmp/arena.html &&
+            if curl -fsSL --max-time 20 "$ROOT/?sha=$GITHUB_SHA" -o /tmp/campaign.html &&
+               curl -fsSL --max-time 20 "$ROOT/phaser-lab.html?sha=$GITHUB_SHA" -o /tmp/arena.html &&
                curl -fsSL --max-time 20 "$ROOT/boss01-test.html?sha=$GITHUB_SHA" -o /tmp/boss01-test.html &&
                curl -fsSL --max-time 20 "$ROOT/deployment-health.json?sha=$GITHUB_SHA" -o /tmp/deployment-health.json &&
+               grep -q '^<!DOCTYPE html>' /tmp/campaign.html &&
                grep -q 'PONTE FORTIFICADA' /tmp/boss01-test.html &&
                grep -q 'phaser-stage' /tmp/arena.html &&
                grep -q "$GITHUB_SHA" /tmp/arena.html &&
