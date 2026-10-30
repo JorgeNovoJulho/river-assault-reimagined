@@ -41,6 +41,8 @@ class PhaserArena extends Phaser.Scene {
  private invulnerableUntil=0;
  private ended=false;
  private pointerActive=false;
+ private pointerFiring=false;
+ private pointerIsMouse=false;
  private pointerX=WIDTH/2;
  private pointerY=HEIGHT-135;
  constructor(){super('PhaserArena')}
@@ -84,9 +86,11 @@ class PhaserArena extends Phaser.Scene {
   this.input.keyboard!.on('keydown-ONE',()=>this.boss.setTexture('boss-1'));
   this.input.keyboard!.on('keydown-TWO',()=>this.boss.setTexture('boss-2'));
   this.input.keyboard!.on('keydown-THREE',()=>this.boss.setTexture('boss-3'));
-  this.input.on('pointerdown',(p:Phaser.Input.Pointer)=>{this.pointerActive=true;this.pointerX=p.x;this.pointerY=p.y;});
-  this.input.on('pointermove',(p:Phaser.Input.Pointer)=>{if(this.pointerActive){this.pointerX=p.x;this.pointerY=p.y;}});
-  this.input.on('pointerup',()=>{this.pointerActive=false});
+  this.input.on('pointerdown',(p:Phaser.Input.Pointer)=>{this.pointerActive=true;this.pointerFiring=true;this.pointerIsMouse=p.pointerType==='mouse';this.pointerX=p.x;this.pointerY=p.y;});
+  this.input.on('pointermove',(p:Phaser.Input.Pointer)=>{if(p.pointerType==='mouse'||p.isDown){this.pointerActive=true;this.pointerIsMouse=p.pointerType==='mouse';this.pointerX=p.x;this.pointerY=p.y;}});
+  this.input.on('pointerup',()=>{this.pointerFiring=false;if(!this.pointerIsMouse)this.pointerActive=false});
+  this.input.on('gameout',()=>{this.pointerActive=false;this.pointerFiring=false});
+  this.game.events.once(Phaser.Core.Events.DESTROY,()=>{this.pointerActive=false;this.pointerFiring=false});
   const status=document.getElementById('phaser-status');
   if(status)status.textContent='Arena Phaser jogável experimental: movimento, tiros, danos e colisões. Campanha Original permanece intacta.';
  }
@@ -124,7 +128,7 @@ class PhaserArena extends Phaser.Scene {
   for(const tile of this.waterTiles){tile.y+=1.25*dt;if(tile.y>HEIGHT+240)tile.y-=1440;}
   for(const island of this.islandDetails){island.y+=1.25*dt;if(island.y>HEIGHT+75)island.y-=1250;}
   for(const island of this.islands){island.y+=1.25*dt;if(island.y>HEIGHT+70)island.y=-85;}
-  if(time>this.nextShot&&(this.keys.space.isDown||this.wasd.SPACE.isDown||this.pointerActive)){
+  if(time>this.nextShot&&(this.keys.space.isDown||this.wasd.SPACE.isDown||this.pointerFiring)){
    this.shoot(this.ship.x,this.ship.y-22,false,1);this.nextShot=time+135;
   }
   if(time>this.nextWave&&this.enemies.length<10){this.spawnWave(time);this.nextWave=time+1200;}
