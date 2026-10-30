@@ -26,6 +26,7 @@ class PhaserArena extends Phaser.Scene {
  private islandDetails:Phaser.GameObjects.Image[]=[];
  private boss!:Phaser.GameObjects.Image;
  private hud!:Phaser.GameObjects.Text;
+ private bossBar!:Phaser.GameObjects.Graphics;
  private keys!:Phaser.Types.Input.Keyboard.CursorKeys;
  private wasd!:Record<'W'|'A'|'S'|'D'|'SPACE',Phaser.Input.Keyboard.Key>;
  private islands:Phaser.GameObjects.Image[]=[];
@@ -78,8 +79,11 @@ class PhaserArena extends Phaser.Scene {
   this.ship.setAlpha(0); // Hitbox original intacta; a nave SVG e somente visual.
   const fighterTexture=this.textures.exists('fighter-premium')?'fighter-premium':'fighter';
   this.shipVisual=this.add.image(this.ship.x,this.ship.y,fighterTexture).setDisplaySize(52,61).setDepth(5);
-  this.hud=this.add.text(12,14,'',{fontFamily:'monospace',fontSize:'17px',color:'#f2f9ff'}).setDepth(10);
-  this.add.text(12,61,'SETAS/WASD mover · ESPAÇO atirar · toque arrastar e atirar · R reiniciar',{fontFamily:'monospace',fontSize:'12px',color:'#c6eaff',wordWrap:{width:WIDTH-24}}).setDepth(10);
+  // HUD ancorado no rodapé, evitando qualquer sobreposição com o boss.
+  this.add.rectangle(WIDTH/2,HEIGHT-31,WIDTH,62,0x061221,.93).setDepth(9);
+  this.hud=this.add.text(12,HEIGHT-49,'',{fontFamily:'monospace',fontSize:'15px',color:'#f2f9ff',wordWrap:{width:WIDTH-24}}).setDepth(10);
+  this.bossBar=this.add.graphics().setDepth(10);
+  this.add.text(WIDTH/2,14,'BOSS 01 · ARTE PROVISÓRIA',{fontFamily:'monospace',fontSize:'13px',color:'#ffcf86'}).setOrigin(.5,0).setDepth(10);
   this.keys=this.input.keyboard!.createCursorKeys();
   this.wasd=this.input.keyboard!.addKeys('W,A,S,D,SPACE') as typeof this.wasd;
   this.input.keyboard!.on('keydown-R',()=>this.scene.restart());
@@ -152,7 +156,10 @@ class PhaserArena extends Phaser.Scene {
    }
   }
   if(this.bossHp<=0){this.bossHp=180;this.points+=2000;this.boss.setTexture(['boss-1','boss-2','boss-3'][Math.floor(this.points/2000)%3]);}
-  this.hud.setText('PHASER 4 + TS | '+Math.round(this.game.loop.actualFps)+' FPS  HP '+this.lives+'  BOSS '+this.bossHp+'/180  PTS '+this.points);
+  this.bossBar.clear();
+  this.bossBar.fillStyle(0x071321,.94).fillRoundedRect(105,36,330,14,5);
+  this.bossBar.fillStyle(0xff805a,1).fillRoundedRect(108,39,324*Phaser.Math.Clamp(this.bossHp/180,0,1),8,3);
+  this.hud.setText('HP '+this.lives+'  •  PTS '+this.points+'  •  '+Math.round(this.game.loop.actualFps)+' FPS');
  }
 }
 new Phaser.Game({
