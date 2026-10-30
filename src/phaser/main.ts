@@ -61,11 +61,31 @@ class PhaserArena extends Phaser.Scene {
   this.load.image('fighter-premium','./assets/sprites/premium/runtime/player/fighter_candidate.png');
   this.load.spritesheet('explosion-premium','./assets/sprites/premium/runtime/fx/explosion_atlas_4x3.png',{frameWidth:128,frameHeight:128,endFrame:11});
   this.load.on('loaderror',(file:Phaser.Loader.File)=>console.warn('Phaser sprite:',file.key));
+  // A arte de gameplay só é classificada como premium quando existe PNG real.
+  // Não considerar SVG rasterizado ou geometria de Phaser como substituição aprovada.
+  this.load.image('premium-boss-01','./assets/sprites/premium/runtime/bosses/boss01.png');
+  this.load.image('premium-enemy-gun','./assets/sprites/premium/runtime/enemies/mecha_gun.png');
+  this.load.image('premium-enemy-heli','./assets/sprites/premium/runtime/enemies/helicopter.png');
+  this.load.image('premium-enemy-sub','./assets/sprites/premium/runtime/enemies/submarine.png');
+  this.load.image('premium-island','./assets/sprites/premium/runtime/terrain/island.png');
+  this.load.image('premium-bank-left','./assets/sprites/premium/runtime/terrain/bank_left.png');
+  this.load.image('premium-bank-right','./assets/sprites/premium/runtime/terrain/bank_right.png');
+  this.load.image('premium-water','./assets/sprites/premium/runtime/terrain/water.png');
+  this.load.image('premium-beam','./assets/sprites/premium/runtime/fx/projectile.png');
  }
  create(){
   if(this.textures.exists('explosion-premium')&&!this.anims.exists('riverstorm-premium-explosion')){
    this.anims.create({key:'riverstorm-premium-explosion',frames:this.anims.generateFrameNumbers('explosion-premium',{start:0,end:11}),frameRate:18,repeat:0});
   }
+  const premiumMap:Record<string,string>={
+   'boss-1':'premium-boss-01','enemy-gun':'premium-enemy-gun',
+   'enemy-heli':'premium-enemy-heli','enemy-sub':'premium-enemy-sub',
+   'island':'premium-island','bank-left':'premium-bank-left',
+   'bank-right':'premium-bank-right','water-detail':'premium-water','beam':'premium-beam'
+  };
+  const found=Object.values(premiumMap).filter(key=>this.textures.exists(key)).length;
+  const status=document.getElementById('phaser-status');
+  if(status)status.textContent='Assets premium confirmados: '+(found+Number(this.textures.exists('fighter-premium'))+Number(this.textures.exists('explosion-premium')))+' de 11. '+(found===9?'Catálogo raster completo carregado.':'PNG premium de bosses/cenários/inimigos ainda faltando no repositório.');
   this.cameras.main.setBackgroundColor('#0c233c');
   this.add.rectangle(WIDTH/2,HEIGHT/2,270,HEIGHT,0x12546a);
   for(let i=0;i<3;i++)this.waterTiles.push(this.add.image(WIDTH/2,i*480-240,'water-detail').setDisplaySize(280,480).setDepth(-1));
@@ -100,7 +120,7 @@ class PhaserArena extends Phaser.Scene {
   this.input.on('gameout',()=>{this.pointerActive=false;this.pointerFiring=false});
   this.game.events.once(Phaser.Core.Events.DESTROY,()=>{this.pointerActive=false;this.pointerFiring=false});
   const status=document.getElementById('phaser-status');
-  if(status)status.textContent='Arena Phaser jogável experimental: movimento, tiros, danos e colisões. Campanha Original permanece intacta.';
+  // O diagnóstico acima informa a ausência de PNGs, sem anunciar aprovação falsa.
  }
  private burst(x:number,y:number,size=88){
   if(!this.textures.exists('explosion-premium')||!this.anims.exists('riverstorm-premium-explosion'))return;
