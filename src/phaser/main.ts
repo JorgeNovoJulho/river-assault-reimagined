@@ -157,8 +157,8 @@ class PhaserArena extends Phaser.Scene {
  private shoot(x:number,y:number,hostile:boolean,damage:number,vx=0,vy=hostile?5:-12){
   if(this.shots.length>=90)return;
   const key=hostile?'enemy-bolt-premium':'player-bolt-premium';
-  const width=hostile?11:9,height=hostile?24:29;
-  const glow=this.add.image(x,y,key).setDisplaySize(width*2.15,height*1.45).setAlpha(.20).setBlendMode(Phaser.BlendModes.ADD).setDepth(5);
+  const width=hostile?13:15,height=hostile?29:42;
+  const glow=this.add.image(x,y,key).setDisplaySize(width*2.05,height*1.34).setAlpha(.24).setBlendMode(Phaser.BlendModes.ADD).setDepth(5);
   const sprite=this.add.image(x,y,key).setDisplaySize(width,height).setDepth(6);
   this.shots.push({sprite,glow,vx,vy,damage,hostile,trailAt:0});
  }
@@ -168,7 +168,7 @@ class PhaserArena extends Phaser.Scene {
  }
  private spawnTrail(b:Bullet){
   const trail=this.add.image(b.sprite.x-b.vx*2,b.sprite.y-b.vy*2,b.hostile?'enemy-bolt-premium':'player-bolt-premium')
-   .setDisplaySize(b.hostile?14:11,b.hostile?25:30).setAlpha(.23).setBlendMode(Phaser.BlendModes.ADD).setDepth(4);
+   .setDisplaySize(b.hostile?16:18,b.hostile?29:42).setAlpha(.23).setBlendMode(Phaser.BlendModes.ADD).setDepth(4);
   this.tweens.add({targets:trail,alpha:0,scaleX:.35,scaleY:.35,duration:120,onComplete:()=>trail.destroy()});
  }
  private spawnWave(time:number){
