@@ -555,13 +555,24 @@ function drawPremiumRioVerde(c,d){
  c.restore();
 }
 function drawPremiumBoss01(c,e,d){
- const w=Math.max(112,e.width||112),h=Math.max(62,e.height||62),hp=Math.max(0,e.hp/Math.max(1,e.maxHp));
+ const w=Math.max(112,e.width||112),h=Math.max(62,e.height||62);
+ const hp=Math.max(0,e.hp/Math.max(1,e.maxHp));
  if(!rasterReady(premiumRuntime.bossCore))return false;
- c.save();c.drawImage(premiumRuntime.bossCore,e.x-w*.5,e.y-h*.5,w,h);
- const towerW=w*.20,towerH=h*.78,cannon=hp<=.22?premiumRuntime.cannonDestroyed:hp<=.52?premiumRuntime.cannonDamaged:premiumRuntime.cannon;
- if(rasterReady(premiumRuntime.tower1))c.drawImage(premiumRuntime.tower1,e.x-w*.40,e.y-h*.34,towerW,towerH);
- if(rasterReady(premiumRuntime.tower2))c.drawImage(premiumRuntime.tower2,e.x+w*.20,e.y-h*.34,towerW,towerH);
- if(rasterReady(cannon))c.drawImage(cannon,e.x-w*.12,e.y-h*.44,w*.24,h*.68);
+ const tick=Number(d.missionTicks)||0;
+ const turretW=w*.20,turretH=h*.78;
+ const cannon=hp<=.22?premiumRuntime.cannonDestroyed:hp<=.52?premiumRuntime.cannonDamaged:premiumRuntime.cannon;
+ const drawModule=(img,x,y,mw,mh,angle)=>{
+  if(!rasterReady(img))return;
+  c.save();c.translate(x,y);c.rotate(angle);c.drawImage(img,-mw*.5,-mh*.5,mw,mh);c.restore();
+ };
+ c.save();
+ // Núcleo estável na dimensão da hitbox; movimento restrito aos módulos visuais.
+ c.drawImage(premiumRuntime.bossCore,e.x-w*.5,e.y-h*.5,w,h);
+ const sweep=Math.sin(tick*.035)*.10;
+ drawModule(premiumRuntime.tower1,e.x-w*.30,e.y+h*.05,turretW,turretH,sweep);
+ drawModule(premiumRuntime.tower2,e.x+w*.30,e.y+h*.05,turretW,turretH,-sweep);
+ // Mudanças de aparência vinculadas à vida, não ao estado aleatório do navegador.
+ drawModule(cannon,e.x,e.y-h*.10,w*.24,h*.68,Math.sin(tick*.023)*.075);
  c.restore();return true;
 }
 function drawPremiumMarginUnit(c,e,d){
