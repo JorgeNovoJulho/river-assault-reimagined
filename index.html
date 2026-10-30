@@ -2547,6 +2547,15 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
         for(const [type,file] of [['BRIDGE','bridge-industrial.svg'],['DAM','dam-concrete.svg'],['BRIDGE_DAMAGED','bridge-damaged.svg'],['DAM_DAMAGED','dam-damaged.svg']]){
           const image=new Image();image.src='./assets/sprites/terrain/'+file;terrainStructureImages[type]=image;
         }
+        // Carregar PNGs de estruturas quando forem publicados no acervo aprovado.
+        // Não remover os arquivos históricos: eles permanecem como fallback visual.
+        const premiumStructureImages={};
+        for(const [type,name] of [['BRIDGE','bridge.png'],['DAM','dam.png'],
+                                  ['BRIDGE_DAMAGED','bridge_damaged.png'],['DAM_DAMAGED','dam_damaged.png']]){
+          const image=new Image();
+          image.src='./assets/sprites/premium/runtime/structures/'+name;
+          premiumStructureImages[type]=image;
+        }
         function drawStructures(){
             const detailed=qualitySelect.value!=='eco';
             for(const p of structures){
@@ -2554,7 +2563,9 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
                 const half=p.width/2,gate=Math.min(half-12,Math.max(28,(p.opening||100)/2));
                 const slabY=-p.height/2;
                 const condition=(p.maxHp>0&&p.hp/p.maxHp<=.45)?'_DAMAGED':'';
-                const terrainImage=terrainStructureImages[p.type+condition]||terrainStructureImages[p.type];
+                const candidate=premiumStructureImages[p.type+condition]||premiumStructureImages[p.type];
+                const premiumReady=!!(candidate&&candidate.complete&&candidate.naturalWidth);
+                const terrainImage=premiumReady?candidate:(terrainStructureImages[p.type+condition]||terrainStructureImages[p.type]);
                 if(terrainImage&&terrainImage.complete&&terrainImage.naturalWidth){
                   // A travessia permanece aberta: renderizar apenas as duas faixas sólidas.
                   ctx.save();ctx.beginPath();
