@@ -66,7 +66,21 @@ function copyAndVersionRuntime() {
       // Copiar as texturas premium aprovadas; os SVGs legados continuam intactos.
       for (const file of [
         'assets/sprites/premium/runtime/player/fighter_candidate.png',
-        'assets/sprites/premium/runtime/fx/explosion_atlas_4x3.png'
+        'assets/sprites/premium/runtime/fx/explosion_atlas_4x3.png',
+        'assets/sprites/premium/runtime/environment/water_calm.png',
+        'assets/sprites/premium/runtime/environment/riverbank_left.png',
+        'assets/sprites/premium/runtime/environment/riverbank_right.png',
+        'assets/sprites/premium/runtime/boss01/core.png',
+        'assets/sprites/premium/runtime/boss01/tower1.png',
+        'assets/sprites/premium/runtime/boss01/tower2.png',
+        'assets/sprites/premium/runtime/boss01/towerFire.png',
+        'assets/sprites/premium/runtime/boss01/cannon.png',
+        'assets/sprites/premium/runtime/boss01/cannonFire.png',
+        'assets/sprites/premium/runtime/boss01/cannonDamaged.png',
+        'assets/sprites/premium/runtime/boss01/cannonDestroyed.png',
+        'assets/sprites/premium/runtime/boss01/areaHelicopter.png',
+        'assets/sprites/premium/runtime/boss01/areaMecha.png',
+        'assets/sprites/premium/runtime/boss01/areaSubmarine.png'
       ]) {
         const source = resolve(file), target = resolve('dist', file);
         if (!existsSync(source)) throw new Error('Imagem premium obrigatória ausente: ' + file);

@@ -25,6 +25,7 @@ class PhaserArena extends Phaser.Scene {
  private waterTiles:Phaser.GameObjects.Image[]=[];
  private islandDetails:Phaser.GameObjects.Image[]=[];
  private boss!:Phaser.GameObjects.Image;
+ private bossModules:Phaser.GameObjects.Image[]=[];
  private hud!:Phaser.GameObjects.Text;
  private bossBar!:Phaser.GameObjects.Graphics;
  private keys!:Phaser.Types.Input.Keyboard.CursorKeys;
@@ -57,9 +58,24 @@ class PhaserArena extends Phaser.Scene {
    'island-detail':{width:180,height:110}
   };
   for(const [key,file] of assets)this.load.svg(key,'./'+file,rasterSizes[key]);
-  // Sprite premium aprovado no laboratório Boss 01. Mantém SVG original como fallback.
+  // Rasters isolados do acervo aprovado. Os SVGs continuam somente como fallback
+  // para o conteúdo que ainda não recebeu arte final.
   this.load.image('fighter-premium','./assets/sprites/premium/runtime/player/fighter_candidate.png');
   this.load.spritesheet('explosion-premium','./assets/sprites/premium/runtime/fx/explosion_atlas_4x3.png',{frameWidth:128,frameHeight:128,endFrame:11});
+  this.load.image('water-premium','./assets/sprites/premium/runtime/environment/water_calm.png');
+  this.load.image('bank-left-premium','./assets/sprites/premium/runtime/environment/riverbank_left.png');
+  this.load.image('bank-right-premium','./assets/sprites/premium/runtime/environment/riverbank_right.png');
+  this.load.image('boss-1-premium','./assets/sprites/premium/runtime/boss01/core.png');
+  this.load.image('boss-tower-left','./assets/sprites/premium/runtime/boss01/tower1.png');
+  this.load.image('boss-tower-right','./assets/sprites/premium/runtime/boss01/tower2.png');
+  this.load.image('boss-tower-fire','./assets/sprites/premium/runtime/boss01/towerFire.png');
+  this.load.image('boss-cannon','./assets/sprites/premium/runtime/boss01/cannon.png');
+  this.load.image('boss-cannon-fire','./assets/sprites/premium/runtime/boss01/cannonFire.png');
+  this.load.image('boss-cannon-damaged','./assets/sprites/premium/runtime/boss01/cannonDamaged.png');
+  this.load.image('boss-cannon-destroyed','./assets/sprites/premium/runtime/boss01/cannonDestroyed.png');
+  this.load.image('enemy-gun-premium','./assets/sprites/premium/runtime/boss01/areaMecha.png');
+  this.load.image('enemy-heli-premium','./assets/sprites/premium/runtime/boss01/areaHelicopter.png');
+  this.load.image('enemy-sub-premium','./assets/sprites/premium/runtime/boss01/areaSubmarine.png');
   this.load.on('loaderror',(file:Phaser.Loader.File)=>console.warn('Phaser sprite:',file.key));
 
  }
@@ -67,22 +83,27 @@ class PhaserArena extends Phaser.Scene {
   if(this.textures.exists('explosion-premium')&&!this.anims.exists('riverstorm-premium-explosion')){
    this.anims.create({key:'riverstorm-premium-explosion',frames:this.anims.generateFrameNumbers('explosion-premium',{start:0,end:11}),frameRate:18,repeat:0});
   }
-  // Somente os dois PNGs encontrados no repositório são contabilizados.
-  const premiumCount=Number(this.textures.exists('fighter-premium'))+Number(this.textures.exists('explosion-premium'));
+  const premiumKeys=['fighter-premium','explosion-premium','water-premium','bank-left-premium','bank-right-premium','boss-1-premium','boss-tower-left','boss-tower-right','boss-tower-fire','boss-cannon','boss-cannon-fire','boss-cannon-damaged','boss-cannon-destroyed','enemy-gun-premium','enemy-heli-premium','enemy-sub-premium'];
+  const premiumCount=premiumKeys.filter(key=>this.textures.exists(key)).length;
   const status=document.getElementById('phaser-status');
-  if(status)status.textContent='Auditoria de sprites: '+premiumCount+'/11 PNG premium verificados. Boss, inimigos e cenário ainda utilizam SVG provisório.';
+  if(status)status.textContent='Sprites Arcade Premium carregados: '+premiumCount+'/'+premiumKeys.length+'. Boss 01, inimigos-base, água e margens usam raster real; ilha e projéteis aguardam arte raster aprovada.';
   this.cameras.main.setBackgroundColor('#0c233c');
   this.add.rectangle(WIDTH/2,HEIGHT/2,270,HEIGHT,0x12546a);
-  for(let i=0;i<3;i++)this.waterTiles.push(this.add.image(WIDTH/2,i*480-240,'water-detail').setDisplaySize(280,480).setDepth(-1));
+  for(let i=0;i<7;i++)this.waterTiles.push(this.add.image(WIDTH/2,i*157-157,'water-premium').setDisplaySize(280,410).setDepth(-1));
   this.islandDetails.push(this.add.image(157,-90,'island-detail').setDisplaySize(102,63).setDepth(0));
   this.islandDetails.push(this.add.image(378,-560,'island-detail').setDisplaySize(110,66).setDepth(0));
   for(let i=0;i<3;i++){
-   this.banks.push(this.add.image(65,i*480-240,'bank-left').setDisplaySize(130,480));
-   this.banks.push(this.add.image(WIDTH-65,i*480-240,'bank-right').setDisplaySize(130,480));
+   this.banks.push(this.add.image(65,i*493-246,'bank-left-premium').setDisplaySize(130,493));
+   this.banks.push(this.add.image(WIDTH-65,i*493-246,'bank-right-premium').setDisplaySize(130,493));
   }
   for(let i=0;i<9;i++)this.islands.push(this.add.image(i%2?388:149,120+i*120,'island').setDisplaySize(125,85).setAlpha(.9));
-  this.boss=this.add.image(WIDTH/2,145,'boss-1').setDisplaySize(160,160);
+  this.boss=this.add.image(WIDTH/2,145,'boss-1-premium').setDisplaySize(360,137).setDepth(3);
   this.boss.setInteractive();
+  this.bossModules=[
+   this.add.image(WIDTH/2-118,137,'boss-tower-left').setDisplaySize(61,61).setDepth(4),
+   this.add.image(WIDTH/2+118,137,'boss-tower-right').setDisplaySize(61,61).setDepth(4),
+   this.add.image(WIDTH/2,118,'boss-cannon').setDisplaySize(72,72).setDepth(4)
+  ];
   this.ship=this.add.triangle(WIDTH/2,HEIGHT-130,0,42,28,0,56,42,0x96e7f2);
   this.ship.setStrokeStyle(3,0xfed084);
   this.ship.setAlpha(0); // Hitbox original intacta; a nave SVG e somente visual.
@@ -92,15 +113,15 @@ class PhaserArena extends Phaser.Scene {
   this.add.rectangle(WIDTH/2,HEIGHT-31,WIDTH,62,0x061221,.93).setDepth(9);
   this.hud=this.add.text(12,HEIGHT-49,'',{fontFamily:'monospace',fontSize:'15px',color:'#f2f9ff',wordWrap:{width:WIDTH-24}}).setDepth(10);
   this.bossBar=this.add.graphics().setDepth(10);
-  this.add.text(WIDTH/2,14,'BOSS 01 · ARTE PROVISÓRIA',{fontFamily:'monospace',fontSize:'13px',color:'#ffcf86'}).setOrigin(.5,0).setDepth(10);
+  this.add.text(WIDTH/2,14,'BOSS 01 · PONTE FORTIFICADA · RASTER PREMIUM',{fontFamily:'monospace',fontSize:'13px',color:'#c5f4ff'}).setOrigin(.5,0).setDepth(10);
   this.keys=this.input.keyboard!.createCursorKeys();
   this.wasd=this.input.keyboard!.addKeys('W,A,S,D,SPACE') as typeof this.wasd;
   this.input.keyboard!.on('keydown-R',()=>this.scene.restart());
-  this.input.keyboard!.on('keydown-ONE',()=>this.boss.setTexture('boss-1'));
+  this.input.keyboard!.on('keydown-ONE',()=>this.boss.setTexture('boss-1-premium'));
   this.input.keyboard!.on('keydown-TWO',()=>this.boss.setTexture('boss-2'));
   this.input.keyboard!.on('keydown-THREE',()=>this.boss.setTexture('boss-3'));
-  this.input.on('pointerdown',(p:Phaser.Input.Pointer)=>{this.pointerActive=true;this.pointerFiring=true;this.pointerIsMouse=p.pointerType==='mouse';this.pointerX=p.x;this.pointerY=p.y;});
-  this.input.on('pointermove',(p:Phaser.Input.Pointer)=>{if(p.pointerType==='mouse'||p.isDown){this.pointerActive=true;this.pointerIsMouse=p.pointerType==='mouse';this.pointerX=p.x;this.pointerY=p.y;}});
+  this.input.on('pointerdown',(p:Phaser.Input.Pointer)=>{this.pointerActive=true;this.pointerFiring=true;this.pointerIsMouse=this.isMousePointer(p);this.pointerX=p.x;this.pointerY=p.y;});
+  this.input.on('pointermove',(p:Phaser.Input.Pointer)=>{if(this.isMousePointer(p)||p.isDown){this.pointerActive=true;this.pointerIsMouse=this.isMousePointer(p);this.pointerX=p.x;this.pointerY=p.y;}});
   this.input.on('pointerup',()=>{this.pointerFiring=false;if(!this.pointerIsMouse)this.pointerActive=false});
   this.input.on('gameout',()=>{this.pointerActive=false;this.pointerFiring=false});
   this.game.events.once(Phaser.Core.Events.DESTROY,()=>{this.pointerActive=false;this.pointerFiring=false});
@@ -112,15 +133,18 @@ class PhaserArena extends Phaser.Scene {
   fx.once(Phaser.Animations.Events.ANIMATION_COMPLETE,()=>fx.destroy());
   fx.play('riverstorm-premium-explosion');
  }
+ private isMousePointer(pointer:Phaser.Input.Pointer){
+  return (pointer as Phaser.Input.Pointer & {pointerType?:string}).pointerType==='mouse';
+ }
  private shoot(x:number,y:number,hostile:boolean,damage:number){
   if(this.shots.length>=90)return;
   const sprite=this.add.image(x,y,'beam').setDisplaySize(hostile?12:9,hostile?22:29).setTint(hostile?0xff6f68:0x80eaff);
   this.shots.push({sprite,vy:hostile?5:-12,damage,hostile});
  }
  private spawnWave(time:number){
-  const types=['enemy-gun','enemy-heli','enemy-sub'];
+  const types=['enemy-gun-premium','enemy-heli-premium','enemy-sub-premium'];
   const key=types[Math.floor(time/7000)%3];
-  const sprite=this.add.image(55+Math.random()*(WIDTH-110),-45,key).setDisplaySize(key==='enemy-sub'?76:58,66);
+  const sprite=this.add.image(55+Math.random()*(WIDTH-110),-45,key).setDisplaySize(key==='enemy-sub-premium'?76:58,66);
   this.enemies.push({sprite,hp:3,speed:1.35+Math.min(2,time/30000),fireAt:time+550});
  }
  private damage(amount:number,time:number){
@@ -143,15 +167,21 @@ class PhaserArena extends Phaser.Scene {
   this.ship.x=Phaser.Math.Clamp(this.ship.x,26,WIDTH-26);this.ship.y=Phaser.Math.Clamp(this.ship.y,110,HEIGHT-100);
   this.ship.setFillStyle(time<this.invulnerableUntil?0xff6b71:0x96e7f2);
   this.shipVisual.setPosition(this.ship.x,this.ship.y).setTint(time<this.invulnerableUntil?0xff899a:0xffffff);
-  for(const bank of this.banks){bank.y+=1.25*dt;if(bank.y>HEIGHT+240)bank.y-=1440;}
-  for(const tile of this.waterTiles){tile.y+=1.25*dt;if(tile.y>HEIGHT+240)tile.y-=1440;}
+  for(const bank of this.banks){bank.y+=1.25*dt;if(bank.y>HEIGHT+246)bank.y-=1479;}
+  for(const tile of this.waterTiles){tile.y+=1.25*dt;if(tile.y>HEIGHT+205)tile.y-=1099;}
   for(const island of this.islandDetails){island.y+=1.25*dt;if(island.y>HEIGHT+75)island.y-=1250;}
   for(const island of this.islands){island.y+=1.25*dt;if(island.y>HEIGHT+70)island.y=-85;}
   if(time>this.nextShot&&(this.keys.space.isDown||this.wasd.SPACE.isDown||this.pointerFiring)){
    this.shoot(this.ship.x,this.ship.y-22,false,1);this.nextShot=time+135;
   }
   if(time>this.nextWave&&this.enemies.length<10){this.spawnWave(time);this.nextWave=time+1200;}
-  if(time>this.bossAttackAt){this.shoot(this.boss.x+Math.sin(time*.001)*45,this.boss.y+55,true,1);this.bossAttackAt=time+900;}
+  if(time>this.bossAttackAt){
+   this.shoot(this.boss.x+Math.sin(time*.001)*45,this.boss.y+55,true,1);
+   this.bossModules[2]?.setTexture('boss-cannon-fire');
+   this.bossModules[0]?.setTexture('boss-tower-fire');
+   this.time.delayedCall(140,()=>{if(!this.ended){this.bossModules[2]?.setTexture('boss-cannon');this.bossModules[0]?.setTexture('boss-tower-left');}});
+   this.bossAttackAt=time+900;
+  }
   for(let i=this.enemies.length-1;i>=0;i--){
    const e=this.enemies[i];e.sprite.y+=e.speed*dt;
    if(time>e.fireAt&&e.sprite.y>50&&e.sprite.y<HEIGHT-140){this.shoot(e.sprite.x,e.sprite.y+22,true,1);e.fireAt=time+1600;}
@@ -170,7 +200,7 @@ class PhaserArena extends Phaser.Scene {
     if(hit){b.sprite.destroy();this.shots.splice(i,1);}
    }
   }
-  if(this.bossHp<=0){this.burst(this.boss.x,this.boss.y,230);this.bossHp=180;this.points+=2000;this.boss.setTexture(['boss-1','boss-2','boss-3'][Math.floor(this.points/2000)%3]);}
+  if(this.bossHp<=0){this.burst(this.boss.x,this.boss.y,230);this.bossHp=180;this.points+=2000;this.boss.setTexture(['boss-1-premium','boss-2','boss-3'][Math.floor(this.points/2000)%3]);}
   this.bossBar.clear();
   this.bossBar.fillStyle(0x071321,.94).fillRoundedRect(105,36,330,14,5);
   this.bossBar.fillStyle(0xff805a,1).fillRoundedRect(108,39,324*Phaser.Math.Clamp(this.bossHp/180,0,1),8,3);
