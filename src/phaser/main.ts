@@ -54,6 +54,8 @@ class PhaserArena extends Phaser.Scene {
    'island-detail':{width:180,height:110}
   };
   for(const [key,file] of assets)this.load.svg(key,'./'+file,rasterSizes[key]);
+  // Sprite premium aprovado no laboratório Boss 01. Mantém SVG original como fallback.
+  this.load.image('fighter-premium','./assets/sprites/premium/runtime/player/fighter_candidate.png');
   this.load.on('loaderror',(file:Phaser.Loader.File)=>console.warn('Phaser sprite:',file.key));
  }
  create(){
@@ -72,7 +74,8 @@ class PhaserArena extends Phaser.Scene {
   this.ship=this.add.triangle(WIDTH/2,HEIGHT-130,0,42,28,0,56,42,0x96e7f2);
   this.ship.setStrokeStyle(3,0xfed084);
   this.ship.setAlpha(0); // Hitbox original intacta; a nave SVG e somente visual.
-  this.shipVisual=this.add.image(this.ship.x,this.ship.y,'fighter').setDisplaySize(52,61).setDepth(5);
+  const fighterTexture=this.textures.exists('fighter-premium')?'fighter-premium':'fighter';
+  this.shipVisual=this.add.image(this.ship.x,this.ship.y,fighterTexture).setDisplaySize(52,61).setDepth(5);
   this.hud=this.add.text(12,14,'',{fontFamily:'monospace',fontSize:'17px',color:'#f2f9ff'}).setDepth(10);
   this.add.text(12,61,'SETAS/WASD mover · ESPAÇO atirar · toque arrastar e atirar · R reiniciar',{fontFamily:'monospace',fontSize:'12px',color:'#c6eaff',wordWrap:{width:WIDTH-24}}).setDepth(10);
   this.keys=this.input.keyboard!.createCursorKeys();
