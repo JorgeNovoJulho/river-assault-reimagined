@@ -527,21 +527,28 @@ for(const [key,file] of Object.entries({
 })){const image=new Image();image.src='./assets/sprites/premium/runtime/'+file;premiumRuntime[key]=image;}
 function rasterReady(image){return !!(image&&image.complete&&image.naturalWidth);}
 function drawPremiumRioVerde(c,d){
- if(Number(d.sector)!==1)return;
- const scroll=((d.distance||0)*.16)%d.h;
- if(rasterReady(premiumRuntime.water)){
-  c.save();if(riverPath(c,d.riverPoints)){c.clip();c.globalAlpha=.86;c.drawImage(premiumRuntime.water,0,scroll-d.h,d.w,d.h);c.drawImage(premiumRuntime.water,0,scroll,d.w,d.h);}c.restore();
- }
- // Recorte contínuo no terreno gerado pela curva real do leito.
- // A posição das entidades e a geometria de colisão permanecem intactas.
- if(d.riverPoints&&d.riverPoints.length>1){
-  c.save();
-  if(clipShoreLand(c,d.riverPoints,d.w,d.h)){
-   if(rasterReady(premiumRuntime.bankLeft))c.drawImage(premiumRuntime.bankLeft,0,0,d.w*.50,d.h);
-   if(rasterReady(premiumRuntime.bankRight))c.drawImage(premiumRuntime.bankRight,d.w*.50,0,d.w*.50,d.h);
-  }
+ if(Number(d.sector)!==1||!d.riverPoints||d.riverPoints.length<2)return;
+ const h=Math.max(1,d.h),w=d.w;
+ // Todos os panos raster acompanham a mesma progressão do mundo, nunca ficam fixos.
+ const shift=(((d.distance||0)*.38)%h+h)%h;
+ function movingTile(image,x,width,alpha=1){
+  if(!rasterReady(image))return;
+  c.save();c.globalAlpha=alpha;
+  for(let y=shift-h;y<h;y+=h)c.drawImage(image,x,y,width,h);
   c.restore();
  }
+ if(rasterReady(premiumRuntime.water)){
+  c.save();
+  if(riverPath(c,d.riverPoints)){c.clip();movingTile(premiumRuntime.water,0,w,.82);}
+  c.restore();
+ }
+ // Desenhar margem apenas em terra, recortada pela geometria móvel real do leito.
+ c.save();
+ if(clipShoreLand(c,d.riverPoints,w,h)){
+  movingTile(premiumRuntime.bankLeft,0,w*.50);
+  movingTile(premiumRuntime.bankRight,w*.50,w*.50);
+ }
+ c.restore();
 }
 function drawPremiumBoss01(c,e,d){
  const w=Math.max(112,e.width||112),h=Math.max(62,e.height||62),hp=Math.max(0,e.hp/Math.max(1,e.maxHp));
