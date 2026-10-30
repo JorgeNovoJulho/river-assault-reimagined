@@ -2561,11 +2561,18 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
                   ctx.rect(-half,slabY,half-gate,p.height);
                   ctx.rect(gate,slabY,half-gate,p.height);
                   ctx.clip();
+                  // Renderizar com filtragem de alta qualidade, mantendo as duas partes
+                  // da estrutura alinhadas à largura real e à abertura de colisão.
+                  ctx.imageSmoothingEnabled=true;
+                  ctx.imageSmoothingQuality='high';
                   ctx.drawImage(terrainImage,-half,slabY,p.width,p.height);
                   ctx.restore();
                   // O corredor central é uma abertura real na ponte/represa.
                   // Não desenhar faixas, tipografia ou guias de depuração sobre o sprite.
-                  ctx.fillStyle='#fb7185';ctx.fillRect(-half,slabY-11,p.width*Math.max(0,p.hp/p.maxHp),3);
+                  // Vida da estrutura discreta: não cobrir a arte ou a passagem.
+                  const hpRatio=Math.max(0,Math.min(1,p.hp/Math.max(1,p.maxHp||1)));
+                  ctx.fillStyle='rgba(2,13,23,.78)';ctx.fillRect(-half,slabY-9,p.width,4);
+                  ctx.fillStyle=hpRatio<.35?'#fb7185':'#f59e66';ctx.fillRect(-half,slabY-9,p.width*hpRatio,4);
                   ctx.restore();continue;
                 }
                 ctx.shadowColor='rgba(1,12,27,.5)';ctx.shadowBlur=detailed?9:3;ctx.shadowOffsetY=4;
