@@ -528,25 +528,29 @@ for(const [key,file] of Object.entries({
 function rasterReady(image){return !!(image&&image.complete&&image.naturalWidth);}
 function drawPremiumRioVerde(c,d){
  if(Number(d.sector)!==1||!d.riverPoints||d.riverPoints.length<2)return;
- const h=Math.max(1,d.h),w=d.w;
- // Todos os panos raster acompanham a mesma progressão do mundo, nunca ficam fixos.
+ const h=Math.max(1,d.h),w=d.w,points=d.riverPoints;
  const shift=(((d.distance||0)*.38)%h+h)%h;
- function movingTile(image,x,width,alpha=1){
-  if(!rasterReady(image))return;
-  c.save();c.globalAlpha=alpha;
-  for(let y=shift-h;y<h;y+=h)c.drawImage(image,x,y,width,h);
-  c.restore();
- }
- if(rasterReady(premiumRuntime.water)){
-  c.save();
-  if(riverPath(c,d.riverPoints)){c.clip();movingTile(premiumRuntime.water,0,w,.82);}
-  c.restore();
- }
- // Desenhar margem apenas em terra, recortada pela geometria móvel real do leito.
+ // Não desenhar water_calm.png: o próprio PNG contém arte/texto borrados.
+ // A água nativa de landscape() e waterMotion() já acompanha o leito e a distância.
+ // Evitar que a borda vertical da textura de margem avance sobre o rio.
  c.save();
- if(clipShoreLand(c,d.riverPoints,w,h)){
-  movingTile(premiumRuntime.bankLeft,0,w*.50);
-  movingTile(premiumRuntime.bankRight,w*.50,w*.50);
+ if(clipShoreLand(c,points,w,h)){
+  for(let y=shift-h;y<h;y+=h){
+   if(rasterReady(premiumRuntime.bankLeft))c.drawImage(premiumRuntime.bankLeft,0,y,w*.50,h);
+   if(rasterReady(premiumRuntime.bankRight))c.drawImage(premiumRuntime.bankRight,w*.50,y,w*.50,h);
+  }
+ }
+ c.restore();
+ // Transição de espuma fina no encontro do terreno com a água.
+ // Baseada em bankAt: nenhuma linha vertical fixa, mesmo durante curvas.
+ c.save();c.lineWidth=1.5;c.strokeStyle='rgba(178,238,239,.30)';
+ for(const side of [0,1]){
+  c.beginPath();
+  for(let y=0;y<=h;y+=8){
+   const bounds=bankAt(points,y,w),x=bounds[side];
+   if(y===0)c.moveTo(x,y);else c.lineTo(x,y);
+  }
+  c.stroke();
  }
  c.restore();
 }
