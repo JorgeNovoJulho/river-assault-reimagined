@@ -92,6 +92,15 @@ function copyAndVersionRuntime() {
         mkdirSync(dirname(target), { recursive: true });
         copyFileSync(source, target);
       }
+      // As sete aeronaves oficiais (4 estados cada) precisam chegar ao Pages/APK.
+      for(const id of ['falcao','vespa','cometa','fenix','helicoptero','disco','titan']){
+        for(const state of ['normal','disparo','especial','boost']){
+          const file='assets/sprites/premium/aircraft/'+id+'_'+state+'.png';
+          const source=resolve(file),target=resolve('dist',file);
+          if(!existsSync(source))throw new Error('Sprite premium obrigatório ausente: '+file);
+          mkdirSync(dirname(target),{recursive:true});copyFileSync(source,target);
+        }
+      }
       // Recursos aprovados do menu: não são importações de JS, por isso devem
       // ser copiados explicitamente para o Pages; sem isso os cartões dão 404.
       for (const folder of ['assets/ui/premium/pilots', 'assets/ui/premium/menu', 'music']) {
