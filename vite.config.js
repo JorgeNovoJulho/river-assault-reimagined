@@ -93,6 +93,23 @@ function copyAndVersionRuntime() {
         };
         copyTree(premiumRoot);
       }
+      // Aeronaves Arcade Premium: PNGs aprovados e manifesto obrigatórios no build web.
+      const aircraftRoot=resolve('assets/sprites/premium/aircraft');
+      const aircraftManifest=JSON.parse(readFileSync(resolve(aircraftRoot,'manifest.json'),'utf8'));
+      const aircraftIds=['falcao','vespa','cometa','fenix','helicoptero','disco','titan'];
+      const aircraftStates=['normal','disparo','boost','especial'];
+      for(const id of aircraftIds){
+        if(!aircraftManifest[id])throw new Error('Aeronave ausente no manifesto: '+id);
+        for(const state of aircraftStates){
+          const name=aircraftManifest[id][state];
+          if(name!==id+'_'+state+'.png')throw new Error('Sprite incorreto no manifesto: '+id+'/'+state);
+          const source=resolve(aircraftRoot,name),target=resolve('dist/assets/sprites/premium/aircraft',name);
+          if(!existsSync(source))throw new Error('Sprite Arcade Premium obrigatório ausente: '+source);
+          mkdirSync(dirname(target),{recursive:true});copyFileSync(source,target);
+        }
+      }
+      mkdirSync(resolve('dist/assets/sprites/premium/aircraft'),{recursive:true});
+      copyFileSync(resolve(aircraftRoot,'manifest.json'),resolve('dist/assets/sprites/premium/aircraft/manifest.json'));
       writeFileSync(indexPath, html);
       writeFileSync(resolve('dist/build-info.json'), JSON.stringify({
         build: buildId, release: '0.5.6', timestamp: new Date().toISOString()
