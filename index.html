@@ -225,6 +225,7 @@
 
 /* Menu Arcade Premium: arte inteira, com áreas de ação HTML exatamente sobre os botões.
    O menu anterior continua no DOM apenas para a navegação interna após Single Player. */
+#rs-pilot-screen:not(.hidden){position:fixed!important;inset:0!important;z-index:1100!important;width:100vw!important;height:100dvh!important;overflow-y:auto!important}
 #mode-selection:not(.hidden){position:fixed!important;inset:0!important;z-index:1000!important;width:100vw!important;height:100dvh!important;max-width:none!important;margin:0!important;padding:0!important;overflow:hidden!important;background:#020a15!important;display:flex!important;align-items:center!important;justify-content:center!important}
 #mode-selection>:not(#rs-menu-art){display:none!important}
 #controller-settings:not(.hidden){position:fixed!important;z-index:2000!important;inset:4vh max(5vw,15px)!important;max-height:90dvh!important;overflow:auto!important;background:#05172af7!important}
@@ -239,7 +240,7 @@
 #rs-menu-art>#riverstorm-update-notice{display:none!important}
 #mode-multi-info:not(.hidden){position:absolute;z-index:3;left:22%;top:28%;width:56%!important;max-width:none!important;padding:20px!important;background:#061b32f5!important;border:2px solid #4bd8ff!important;color:white!important}
 #start-screen:has(#mode-selection:not(.hidden)){background:#020a15!important}
-#start-screen:has(#mode-selection:not(.hidden)) #controller-settings:not(.hidden){position:fixed!important;z-index:1200!important;inset:4vh max(5vw,15px)!important;max-height:90dvh!important;background:#05172af5!important}
+body #controller-settings:not(.hidden){position:fixed!important;z-index:1200!important;inset:4vh max(5vw,15px)!important;max-height:90dvh!important;background:#05172af5!important}
 @media(max-width:650px){#rs-menu-art>#mode-last-pilot{top:69%;font-size:8px!important}#rs-menu-art>#mode-menu-music{bottom:1%;padding:2px;font-size:8px!important}}
 </style>
 <div id="start-screen" class="absolute inset-0 bg-black/90 flex flex-col items-center justify-start p-3 text-center z-30">
@@ -4887,6 +4888,15 @@ function updateTerrainEvent(){
           const node=document.getElementById(id);if(node)premiumArt.appendChild(node);
         }
         premiumMenu.appendChild(premiumArt);
+        // O canvas e o shell do jogo aplicam transform/scale; elementos fixed
+        // descendentes ficam presos a esse shell. Portais fora dele corrigem
+        // a janela cinematográfica cortada e o painel legado ao lado.
+        document.body.appendChild(premiumMenu);
+        const pilotPortal=document.getElementById('rs-pilot-screen');
+        if(pilotPortal)document.body.appendChild(pilotPortal);
+        const settingsPortal=document.getElementById('controller-settings');
+        if(settingsPortal)document.body.appendChild(settingsPortal);
+
         document.getElementById('mode-single').setAttribute('aria-label','Single Player');
         document.getElementById('mode-multi').setAttribute('aria-label','Multiplayer');
         document.getElementById('mode-settings').setAttribute('aria-label','Configurações');
@@ -4894,8 +4904,8 @@ function updateTerrainEvent(){
         modeSettings.addEventListener('click',()=>{showControllerSettings(true);document.getElementById('controller-settings').focus({preventScroll:true});});
         const menuMusic=document.getElementById('riverstorm-intro-audio');
         const menuMusicLabel=document.getElementById('mode-menu-music');
-        menuMusic.volume=.38;
-        menuMusic.addEventListener('error',()=>{menuMusicLabel.textContent='♫ Tema: envie music/lucidez-menu.opus ao GitHub';});
+        menuMusic.volume=.58;
+        menuMusic.addEventListener('error',()=>{menuMusicLabel.textContent='♫ Falha ao carregar tema de abertura';});
         const startIntroMusic=()=>{
           if(modeSelection.classList.contains('hidden'))return;
           menuMusic.play().then(()=>{menuMusicLabel.textContent='♫ Lucidez — tema do menu';}).catch(()=>{menuMusicLabel.textContent='♫ Clique para liberar o tema do menu';});
@@ -4911,6 +4921,8 @@ function updateTerrainEvent(){
           else if(e.key==='Enter'&&e.target===modeSelection){e.preventDefault();modeBtns[modeFocus].click();}
         });
         document.addEventListener('pointerdown',startIntroMusic,{once:true});
+        document.addEventListener('keydown',startIntroMusic,{once:true});
+        menuMusic.load();
         const lastChoice=document.getElementById('mode-last-pilot');
         function updateLastChoice(){
           let pilot='',plane='';
