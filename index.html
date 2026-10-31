@@ -138,11 +138,11 @@
  #btn-bomb{min-width:65px!important;min-height:54px!important}
  #touch-controls{padding-bottom:env(safe-area-inset-bottom)!important;max-width:100%!important;box-sizing:border-box!important;gap:6px!important}\n #touch-controls button{font-size:clamp(10px,2.5vw,13px)!important}\n #compact-hud{max-width:100%!important;overflow-x:auto!important}\n #boss-dialogue-strip{max-width:100%!important;box-sizing:border-box!important}
 }
-</style></head>
+</style><style id="riverstorm-crt-retired">.crt-effect::before,.crt-effect::after{content:none!important;display:none!important}#gameCanvas{filter:none!important;image-rendering:auto!important}#rs-mobile-hud-toggle{display:none}@media (pointer:coarse),(max-width:700px){#rs-mobile-hud-toggle{display:block;width:100%;background:#143d5b;color:#e5fcff;border:1px solid #4ea3bc;border-radius:5px;min-height:34px;font:700 12px system-ui}#compact-hud:not(.rs-hud-expanded) .rs-hud-grid,#compact-hud:not(.rs-hud-expanded) .rs-hud-footer,#compact-hud:not(.rs-hud-expanded) #pilot-progress{display:none!important}#compact-hud.rs-hud-expanded .rs-hud-grid{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important}#compact-hud.rs-hud-expanded .rs-hud-footer,#compact-hud.rs-hud-expanded #pilot-progress{display:flex!important}}</style></head>
 <body class="h-screen w-screen flex flex-col items-center justify-center p-2 sm:p-4">
 
     <!-- Moldura Principal do Jogo -->
-    <div id="game-container" class="relative crt-effect rounded-lg overflow-hidden border-4 border-slate-700 bg-black max-w-xl w-full flex-1 max-h-[800px]">
+    <div id="game-container" class="relative rounded-lg overflow-hidden border-4 border-slate-700 bg-black max-w-xl w-full flex-1 max-h-[800px]">
         <canvas id="gameCanvas" class="w-full h-full block"></canvas>
 <div id="boss-skill-picker" class="hidden absolute inset-0 z-40 flex flex-col items-center justify-center p-3" style="background:rgba(2,9,23,.95);color:#e2e8f0" role="dialog" aria-modal="true" aria-label="Escolher habilidade de boss">
   <div style="width:100%;max-width:420px;padding:17px;border:2px solid #38bdf8;border-radius:15px;background:linear-gradient(#102944,#061224);box-shadow:0 0 35px #38bdf844">
@@ -429,6 +429,7 @@ body #controller-settings:not(.hidden){position:fixed!important;z-index:1200!imp
     <div id="boss-dialogue-strip" aria-live="polite" class="hidden" role="status"><b id="boss-dialogue-name" style="display:block;color:#fbbf24"></b><span id="boss-dialogue-text" style="color:#fff"></span></div>
     <!-- HUD compacto unificado: fora do Canvas para preservar toda a área de combate. -->
     <section id="compact-hud" aria-label="Painel de combate RiverStorm">
+      <button id="rs-mobile-hud-toggle" type="button" aria-expanded="false">▸ HUD · expandir</button>
       <div class="rs-hud-grid">
         <div class="rs-hud-cell rs-score"><span class="rs-label">🏆 RECORDE <b id="hi-score-text" class="rs-yellow">000000</b></span><span class="rs-label">◎ PONTOS <b id="hud-score" class="rs-yellow">000000</b></span></div>
         <div class="rs-hud-cell"><span class="rs-label">🎯 ARMA <b id="hud-weapon" class="rs-yellow">SINGLE</b></span><span class="rs-label">TIROS <b id="hud-shots">0</b></span></div>
@@ -442,7 +443,6 @@ body #controller-settings:not(.hidden){position:fixed!important;z-index:1200!imp
     </section>
     <div id="rs-now-playing" aria-live="polite" title="Faixa musical atual" style="max-width:920px;margin:3px auto;padding:5px 12px;box-sizing:border-box;border:1px solid #177caa;border-radius:6px;background:#061522;color:#7de8ff;font:600 12px monospace;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">♫ TOCANDO: nenhuma faixa</div>
     <div id="rs-bottom-actions" aria-label="Opções rápidas">
-      <button id="crt-toggle" type="button">CRT: LIG</button>
       <button id="controller-settings-btn" type="button">⚙ CONTROLE</button>
       <button id="track-next" type="button">⏭</button>
       <button id="music-library" type="button">♫ MÚSICAS</button>
@@ -905,8 +905,10 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
           try{localStorage.setItem(XP_STORE,String(pilotXP))}catch(e){}
           if(pilotLevel>previous){createFloatingText(player.x,player.y-65,'NÍVEL '+pilotLevel+'!','#facc15');addExplosion(player.x,player.y,'#facc15',18)}
         }
-        let crtEnabled = true;
+        const crtEnabled = false; document.getElementById('game-container')?.classList.remove('crt-effect');
 
+        const hudToggle=document.getElementById("rs-mobile-hud-toggle");
+        hudToggle.addEventListener("click",()=>{const hud=document.getElementById("compact-hud");const open=hud.classList.toggle("rs-hud-expanded");hudToggle.setAttribute("aria-expanded",String(open));hudToggle.textContent=open?"▾ HUD · recolher":"▸ HUD · expandir";});
         // Propriedades do Jogador
         let player = {
             x: VIRTUAL_WIDTH / 2,
@@ -916,7 +918,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
             width: 28,
             height: 32,
             speed: 6.5,
-            baseScrollSpeed: 3.2,
+            baseScrollSpeed: 2.72,
             currentScrollSpeed: 3.2,
             fuel: 100,
             maxFuel: 100,
@@ -3153,8 +3155,9 @@ function updateTerrainEvent(){
                 const vertical=(down?1:0)-(up?1:0);
                 player.currentScrollSpeed=player.baseScrollSpeed*(up?1.5:down?0.72:1);
                 const normalization=Math.hypot(horizontal,vertical)||1;
-                player.x+=horizontal*player.speed/normalization;
-                player.y+=vertical*player.speed/normalization;
+                const joystickActive=activeJoystickPointer!==null;
+                player.x+=(joystickActive?analogJoystickX:horizontal/normalization)*player.speed;
+                player.y+=(joystickActive?analogJoystickY:vertical/normalization)*player.speed;
                 if(mouseInput.active&&!horizontal){
                     player.x+=Math.max(-player.speed,Math.min(player.speed,mouseInput.x-player.x));
                     if(!up&&!down)player.y+=Math.max(-player.speed,Math.min(player.speed,mouseInput.y-player.y));
@@ -3815,7 +3818,7 @@ function updateTerrainEvent(){
             player.speed = config.speed;
             // Redução moderada do deslocamento do mundo; velocidade lateral da nave não muda.
             // Mantém proporcionalidade dos controles de aceleração/frenagem e consumo de combustível.
-            player.baseScrollSpeed = config.scroll * 0.88;
+            player.baseScrollSpeed = config.scroll * 0.85;
             player.currentScrollSpeed = player.baseScrollSpeed;
             player.fuelDepletionRate = config.fuel*.8*Math.max(.72,1-(journey-1)*.018);
             player.weapon = config.weapons[0];
@@ -4883,8 +4886,10 @@ function updateTerrainEvent(){
         const joystick = document.getElementById('virtual-joystick');
         const knob = document.getElementById('joystick-knob');
         let activeJoystickPointer = null;
+        let analogJoystickX=0, analogJoystickY=0;
         function resetJoystick() {
             activeJoystickPointer = null;
+            analogJoystickX=0; analogJoystickY=0;
             ['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].forEach(k => keys[k] = false);
             knob.style.left = '50%'; knob.style.top = '50%';
         }
@@ -4897,7 +4902,11 @@ function updateTerrainEvent(){
             if (distance > radius) { dx = dx / distance * radius; dy = dy / distance * radius; }
             knob.style.left = `calc(50% + ${dx}px)`;
             knob.style.top = `calc(50% + ${dy}px)`;
-            const deadzone = radius * 0.24;
+            const deadzone = radius * 0.28;
+            const strength=Math.min(1,Math.hypot(dx,dy)/radius);
+            const amount=strength<.28?0:Math.pow((strength-.28)/.72,1.85)*.72;
+            const m=Math.hypot(dx,dy)||1;
+            analogJoystickX=dx/m*amount;analogJoystickY=dy/m*amount;
             keys.ArrowLeft = dx < -deadzone;
             keys.ArrowRight = dx > deadzone;
             keys.ArrowUp = dy < -deadzone;
@@ -5204,12 +5213,7 @@ function updateTerrainEvent(){
             document.getElementById('pause-screen').classList.add('hidden');
         });
 
-        document.getElementById('crt-toggle').addEventListener('click', () => {
-            crtEnabled = !crtEnabled;
-            const container = document.getElementById('game-container');
-            container.classList.toggle('crt-effect', crtEnabled);
-            document.getElementById('crt-toggle').innerText = `CRT: ${crtEnabled ? 'LIG' : 'DES'}`;
-        });
+        // CRT removido definitivamente.
 
         document.getElementById('sound-toggle').addEventListener('click', () => {
             sound.enabled = !sound.enabled;
