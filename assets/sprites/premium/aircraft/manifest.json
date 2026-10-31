@@ -1,0 +1,44 @@
+{
+  "falcao": {
+    "normal": "falcao_normal.png",
+    "disparo": "falcao_disparo.png",
+    "especial": "falcao_especial.png",
+    "boost": "falcao_boost.png"
+  },
+  "vespa": {
+    "normal": "vespa_normal.png",
+    "disparo": "vespa_disparo.png",
+    "especial": "vespa_especial.png",
+    "boost": "vespa_boost.png"
+  },
+  "cometa": {
+    "normal": "cometa_normal.png",
+    "disparo": "cometa_disparo.png",
+    "especial": "cometa_especial.png",
+    "boost": "cometa_boost.png"
+  },
+  "fenix": {
+    "normal": "fenix_normal.png",
+    "disparo": "fenix_disparo.png",
+    "especial": "fenix_especial.png",
+    "boost": "fenix_boost.png"
+  },
+  "helicoptero": {
+    "normal": "helicoptero_normal.png",
+    "disparo": "helicoptero_disparo.png",
+    "especial": "helicoptero_especial.png",
+    "boost": "helicoptero_boost.png"
+  },
+  "disco": {
+    "normal": "disco_normal.png",
+    "disparo": "disco_disparo.png",
+    "especial": "disco_especial.png",
+    "boost": "disco_boost.png"
+  },
+  "titan": {
+    "normal": "titan_normal.png",
+    "disparo": "titan_disparo.png",
+    "especial": "titan_especial.png",
+    "boost": "titan_boost.png"
+  }
+}
