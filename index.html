@@ -72,7 +72,7 @@
             background: rgba(30, 41, 59, 0.7);
             border: 2px solid #475569;
             border-radius: 8px;
-            backdrop-filter: blur(4px);
+            backdrop-filter: none;
         }
         .d-btn:active {
             background: rgba(59, 130, 246, 0.6);
@@ -171,7 +171,7 @@
 <body class="h-screen w-screen flex flex-col items-center justify-center p-2 sm:p-4">
 
     <!-- Moldura Principal do Jogo -->
-    <div id="game-container" class="relative crt-effect rounded-lg overflow-hidden border-4 border-slate-700 bg-black max-w-xl w-full flex-1 max-h-[800px]">
+    <div id="game-container" class="relative rounded-lg overflow-hidden border-4 border-slate-700 bg-black max-w-xl w-full flex-1 max-h-[800px]">
         <canvas id="gameCanvas" class="w-full h-full block"></canvas>
 <div id="boss-skill-picker" class="hidden absolute inset-0 z-40 flex flex-col items-center justify-center p-3" style="background:rgba(2,9,23,.95);color:#e2e8f0" role="dialog" aria-modal="true" aria-label="Escolher habilidade de boss">
   <div style="width:100%;max-width:420px;padding:17px;border:2px solid #38bdf8;border-radius:15px;background:linear-gradient(#102944,#061224);box-shadow:0 0 35px #38bdf844">
@@ -374,7 +374,7 @@
       <div class="rs-hud-footer"><span id="hud-version" style="color:#38bdf8;font-size:8px">HUD 0.7.6</span><span id="mission-hud">SELVA DA AURORA</span><b id="sector-hud">SETOR 1</b><span id="hud-environment" title="Período do dia e clima">☀ DIA · CÉU LIMPO</span><span id="hud-pilot-name" title="Piloto">PILOTO</span><span id="hud-rank">J1 SOLDADO</span></div>
     </section>
     <div id="rs-bottom-actions" aria-label="Opções rápidas">
-      <button id="crt-toggle" type="button">CRT: LIG</button>
+      <button id="crt-toggle" type="button" hidden aria-hidden="true">CRT: DES</button>
       <button id="controller-settings-btn" type="button">⚙ CONTROLE</button>
       <button id="track-next" type="button">⏭</button>
       <button id="music-library" type="button">♫ MÚSICAS</button>
@@ -829,7 +829,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
           try{localStorage.setItem(XP_STORE,String(pilotXP))}catch(e){}
           if(pilotLevel>previous){createFloatingText(player.x,player.y-65,'NÍVEL '+pilotLevel+'!','#facc15');addExplosion(player.x,player.y,'#facc15',18)}
         }
-        let crtEnabled = !window.matchMedia('(pointer:coarse), (max-width:700px)').matches;
+        let crtEnabled = false;
         if(!crtEnabled){document.getElementById('game-container')?.classList.remove('crt-effect');document.getElementById('crt-toggle').textContent='CRT: DES';}
         // Em telas touch, os poderes ficam no painel inferior, jamais sobre o rio.
         if(window.matchMedia('(pointer:coarse), (max-width:700px)').matches){
@@ -2212,7 +2212,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
                 }
                 // Camada Premium: só substitui a silhueta quando existe PNG homologado.
                 // A lógica e o movimento do inimigo continuam sendo os originais.
-                const rasterEnemy=window.RiverPremium?.get('enemy',e.type);
+                const rasterEnemy=window.RiverPremium?.get('enemy',e.type==='BIOME_ENEMY'?(e.biomeId||'TUCANO'):e.type);
                 if(rasterEnemy&&e.type!=='BOSS'&&e.type!=='MEGAZORD'){
                     ctx.drawImage(rasterEnemy,-(e.width||32)/2,-(e.height||32)/2,e.width||32,e.height||32);
                     ctx.restore();
@@ -4954,10 +4954,10 @@ function updateTerrainEvent(){
         });
 
         document.getElementById('crt-toggle').addEventListener('click', () => {
-            crtEnabled = !crtEnabled;
+            crtEnabled = false;
             const container = document.getElementById('game-container');
-            container.classList.toggle('crt-effect', crtEnabled);
-            document.getElementById('crt-toggle').innerText = `CRT: ${crtEnabled ? 'LIG' : 'DES'}`;
+            container.classList.remove('crt-effect');
+            document.getElementById('crt-toggle').innerText = 'CRT: DES';
         });
 
         document.getElementById('sound-toggle').addEventListener('click', () => {
