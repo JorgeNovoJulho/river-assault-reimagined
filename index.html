@@ -273,17 +273,7 @@ body #controller-settings:not(.hidden){position:fixed!important;z-index:1200!imp
 @media(min-width:1000px){#rs-pilot-screen{display:grid!important;grid-template-columns:50% 50%;grid-template-rows:auto auto 1fr auto!important;column-gap:12px!important}#rs-pilot-screen>h2,#rs-pilot-screen>p{grid-column:1/-1}#rs-pilot-grid{grid-column:1;grid-row:3;align-content:start}#rs-pilot-detail{grid-column:2;grid-row:3;margin:0!important;height:100%!important}#rs-pilot-screen>div:last-child{grid-column:1/-1;grid-row:4}}
 @media(max-width:700px){#rs-pilot-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}#rs-pilot-detail{grid-template-columns:1fr!important}#rs-pilot-detail .rs-pilot-feature-art{height:260px}#rs-pilot-detail .rs-pilot-stat{grid-template-columns:92px 1fr 40px}}
 </style>
-<style id="rs-featured-live-style">
-#rs-menu-art #rs-featured-live{position:absolute;z-index:4;right:2.5%;top:12%;width:31%;height:58%;box-sizing:border-box;border:2px solid #24c7ff;border-radius:13px;background:linear-gradient(135deg,#04152af7,#0a2949f2);box-shadow:inset 0 0 18px #009ffc55,0 0 22px #0009;display:flex;flex-direction:column;align-items:center;overflow:hidden;pointer-events:none}
-#rs-featured-live .rs-feature-heading{align-self:stretch;background:linear-gradient(90deg,#ffdb32,#e4a109);color:#111927;font:900 clamp(9px,1.05vw,16px) system-ui;padding:6px 12px}
-#rs-featured-live img{min-width:0;min-height:0;flex:1;width:98%;object-fit:contain;filter:drop-shadow(0 2px 12px #04aaff4a)}
-#rs-featured-live .rs-feature-caption{padding:5px;background:#031729e8;border-top:1px solid #22caff;align-self:stretch;display:flex;flex-direction:column;gap:2px;text-align:center}
-#rs-featured-live strong{color:#a3edff;font:900 clamp(12px,1.8vw,28px) system-ui}
-#rs-featured-live .rs-feature-caption span{color:#ffdd65;font:800 clamp(9px,1vw,15px) system-ui}
-#rs-menu-art>#mode-last-pilot{z-index:5;top:71%!important;right:2.5%!important;width:31%!important}
-#rs-pilot-screen .rs-pilot-card img{content-visibility:auto}
-@media(max-width:700px){#rs-featured-live .rs-feature-heading{padding:2px 5px}#rs-featured-live .rs-feature-caption{padding:2px}}
-</style>
+
 <div id="start-screen" class="absolute inset-0 bg-black/90 flex flex-col items-center justify-start p-3 text-center z-30">
             <div id="rs-pilot-screen" class="hidden" style="position:absolute;inset:0;z-index:96;overflow:auto;background:linear-gradient(#03101de0,#03101ef4),url('./assets/ui/premium/menu/2b81e191-9306-4a6e-aabf-049f60939aa0.png') center/cover;box-sizing:border-box;padding:clamp(12px,3vw,28px);color:#e3f8ff">
 <h2 style="font:900 clamp(25px,4vw,46px) system-ui;color:#61e3ff;text-align:center;margin:0 0 12px">SELEÇÃO DE PILOTOS</h2>
@@ -4928,12 +4918,6 @@ function updateTerrainEvent(){
         for(const id of ['mode-single','mode-multi','mode-settings','mode-last-pilot','mode-menu-music','riverstorm-update-notice','mode-multi-info']){
           const node=document.getElementById(id);if(node)premiumArt.appendChild(node);
         }
-        // Painel independente: substitui o retrato fixo do banner pela escolha salva.
-        const featured=document.createElement('section');
-        featured.id='rs-featured-live';
-        featured.setAttribute('aria-label','Piloto e aeronave em destaque');
-        featured.innerHTML='<span class="rs-feature-heading">PILOTO EM DESTAQUE</span><img id="rs-featured-img" alt="" decoding="async"><div class="rs-feature-caption"><strong id="rs-featured-name"></strong><span id="rs-featured-plane"></span></div>';
-        premiumArt.appendChild(featured);
         premiumMenu.appendChild(premiumArt);
         // O canvas e o shell do jogo aplicam transform/scale; elementos fixed
         // descendentes ficam presos a esse shell. Portais fora dele corrigem
@@ -4980,13 +4964,9 @@ function updateTerrainEvent(){
           lastChoice.textContent='ÚLTIMA SELEÇÃO: '+(pilot||'Perfil do jogador')+' · '+(plane||'Aeronave atual');
           const savedId=(()=>{try{return localStorage.getItem('riverstorm_last_pilot_id')}catch(e){return null}})();
           const match=pilotEntries.find(p=>p[0]===savedId)||pilotEntries.find(p=>p[1]===pilot)||pilotEntries[0];
-          const img=document.getElementById('rs-featured-img'),name=document.getElementById('rs-featured-name'),ship=document.getElementById('rs-featured-plane');
-          if(img&&img.dataset.pilot!==match[0]){img.dataset.pilot=match[0];img.src='./assets/ui/premium/pilots/'+match[4];img.alt=match[1]+' e '+match[3];}
-          if(name)name.textContent=match[1];
-          if(ship)ship.textContent='NAVE RELACIONADA · '+match[3];
+          // O destaque usa apenas rs-menu-spotlight (sem camadas duplicadas).
 
         }
-        updateLastChoice();
         window.addEventListener('storage',updateLastChoice);
         document.getElementById('plane-select')?.addEventListener('change',()=>{try{localStorage.setItem('riverstorm_last_aircraft',document.getElementById('plane-select').selectedOptions[0].textContent);}catch(e){}updateLastChoice();});
         const pilotEntries=[
@@ -5010,6 +4990,7 @@ function updateTerrainEvent(){
  let chosenPilot=pilotEntries[0];
  try{const v=localStorage.getItem('riverstorm_last_pilot_id'),label=localStorage.getItem('riverstorm_last_pilot'),ship=localStorage.getItem('riverstorm_last_aircraft');chosenPilot=pilotEntries.find(p=>p[0]===v)||pilotEntries.find(p=>p[1]===label&&(!ship||p[3]===ship))||pilotEntries.find(p=>p[1]===label)||chosenPilot;}catch(e){}
  syncSpotlight(chosenPilot);
+ updateLastChoice();
  // Painel derivado do catálogo real: escala informativa, não uma segunda física.
  const gamePlanes=window.RiverAircraft?.PLANES||{};
  const pilotStats=Object.fromEntries(pilotEntries.map(p=>{
