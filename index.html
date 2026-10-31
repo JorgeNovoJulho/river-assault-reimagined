@@ -1648,7 +1648,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
             }
             // Assinaturas especiais por chefe: EMP, relâmpagos, gravidade, fogo, gelo e investida.
             // Um único relógio de recarga para todos os especiais; nunca usar dois EMP em paralelo.
-            const abilityCooldown=Math.max(360,Math.round((e.specialCooldown || 480)/adaptiveThreat));
+            const abilityCooldown=Math.max(420,Math.round((e.specialCooldown || 480)/adaptiveThreat));
             e.specialCharge=Math.min(abilityCooldown,(e.specialCharge||0)+1);
             const warning=e.specialCount<5 && e.specialCharge>=abilityCooldown-90;
             if(warning&&e.specialCharge===abilityCooldown-90){createFloatingText(e.x,e.y-55,'⚠ ESPECIAL EM 1,5 S','#facc15');try{window.RiverSFX?.alert?.()}catch(error){}}
@@ -3471,7 +3471,7 @@ function updateTerrainEvent(){
                         bullets.splice(bIndex, 1);
                         if(e.type==='BOSS'&&bossDefeatedThisMission) return;
                         if(e.type==='BOSS')dropBossReward(e,1);
-                        e.hp=Math.max(0,e.hp-(e.type==='BOSS'?Math.min(e.maxHp*.012,(b.damage||1)*(b.reflected?1:pilotBonus().damage)*(b.iceWeak?.5:1)*(player.effectType==='GRAVITY'&&player.effectTimer>0?.25:1)*(e.dualTicks>0&&e.dualElement==='PRISM'?1+Math.min(.25,e.dualAmp||0):1)*(e.parryVulnerableTicks>0?1.25:1)):(b.damage||1)*(b.reflected?1:pilotBonus().damage)*(b.iceWeak?.5:1)*(player.effectType==='GRAVITY'&&player.effectTimer>0?.25:1)));
+                        e.hp=Math.max(0,e.hp-(e.type==='BOSS'?Math.min(e.maxHp*.012,(b.damage||1)*(b.reflected?1:pilotBonus().damage)*(b.iceWeak?.5:1)*(player.effectType==='GRAVITY'&&player.effectTimer>0?.25:1)*(e.dualTicks>0&&e.dualElement==='PRISM'?1+Math.min(.25,e.dualAmp||0):1)*(e.parryVulnerableTicks>0?1.5:1)):(b.damage||1)*(b.reflected?1:pilotBonus().damage)*(b.iceWeak?.5:1)*(player.effectType==='GRAVITY'&&player.effectTimer>0?.25:1)));
                         addExplosion(b.x, b.y, b.type==='BANK_MISSILE'?'#fb923c':'#fba518', b.type==='BANK_MISSILE'?16:4);
 
                         if (e.hp <= 0) {
@@ -3988,13 +3988,13 @@ function updateTerrainEvent(){
           for(const w of wingmen){
             if(w.hp<=0)continue;
             if(weapon==='ALTERNATE'&&(Math.floor(missionTicks/cadence)%2)!==(w.side===1?1:0))continue;
-            const p=wingPosition(w),guided=['MISSILE','TRACKER','ROCKET','MULTI','BANK_MISSILE'].includes(weapon);
+            const p=wingPosition(w);
             const rays=mode==='ORBIT'?[[w.side*5,-8],[-w.side*5,-8],[w.side*5,8],[-w.side*5,8]]:
               mode==='X'||mode==='WIDE'?[[w.side*6,-8],[-w.side*6,-8]]:
               mode==='TRIDENT'||mode==='DIAMOND'?[[0,-10],[w.side*5,-9]]:
               [[w.side*(mode==='PENDULUM'?3:1.6),-10]];
             for(const [vx,vy] of rays){
-              bullets.push({x:p.x,y:p.y,vx,speed:-vy,type:guided?'MISSILE':(['BEAM','LASER','PULSE'].includes(weapon)?'LASER':'SINGLE'),weaponId:weapon,color:guided?'#ffb65c':'#67e8f9',isWingmanMissile:guided,damage:guided?3:2});
+              bullets.push({x:p.x,y:p.y,vx,speed:-vy,type:'MISSILE',weaponId:'MISSILE',color:'#ffb65c',isWingmanMissile:true,damage:3});
             }
           }
         }
