@@ -874,10 +874,10 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
             refreshWallet();document.getElementById('plane-status').textContent='Aeronave desbloqueada!';
         });
         const HANGAR_PILOTS={
-          falcao:['CAP. RAFA','△','#b91c1c','#d9a179'],vespa:['TEN. MAYA','V','#ca8a04','#b87955'],
-          cometa:['MAJ. ÍCARO','C','#2563eb','#e1ac82'],fenix:['CMD. LUNA','F','#be185d','#b77c66'],
-          helicoptero:['CAP. ÁGUIA','A','#1d4ed8','#8d614e'],disco:['NOVA-7','D','#7c3aed','#dbab98'],
-          titan:['SGT. BRUTUS','T','#4d7c0f','#b98a63']
+          falcao:['TEN. SNABO','△','#b91c1c','#d9a179'],vespa:['CAP. JHOW','V','#ca8a04','#b87955'],
+          cometa:['CAP. B.TATA','C','#2563eb','#e1ac82'],fenix:['MAJ. NAPAS','F','#be185d','#b77c66'],
+          helicoptero:['SGT. CASPER','A','#1d4ed8','#8d614e'],disco:['SGT. ROGER','D','#7c3aed','#dbab98'],
+          titan:['TEN. DUDU','T','#4d7c0f','#b98a63']
         };
         function renderHangar(){
           const key=planeSelect.value,conf=aircraftCatalog.PLANES[key],pilot=HANGAR_PILOTS[key],p=window.RiverVisuals;
@@ -887,7 +887,9 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
           pc.fillStyle=grad;pc.fillRect(0,0,224,144);
           pc.strokeStyle='#23496a';pc.lineWidth=1;for(let x=16;x<224;x+=24){pc.beginPath();pc.moveTo(x,0);pc.lineTo(x,144);pc.stroke()}
           for(let y=12;y<144;y+=24){pc.beginPath();pc.moveTo(0,y);pc.lineTo(224,y);pc.stroke()}
-          try{p.plane(pc,112,65,key,2.35)}catch(error){console.warn('Prévia da aeronave:',error);pc.fillStyle=conf.color;pc.font='bold 28px monospace';pc.textAlign='center';pc.fillText(conf.name,112,72)}
+          const premiumPreview=window.RiverPremium?.aircraft(key,'normal');
+          if(premiumPreview){const ratio=Math.min(166/premiumPreview.naturalWidth,103/premiumPreview.naturalHeight);const w=premiumPreview.naturalWidth*ratio,h=premiumPreview.naturalHeight*ratio;pc.drawImage(premiumPreview,112-w/2,65-h/2,w,h);}
+          else {pc.fillStyle='#a3c5d8';pc.font='bold 12px monospace';pc.textAlign='center';pc.fillText('CARREGANDO ARTE PREMIUM...',112,65);}
           pc.font='bold 10px monospace';pc.textAlign='center';pc.fillStyle=conf.color;pc.fillText('◀ '+conf.name+' ▶',112,137);
           function pilotDraw(id,bust){
             const cv=document.getElementById(id),c=cv.getContext('2d'),w=cv.width,h=cv.height;
@@ -2086,11 +2088,8 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
                 ctx.shadowBlur=18;
                 ctx.globalAlpha=.86;
             }
-            if(selectedPlane==='falcao' && window.RiverPremium?.get('player','falcao')){
-                ctx.drawImage(window.RiverPremium.get('player','falcao'),-27,-30,54,66);
-                ctx.restore();
-                return;
-            }
+            const approvedAircraft=window.RiverPremium?.aircraft(player.aircraftType||selectedPlane,'normal');
+            if(approvedAircraft){ctx.drawImage(approvedAircraft,-27,-30,54,66);ctx.restore();return;}
             // Fogo do Pós-combustor
             ctx.fillStyle = Math.random() < 0.5 ? '#f97316' : '#ef4444';
             ctx.beginPath();
