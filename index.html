@@ -212,7 +212,17 @@
 
         <!-- Telas de Interface Overlay -->
         <!-- Tela Inicial / Menu Principal -->
-        <div id="start-screen" class="absolute inset-0 bg-black/90 flex flex-col items-center justify-start p-3 text-center z-30">
+        <style id="rs-premium-main-menu">
+#mode-selection{background:linear-gradient(90deg,#041123e8,#04152bb8),url('./assets/ui/premium/menu/menu_arcade.png') center/cover no-repeat,linear-gradient(135deg,#071b30,#061025)!important;gap:13px!important}
+#mode-selection>h2{font:900 clamp(35px,7vw,75px)/1 'Arial Black',Impact,sans-serif!important;background:linear-gradient(#fff,#79d7ff 45%,#1161b7 80%,#ff8b4b);background-clip:text;-webkit-background-clip:text;color:transparent!important;text-shadow:0 6px 25px #007df355;letter-spacing:.06em}
+#mode-selection #mode-single,#mode-selection #mode-multi,#mode-selection #mode-settings{max-width:440px;width:min(90vw,440px)!important;transition:transform .16s,filter .16s,box-shadow .16s;cursor:pointer;font:900 clamp(17px,2.7vw,23px) system-ui!important;box-shadow:inset 0 0 14px #0de9ff35,0 6px 20px #0009}
+#mode-selection #mode-single{background:linear-gradient(105deg,#87400c,#c67e16)!important;border-color:#ffcb52!important}
+#mode-selection #mode-multi,#mode-selection #mode-settings{background:linear-gradient(105deg,#062651,#08578a)!important}
+#mode-selection button:hover,#mode-selection button:focus-visible,#mode-selection button.rs-selected{transform:scale(1.035);filter:brightness(1.32);outline:2px solid #fff8a8;outline-offset:3px;box-shadow:0 0 25px #00caff9c!important}
+@media(max-width:620px){#mode-selection{padding:12px!important}#mode-selection>h2{font-size:clamp(31px,10vw,54px)!important}#mode-selection button{padding:13px!important}}
+@media(prefers-reduced-motion:reduce){#mode-selection button{transition:none!important}}
+</style>
+<div id="start-screen" class="absolute inset-0 bg-black/90 flex flex-col items-center justify-start p-3 text-center z-30">
             <div id="mode-selection" style="position:absolute;inset:0;z-index:95;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:22px;background:linear-gradient(155deg,#03131e 5%,#13344b 52%,#080c20 100%);overflow:auto">
 <h2 style="font-size:clamp(24px,6vw,37px);font-weight:900;color:#7de8ff;letter-spacing:2px">RIVER STORM</h2>
 <p style="max-width:320px;font-size:12px;color:#bdd8ed">ESCOLHA O MODO DE JOGO</p>
@@ -223,6 +233,10 @@
 <p>Salas LAN com código e senha, rankings e torneios eliminatórios. O serviço de rede precisa ser instalado e configurado no anfitrião.</p>
 <button id="mode-multi-back" type="button" style="padding:10px;border:1px solid #94baff;border-radius:8px;margin-top:6px">VOLTAR AOS MODOS</button>
 </div>
+<button id="mode-settings" type="button" style="width:min(94%,440px);padding:17px;color:#d6f9ff;background:#082e57;border:2px solid #41caff;border-radius:12px;font-weight:900">⚙ CONFIGURAÇÕES</button>
+<div id="mode-last-pilot" aria-live="polite" style="width:min(94%,440px);color:#aaf2ff;font:700 12px system-ui;padding:8px 12px;background:#001529b8;border:1px solid #287ab1;border-radius:9px">ÚLTIMA SELEÇÃO: carregando...</div>
+<div id="mode-menu-music" style="color:#ffd97d;font:600 11px system-ui">♫ Tema de abertura: clique ou pressione uma tecla para tocar</div>
+<audio id="riverstorm-intro-audio" src="./music/lucidez-menu.opus" preload="none" loop></audio>
 <div id="riverstorm-update-notice" role="status" style="font-size:11px;color:#b7d9fb;max-width:350px">Verificando informações da versão...</div>
 </div>
 <h1 id="start-headline" aria-label="RiverStorm"><span>RIVER</span><span>STORM</span></h1>
@@ -4838,7 +4852,38 @@ function updateTerrainEvent(){
 
         // Seleção de modo antes do hangar: não altera a campanha solo.
         const modeSelection=document.getElementById('mode-selection');
-        document.getElementById('mode-single').addEventListener('click',()=>{modeSelection.classList.add('hidden');});
+        const modeSettings=document.getElementById('mode-settings');
+        modeSettings.addEventListener('click',()=>showControllerSettings(true));
+        const menuMusic=document.getElementById('riverstorm-intro-audio');
+        const menuMusicLabel=document.getElementById('mode-menu-music');
+        menuMusic.volume=.38;
+        menuMusic.addEventListener('error',()=>{menuMusicLabel.textContent='♫ Tema: envie music/lucidez-menu.opus ao GitHub';});
+        const startIntroMusic=()=>{
+          if(modeSelection.classList.contains('hidden'))return;
+          menuMusic.play().then(()=>{menuMusicLabel.textContent='♫ Lucidez — tema do menu';}).catch(()=>{menuMusicLabel.textContent='♫ Clique para liberar o tema do menu';});
+        };
+        const stopIntroMusic=()=>{menuMusic.pause();};
+        const modeBtns=['mode-single','mode-multi','mode-settings'].map(id=>document.getElementById(id));
+        let modeFocus=0;
+        function highlightMode(i){modeFocus=(i+modeBtns.length)%modeBtns.length;modeBtns.forEach((b,n)=>b.classList.toggle('rs-selected',n===modeFocus));modeBtns[modeFocus].focus({preventScroll:true});}
+        modeBtns.forEach((b,i)=>{b.addEventListener('pointerenter',()=>{modeFocus=i;modeBtns.forEach((x,n)=>x.classList.toggle('rs-selected',n===i));});b.addEventListener('click',startIntroMusic);});
+        modeSelection.addEventListener('keydown',e=>{
+          if(e.target.closest('input,select,textarea')||!document.getElementById('controller-settings').classList.contains('hidden'))return;
+          if(e.key==='ArrowDown'||e.key==='ArrowUp'){e.preventDefault();highlightMode(modeFocus+(e.key==='ArrowDown'?1:-1));startIntroMusic();}
+          else if(e.key==='Enter'&&e.target===modeSelection){e.preventDefault();modeBtns[modeFocus].click();}
+        });
+        document.addEventListener('pointerdown',startIntroMusic,{once:true});
+        const lastChoice=document.getElementById('mode-last-pilot');
+        function updateLastChoice(){
+          let pilot='',plane='';
+          try{pilot=localStorage.getItem('riverstorm_last_pilot')||localStorage.getItem('river_last_pilot')||'';plane=localStorage.getItem('riverstorm_last_aircraft')||'';}catch(e){}
+          const selected=document.getElementById('aircraft-select')||document.getElementById('plane-select');
+          if(!plane&&selected)plane=selected.selectedOptions?.[0]?.textContent||selected.value;
+          lastChoice.textContent='ÚLTIMA SELEÇÃO: '+(pilot||'Perfil do jogador')+' · '+(plane||'Aeronave atual');
+        }
+        updateLastChoice();
+        window.addEventListener('storage',updateLastChoice);
+        document.getElementById('mode-single').addEventListener('click',()=>{stopIntroMusic();modeSelection.classList.add('hidden');});
         document.getElementById('mode-multi').addEventListener('click',()=>{
           document.getElementById('mode-multi-info').classList.remove('hidden');
           document.getElementById('mode-single').classList.add('hidden');
