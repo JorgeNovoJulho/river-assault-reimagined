@@ -4661,7 +4661,7 @@ function updateTerrainEvent(){
             try {
             if(controllerMenuOpen && timestamp-(gameLoop.lastSettingsPoll||0)<140){requestAnimationFrame(gameLoop);return;}
             if(controllerMenuOpen)gameLoop.lastSettingsPoll=timestamp;
-            if(gameState!=='PLAYING'&&!controllerMenuOpen && timestamp-(gameLoop.lastMenuFrame||0)<50){requestAnimationFrame(gameLoop);return;}
+            if(gameState!=='PLAYING'&&!controllerMenuOpen && timestamp-(gameLoop.lastMenuFrame||0)<120){requestAnimationFrame(gameLoop);return;}
             if(gameState!=='PLAYING'&&!controllerMenuOpen)gameLoop.lastMenuFrame=timestamp;
             gamepadState = physicalGamepad.poll();
             const parryPadPressed=!!physicalGamepad.lastButtons[4];
@@ -4965,6 +4965,7 @@ function updateTerrainEvent(){
           const savedId=(()=>{try{return localStorage.getItem('riverstorm_last_pilot_id')}catch(e){return null}})();
           const match=pilotEntries.find(p=>p[0]===savedId)||pilotEntries.find(p=>p[1]===pilot)||pilotEntries[0];
           // O destaque usa apenas rs-menu-spotlight (sem camadas duplicadas).
+          if(typeof syncSpotlight==='function')syncSpotlight(match);
 
         }
         window.addEventListener('storage',updateLastChoice);
