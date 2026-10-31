@@ -5,6 +5,9 @@
 (function(global){
 'use strict';
 const BASE='./assets/sprites/premium/runtime/';
+const AIRCRAFT_BASE='./assets/sprites/premium/aircraft/';
+const AIRCRAFT_IDS=['falcao','vespa','cometa','fenix','helicoptero','disco','titan'];
+const AIRCRAFT_STATES=['normal','disparo','boost','especial'];
 const CATALOG={
  player:{falcao:'player/fighter_candidate.png'},
  fx:{explosion:'fx/explosion_atlas_4x3.png'},
@@ -43,6 +46,21 @@ for(const [group,items] of Object.entries(CATALOG))for(const [id,path] of Object
  const supported=(group==='player'&&id==='falcao')||(group==='fx'&&id==='explosion')||(group==='enemy'&&(id==='TURRET'||id==='SHIP'));
  files.set(group+':'+id,{path,loaded:false,supported,img:null});
 }
+for(const id of AIRCRAFT_IDS)for(const state of AIRCRAFT_STATES){
+ files.set('aircraft:'+id+':'+state,{path:id+'_'+state+'.png',loaded:false,supported:true,img:null,base:AIRCRAFT_BASE});
+}
+function aircraft(id,state='normal'){
+ if(!AIRCRAFT_IDS.includes(id))return null;
+ const entry=files.get('aircraft:'+id+':'+(AIRCRAFT_STATES.includes(state)?state:'normal'));
+ if(!entry)return null;
+ if(!entry.img){
+  const im=new Image();entry.img=im;
+  im.onload=()=>{entry.loaded=true};
+  im.onerror=()=>{entry.loaded=false};
+  im.src=entry.base+entry.path;
+ }
+ return entry.loaded&&entry.img.naturalWidth>0?entry.img:null;
+}
 function register(group,id,path){
  if(!CATALOG[group])throw Error('Grupo desconhecido: '+group);
  if(typeof path!=='string'||!/^[-\w/]+\.png$/i.test(path))throw Error('Caminho PNG inválido');
@@ -67,5 +85,5 @@ function paint(ctx,group,id,x,y,w,h,rotation=0){
 function status(){
  return Array.from(files,([key,value])=>({key,available:value.supported,loaded:value.loaded,path:value.path}));
 }
-global.RiverPremium={register,get,paint,status,catalog:CATALOG};
+global.RiverPremium={register,get,aircraft,paint,status,catalog:CATALOG};
 })(window);
