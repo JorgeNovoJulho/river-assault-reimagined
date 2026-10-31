@@ -243,6 +243,31 @@
 body #controller-settings:not(.hidden){position:fixed!important;z-index:1200!important;inset:4vh max(5vw,15px)!important;max-height:90dvh!important;background:#05172af5!important}
 @media(max-width:650px){#rs-menu-art>#mode-last-pilot{top:69%;font-size:8px!important}#rs-menu-art>#mode-menu-music{bottom:1%;padding:2px;font-size:8px!important}}
 </style>
+<style id="rs-pilot-premium-style">
+#rs-pilot-screen:not(.hidden){display:flex!important;flex-direction:column!important;min-height:100dvh!important;padding:clamp(10px,2vw,25px)!important;background:linear-gradient(#021024ec,#020d20ee),url('./assets/ui/premium/menu/2b81e191-9306-4a6e-aabf-049f60939aa0.png') center/cover!important}
+#rs-pilot-screen>h2{font:900 clamp(29px,4vw,58px) system-ui!important;margin:0!important;text-shadow:0 0 18px #00aeff!important}
+#rs-pilot-screen>p{font:700 clamp(11px,1.25vw,17px) system-ui!important;letter-spacing:.23em!important;margin:7px 0 14px!important}
+#rs-pilot-grid{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:clamp(6px,1vw,13px)!important;max-width:none!important;margin:0!important;width:100%!important}
+#rs-pilot-screen{--rs-panel-blue:#1ac8fc}
+#rs-pilot-screen .rs-pilot-card{display:flex;flex-direction:column;gap:3px;align-items:center;min-width:0;overflow:hidden;border:2px solid #15caff;border-radius:12px;background:linear-gradient(#07335a,#001426);color:#fff;cursor:pointer;padding:5px;transition:box-shadow .14s,border-color .14s,filter .14s;font-family:system-ui}
+#rs-pilot-screen .rs-pilot-card img{width:100%;height:clamp(100px,17vh,180px);object-fit:contain;object-position:center;background:radial-gradient(#264768,#001526);border-radius:6px}
+#rs-pilot-screen .rs-pilot-card strong{font-size:clamp(11px,1.15vw,17px)}#rs-pilot-screen .rs-pilot-card span{font-weight:900;font-size:clamp(10px,1vw,14px)}#rs-pilot-screen .rs-pilot-card small{color:#3effae;font-size:10px;font-weight:900}
+#rs-pilot-screen .rs-pilot-card:hover,#rs-pilot-screen .rs-pilot-card:focus-visible,#rs-pilot-screen .rs-pilot-selected{border-color:#ffe75b!important;box-shadow:0 0 0 3px #f4c90080,0 0 25px #ffd400aa!important;outline:none;filter:brightness(1.13)}
+#rs-pilot-detail{display:grid!important;grid-template-columns:minmax(0,42%) minmax(0,58%)!important;align-items:center!important;max-width:none!important;width:100%!important;box-sizing:border-box!important;min-height:270px!important;margin:12px 0!important;padding:12px!important;background:#03172eea!important;border:2px solid #12d2ff!important;border-radius:15px!important;overflow:hidden!important}
+#rs-pilot-detail .rs-pilot-feature-art{width:100%;height:clamp(235px,38vh,420px);object-fit:contain}
+#rs-pilot-detail .rs-pilot-feature-content{text-align:left;min-width:0;padding:10px}
+#rs-pilot-detail .rs-feature-tag{background:linear-gradient(90deg,#ffcc16,transparent);color:#161a20;font:900 13px system-ui;padding:7px 12px;border-radius:6px}
+#rs-pilot-detail h3{font:900 clamp(22px,3vw,43px) system-ui;color:#a9edff;margin:12px 0 5px;text-shadow:0 0 12px #00aaff}
+#rs-pilot-detail h4{font:900 clamp(15px,1.8vw,25px) system-ui;color:#fff;margin:7px 0}
+#rs-pilot-detail p{color:#cceaff;font:500 13px system-ui}
+#rs-pilot-detail h5{font:900 14px system-ui;color:#80e3ff;margin:15px 0 8px}
+#rs-pilot-detail .rs-pilot-stat{display:grid;grid-template-columns:105px minmax(20px,1fr) 45px;align-items:center;gap:7px;margin:7px 0;font:800 11px system-ui}
+#rs-pilot-detail .rs-pilot-track{height:12px;border:1px solid #2b739c;background:#06253d;border-radius:4px;overflow:hidden}
+#rs-pilot-detail .rs-pilot-track>div{height:100%;border-radius:3px}
+#rs-pilot-screen>div:last-child button{font:900 15px system-ui!important;cursor:pointer}
+@media(min-width:1000px){#rs-pilot-screen{display:grid!important;grid-template-columns:50% 50%;grid-template-rows:auto auto 1fr auto!important;column-gap:12px!important}#rs-pilot-screen>h2,#rs-pilot-screen>p{grid-column:1/-1}#rs-pilot-grid{grid-column:1;grid-row:3;align-content:start}#rs-pilot-detail{grid-column:2;grid-row:3;margin:0!important;height:100%!important}#rs-pilot-screen>div:last-child{grid-column:1/-1;grid-row:4}}
+@media(max-width:700px){#rs-pilot-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}#rs-pilot-detail{grid-template-columns:1fr!important}#rs-pilot-detail .rs-pilot-feature-art{height:260px}#rs-pilot-detail .rs-pilot-stat{grid-template-columns:92px 1fr 40px}}
+</style>
 <div id="start-screen" class="absolute inset-0 bg-black/90 flex flex-col items-center justify-start p-3 text-center z-30">
             <div id="rs-pilot-screen" class="hidden" style="position:absolute;inset:0;z-index:96;overflow:auto;background:linear-gradient(#03101de0,#03101ef4),url('./assets/ui/premium/menu/2b81e191-9306-4a6e-aabf-049f60939aa0.png') center/cover;box-sizing:border-box;padding:clamp(12px,3vw,28px);color:#e3f8ff">
 <h2 style="font:900 clamp(25px,4vw,46px) system-ui;color:#61e3ff;text-align:center;margin:0 0 12px">SELEÇÃO DE PILOTOS</h2>
@@ -4946,17 +4971,71 @@ function updateTerrainEvent(){
  const pilotScreen=document.getElementById('rs-pilot-screen'),pilotGrid=document.getElementById('rs-pilot-grid'),pilotDetail=document.getElementById('rs-pilot-detail');
  let chosenPilot=pilotEntries[0];
  try{const v=localStorage.getItem('riverstorm_last_pilot_id');chosenPilot=pilotEntries.find(p=>p[0]===v)||chosenPilot;}catch(e){}
+ const pilotStats={
+  snabo:[6,6,8,7,6,6],jhow:[8,9,5,6,5,7],btata:[6,10,4,4,5,6],
+  napas:[10,7,4,5,6,8],casper:[6,5,10,8,7,5],roger:[5,7,6,10,5,10],dudu:[9,4,10,5,10,5]
+ };
+ const pilotDescriptions={
+  snabo:'Equilíbrio, estabilidade e resistência.',
+  jhow:'Agilidade e poder de fogo.',
+  btata:'Velocidade extrema e maior consumo.',
+  napas:'Alto dano, com menor blindagem.',
+  casper:'Blindagem e controle VTOL.',
+  roger:'Energia e habilidades especiais.',
+  dudu:'Blindagem pesada e bombas.'
+ };
+ const statNames=['POTÊNCIA','VELOCIDADE','BLINDAGEM','ENERGIA','BOMBAS','ESPECIAL'];
+ const statColors=['#f44d63','#2fcaff','#33ed96','#ffd447','#b579ff','#30e7f2'];
  function renderPilotCards(){
   pilotGrid.replaceChildren();
   for(const entry of pilotEntries){
-   const button=document.createElement('button');button.type='button';button.style='border:2px solid '+(entry===chosenPilot?'#ffd449':'#26aede');button.style.background='#061e37';button.style.borderRadius='11px';button.style.padding='8px';button.style.color='white';button.style.cursor='pointer';
-   const img=document.createElement('img');img.src='./assets/ui/premium/pilots/'+entry[4];img.alt=entry[1]+' com '+entry[3];img.style='width:100%;height:145px;object-fit:contain';img.onerror=()=>{img.style.display='none';};
-   const label=document.createElement('div');label.textContent=entry[1]+' · '+entry[3];label.style='font:bold 12px system-ui';button.append(img,label);
-   button.onclick=()=>{chosenPilot=entry;renderPilotCards();};
+   const button=document.createElement('button');
+   button.type='button';button.className='rs-pilot-card'+(entry===chosenPilot?' rs-pilot-selected':'');
+   button.setAttribute('aria-pressed',String(entry===chosenPilot));
+   const img=document.createElement('img');
+   img.src='./assets/ui/premium/pilots/'+entry[4];img.alt=entry[1]+' com '+entry[3];
+   img.loading='lazy';img.onerror=()=>{img.alt='Arte de '+entry[1]+' indisponível';button.classList.add('rs-image-missing');};
+   const title=document.createElement('strong');title.textContent=entry[1];
+   const ship=document.createElement('span');ship.textContent=entry[3];
+   const status=document.createElement('small');status.textContent='● DISPONÍVEL';
+   button.append(img,title,ship,status);
+   button.addEventListener('click',()=>{chosenPilot=entry;renderPilotCards();});
+   button.addEventListener('mouseenter',()=>{if(chosenPilot!==entry){chosenPilot=entry;renderPilotCards();}});
    pilotGrid.appendChild(button);
   }
-  pilotDetail.textContent=chosenPilot[1]+' — NAVE '+chosenPilot[3]+' · DISPONÍVEL';
+  pilotDetail.replaceChildren();
+  const art=document.createElement('img');art.className='rs-pilot-feature-art';
+  art.src='./assets/ui/premium/pilots/'+chosenPilot[4];art.alt=chosenPilot[1]+' e nave '+chosenPilot[3];
+  const side=document.createElement('div');side.className='rs-pilot-feature-content';
+  const tag=document.createElement('div');tag.className='rs-feature-tag';tag.textContent='PILOTO SELECIONADO';
+  const name=document.createElement('h3');name.textContent=chosenPilot[1];
+  const ship=document.createElement('h4');ship.textContent='NAVE RELACIONADA · '+chosenPilot[3];
+  const desc=document.createElement('p');desc.textContent=pilotDescriptions[chosenPilot[0]];
+  const heading=document.createElement('h5');heading.textContent='ESTATÍSTICAS DA NAVE';
+  side.append(tag,name,ship,desc,heading);
+  pilotStats[chosenPilot[0]].forEach((value,i)=>{
+   const r=document.createElement('div');r.className='rs-pilot-stat';
+   const label=document.createElement('span');label.textContent=statNames[i];
+   const bar=document.createElement('div');bar.className='rs-pilot-track';
+   const fill=document.createElement('div');fill.style.width=(value*10)+'%';fill.style.background=statColors[i];bar.appendChild(fill);
+   const number=document.createElement('b');number.textContent=value+'/10';r.append(label,bar,number);side.appendChild(r);
+  });
+  pilotDetail.append(art,side);
  }
+ pilotScreen.addEventListener('keydown',e=>{
+  if(pilotScreen.classList.contains('hidden'))return;
+  const idx=pilotEntries.indexOf(chosenPilot);
+  let next=idx;
+  if(e.key==='ArrowRight')next=(idx+1)%pilotEntries.length;
+  else if(e.key==='ArrowLeft')next=(idx+pilotEntries.length-1)%pilotEntries.length;
+  else if(e.key==='ArrowDown')next=(idx+4)%pilotEntries.length;
+  else if(e.key==='ArrowUp')next=(idx+3)%pilotEntries.length;
+  else if(e.key==='Enter'&&e.target.closest('.rs-pilot-card')){document.getElementById('rs-pilot-confirm').click();return;}
+  else if(e.key==='Escape'){document.getElementById('rs-pilot-back').click();return;}
+  else return;
+  e.preventDefault();chosenPilot=pilotEntries[next];renderPilotCards();
+  pilotGrid.children[next]?.focus({preventScroll:true});
+ });
  document.getElementById('mode-single').addEventListener('click',()=>{modeSelection.classList.add('hidden');pilotScreen.classList.remove('hidden');renderPilotCards();});
  document.getElementById('rs-pilot-back').onclick=()=>{pilotScreen.classList.add('hidden');modeSelection.classList.remove('hidden');};
  document.getElementById('rs-pilot-confirm').onclick=()=>{
