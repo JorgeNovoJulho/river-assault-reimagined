@@ -1,0 +1,2366 @@
+{
+  "version": "3",
+  "source_zip_sha256": "92b3f0d9aa8b6769d877b1cfecba8a01f0f30eba4419af08d26af11b583df9d9",
+  "assets": [
+    {
+      "asset_id": "enemies_exclusive_01_tucano_idle_000",
+      "category": "enemies/exclusive/01_tucano",
+      "path": "approved/enemies/exclusive/01_tucano/idle_000.png",
+      "source_path": "enemies/exclusive/01_tucano/idle_000.png",
+      "source_board": "exclusive_atlas.png",
+      "source_rect_xywh": [
+        3,
+        12,
+        287,
+        270
+      ],
+      "sha256": "c008b555b898dbcb93f572baa53ed7490766e8f361017c164ade1634f3951fab",
+      "size_px": [
+        556,
+        506
+      ],
+      "pivot_xy_normalized": [
+        0.5,
+        0.5
+      ],
+      "display_scale": 1.0,
+      "animation": {
+        "type": "static",
+        "states": [
+          "idle"
+        ]
+      },
+      "approval_state": "byte_verified_rgba; visual_runtime_review_required"
+    },
+    {
+      "asset_id": "enemies_exclusive_02_crane_idle_000",
+      "category": "enemies/exclusive/02_crane",
+      "path": "approved/enemies/exclusive/02_crane/idle_000.png",
+      "source_path": "enemies/exclusive/02_crane/idle_000.png",
+      "source_board": "exclusive_atlas.png",
+      "source_rect_xywh": [
+        293,
+        12,
+        577,
+        270
+      ],
+      "sha256": "2c7d7495526d0274f2630b554aec127b6bd30f144e2a44904be040f197bc3018",
+      "size_px": [
+        568,
+        494
+      ],
+      "pivot_xy_normalized": [
+        0.5,
+        0.5
+      ],
+      "display_scale": 1.0,
+      "animation": {
+        "type": "static",
+        "states": [
+          "idle"
+        ]
+      },
+      "approval_state": "byte_verified_rgba; visual_runtime_review_required"
+    },
+    {
+      "asset_id": "enemies_exclusive_03_scorpion_idle_000",
+      "category": "enemies/exclusive/03_scorpion",
+      "path": "approved/enemies/exclusive/03_scorpion/idle_000.png",
+      "source_path": "enemies/exclusive/03_scorpion/idle_000.png",
+      "source_board": "exclusive_atlas.png",
+      "source_rect_xywh": [
+        583,
+        12,
+        867,
+        270
+      ],
+      "sha256": "3905a1affe919d078bb5fe56c6d22a2e9c866f74146b0f46403d608140e49bfe",
+      "size_px": [
+        568,
+        490
+      ],
+      "pivot_xy_normalized": [
+        0.5,
+        0.5
+      ],
+      "display_scale": 1.0,
+      "animation": {
+        "type": "static",
+        "states": [
+          "idle"
+        ]
+      },
+      "approval_state": "byte_verified_rgba; visual_runtime_review_required"
+    },
+    {
+      "asset_id": "enemies_exclusive_04_alligator_idle_000",
+      "category": "enemies/exclusive/04_alligator",
+      "path": "approved/enemies/exclusive/04_alligator/idle_000.png",
+      "source_path": "enemies/exclusive/04_alligator/idle_000.png",
+      "source_board": "exclusive_atlas.png",
+      "source_rect_xywh": [
+        873,
+        12,
+        1157,
+        270
+      ],
+      "sha256": "2c932c54e942ee1c2a9adc19f4388273b165a0dbf81d44a6833b77af219fada9",
+      "size_px": [
+        568,
+        490
+      ],
+      "pivot_xy_normalized": [
+        0.5,
+        0.5
+      ],
+      "display_scale": 1.0,
+      "animation": {
+        "type": "static",
+        "states": [
+          "idle"
+        ]
+      },
+      "approval_state": "byte_verified_rgba; visual_runtime_review_required"
+    },
+    {
+      "asset_id": "enemies_exclusive_05_corsair_idle_000",
+      "category": "enemies/exclusive/05_corsair",
+      "path": "approved/enemies/exclusive/05_corsair/idle_000.png",
+      "source_path": "enemies/exclusive/05_corsair/idle_000.png",
+      "source_board": "exclusive_atlas.png",
+      "source_rect_xywh": [
+        1163,
+        12,
+        1447,
+        270
+      ],
+      "sha256": "474280c293807dc450258a430a78331b6494d72d5b70c36019ad5b08f6838021",
+      "size_px": [
+        568,
+        462
+      ],
+      "pivot_xy_normalized": [
+        0.5,
+        0.5
+      ],
+      "display_scale": 1.0,
+      "animation": {
+        "type": "static",
+        "states": [
+          "idle"
+        ]
+      },
+      "approval_state": "byte_verified_rgba; visual_runtime_review_required"
+    },
+    {
+      "asset_id": "enemies_exclusive_06_walrus_idle_000",
+      "category": "enemies/exclusive/06_walrus",
+      "path": "approved/enemies/exclusive/06_walrus/idle_000.png",
+      "source_path": "enemies/exclusive/06_walrus/idle_000.png",
+      "source_board": "exclusive_atlas.png",
+      "source_rect_xywh": [
+        3,
+        273,
+        287,
+        516
+      ],
+      "sha256": "6d87f90a59a20bd8026852a3e244a701930e8c86de72004e269b56e77e3b5016",
+      "size_px": [
+        566,
+        484
+      ],
+      "pivot_xy_normalized": [
+        0.5,
+        0.5
+      ],
+      "display_scale": 1.0,
+      "animation": {
+        "type": "static",
+        "states": [
+          "idle"
+        ]
+      },
+      "approval_state": "byte_verified_rgba; visual_runtime_review_required"
+    },
+    {
+      "asset_id": "enemies_exclusive_07_mantis_idle_000",
+      "category": "enemies/exclusive/07_mantis",
+      "path": "approved/enemies/exclusive/07_mantis/idle_000.png",
+      "source_path": "enemies/exclusive/07_mantis/idle_000.png",
+      "source_board": "exclusive_atlas.png",
+      "source_rect_xywh": [
+        293,
+        273,
+        577,
+        516
+      ],
+      "sha256": "e51a514072a1b757c69a088ed08878b9186f7d00e8506649b412364a7aca7b0d",
+      "size_px": [
+        568,
+        486
+      ],
+      "pivot_xy_normalized": [
+        0.5,
+        0.5
+      ],
+      "display_scale": 1.0,
+      "animation": {
+        "type": "static",
+        "states": [
+          "idle"
+        ]
+      },
+      "approval_state": "byte_verified_rgba; visual_runtime_review_required"
+    },
+    {
+      "asset_id": "enemies_exclusive_08_motojet_idle_000",
+      "category": "enemies/exclusive/08_motojet",
+      "path": "approved/enemies/exclusive/08_motojet/idle_000.png",
+      "source_path": "enemies/exclusive/08_motojet/idle_000.png",
+      "source_board": "exclusive_atlas.png",
+      "source_rect_xywh": [
+        583,
+        273,
+        867,
+        516
+      ],
+      "sha256": "740c57c6d4fcd95d5203c3826d289e0c89888b42c9b767fd123965bfdfadf0b8",
+      "size_px": [
+        568,
+        486
+      ],
+      "pivot_xy_normalized": [
+        0.5,
+        0.5
+      ],
+      "display_scale": 1.0,
+      "animation": {
+        "type": "static",
+        "states": [
+          "idle"
+        ]
+      },
+      "approval_state": "byte_verified_rgba; visual_runtime_review_required"
+    },
+    {
+      "asset_id": "enemies_exclusive_09_salamander_idle_000",
+      "category": "enemies/exclusive/09_salamander",
+      "path": "approved/enemies/exclusive/09_salamander/idle_000.png",
+      "source_path": "enemies/exclusive/09_salamander/idle_000.png",
+      "source_board": "exclusive_atlas.png",
+      "source_rect_xywh": [
+        873,
+        273,
+        1157,
+        516
+      ],
+      "sha256": "1dbb151263defb8e5f554e53846aa2a595ed9566ee428862079aaeb93da851df",
+      "size_px": [
+        568,
+        484
+      ],
+      "pivot_xy_normalized": [
+        0.5,
+        0.5
+      ],
+      "display_scale": 1.0,
+      "animation": {
+        "type": "static",
+        "states": [
+          "idle"
+        ]
+      },
+      "approval_state": "byte_verified_rgba; visual_runtime_review_required"
+    },
+    {
+      "asset_id": "enemies_exclusive_10_eagle_idle_000",
+      "category": "enemies/exclusive/10_eagle",
+      "path": "approved/enemies/exclusive/10_eagle/idle_000.png",
+      "source_path": "enemies/exclusive/10_eagle/idle_000.png",
+      "source_board": "exclusive_atlas.png",
+      "source_rect_xywh": [
+        1163,
+        273,
+        1447,
+        516
+      ],
+      "sha256": "0d51b7841f4706fe99c8052212684eecac0e6ee95707db7e2d36d58f253aa8a1",
+      "size_px": [
+        568,
+        476
+      ],
+      "pivot_xy_normalized": [
+        0.5,
+        0.5
+      ],
+      "display_scale": 1.0,
+      "animation": {
+        "type": "static",
+        "states": [
+          "idle"
+        ]
+      },
+      "approval_state": "byte_verified_rgba; visual_runtime_review_required"
+    },
+    {
+      "asset_id": "enemies_exclusive_11_dredger_idle_000",
+      "category": "enemies/exclusive/11_dredger",
+      "path": "approved/enemies/exclusive/11_dredger/idle_000.png",
+      "source_path": "enemies/exclusive/11_dredger/idle_000.png",
+      "source_board": "exclusive_atlas.png",
+      "source_rect_xywh": [
+        3,
+        520,
+        287,
+        771
+      ],
+      "sha256": "51bbfe1a1d4901f9a2ca6ecd1165a46c4f2dd961afc0b0aeec0c8feb8fafb4d9",
+      "size_px": [
+        548,
+        502
+      ],
+      "pivot_xy_normalized": [
+        0.5,
+        0.5
+      ],
+      "display_scale": 1.0,
+      "animation": {
+        "type": "static",
+        "states": [
+          "idle"
+        ]
+      },
+      "approval_state": "byte_verified_rgba; visual_runtime_review_required"
+    },
+    {
+      "asset_id": "enemies_exclusive_12_hovercar_idle_000",
+      "category": "enemies/exclusive/12_hovercar",
+      "path": "approved/enemies/exclusive/12_hovercar/idle_000.png",
+      "source_path": "enemies/exclusive/12_hovercar/idle_000.png",
+      "source_board": "exclusive_atlas.png",
+      "source_rect_xywh": [
+        293,
+        520,
+        577,
+        771
+      ],
+      "sha256": "989bbf9c40744e5350ced3b8a83c59a3f8cee1b639f5e148e31916b5871e3ac8",
+      "size_px": [
+        568,
+        500
+      ],
+      "pivot_xy_normalized": [
+        0.5,
+        0.5
+      ],
+      "display_scale": 1.0,
+      "animation": {
+        "type": "static",
+        "states": [
+          "idle"
+        ]
+      },
+      "approval_state": "byte_verified_rgba; visual_runtime_review_required"
+    },
+    {
+      "asset_id": "enemies_exclusive_13_piranha_idle_000",
+      "category": "enemies/exclusive/13_piranha",
+      "path": "approved/enemies/exclusive/13_piranha/idle_000.png",
+      "source_path": "enemies/exclusive/13_piranha/idle_000.png",
+      "source_board": "exclusive_atlas.png",
+      "source_rect_xywh": [
+        583,
+        520,
+        867,
+        771
+      ],
+      "sha256": "7c737b7eb3c3baddc344174dd2eb3f8d8c007bf28c2072e99042243714f54611",
+      "size_px": [
+        568,
+        500
+      ],
+      "pivot_xy_normalized": [
+        0.5,
+        0.5
+      ],
+      "display_scale": 1.0,
+      "animation": {
+        "type": "static",
+        "states": [
+          "idle"
+        ]
+      },
+      "approval_state": "byte_verified_rgba; visual_runtime_review_required"
+    },
+    {
+      "asset_id": "enemies_exclusive_14_ice_ray_idle_000",
+      "category": "enemies/exclusive/14_ice_ray",
+      "path": "approved/enemies/exclusive/14_ice_ray/idle_000.png",
+      "source_path": "enemies/exclusive/14_ice_ray/idle_000.png",
+      "source_board": "exclusive_atlas.png",
+      "source_rect_xywh": [
+        873,
+        520,
+        1157,
+        771
+      ],
+      "sha256": "90183483673f94af71a213b607ec4104f734008d2695ed9b8500ef3bc3b64deb",
+      "size_px": [
+        568,
+        478
+      ],
+      "pivot_xy_normalized": [
+        0.5,
+        0.5
+      ],
+      "display_scale": 1.0,
+      "animation": {
+        "type": "static",
+        "states": [
+          "idle"
+        ]
+      },
+      "approval_state": "byte_verified_rgba; visual_runtime_review_required"
+    },
+    {
+      "asset_id": "enemies_exclusive_15_beetle_idle_000",
+      "category": "enemies/exclusive/15_beetle",
+      "path": "approved/enemies/exclusive/15_beetle/idle_000.png",
+      "source_path": "enemies/exclusive/15_beetle/idle_000.png",
+      "source_board": "exclusive_atlas.png",
+      "source_rect_xywh": [
+        1163,
+        520,
+        1447,
+        771
+      ],
+      "sha256": "8c341e0d332887750c18c1e1f8971d9a83e14b544854b1198a82c48ac90db600",
+      "size_px": [
+        568,
+        486
+      ],
+      "pivot_xy_normalized": [
+        0.5,
+        0.5
+      ],
+      "display_scale": 1.0,
+      "animation": {
+        "type": "static",
+        "states": [
+          "idle"
+        ]
+      },
+      "approval_state": "byte_verified_rgba; visual_runtime_review_required"
+    },
+    {
+      "asset_id": "enemies_exclusive_16_prism_wasp_idle_000",
+      "category": "enemies/exclusive/16_prism_wasp",
+      "path": "approved/enemies/exclusive/16_prism_wasp/idle_000.png",
+      "source_path": "enemies/exclusive/16_prism_wasp/idle_000.png",
+      "source_board": "exclusive_atlas.png",
+      "source_rect_xywh": [
+        3,
+        775,
+        287,
+        1052
+      ],
+      "sha256": "b2f6345f524b7f6f59dced08faeda55e3e2670a4526b1f98176aa8c0d80bc186",
+      "size_px": [
+        568,
+        554
+      ],
+      "pivot_xy_normalized": [
+        0.5,
+        0.5
+      ],
+      "display_scale": 1.0,
+      "animation": {
+        "type": "static",
+        "states": [
+          "idle"
+        ]
+      },
+      "approval_state": "byte_verified_rgba; visual_runtime_review_required"
+    },
+    {
+      "asset_id": "enemies_exclusive_17_welder_idle_000",
+      "category": "enemies/exclusive/17_welder",
+      "path": "approved/enemies/exclusive/17_welder/idle_000.png",
+      "source_path": "enemies/exclusive/17_welder/idle_000.png",
+      "source_board": "exclusive_atlas.png",
+      "source_rect_xywh": [
+        293,
+        775,
+        577,
+        1052
+      ],
+      "sha256": "77279d87bb436e85a94e13eede2a124c5380344ced302fe73a603fb094e5cf2e",
+      "size_px": [
+        568,
+        554
+      ],
+      "pivot_xy_normalized": [
+        0.5,
+        0.5
+      ],
+      "display_scale": 1.0,
+      "animation": {
+        "type": "static",
+        "states": [
+          "idle"
+        ]
+      },
+      "approval_state": "byte_verified_rgba; visual_runtime_review_required"
+    },
+    {
+      "asset_id": "enemies_exclusive_18_narwhal_idle_000",
+      "category": "enemies/exclusive/18_narwhal",
+      "path": "approved/enemies/exclusive/18_narwhal/idle_000.png",
+      "source_path": "enemies/exclusive/18_narwhal/idle_000.png",
+      "source_board": "exclusive_atlas.png",
+      "source_rect_xywh": [
+        583,
+        775,
+        867,
+        1052
+      ],
+      "sha256": "ed9247353cb3b46a63831d96c5a351ebab914dea12fd28ffa7b071fb8f819b67",
+      "size_px": [
+        568,
+        554
+      ],
+      "pivot_xy_normalized": [
+        0.5,
+        0.5
+      ],
+      "display_scale": 1.0,
+      "animation": {
+        "type": "static",
+        "states": [
+          "idle"
+        ]
+      },
+      "approval_state": "byte_verified_rgba; visual_runtime_review_required"
+    },
+    {
+      "asset_id": "enemies_exclusive_19_eel_idle_000",
+      "category": "enemies/exclusive/19_eel",
+      "path": "approved/enemies/exclusive/19_eel/idle_000.png",
+      "source_path": "enemies/exclusive/19_eel/idle_000.png",
+      "source_board": "exclusive_atlas.png",
+      "source_rect_xywh": [
+        873,
+        775,
+        1157,
+        1052
+      ],
+      "sha256": "fdef695f6172a02efe1cdec7b83fc4433de83be7a88eb571e36ceb5c81d0617e",
+      "size_px": [
+        568,
+        554
+      ],
+      "pivot_xy_normalized": [
+        0.5,
+        0.5
+      ],
+      "display_scale": 1.0,
+      "animation": {
+        "type": "static",
+        "states": [
+          "idle"
+        ]
+      },
+      "approval_state": "byte_verified_rgba; visual_runtime_review_required"
+    },
+    {
+      "asset_id": "enemies_exclusive_20_hybrid_hunter_idle_000",
+      "category": "enemies/exclusive/20_hybrid_hunter",
+      "path": "approved/enemies/exclusive/20_hybrid_hunter/idle_000.png",
+      "source_path": "enemies/exclusive/20_hybrid_hunter/idle_000.png",
+      "source_board": "exclusive_atlas.png",
+      "source_rect_xywh": [
+        1163,
+        775,
+        1447,
+        1052
+      ],
+      "sha256": "7a2592b3666bd1d4cddea35a25078c748f8c9ef71ee83bf9e1d06942e2d22034",
+      "size_px": [
+        568,
+        554
+      ],
+      "pivot_xy_normalized": [
+        0.5,
+        0.5
+      ],
+      "display_scale": 1.0,
+      "animation": {
+        "type": "static",
+        "states": [
+          "idle"
+        ]
+      },
+      "approval_state": "byte_verified_rgba; visual_runtime_review_required"
+    },
+    {
+      "asset_id": "enemies_recurring_recon_plane_idle_000",
+      "category": "enemies/recurring/recon_plane",
+      "path": "approved/enemies/recurring/recon_plane/idle_000.png",
+      "source_path": "enemies/recurring/recon_plane/idle_000.png",
+      "source_board": "recurring_fx_atlas.png",
+      "source_rect_xywh": [
+        2,
+        4,
+        224,
+        165
+      ],
+      "sha256": "96e47a33c03d74ad183ec8896a6d2195f6fbf5af0e2ccd3a8bb017ed1f381d73",
+      "size_px": [
+        444,
+        320
+      ],
+      "pivot_xy_normalized": [
+        0.5,
+        0.5
+      ],
+      "display_scale": 1.0,
+      "animation": {
+        "type": "static",
+        "states": [
+          "idle"
+        ]
+      },
+      "approval_state": "byte_verified_rgba; visual_runtime_review_required"
+    },
+    {
+      "asset_id": "enemies_recurring_attack_helicopter_idle_000",
+      "category": "enemies/recurring/attack_helicopter",
+      "path": "approved/enemies/recurring/attack_helicopter/idle_000.png",
+      "source_path": "enemies/recurring/attack_helicopter/idle_000.png",
+      "source_board": "recurring_fx_atlas.png",
+      "source_rect_xywh": [
+        215,
+        4,
+        442,
+        163
+      ],
+      "sha256": "c41092c71313e0524ab7f61f98d9bc285fd19792b0097ad7a4bb18f368fcd4d1",
+      "size_px": [
+        454,
+        318
+      ],
+      "pivot_xy_normalized": [
+        0.5,
+        0.5
+      ],
+      "display_scale": 1.0,
+      "animation": {
+        "type": "static",
+        "states": [
+          "idle"
+        ]
+      },
+      "approval_state": "byte_verified_rgba; visual_runtime_review_required"
+    },
+    {
+      "asset_id": "enemies_recurring_drone_idle_000",
+      "category": "enemies/recurring/drone",
+      "path": "approved/enemies/recurring/drone/idle_000.png",
+      "source_path": "enemies/recurring/drone/idle_000.png",
+      "source_board": "recurring_fx_atlas.png",
+      "source_rect_xywh": [
+        439,
+        5,
+        590,
+        170
+      ],
+      "sha256": "568968eff356bfe0aeaed1e2f654320b56ec95200712ace48474726bf599debe",
+      "size_px": [
+        302,
+        322
+      ],
+      "pivot_xy_normalized": [
+        0.5,
+        0.5
+      ],
+      "display_scale": 1.0,
+      "animation": {
+        "type": "static",
+        "states": [
+          "idle"
+        ]
+      },
+      "approval_state": "byte_verified_rgba; visual_runtime_review_required"
+    },
+    {
+      "asset_id": "enemies_recurring_mecha_sword_idle_000",
+      "category": "enemies/recurring/mecha_sword",
+      "path": "approved/enemies/recurring/mecha_sword/idle_000.png",
+      "source_path": "enemies/recurring/mecha_sword/idle_000.png",
+      "source_board": "recurring_fx_atlas.png",
+      "source_rect_xywh": [
+        593,
+        3,
+        778,
+        173
+      ],
+      "sha256": "d995bc9ae2de8f57c1066e393295117cc164803036c21780f714f96343a60afa",
+      "size_px": [
+        370,
+        340
+      ],
+      "pivot_xy_normalized": [
+        0.5,
+        0.5
+      ],
+      "display_scale": 1.0,
+      "animation": {
+        "type": "static",
+        "states": [
+          "idle"
+        ]
+      },
+      "approval_state": "byte_verified_rgba; visual_runtime_review_required"
+    },
+    {
+      "asset_id": "enemies_recurring_mecha_gun_idle_000",
+      "category": "enemies/recurring/mecha_gun",
+      "path": "approved/enemies/recurring/mecha_gun/idle_000.png",
+      "source_path": "enemies/recurring/mecha_gun/idle_000.png",
+      "source_board": "recurring_fx_atlas.png",
+      "source_rect_xywh": [
+        780,
+        2,
+        983,
+        177
+      ],
+      "sha256": "7601c05d88f7d476852402ab172caa62bc6db10481aea84f053b1b7d2ee7b106",
+      "size_px": [
+        406,
+        350
+      ],
+      "pivot_xy_normalized": [
+        0.5,
+        0.5
+      ],
+      "display_scale": 1.0,
+      "animation": {
+        "type": "static",
+        "states": [
+          "idle"
+        ]
+      },
+      "approval_state": "byte_verified_rgba; visual_runtime_review_required"
+    },
+    {
+      "asset_id": "enemies_recurring_tank_idle_000",
+      "category": "enemies/recurring/tank",
+      "path": "approved/enemies/recurring/tank/idle_000.png",
+      "source_path": "enemies/recurring/tank/idle_000.png",
+      "source_board": "recurring_fx_atlas.png",
+      "source_rect_xywh": [
+        988,
+        4,
+        1196,
+        172
+      ],
+      "sha256": "def14d101fc9b72d9bb314a7fb0ac7058a12ba5bf6f30c31c6c59a4556fb76fc",
+      "size_px": [
+        416,
+        326
+      ],
+      "pivot_xy_normalized": [
+        0.5,
+        0.5
+      ],
+      "display_scale": 1.0,
+      "animation": {
+        "type": "static",
+        "states": [
+          "idle"
+        ]
+      },
+      "approval_state": "byte_verified_rgba; visual_runtime_review_required"
+    },
+    {
+      "asset_id": "enemies_recurring_armed_boat_idle_000",
+      "category": "enemies/recurring/armed_boat",
+      "path": "approved/enemies/recurring/armed_boat/idle_000.png",
+      "source_path": "enemies/recurring/armed_boat/idle_000.png",
+      "source_board": "recurring_fx_atlas.png",
+      "source_rect_xywh": [
+        1198,
+        5,
+        1445,
+        170
+      ],
+      "sha256": "13fea4629e927eb55481f02e345c241e50b5c8f660ed8f2aaeb01833b2561497",
+      "size_px": [
+        494,
+        330
+      ],
+      "pivot_xy_normalized": [
+        0.5,
+        0.5
+      ],
+      "display_scale": 1.0,
+      "animation": {
+        "type": "static",
+        "states": [
+          "idle"
+        ]
+      },
+      "approval_state": "byte_verified_rgba; visual_runtime_review_required"
+    },
+    {
+      "asset_id": "enemies_recurring_submarine_idle_000",
+      "category": "enemies/recurring/submarine",
+      "path": "approved/enemies/recurring/submarine/idle_000.png",
+      "source_path": "enemies/recurring/submarine/idle_000.png",
+      "source_board": "recurring_fx_atlas.png",
+      "source_rect_xywh": [
+        2,
+        170,
+        311,
+        315
+      ],
+      "sha256": "fb2eeba605b7aa7f0345bd883cb3c2f0cbe8da06bcb775ec413b7f65c2df8030",
+      "size_px": [
+        618,
+        290
+      ],
+      "pivot_xy_normalized": [
+        0.5,
+        0.5
+      ],
+      "display_scale": 1.0,
+      "animation": {
+        "type": "static",
+        "states": [
+          "idle"
+        ]
+      },
+      "approval_state": "byte_verified_rgba; visual_runtime_review_required"
+    },
+    {
+      "asset_id": "enemies_recurring_floating_turret_idle_000",
+      "category": "enemies/recurring/floating_turret",
+      "path": "approved/enemies/recurring/floating_turret/idle_000.png",
+      "source_path": "enemies/recurring/floating_turret/idle_000.png",
+      "source_board": "recurring_fx_atlas.png",
+      "source_rect_xywh": [
+        305,
+        166,
+        506,
+        320
+      ],
+      "sha256": "dfd8494d3e1ddea6cab3981fefeccc8a10e56eaacbf69a59d38bbe56a8b26aec",
+      "size_px": [
+        402,
+        308
+      ],
+      "pivot_xy_normalized": [
+        0.5,
+        0.5
+      ],
+      "display_scale": 1.0,
+      "animation": {
+        "type": "static",
+        "states": [
+          "idle"
+        ]
+      },
+      "approval_state": "byte_verified_rgba; visual_runtime_review_required"
+    },
+    {
+      "asset_id": "enemies_recurring_warship_idle_000",
+      "category": "enemies/recurring/warship",
+      "path": "approved/enemies/recurring/warship/idle_000.png",
+      "source_path": "enemies/recurring/warship/idle_000.png",
+      "source_board": "recurring_fx_atlas.png",
+      "source_rect_xywh": [
+        511,
+        176,
+        805,
+        322
+      ],
+      "sha256": "144995bf59693401ad41e62f10075a1de2397dd2f4eb50058bb1603e302293ff",
+      "size_px": [
+        588,
+        292
+      ],
+      "pivot_xy_normalized": [
+        0.5,
+        0.5
+      ],
+      "display_scale": 1.0,
+      "animation": {
+        "type": "static",
+        "states": [
+          "idle"
+        ]
+      },
+      "approval_state": "byte_verified_rgba; visual_runtime_review_required"
+    },
+    {
+      "asset_id": "enemies_recurring_bomber_idle_000",
+      "category": "enemies/recurring/bomber",
+      "path": "approved/enemies/recurring/bomber/idle_000.png",
+      "source_path": "enemies/recurring/bomber/idle_000.png",
+      "source_board": "recurring_fx_atlas.png",
+      "source_rect_xywh": [
+        808,
+        169,
+        1133,
+        320
+      ],
+      "sha256": "53736f8ba4e64aed99a13bb9774ab56a9227796d0061a0c83c4f78a556bfa758",
+      "size_px": [
+        650,
+        302
+      ],
+      "pivot_xy_normalized": [
+        0.5,
+        0.5
+      ],
+      "display_scale": 1.0,
+      "animation": {
+        "type": "static",
+        "states": [
+          "idle"
+        ]
+      },
+      "approval_state": "byte_verified_rgba; visual_runtime_review_required"
+    },
+    {
+      "asset_id": "enemies_recurring_elite_fighter_idle_000",
+      "category": "enemies/recurring/elite_fighter",
+      "path": "approved/enemies/recurring/elite_fighter/idle_000.png",
+      "source_path": "enemies/recurring/elite_fighter/idle_000.png",
+      "source_board": "recurring_fx_atlas.png",
+      "source_rect_xywh": [
+        1136,
+        168,
+        1445,
+        320
+      ],
+      "sha256": "8bfca800f0cd3c2b59919c7ec4bfe17f359f5359f49d6c767fd5209c57b70971",
+      "size_px": [
+        618,
+        304
+      ],
+      "pivot_xy_normalized": [
+        0.5,
+        0.5
+      ],
+      "display_scale": 1.0,
+      "animation": {
+        "type": "static",
+        "states": [
+          "idle"
+        ]
+      },
+      "approval_state": "byte_verified_rgba; visual_runtime_review_required"
+    },
+    {
+      "asset_id": "enemies_recurring_armed_island_idle_000",
+      "category": "enemies/recurring/armed_island",
+      "path": "approved/enemies/recurring/armed_island/idle_000.png",
+      "source_path": "enemies/recurring/armed_island/idle_000.png",
+      "source_board": "recurring_fx_atlas.png",
+      "source_rect_xywh": [
+        52,
+        321,
+        526,
+        514
+      ],
+      "sha256": "01b6ddb085bcf62918c94daf465f296e3c6c990522773041e71728f69fd6c4e0",
+      "size_px": [
+        948,
+        386
+      ],
+      "pivot_xy_normalized": [
+        0.5,
+        0.5
+      ],
+      "display_scale": 1.0,
+      "animation": {
+        "type": "static",
+        "states": [
+          "idle"
+        ]
+      },
+      "approval_state": "byte_verified_rgba; visual_runtime_review_required"
+    },
+    {
+      "asset_id": "enemies_recurring_dam_bridge_idle_000",
+      "category": "enemies/recurring/dam_bridge",
+      "path": "approved/enemies/recurring/dam_bridge/idle_000.png",
+      "source_path": "enemies/recurring/dam_bridge/idle_000.png",
+      "source_board": "recurring_fx_atlas.png",
+      "source_rect_xywh": [
+        535,
+        313,
+        997,
+        511
+      ],
+      "sha256": "8258e5f9166cb75ee0ede90b7e850e3c5263fb2939cda7829ae596f00e07f211",
+      "size_px": [
+        924,
+        396
+      ],
+      "pivot_xy_normalized": [
+        0.5,
+        0.5
+      ],
+      "display_scale": 1.0,
+      "animation": {
+        "type": "static",
+        "states": [
+          "idle"
+        ]
+      },
+      "approval_state": "byte_verified_rgba; visual_runtime_review_required"
+    },
+    {
+      "asset_id": "enemies_recurring_item_capsule_idle_000",
+      "category": "enemies/recurring/item_capsule",
+      "path": "approved/enemies/recurring/item_capsule/idle_000.png",
+      "source_path": "enemies/recurring/item_capsule/idle_000.png",
+      "source_board": "recurring_fx_atlas.png",
+      "source_rect_xywh": [
+        1015,
+        316,
+        1152,
+        489
+      ],
+      "sha256": "f8bcf549bdee16c1e1feaa81279c91933fcc9036b273851e68a42e6795cf513c",
+      "size_px": [
+        274,
+        346
+      ],
+      "pivot_xy_normalized": [
+        0.5,
+        0.5
+      ],
+      "display_scale": 1.0,
+      "animation": {
+        "type": "static",
+        "states": [
+          "idle"
+        ]
+      },
+      "approval_state": "byte_verified_rgba; visual_runtime_review_required"
+    },
+    {
+      "asset_id": "enemies_recurring_floating_mine_idle_000",
+      "category": "enemies/recurring/floating_mine",
+      "path": "approved/enemies/recurring/floating_mine/idle_000.png",
+      "source_path": "enemies/recurring/floating_mine/idle_000.png",
+      "source_board": "recurring_fx_atlas.png",
+      "source_rect_xywh": [
+        1160,
+        321,
+        1378,
+        488
+      ],
+      "sha256": "cbc81751837b077358bdf324c7befa5a8562c9c4ba321b93644e18d2560c636f",
+      "size_px": [
+        436,
+        334
+      ],
+      "pivot_xy_normalized": [
+        0.5,
+        0.5
+      ],
+      "display_scale": 1.0,
+      "animation": {
+        "type": "static",
+        "states": [
+          "idle"
+        ]
+      },
+      "approval_state": "byte_verified_rgba; visual_runtime_review_required"
+    },
+    {
+      "asset_id": "fx_shots_atlas_candidate",
+      "category": "fx/shots",
+      "path": "approved/fx/shots/atlas_candidate.png",
+      "source_path": "fx/shots/atlas_candidate.png",
+      "source_board": "recurring_fx_atlas.png",
+      "source_rect_xywh": [
+        0,
+        516,
+        333,
+        627
+      ],
+      "sha256": "7e1ca086132273ddd667d63bd82de3f996fc7702a778c77df299f98f19a97271",
+      "size_px": [
+        666,
+        222
+      ],
+      "pivot_xy_normalized": [
+        0.5,
+        0.5
+      ],
+      "display_scale": 1.0,
+      "animation": {
+        "type": "atlas",
+        "states": [
+          "idle"
+        ]
+      },
+      "approval_state": "byte_verified_rgba; visual_runtime_review_required"
+    },
+    {
+      "asset_id": "fx_missiles_atlas_candidate",
+      "category": "fx/missiles",
+      "path": "approved/fx/missiles/atlas_candidate.png",
+      "source_path": "fx/missiles/atlas_candidate.png",
+      "source_board": "recurring_fx_atlas.png",
+      "source_rect_xywh": [
+        324,
+        511,
+        756,
+        630
+      ],
+      "sha256": "b46ae40320e09d770d2646e442c512d2fe1e101a26c60325c2ed84abf798e0f8",
+      "size_px": [
+        864,
+        238
+      ],
+      "pivot_xy_normalized": [
+        0.5,
+        0.5
+      ],
+      "display_scale": 1.0,
+      "animation": {
+        "type": "atlas",
+        "states": [
+          "idle"
+        ]
+      },
+      "approval_state": "byte_verified_rgba; visual_runtime_review_required"
+    },
+    {
+      "asset_id": "fx_water_splashes_atlas_candidate",
+      "category": "fx/water_splashes",
+      "path": "approved/fx/water_splashes/atlas_candidate.png",
+      "source_path": "fx/water_splashes/atlas_candidate.png",
+      "source_board": "recurring_fx_atlas.png",
+      "source_rect_xywh": [
+        763,
+        495,
+        1447,
+        628
+      ],
+      "sha256": "4f3ae9188a386f658c373276e2035a1a8c5581708907cccfa0d27cd44d6d63a6",
+      "size_px": [
+        1368,
+        266
+      ],
+      "pivot_xy_normalized": [
+        0.5,
+        0.5
+      ],
+      "display_scale": 1.0,
+      "animation": {
+        "type": "atlas",
+        "states": [
+          "idle"
+        ]
+      },
+      "approval_state": "byte_verified_rgba; visual_runtime_review_required"
+    },
+    {
+      "asset_id": "fx_explosions_atlas_candidate",
+      "category": "fx/explosions",
+      "path": "approved/fx/explosions/atlas_candidate.png",
+      "source_path": "fx/explosions/atlas_candidate.png",
+      "source_board": "recurring_fx_atlas.png",
+      "source_rect_xywh": [
+        0,
+        631,
+        558,
+        753
+      ],
+      "sha256": "ee405e372ff2a71a1661bc35118afe485cf473029cb3eebca6d352cb7d31eecf",
+      "size_px": [
+        1116,
+        244
+      ],
+      "pivot_xy_normalized": [
+        0.5,
+        0.5
+      ],
+      "display_scale": 1.0,
+      "animation": {
+        "type": "atlas",
+        "states": [
+          "idle"
+        ]
+      },
+      "approval_state": "byte_verified_rgba; visual_runtime_review_required"
+    },
+    {
+      "asset_id": "fx_items_atlas_candidate",
+      "category": "fx/items",
+      "path": "approved/fx/items/atlas_candidate.png",
+      "source_path": "fx/items/atlas_candidate.png",
+      "source_board": "recurring_fx_atlas.png",
+      "source_rect_xywh": [
+        561,
+        630,
+        1447,
+        754
+      ],
+      "sha256": "68b2ced9121a36faa14daf091cfc8e8a1e7a859d7bf551ab42dd35f7fc24dc1a",
+      "size_px": [
+        1772,
+        248
+      ],
+      "pivot_xy_normalized": [
+        0.5,
+        0.5
+      ],
+      "display_scale": 1.0,
+      "animation": {
+        "type": "atlas",
+        "states": [
+          "idle"
+        ]
+      },
+      "approval_state": "byte_verified_rgba; visual_runtime_review_required"
+    },
+    {
+      "asset_id": "fx_ice_atlas_candidate",
+      "category": "fx/ice",
+      "path": "approved/fx/ice/atlas_candidate.png",
+      "source_path": "fx/ice/atlas_candidate.png",
+      "source_board": "recurring_fx_atlas.png",
+      "source_rect_xywh": [
+        0,
+        756,
+        455,
+        896
+      ],
+      "sha256": "935d004c6a02a8ea01b74b3919c4ee6e6ebb404feff38311ed1a57f7f3ff83be",
+      "size_px": [
+        910,
+        280
+      ],
+      "pivot_xy_normalized": [
+        0.5,
+        0.5
+      ],
+      "display_scale": 1.0,
+      "animation": {
+        "type": "atlas",
+        "states": [
+          "idle"
+        ]
+      },
+      "approval_state": "byte_verified_rgba; visual_runtime_review_required"
+    },
+    {
+      "asset_id": "fx_fire_atlas_candidate",
+      "category": "fx/fire",
+      "path": "approved/fx/fire/atlas_candidate.png",
+      "source_path": "fx/fire/atlas_candidate.png",
+      "source_board": "recurring_fx_atlas.png",
+      "source_rect_xywh": [
+        460,
+        757,
+        745,
+        895
+      ],
+      "sha256": "ad0a32acd491be42cc4b9804b912c0d7b10fb7c097a8c7bde4b6771bc10e7d18",
+      "size_px": [
+        570,
+        276
+      ],
+      "pivot_xy_normalized": [
+        0.5,
+        0.5
+      ],
+      "display_scale": 1.0,
+      "animation": {
+        "type": "atlas",
+        "states": [
+          "idle"
+        ]
+      },
+      "approval_state": "byte_verified_rgba; visual_runtime_review_required"
+    },
+    {
+      "asset_id": "fx_lightning_atlas_candidate",
+      "category": "fx/lightning",
+      "path": "approved/fx/lightning/atlas_candidate.png",
+      "source_path": "fx/lightning/atlas_candidate.png",
+      "source_board": "recurring_fx_atlas.png",
+      "source_rect_xywh": [
+        745,
+        753,
+        914,
+        902
+      ],
+      "sha256": "79b5ecfb31c4649e62ee02daa9de2d06dbc99968522df72046eb51e3c4585a31",
+      "size_px": [
+        338,
+        298
+      ],
+      "pivot_xy_normalized": [
+        0.5,
+        0.5
+      ],
+      "display_scale": 1.0,
+      "animation": {
+        "type": "atlas",
+        "states": [
+          "idle"
+        ]
+      },
+      "approval_state": "byte_verified_rgba; visual_runtime_review_required"
+    },
+    {
+      "asset_id": "fx_gravity_atlas_candidate",
+      "category": "fx/gravity",
+      "path": "approved/fx/gravity/atlas_candidate.png",
+      "source_path": "fx/gravity/atlas_candidate.png",
+      "source_board": "recurring_fx_atlas.png",
+      "source_rect_xywh": [
+        920,
+        748,
+        1447,
+        900
+      ],
+      "sha256": "12f432c18508341daae4d5769105ea987f0cca198fdef52efc0fa1afdec1aec8",
+      "size_px": [
+        1036,
+        304
+      ],
+      "pivot_xy_normalized": [
+        0.5,
+        0.5
+      ],
+      "display_scale": 1.0,
+      "animation": {
+        "type": "atlas",
+        "states": [
+          "idle"
+        ]
+      },
+      "approval_state": "byte_verified_rgba; visual_runtime_review_required"
+    },
+    {
+      "asset_id": "fx_emp_atlas_candidate",
+      "category": "fx/emp",
+      "path": "approved/fx/emp/atlas_candidate.png",
+      "source_path": "fx/emp/atlas_candidate.png",
+      "source_board": "recurring_fx_atlas.png",
+      "source_rect_xywh": [
+        0,
+        899,
+        313,
+        1079
+      ],
+      "sha256": "c77afaf2554286e9dc4e0c7234c215710ee9f082f4594df86dfa2d84dc5d295b",
+      "size_px": [
+        626,
+        360
+      ],
+      "pivot_xy_normalized": [
+        0.5,
+        0.5
+      ],
+      "display_scale": 1.0,
+      "animation": {
+        "type": "atlas",
+        "states": [
+          "idle"
+        ]
+      },
+      "approval_state": "byte_verified_rgba; visual_runtime_review_required"
+    },
+    {
+      "asset_id": "fx_poison_atlas_candidate",
+      "category": "fx/poison",
+      "path": "approved/fx/poison/atlas_candidate.png",
+      "source_path": "fx/poison/atlas_candidate.png",
+      "source_board": "recurring_fx_atlas.png",
+      "source_rect_xywh": [
+        319,
+        894,
+        570,
+        1081
+      ],
+      "sha256": "80033b1fa8e952eba69e1dac5ed808376635f2379b41a0ad98ce6d5fe5e29d7a",
+      "size_px": [
+        502,
+        374
+      ],
+      "pivot_xy_normalized": [
+        0.5,
+        0.5
+      ],
+      "display_scale": 1.0,
+      "animation": {
+        "type": "atlas",
+        "states": [
+          "idle"
+        ]
+      },
+      "approval_state": "byte_verified_rgba; visual_runtime_review_required"
+    },
+    {
+      "asset_id": "fx_bleeding_atlas_candidate",
+      "category": "fx/bleeding",
+      "path": "approved/fx/bleeding/atlas_candidate.png",
+      "source_path": "fx/bleeding/atlas_candidate.png",
+      "source_board": "recurring_fx_atlas.png",
+      "source_rect_xywh": [
+        574,
+        896,
+        715,
+        1078
+      ],
+      "sha256": "14cff2df415efbb933ad1b817b10d70569e4a85366db1b5aecf3d4bccf687e9e",
+      "size_px": [
+        282,
+        364
+      ],
+      "pivot_xy_normalized": [
+        0.5,
+        0.5
+      ],
+      "display_scale": 1.0,
+      "animation": {
+        "type": "atlas",
+        "states": [
+          "idle"
+        ]
+      },
+      "approval_state": "byte_verified_rgba; visual_runtime_review_required"
+    },
+    {
+      "asset_id": "fx_parry_shield_atlas_candidate",
+      "category": "fx/parry_shield",
+      "path": "approved/fx/parry_shield/atlas_candidate.png",
+      "source_path": "fx/parry_shield/atlas_candidate.png",
+      "source_board": "recurring_fx_atlas.png",
+      "source_rect_xywh": [
+        711,
+        899,
+        927,
+        1084
+      ],
+      "sha256": "8d303cc96930d7619ebae0a5c137ce27ec0e0e399ec622f5458807b94b5f5b21",
+      "size_px": [
+        432,
+        370
+      ],
+      "pivot_xy_normalized": [
+        0.5,
+        0.5
+      ],
+      "display_scale": 1.0,
+      "animation": {
+        "type": "atlas",
+        "states": [
+          "idle"
+        ]
+      },
+      "approval_state": "byte_verified_rgba; visual_runtime_review_required"
+    },
+    {
+      "asset_id": "fx_sword_rush_atlas_candidate",
+      "category": "fx/sword_rush",
+      "path": "approved/fx/sword_rush/atlas_candidate.png",
+      "source_path": "fx/sword_rush/atlas_candidate.png",
+      "source_board": "recurring_fx_atlas.png",
+      "source_rect_xywh": [
+        931,
+        898,
+        1126,
+        1081
+      ],
+      "sha256": "aac548c478be0b3b4ecc2675e6f052c4ad7bb4159902f28991f53cd8c49978cc",
+      "size_px": [
+        390,
+        366
+      ],
+      "pivot_xy_normalized": [
+        0.5,
+        0.5
+      ],
+      "display_scale": 1.0,
+      "animation": {
+        "type": "atlas",
+        "states": [
+          "idle"
+        ]
+      },
+      "approval_state": "byte_verified_rgba; visual_runtime_review_required"
+    },
+    {
+      "asset_id": "fx_reflect_burst_atlas_candidate",
+      "category": "fx/reflect_burst",
+      "path": "approved/fx/reflect_burst/atlas_candidate.png",
+      "source_path": "fx/reflect_burst/atlas_candidate.png",
+      "source_board": "recurring_fx_atlas.png",
+      "source_rect_xywh": [
+        1130,
+        898,
+        1263,
+        1082
+      ],
+      "sha256": "3976ba2fc1f7b11735662b4970305ac3a158bafb56954ba3562ec596b2e0fd30",
+      "size_px": [
+        266,
+        368
+      ],
+      "pivot_xy_normalized": [
+        0.5,
+        0.5
+      ],
+      "display_scale": 1.0,
+      "animation": {
+        "type": "atlas",
+        "states": [
+          "idle"
+        ]
+      },
+      "approval_state": "byte_verified_rgba; visual_runtime_review_required"
+    },
+    {
+      "asset_id": "fx_bomb_shockwave_atlas_candidate",
+      "category": "fx/bomb_shockwave",
+      "path": "approved/fx/bomb_shockwave/atlas_candidate.png",
+      "source_path": "fx/bomb_shockwave/atlas_candidate.png",
+      "source_board": "recurring_fx_atlas.png",
+      "source_rect_xywh": [
+        1261,
+        900,
+        1446,
+        1084
+      ],
+      "sha256": "178d3561697e8efc6ceedfad4bdf9599bb29e18807367f6a90ac4c7173f87771",
+      "size_px": [
+        370,
+        368
+      ],
+      "pivot_xy_normalized": [
+        0.5,
+        0.5
+      ],
+      "display_scale": 1.0,
+      "animation": {
+        "type": "atlas",
+        "states": [
+          "idle"
+        ]
+      },
+      "approval_state": "byte_verified_rgba; visual_runtime_review_required"
+    },
+    {
+      "asset_id": "bosses_01_ponte_fortificada_body_full",
+      "category": "bosses/01_ponte_fortificada",
+      "path": "approved/bosses/01_ponte_fortificada/atlas_v3/body_full.png",
+      "source_path": "bosses/01_ponte_fortificada/body_full.png",
+      "source_board": "boss_01_02_atlas.png",
+      "source_rect_xywh": [
+        0,
+        0,
+        728,
+        285
+      ],
+      "sha256": "18878e6467d69d295196d80ebe99ea0680cabc9b7444306dd948637fc26c783c",
+      "size_px": [
+        1456,
+        570
+      ],
+      "pivot_xy_normalized": [
+        0.5,
+        0.5
+      ],
+      "display_scale": 1.0,
+      "animation": {
+        "type": "static",
+        "states": [
+          "idle"
+        ]
+      },
+      "approval_state": "byte_verified_rgba; visual_runtime_review_required"
+    },
+    {
+      "asset_id": "bosses_01_ponte_fortificada_modules",
+      "category": "bosses/01_ponte_fortificada",
+      "path": "approved/bosses/01_ponte_fortificada/atlas_v3/modules.png",
+      "source_path": "bosses/01_ponte_fortificada/modules.png",
+      "source_board": "boss_01_02_atlas.png",
+      "source_rect_xywh": [
+        724,
+        0,
+        1164,
+        288
+      ],
+      "sha256": "4bbb5ab4d89d5f2c4a77dd641d69b7b0173aa7c8f12949c5591cb26b23699273",
+      "size_px": [
+        880,
+        576
+      ],
+      "pivot_xy_normalized": [
+        0.5,
+        0.5
+      ],
+      "display_scale": 1.0,
+      "animation": {
+        "type": "static",
+        "states": [
+          "idle"
+        ]
+      },
+      "approval_state": "byte_verified_rgba; visual_runtime_review_required"
+    },
+    {
+      "asset_id": "bosses_01_ponte_fortificada_projectiles_explosions",
+      "category": "bosses/01_ponte_fortificada",
+      "path": "approved/bosses/01_ponte_fortificada/atlas_v3/projectiles_explosions.png",
+      "source_path": "bosses/01_ponte_fortificada/projectiles_explosions.png",
+      "source_board": "boss_01_02_atlas.png",
+      "source_rect_xywh": [
+        1158,
+        0,
+        1448,
+        292
+      ],
+      "sha256": "b59e9de91871ccdee0116b76f665b474f92d92ea803c9c8df3ade3cca2cc9226",
+      "size_px": [
+        580,
+        584
+      ],
+      "pivot_xy_normalized": [
+        0.5,
+        0.5
+      ],
+      "display_scale": 1.0,
+      "animation": {
+        "type": "static",
+        "states": [
+          "idle"
+        ]
+      },
+      "approval_state": "byte_verified_rgba; visual_runtime_review_required"
+    },
+    {
+      "asset_id": "bosses_01_ponte_fortificada_damage_strip",
+      "category": "bosses/01_ponte_fortificada",
+      "path": "approved/bosses/01_ponte_fortificada/atlas_v3/damage_strip.png",
+      "source_path": "bosses/01_ponte_fortificada/damage_strip.png",
+      "source_board": "boss_01_02_atlas.png",
+      "source_rect_xywh": [
+        0,
+        289,
+        1448,
+        401
+      ],
+      "sha256": "255e325156cba74da2ac59ba261c74ad7963a6b2235db4260f8c962148332471",
+      "size_px": [
+        1434,
+        112
+      ],
+      "pivot_xy_normalized": [
+        0.5,
+        0.5
+      ],
+      "display_scale": 1.0,
+      "animation": {
+        "type": "atlas",
+        "states": [
+          "idle"
+        ]
+      },
+      "approval_state": "byte_verified_rgba; visual_runtime_review_required"
+    },
+    {
+      "asset_id": "bosses_01_ponte_fortificada_movement_strip",
+      "category": "bosses/01_ponte_fortificada",
+      "path": "approved/bosses/01_ponte_fortificada/atlas_v3/movement_strip.png",
+      "source_path": "bosses/01_ponte_fortificada/movement_strip.png",
+      "source_board": "boss_01_02_atlas.png",
+      "source_rect_xywh": [
+        0,
+        408,
+        1448,
+        531
+      ],
+      "sha256": "d5ad87170a7d86b2469411774c3f840e2e4f3017c1bf2be431d2992aa2298a94",
+      "size_px": [
+        1415,
+        123
+      ],
+      "pivot_xy_normalized": [
+        0.5,
+        0.5
+      ],
+      "display_scale": 1.0,
+      "animation": {
+        "type": "atlas",
+        "states": [
+          "idle"
+        ]
+      },
+      "approval_state": "byte_verified_rgba; visual_runtime_review_required"
+    },
+    {
+      "asset_id": "bosses_02_encouracado_abissal_body_full",
+      "category": "bosses/02_encouracado_abissal",
+      "path": "approved/bosses/02_encouracado_abissal/atlas_v3/body_full.png",
+      "source_path": "bosses/02_encouracado_abissal/body_full.png",
+      "source_board": "boss_01_02_atlas.png",
+      "source_rect_xywh": [
+        0,
+        538,
+        654,
+        773
+      ],
+      "sha256": "8b6891dc38b9f07467ea400b0a2fe350ef9951acf146ebe9d06c0b676c0c6cd6",
+      "size_px": [
+        1308,
+        470
+      ],
+      "pivot_xy_normalized": [
+        0.5,
+        0.5
+      ],
+      "display_scale": 1.0,
+      "animation": {
+        "type": "static",
+        "states": [
+          "idle"
+        ]
+      },
+      "approval_state": "byte_verified_rgba; visual_runtime_review_required"
+    },
+    {
+      "asset_id": "bosses_02_encouracado_abissal_modules",
+      "category": "bosses/02_encouracado_abissal",
+      "path": "approved/bosses/02_encouracado_abissal/atlas_v3/modules.png",
+      "source_path": "bosses/02_encouracado_abissal/modules.png",
+      "source_board": "boss_01_02_atlas.png",
+      "source_rect_xywh": [
+        656,
+        538,
+        1160,
+        779
+      ],
+      "sha256": "5c2098cbd5188cc9559e28dfcd8ba75b61396a2f0f48345be687f7ae5db84359",
+      "size_px": [
+        1008,
+        482
+      ],
+      "pivot_xy_normalized": [
+        0.5,
+        0.5
+      ],
+      "display_scale": 1.0,
+      "animation": {
+        "type": "static",
+        "states": [
+          "idle"
+        ]
+      },
+      "approval_state": "byte_verified_rgba; visual_runtime_review_required"
+    },
+    {
+      "asset_id": "bosses_02_encouracado_abissal_projectiles_explosions",
+      "category": "bosses/02_encouracado_abissal",
+      "path": "approved/bosses/02_encouracado_abissal/atlas_v3/projectiles_explosions.png",
+      "source_path": "bosses/02_encouracado_abissal/projectiles_explosions.png",
+      "source_board": "boss_01_02_atlas.png",
+      "source_rect_xywh": [
+        1158,
+        536,
+        1448,
+        783
+      ],
+      "sha256": "3a626894f02996da81042e64e8aa02a4fb812a91248a9efed9190d12d77346c0",
+      "size_px": [
+        580,
+        494
+      ],
+      "pivot_xy_normalized": [
+        0.5,
+        0.5
+      ],
+      "display_scale": 1.0,
+      "animation": {
+        "type": "static",
+        "states": [
+          "idle"
+        ]
+      },
+      "approval_state": "byte_verified_rgba; visual_runtime_review_required"
+    },
+    {
+      "asset_id": "bosses_02_encouracado_abissal_damage_strip",
+      "category": "bosses/02_encouracado_abissal",
+      "path": "approved/bosses/02_encouracado_abissal/atlas_v3/damage_strip.png",
+      "source_path": "bosses/02_encouracado_abissal/damage_strip.png",
+      "source_board": "boss_01_02_atlas.png",
+      "source_rect_xywh": [
+        0,
+        780,
+        1448,
+        913
+      ],
+      "sha256": "6163e00b963d9da64809234dd967864700a70189af8634ccc7027beb21692009",
+      "size_px": [
+        1427,
+        133
+      ],
+      "pivot_xy_normalized": [
+        0.5,
+        0.5
+      ],
+      "display_scale": 1.0,
+      "animation": {
+        "type": "atlas",
+        "states": [
+          "idle"
+        ]
+      },
+      "approval_state": "byte_verified_rgba; visual_runtime_review_required"
+    },
+    {
+      "asset_id": "bosses_02_encouracado_abissal_movement_strip",
+      "category": "bosses/02_encouracado_abissal",
+      "path": "approved/bosses/02_encouracado_abissal/atlas_v3/movement_strip.png",
+      "source_path": "bosses/02_encouracado_abissal/movement_strip.png",
+      "source_board": "boss_01_02_atlas.png",
+      "source_rect_xywh": [
+        0,
+        915,
+        1448,
+        1086
+      ],
+      "sha256": "88bb4b402db4c8cf70d1d89c801de9135eb24e19391b662840fb727f3b2ee6e3",
+      "size_px": [
+        1427,
+        159
+      ],
+      "pivot_xy_normalized": [
+        0.5,
+        0.5
+      ],
+      "display_scale": 1.0,
+      "animation": {
+        "type": "atlas",
+        "states": [
+          "idle"
+        ]
+      },
+      "approval_state": "byte_verified_rgba; visual_runtime_review_required"
+    },
+    {
+      "asset_id": "01_ponte_fortificada_damage_00",
+      "category": "bosses/01_ponte_fortificada/frames/damage",
+      "path": "approved/bosses/01_ponte_fortificada/frames/damage/frame_00.png",
+      "source_path": "bosses/01_ponte_fortificada/damage_strip.png",
+      "source_board": "boss_01_02_atlas.png",
+      "source_rect_xywh": null,
+      "sha256": "3dac384f4cfce5e774c58187a17b197a3b92eabfd418aa693fd12a3d516f6bd2",
+      "size_px": [
+        287,
+        112
+      ],
+      "pivot_xy_normalized": [
+        0.5,
+        0.5
+      ],
+      "display_scale": 1.0,
+      "animation": {
+        "type": "frame",
+        "state": "damage",
+        "index": 0,
+        "count": 5
+      },
+      "approval_state": "derived_from_byte_verified_rgba_strip; visual_runtime_review_required"
+    },
+    {
+      "asset_id": "01_ponte_fortificada_damage_01",
+      "category": "bosses/01_ponte_fortificada/frames/damage",
+      "path": "approved/bosses/01_ponte_fortificada/frames/damage/frame_01.png",
+      "source_path": "bosses/01_ponte_fortificada/damage_strip.png",
+      "source_board": "boss_01_02_atlas.png",
+      "source_rect_xywh": null,
+      "sha256": "9c6231d6ef8118135bc6e5da59bcec2e8f2ea7bf779f545d18ed0c1f447dc652",
+      "size_px": [
+        287,
+        112
+      ],
+      "pivot_xy_normalized": [
+        0.5,
+        0.5
+      ],
+      "display_scale": 1.0,
+      "animation": {
+        "type": "frame",
+        "state": "damage",
+        "index": 1,
+        "count": 5
+      },
+      "approval_state": "derived_from_byte_verified_rgba_strip; visual_runtime_review_required"
+    },
+    {
+      "asset_id": "01_ponte_fortificada_damage_02",
+      "category": "bosses/01_ponte_fortificada/frames/damage",
+      "path": "approved/bosses/01_ponte_fortificada/frames/damage/frame_02.png",
+      "source_path": "bosses/01_ponte_fortificada/damage_strip.png",
+      "source_board": "boss_01_02_atlas.png",
+      "source_rect_xywh": null,
+      "sha256": "2ac7d8e448c2bcb9e52649c862d7fc497459af823e8a1ecd9fd26f5f44d4161d",
+      "size_px": [
+        286,
+        112
+      ],
+      "pivot_xy_normalized": [
+        0.5,
+        0.5
+      ],
+      "display_scale": 1.0,
+      "animation": {
+        "type": "frame",
+        "state": "damage",
+        "index": 2,
+        "count": 5
+      },
+      "approval_state": "derived_from_byte_verified_rgba_strip; visual_runtime_review_required"
+    },
+    {
+      "asset_id": "01_ponte_fortificada_damage_03",
+      "category": "bosses/01_ponte_fortificada/frames/damage",
+      "path": "approved/bosses/01_ponte_fortificada/frames/damage/frame_03.png",
+      "source_path": "bosses/01_ponte_fortificada/damage_strip.png",
+      "source_board": "boss_01_02_atlas.png",
+      "source_rect_xywh": null,
+      "sha256": "45bce2da97bfd32a6effa8d576ec667763c2c617668d1e9bcb8f476ea7c15eca",
+      "size_px": [
+        287,
+        112
+      ],
+      "pivot_xy_normalized": [
+        0.5,
+        0.5
+      ],
+      "display_scale": 1.0,
+      "animation": {
+        "type": "frame",
+        "state": "damage",
+        "index": 3,
+        "count": 5
+      },
+      "approval_state": "derived_from_byte_verified_rgba_strip; visual_runtime_review_required"
+    },
+    {
+      "asset_id": "01_ponte_fortificada_damage_04",
+      "category": "bosses/01_ponte_fortificada/frames/damage",
+      "path": "approved/bosses/01_ponte_fortificada/frames/damage/frame_04.png",
+      "source_path": "bosses/01_ponte_fortificada/damage_strip.png",
+      "source_board": "boss_01_02_atlas.png",
+      "source_rect_xywh": null,
+      "sha256": "c1c63c2636f5a7ea3ee9a748e9dc30ee02bf5a78549b8478a98da3b1d09c37a4",
+      "size_px": [
+        287,
+        112
+      ],
+      "pivot_xy_normalized": [
+        0.5,
+        0.5
+      ],
+      "display_scale": 1.0,
+      "animation": {
+        "type": "frame",
+        "state": "damage",
+        "index": 4,
+        "count": 5
+      },
+      "approval_state": "derived_from_byte_verified_rgba_strip; visual_runtime_review_required"
+    },
+    {
+      "asset_id": "01_ponte_fortificada_movement_00",
+      "category": "bosses/01_ponte_fortificada/frames/movement",
+      "path": "approved/bosses/01_ponte_fortificada/frames/movement/frame_00.png",
+      "source_path": "bosses/01_ponte_fortificada/movement_strip.png",
+      "source_board": "boss_01_02_atlas.png",
+      "source_rect_xywh": null,
+      "sha256": "11b9672c23b5fa585b47f024287b899474b9471f702bac88e0c2cef50e276890",
+      "size_px": [
+        283,
+        123
+      ],
+      "pivot_xy_normalized": [
+        0.5,
+        0.5
+      ],
+      "display_scale": 1.0,
+      "animation": {
+        "type": "frame",
+        "state": "movement",
+        "index": 0,
+        "count": 5
+      },
+      "approval_state": "derived_from_byte_verified_rgba_strip; visual_runtime_review_required"
+    },
+    {
+      "asset_id": "01_ponte_fortificada_movement_01",
+      "category": "bosses/01_ponte_fortificada/frames/movement",
+      "path": "approved/bosses/01_ponte_fortificada/frames/movement/frame_01.png",
+      "source_path": "bosses/01_ponte_fortificada/movement_strip.png",
+      "source_board": "boss_01_02_atlas.png",
+      "source_rect_xywh": null,
+      "sha256": "8a9ae8d72599e7899357112fc8509d29a5065251fe8577e652128039c8a9e794",
+      "size_px": [
+        283,
+        123
+      ],
+      "pivot_xy_normalized": [
+        0.5,
+        0.5
+      ],
+      "display_scale": 1.0,
+      "animation": {
+        "type": "frame",
+        "state": "movement",
+        "index": 1,
+        "count": 5
+      },
+      "approval_state": "derived_from_byte_verified_rgba_strip; visual_runtime_review_required"
+    },
+    {
+      "asset_id": "01_ponte_fortificada_movement_02",
+      "category": "bosses/01_ponte_fortificada/frames/movement",
+      "path": "approved/bosses/01_ponte_fortificada/frames/movement/frame_02.png",
+      "source_path": "bosses/01_ponte_fortificada/movement_strip.png",
+      "source_board": "boss_01_02_atlas.png",
+      "source_rect_xywh": null,
+      "sha256": "0489cce49460c22275b4cfdb3d3df3809a1ba09e01f3cdb3cee0ac29c6dfab24",
+      "size_px": [
+        283,
+        123
+      ],
+      "pivot_xy_normalized": [
+        0.5,
+        0.5
+      ],
+      "display_scale": 1.0,
+      "animation": {
+        "type": "frame",
+        "state": "movement",
+        "index": 2,
+        "count": 5
+      },
+      "approval_state": "derived_from_byte_verified_rgba_strip; visual_runtime_review_required"
+    },
+    {
+      "asset_id": "01_ponte_fortificada_movement_03",
+      "category": "bosses/01_ponte_fortificada/frames/movement",
+      "path": "approved/bosses/01_ponte_fortificada/frames/movement/frame_03.png",
+      "source_path": "bosses/01_ponte_fortificada/movement_strip.png",
+      "source_board": "boss_01_02_atlas.png",
+      "source_rect_xywh": null,
+      "sha256": "c12eaedc8a97c12ce43ef142ab24f040a5732bf95b177e043b69e10c0293cd7c",
+      "size_px": [
+        283,
+        123
+      ],
+      "pivot_xy_normalized": [
+        0.5,
+        0.5
+      ],
+      "display_scale": 1.0,
+      "animation": {
+        "type": "frame",
+        "state": "movement",
+        "index": 3,
+        "count": 5
+      },
+      "approval_state": "derived_from_byte_verified_rgba_strip; visual_runtime_review_required"
+    },
+    {
+      "asset_id": "01_ponte_fortificada_movement_04",
+      "category": "bosses/01_ponte_fortificada/frames/movement",
+      "path": "approved/bosses/01_ponte_fortificada/frames/movement/frame_04.png",
+      "source_path": "bosses/01_ponte_fortificada/movement_strip.png",
+      "source_board": "boss_01_02_atlas.png",
+      "source_rect_xywh": null,
+      "sha256": "1a204f44bb38f73b3fe5ba78fbdbcaa39a7eb6b93a87ba355225a987c8599c0f",
+      "size_px": [
+        283,
+        123
+      ],
+      "pivot_xy_normalized": [
+        0.5,
+        0.5
+      ],
+      "display_scale": 1.0,
+      "animation": {
+        "type": "frame",
+        "state": "movement",
+        "index": 4,
+        "count": 5
+      },
+      "approval_state": "derived_from_byte_verified_rgba_strip; visual_runtime_review_required"
+    },
+    {
+      "asset_id": "02_encouracado_abissal_damage_00",
+      "category": "bosses/02_encouracado_abissal/frames/damage",
+      "path": "approved/bosses/02_encouracado_abissal/frames/damage/frame_00.png",
+      "source_path": "bosses/02_encouracado_abissal/damage_strip.png",
+      "source_board": "boss_01_02_atlas.png",
+      "source_rect_xywh": null,
+      "sha256": "a89dc0a30e065cbae528449574abaa5600343af2d929ff8080a619aff00aa8b9",
+      "size_px": [
+        285,
+        133
+      ],
+      "pivot_xy_normalized": [
+        0.5,
+        0.5
+      ],
+      "display_scale": 1.0,
+      "animation": {
+        "type": "frame",
+        "state": "damage",
+        "index": 0,
+        "count": 5
+      },
+      "approval_state": "derived_from_byte_verified_rgba_strip; visual_runtime_review_required"
+    },
+    {
+      "asset_id": "02_encouracado_abissal_damage_01",
+      "category": "bosses/02_encouracado_abissal/frames/damage",
+      "path": "approved/bosses/02_encouracado_abissal/frames/damage/frame_01.png",
+      "source_path": "bosses/02_encouracado_abissal/damage_strip.png",
+      "source_board": "boss_01_02_atlas.png",
+      "source_rect_xywh": null,
+      "sha256": "d2436b72c4aa2586d2ebfe4246e6bb781de397a072d0b2be272312db25975758",
+      "size_px": [
+        286,
+        133
+      ],
+      "pivot_xy_normalized": [
+        0.5,
+        0.5
+      ],
+      "display_scale": 1.0,
+      "animation": {
+        "type": "frame",
+        "state": "damage",
+        "index": 1,
+        "count": 5
+      },
+      "approval_state": "derived_from_byte_verified_rgba_strip; visual_runtime_review_required"
+    },
+    {
+      "asset_id": "02_encouracado_abissal_damage_02",
+      "category": "bosses/02_encouracado_abissal/frames/damage",
+      "path": "approved/bosses/02_encouracado_abissal/frames/damage/frame_02.png",
+      "source_path": "bosses/02_encouracado_abissal/damage_strip.png",
+      "source_board": "boss_01_02_atlas.png",
+      "source_rect_xywh": null,
+      "sha256": "ee1688e9ed0d41ec48109a19672ffbf46e6277b58d06296be634015efe9c6fd3",
+      "size_px": [
+        285,
+        133
+      ],
+      "pivot_xy_normalized": [
+        0.5,
+        0.5
+      ],
+      "display_scale": 1.0,
+      "animation": {
+        "type": "frame",
+        "state": "damage",
+        "index": 2,
+        "count": 5
+      },
+      "approval_state": "derived_from_byte_verified_rgba_strip; visual_runtime_review_required"
+    },
+    {
+      "asset_id": "02_encouracado_abissal_damage_03",
+      "category": "bosses/02_encouracado_abissal/frames/damage",
+      "path": "approved/bosses/02_encouracado_abissal/frames/damage/frame_03.png",
+      "source_path": "bosses/02_encouracado_abissal/damage_strip.png",
+      "source_board": "boss_01_02_atlas.png",
+      "source_rect_xywh": null,
+      "sha256": "fe24f3e5cf5e3f177c5c5adf75ceb296a85db59224bda42bf598a3e1021a6dad",
+      "size_px": [
+        286,
+        133
+      ],
+      "pivot_xy_normalized": [
+        0.5,
+        0.5
+      ],
+      "display_scale": 1.0,
+      "animation": {
+        "type": "frame",
+        "state": "damage",
+        "index": 3,
+        "count": 5
+      },
+      "approval_state": "derived_from_byte_verified_rgba_strip; visual_runtime_review_required"
+    },
+    {
+      "asset_id": "02_encouracado_abissal_damage_04",
+      "category": "bosses/02_encouracado_abissal/frames/damage",
+      "path": "approved/bosses/02_encouracado_abissal/frames/damage/frame_04.png",
+      "source_path": "bosses/02_encouracado_abissal/damage_strip.png",
+      "source_board": "boss_01_02_atlas.png",
+      "source_rect_xywh": null,
+      "sha256": "71faf90da0950ceca5413547495a3989419eb46be54d147156055892a5394394",
+      "size_px": [
+        285,
+        133
+      ],
+      "pivot_xy_normalized": [
+        0.5,
+        0.5
+      ],
+      "display_scale": 1.0,
+      "animation": {
+        "type": "frame",
+        "state": "damage",
+        "index": 4,
+        "count": 5
+      },
+      "approval_state": "derived_from_byte_verified_rgba_strip; visual_runtime_review_required"
+    },
+    {
+      "asset_id": "02_encouracado_abissal_movement_00",
+      "category": "bosses/02_encouracado_abissal/frames/movement",
+      "path": "approved/bosses/02_encouracado_abissal/frames/movement/frame_00.png",
+      "source_path": "bosses/02_encouracado_abissal/movement_strip.png",
+      "source_board": "boss_01_02_atlas.png",
+      "source_rect_xywh": null,
+      "sha256": "045f0bb8637cf39b1aa58620c1821d4cb9e27584550af503bcc26981589e71b9",
+      "size_px": [
+        285,
+        159
+      ],
+      "pivot_xy_normalized": [
+        0.5,
+        0.5
+      ],
+      "display_scale": 1.0,
+      "animation": {
+        "type": "frame",
+        "state": "movement",
+        "index": 0,
+        "count": 5
+      },
+      "approval_state": "derived_from_byte_verified_rgba_strip; visual_runtime_review_required"
+    },
+    {
+      "asset_id": "02_encouracado_abissal_movement_01",
+      "category": "bosses/02_encouracado_abissal/frames/movement",
+      "path": "approved/bosses/02_encouracado_abissal/frames/movement/frame_01.png",
+      "source_path": "bosses/02_encouracado_abissal/movement_strip.png",
+      "source_board": "boss_01_02_atlas.png",
+      "source_rect_xywh": null,
+      "sha256": "0ade6ccda1fdd93d6dc919bbdb0cd66f77dd7ac594a401cc5aa824fefb82f907",
+      "size_px": [
+        286,
+        159
+      ],
+      "pivot_xy_normalized": [
+        0.5,
+        0.5
+      ],
+      "display_scale": 1.0,
+      "animation": {
+        "type": "frame",
+        "state": "movement",
+        "index": 1,
+        "count": 5
+      },
+      "approval_state": "derived_from_byte_verified_rgba_strip; visual_runtime_review_required"
+    },
+    {
+      "asset_id": "02_encouracado_abissal_movement_02",
+      "category": "bosses/02_encouracado_abissal/frames/movement",
+      "path": "approved/bosses/02_encouracado_abissal/frames/movement/frame_02.png",
+      "source_path": "bosses/02_encouracado_abissal/movement_strip.png",
+      "source_board": "boss_01_02_atlas.png",
+      "source_rect_xywh": null,
+      "sha256": "7cb471b6806fd8158647d8475c6dbf15ebf00d74748b54df2d94e5cea0ef0bbb",
+      "size_px": [
+        285,
+        159
+      ],
+      "pivot_xy_normalized": [
+        0.5,
+        0.5
+      ],
+      "display_scale": 1.0,
+      "animation": {
+        "type": "frame",
+        "state": "movement",
+        "index": 2,
+        "count": 5
+      },
+      "approval_state": "derived_from_byte_verified_rgba_strip; visual_runtime_review_required"
+    },
+    {
+      "asset_id": "02_encouracado_abissal_movement_03",
+      "category": "bosses/02_encouracado_abissal/frames/movement",
+      "path": "approved/bosses/02_encouracado_abissal/frames/movement/frame_03.png",
+      "source_path": "bosses/02_encouracado_abissal/movement_strip.png",
+      "source_board": "boss_01_02_atlas.png",
+      "source_rect_xywh": null,
+      "sha256": "fbe1aaddf4a210dbdf69ce6f2a9dada9f7990fb1c66108e0ecca2124de16a511",
+      "size_px": [
+        286,
+        159
+      ],
+      "pivot_xy_normalized": [
+        0.5,
+        0.5
+      ],
+      "display_scale": 1.0,
+      "animation": {
+        "type": "frame",
+        "state": "movement",
+        "index": 3,
+        "count": 5
+      },
+      "approval_state": "derived_from_byte_verified_rgba_strip; visual_runtime_review_required"
+    },
+    {
+      "asset_id": "02_encouracado_abissal_movement_04",
+      "category": "bosses/02_encouracado_abissal/frames/movement",
+      "path": "approved/bosses/02_encouracado_abissal/frames/movement/frame_04.png",
+      "source_path": "bosses/02_encouracado_abissal/movement_strip.png",
+      "source_board": "boss_01_02_atlas.png",
+      "source_rect_xywh": null,
+      "sha256": "4b3a22f2145f1b5e65559e79c0d2c03e6131a96f0e8ef0e67284c4cb9e617801",
+      "size_px": [
+        285,
+        159
+      ],
+      "pivot_xy_normalized": [
+        0.5,
+        0.5
+      ],
+      "display_scale": 1.0,
+      "animation": {
+        "type": "frame",
+        "state": "movement",
+        "index": 4,
+        "count": 5
+      },
+      "approval_state": "derived_from_byte_verified_rgba_strip; visual_runtime_review_required"
+    }
+  ]
+}

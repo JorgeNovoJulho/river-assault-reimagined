@@ -16,7 +16,37 @@ const CATALOG={
   ZIGZAG:'enemies/zigzag.png',TURRET:'enemies/turret.png',
   TANK:'enemies/tank.png',SUB:'enemies/submarine.png',
   SHIP:'enemies/ship.png',MECHA_GUN:'enemies/mecha-gun.png',
-  MECHA_SWORD:'enemies/mecha-sword.png'
+  MECHA_SWORD:'enemies/mecha-sword.png',
+  // Recorrentes V3: somente IDs já usados pela simulação. A camada é visual.
+  DRONE:'approved/enemies/recurring/drone/idle_000.png',
+  HELI:'approved/enemies/recurring/attack_helicopter/idle_000.png',
+  JET:'approved/enemies/recurring/elite_fighter/idle_000.png',
+  TANK:'approved/enemies/recurring/tank/idle_000.png',
+  TURRET:'approved/enemies/recurring/floating_turret/idle_000.png',
+  SHIP:'approved/enemies/recurring/armed_boat/idle_000.png',
+  SUB:'approved/enemies/recurring/submarine/idle_000.png',
+  MECHA_GUN:'approved/enemies/recurring/mecha_gun/idle_000.png',
+  MECHA_SWORD:'approved/enemies/recurring/mecha_sword/idle_000.png',
+  TUCANO:'approved/enemies/exclusive/01_tucano/idle_000.png',
+  CRANE:'approved/enemies/exclusive/02_crane/idle_000.png',
+  SCORPION:'approved/enemies/exclusive/03_scorpion/idle_000.png',
+  ALLIGATOR:'approved/enemies/exclusive/04_alligator/idle_000.png',
+  CORSAIR:'approved/enemies/exclusive/05_corsair/idle_000.png',
+  WALRUS:'approved/enemies/exclusive/06_walrus/idle_000.png',
+  MANTIS:'approved/enemies/exclusive/07_mantis/idle_000.png',
+  MOTOJET:'approved/enemies/exclusive/08_motojet/idle_000.png',
+  SALAMANDER:'approved/enemies/exclusive/09_salamander/idle_000.png',
+  EAGLE:'approved/enemies/exclusive/10_eagle/idle_000.png',
+  DREDGER:'approved/enemies/exclusive/11_dredger/idle_000.png',
+  HOVERCAR:'approved/enemies/exclusive/12_hovercar/idle_000.png',
+  PIRANHA:'approved/enemies/exclusive/13_piranha/idle_000.png',
+  ICE_RAY:'approved/enemies/exclusive/14_ice_ray/idle_000.png',
+  BEETLE:'approved/enemies/exclusive/15_beetle/idle_000.png',
+  PRISM_WASP:'approved/enemies/exclusive/16_prism_wasp/idle_000.png',
+  WELDER:'approved/enemies/exclusive/17_welder/idle_000.png',
+  NARWHAL:'approved/enemies/exclusive/18_narwhal/idle_000.png',
+  EEL:'approved/enemies/exclusive/19_eel/idle_000.png',
+  HYBRID_HUNTER:'approved/enemies/exclusive/20_hybrid_hunter/idle_000.png'
  },
  terrain:{
   ISLAND:'terrain/island.png',BRIDGE:'terrain/bridge.png',
@@ -43,8 +73,8 @@ const CATALOG={
 const files=new Map();
 for(const [group,items] of Object.entries(CATALOG))for(const [id,path] of Object.entries(items)){
  // Só arquivos existentes são habilitados por padrão. Nada de usar imagens erradas.
- const supported=(group==='player'&&id==='falcao')||(group==='fx'&&id==='explosion')||(group==='enemy'&&(id==='TURRET'||id==='SHIP'));
- files.set(group+':'+id,{path,loaded:false,supported,img:null});
+ const supported=(group==='player'&&id==='falcao')||(group==='fx'&&id==='explosion')||(group==='enemy'&&path.startsWith('approved/'))||(group==='enemy'&&(id==='TURRET'||id==='SHIP'));
+ files.set(group+':'+id,{path,loaded:false,supported,img:null,base:path.startsWith('approved/')?'./assets/sprites/premium/':BASE});
 }
 for(const id of AIRCRAFT_IDS)for(const state of AIRCRAFT_STATES){
  files.set('aircraft:'+id+':'+state,{path:id+'_'+state+'.png',loaded:false,supported:true,img:null,base:AIRCRAFT_BASE});
@@ -73,7 +103,7 @@ function get(group,id){
    const im=new Image();entry.img=im;
    im.onload=()=>{entry.loaded=true};
    im.onerror=()=>{entry.loaded=false;entry.supported=false};
-   im.src=BASE+entry.path;
+   im.src=(entry.base||BASE)+entry.path;
  }
  return entry.loaded&&entry.img.naturalWidth>0?entry.img:null;
 }

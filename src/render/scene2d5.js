@@ -1410,6 +1410,18 @@ function bossAccessories(c,e,d){
 // Casco raster oficial da revisão Boss02 v53: opcional até instalação binária.
 const premiumBoss02=new Image();
 premiumBoss02.src='./assets/sprites/premium/runtime/bosses/boss02_casco_sem_quadro.png';
+// Corpos V3 aprovados. A simulação continua responsável por módulos, vida e IA.
+const premiumBossV3=[null,new Image(),new Image()];
+premiumBossV3[1].src='./assets/sprites/premium/approved/bosses/01_ponte_fortificada/atlas_v3/body_full.png';
+premiumBossV3[2].src='./assets/sprites/premium/approved/bosses/02_encouracado_abissal/atlas_v3/body_full.png';
+function drawPremiumBossV3(c,e,sector){
+ const image=premiumBossV3[Number(sector)];
+ if(!image||!image.complete||!image.naturalWidth)return false;
+ const w=Math.min(Math.max(132,(e.width||90)*1.55),260);
+ const h=w*image.naturalHeight/image.naturalWidth;
+ c.save();c.imageSmoothingEnabled=true;c.drawImage(image,e.x-w*.5,e.y-h*.5,w,h);c.restore();
+ return true;
+}
 const bossSpriteFiles=['iron-wasp.svg','abyss-manta.svg','crimson-rotor.svg','granite-dam.svg','crimson-spider.svg','frost-sentinel.svg','storm-mantis.svg','neon-leviathan.svg','inferno-dredger.svg','glacier-titan.svg','solar-vulture.svg','night-harvester.svg','thunder-serpent.svg','blizzard-hydra.svg','desert-reaper.svg','abyssal-jellyfish.svg','forge-colossus.svg','polar-scythe.svg','phantom-fortress.svg','omega-overlord.svg'];
 const bossSpriteImages=bossSpriteFiles.map(name=>{const im=new Image();im.src='./assets/sprites/bosses/'+name;return im;});
 function draw(c,d){
@@ -1434,7 +1446,9 @@ function draw(c,d){
  islands(c,(d.islands||[]).filter(p=>p.y+(p.height||0)>-32&&p.y-(p.height||0)<d.h+32&&p.x+(p.width||0)>-32&&p.x-(p.width||0)<d.w+32),t);
  for(const e of d.enemies||[]){
    if(e.hp<=0||e.y+(e.height||40)<-45||e.y-(e.height||40)>d.h+45||e.x+(e.width||40)<-45||e.x-(e.width||40)>d.w+45)continue;
-   if(e.type==='BOSS'&&Number(d.sector)===2&&premiumBoss02.complete&&premiumBoss02.naturalWidth>0){
+   if(e.type==='BOSS'&&Number(d.sector)<=2&&drawPremiumBossV3(c,e,d.sector)){
+     bossAccessories(c,e,d);
+   }else if(e.type==='BOSS'&&Number(d.sector)===2&&premiumBoss02.complete&&premiumBoss02.naturalWidth>0){
      // Imagem raster recortada, centrada na hitbox original; nao troca IA ou partes.
      const bw=e.width||90,bh=e.height||90;
      c.drawImage(premiumBoss02,e.x-bw/2,e.y-bh/2,bw,bh);
@@ -1443,7 +1457,8 @@ function draw(c,d){
    else {
      // Um único render por entidade: PNG Premium substitui (não sobrepõe)
      // a silhueta procedural; IA, animações de posição e hitboxes intocadas.
-     const premium=root.RiverPremium?.get('enemy',e.type);
+     const premiumId=e.type==='BIOME_ENEMY'?e.biomeId:e.type;
+     const premium=root.RiverPremium?.get('enemy',premiumId);
      if(premium){
        c.save();
        c.translate(e.x,e.y);
