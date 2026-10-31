@@ -24,6 +24,7 @@ const CATALOG={
   TANK:'approved/enemies/recurring/tank/idle_000.png',
   TURRET:'approved/enemies/recurring/floating_turret/idle_000.png',
   SHIP:'approved/enemies/recurring/armed_boat/idle_000.png',
+  WARSHIP:'approved/enemies/recurring/warship/idle_000.png',
   SUB:'approved/enemies/recurring/submarine/idle_000.png',
   MECHA_GUN:'approved/enemies/recurring/mecha_gun/idle_000.png',
   MECHA_SWORD:'approved/enemies/recurring/mecha_sword/idle_000.png',
@@ -70,6 +71,21 @@ const CATALOG={
   MULTI:'projectiles/multi.png'
  }
 };
+// IDs da simulação legada e os nomes descritivos da biblioteca V3.
+// Esta resolução é só visual: IA, dano, colisão e cadência permanecem intocados.
+const ENEMY_ALIASES={
+ RECON_PLANE:'ZIGZAG',RECON:'ZIGZAG',HELICOPTER:'HELI',ATTACK_HELICOPTER:'HELI',
+ DRONE:'DRONE',MECHA_SWORD:'MECHA_SWORD',MECHA_GUN:'MECHA_GUN',TANK:'TANK',
+ ARMED_BOAT:'SHIP',SUBMARINE:'SUB',FLOATING_TURRET:'TURRET',WARSHIP:'WARSHIP',
+ HELI:'HELI',JET:'JET',ZIGZAG:'ZIGZAG',SHIP:'SHIP',SUB:'SUB',TURRET:'TURRET'
+};
+// Tamanho visual independente da hitbox para não reduzir os masters Premium
+// ao tamanho das caixas lógicas originalmente usadas pelo canvas legado.
+const ENEMY_DISPLAY={
+ HELI:[48,38],JET:[42,48],ZIGZAG:[42,40],DRONE:[38,38],
+ MECHA_SWORD:[50,52],MECHA_GUN:[50,50],TANK:[52,43],SHIP:[54,46],
+ SUB:[52,52],TURRET:[42,42],WARSHIP:[64,50],TUCANO:[54,44]
+};
 const files=new Map();
 for(const [group,items] of Object.entries(CATALOG))for(const [id,path] of Object.entries(items)){
  // Só arquivos existentes são habilitados por padrão. Nada de usar imagens erradas.
@@ -97,6 +113,7 @@ function register(group,id,path){
  files.set(group+':'+id,{path,loaded:false,supported:true,img:null});
 }
 function get(group,id){
+ if(group==='enemy')id=ENEMY_ALIASES[String(id||'').toUpperCase()]||String(id||'').toUpperCase();
  const entry=files.get(group+':'+id);
  if(!entry||!entry.supported)return null;
  if(!entry.img){
@@ -107,6 +124,14 @@ function get(group,id){
  }
  return entry.loaded&&entry.img.naturalWidth>0?entry.img:null;
 }
+function declared(group,id){
+ if(group==='enemy')id=ENEMY_ALIASES[String(id||'').toUpperCase()]||String(id||'').toUpperCase();
+ const entry=files.get(group+':'+id);return Boolean(entry&&entry.supported);
+}
+function displaySize(id,fallbackWidth=36,fallbackHeight=36){
+ const canonical=ENEMY_ALIASES[String(id||'').toUpperCase()]||String(id||'').toUpperCase();
+ return ENEMY_DISPLAY[canonical]||[Math.max(36,fallbackWidth),Math.max(36,fallbackHeight)];
+}
 function paint(ctx,group,id,x,y,w,h,rotation=0){
  const im=get(group,id);if(!im)return false;
  ctx.save();ctx.translate(x,y);ctx.rotate(rotation);
@@ -115,5 +140,9 @@ function paint(ctx,group,id,x,y,w,h,rotation=0){
 function status(){
  return Array.from(files,([key,value])=>({key,available:value.supported,loaded:value.loaded,path:value.path}));
 }
-global.RiverPremium={register,get,aircraft,paint,status,catalog:CATALOG};
+function preload(){
+ for(const [key,entry] of files){if(entry.supported&&!key.startsWith('aircraft:'))get(...key.split(':'));}
+}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',preload,{once:true});else preload();
+global.RiverPremium={register,get,declared,displaySize,aircraft,paint,status,catalog:CATALOG};
 })(window);
