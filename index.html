@@ -224,7 +224,14 @@
 @media(prefers-reduced-motion:reduce){#mode-selection button{transition:none!important}}
 </style>
 <div id="start-screen" class="absolute inset-0 bg-black/90 flex flex-col items-center justify-start p-3 text-center z-30">
-            <div id="mode-selection" style="position:absolute;inset:0;z-index:95;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:22px;background:linear-gradient(155deg,#03131e 5%,#13344b 52%,#080c20 100%);overflow:auto">
+            <div id="rs-pilot-screen" class="hidden" style="position:absolute;inset:0;z-index:96;overflow:auto;background:linear-gradient(#03101de0,#03101ef4),url('./assets/ui/premium/menu/menu_arcade.png') center/cover;box-sizing:border-box;padding:clamp(12px,3vw,28px);color:#e3f8ff">
+<h2 style="font:900 clamp(25px,4vw,46px) system-ui;color:#61e3ff;text-align:center;margin:0 0 12px">SELEÇÃO DE PILOTOS</h2>
+<p style="text-align:center;font-weight:700;color:#ffd45d;margin:0 0 12px">TODOS DESBLOQUEADOS — ESCOLHA SEU ESQUADRÃO</p>
+<div id="rs-pilot-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;max-width:1050px;margin:auto"></div>
+<section id="rs-pilot-detail" style="max-width:1050px;margin:14px auto;padding:12px;border:1px solid #25c9ff;background:#021b32d9;border-radius:12px;text-align:center" aria-live="polite"></section>
+<div style="display:flex;justify-content:center;gap:12px;flex-wrap:wrap"><button id="rs-pilot-back" type="button" style="padding:12px 22px;background:#183753;border:1px solid #57caff;border-radius:8px;font-weight:900">VOLTAR</button><button id="rs-pilot-confirm" type="button" style="padding:12px 22px;background:#d59718;color:#06101e;border:1px solid #ffd56e;border-radius:8px;font-weight:900">CONFIRMAR PILOTO</button></div>
+</div>
+<div id="mode-selection" style="position:absolute;inset:0;z-index:95;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:22px;background:linear-gradient(155deg,#03131e 5%,#13344b 52%,#080c20 100%);overflow:auto">
 <h2 style="font-size:clamp(24px,6vw,37px);font-weight:900;color:#7de8ff;letter-spacing:2px">RIVER STORM</h2>
 <p style="max-width:320px;font-size:12px;color:#bdd8ed">ESCOLHA O MODO DE JOGO</p>
 <button id="mode-single" type="button" style="width:min(94%,330px);padding:18px;background:#0d6557;border:2px solid #56f0c7;border-radius:12px;color:white;font-weight:900">✈ SINGLE PLAYER</button>
@@ -4885,7 +4892,37 @@ function updateTerrainEvent(){
         updateLastChoice();
         window.addEventListener('storage',updateLastChoice);
         document.getElementById('plane-select')?.addEventListener('change',()=>{try{localStorage.setItem('riverstorm_last_aircraft',document.getElementById('plane-select').selectedOptions[0].textContent);}catch(e){}updateLastChoice();});
-        document.getElementById('mode-single').addEventListener('click',()=>{stopIntroMusic();modeSelection.classList.add('hidden');});
+        const pilotEntries=[
+ ['snabo','Ten. Snabo','falcao','FALCÃO','snabo_falcao.png'],
+ ['jhow','Capt. Jhow','vespa','VESPA','jhow_vespa.png'],
+ ['btata','Capt. B.Tata','cometa','COMETA','btata_cometa.png'],
+ ['napas','Major Napas','fenix','FÊNIX','napas_fenix.png'],
+ ['casper','Sarg. Casper','aguia_vtol','ÁGUIA VTOL','casper_aguia_vtol.png'],
+ ['roger','Sarg. Roger','ufo_aurora','UFO AURORA','roger_ufo_aurora.png'],
+ ['dudu','Ten. Dudu','titan','TITAN','dudu_titan.png']
+ ];
+ const pilotScreen=document.getElementById('rs-pilot-screen'),pilotGrid=document.getElementById('rs-pilot-grid'),pilotDetail=document.getElementById('rs-pilot-detail');
+ let chosenPilot=pilotEntries[0];
+ try{const v=localStorage.getItem('riverstorm_last_pilot_id');chosenPilot=pilotEntries.find(p=>p[0]===v)||chosenPilot;}catch(e){}
+ function renderPilotCards(){
+  pilotGrid.replaceChildren();
+  for(const entry of pilotEntries){
+   const button=document.createElement('button');button.type='button';button.style='border:2px solid '+(entry===chosenPilot?'#ffd449':'#26aede');button.style.background='#061e37';button.style.borderRadius='11px';button.style.padding='8px';button.style.color='white';button.style.cursor='pointer';
+   const img=document.createElement('img');img.src='./assets/ui/premium/pilots/'+entry[4];img.alt=entry[1]+' com '+entry[3];img.style='width:100%;height:145px;object-fit:contain';img.onerror=()=>{img.style.display='none';};
+   const label=document.createElement('div');label.textContent=entry[1]+' · '+entry[3];label.style='font:bold 12px system-ui';button.append(img,label);
+   button.onclick=()=>{chosenPilot=entry;renderPilotCards();};
+   pilotGrid.appendChild(button);
+  }
+  pilotDetail.textContent=chosenPilot[1]+' — NAVE '+chosenPilot[3]+' · DISPONÍVEL';
+ }
+ document.getElementById('mode-single').addEventListener('click',()=>{modeSelection.classList.add('hidden');pilotScreen.classList.remove('hidden');renderPilotCards();});
+ document.getElementById('rs-pilot-back').onclick=()=>{pilotScreen.classList.add('hidden');modeSelection.classList.remove('hidden');};
+ document.getElementById('rs-pilot-confirm').onclick=()=>{
+  try{localStorage.setItem('riverstorm_last_pilot_id',chosenPilot[0]);localStorage.setItem('riverstorm_last_pilot',chosenPilot[1]);localStorage.setItem('riverstorm_last_aircraft',chosenPilot[3]);}catch(e){}
+  const planeSelect=document.getElementById('plane-select');
+  if(planeSelect&&[...planeSelect.options].some(o=>o.value===chosenPilot[2])){planeSelect.value=chosenPilot[2];planeSelect.dispatchEvent(new Event('change',{bubbles:true}));}
+  pilotScreen.classList.add('hidden');stopIntroMusic();updateLastChoice();
+ };
         document.getElementById('mode-multi').addEventListener('click',()=>{
           document.getElementById('mode-multi-info').classList.remove('hidden');
           document.getElementById('mode-single').classList.add('hidden');
