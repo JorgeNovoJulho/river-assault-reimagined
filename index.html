@@ -274,6 +274,13 @@ body #controller-settings:not(.hidden){position:fixed!important;z-index:1200!imp
 @media(max-width:700px){#rs-pilot-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}#rs-pilot-detail{grid-template-columns:1fr!important}#rs-pilot-detail .rs-pilot-feature-art{height:260px}#rs-pilot-detail .rs-pilot-stat{grid-template-columns:92px 1fr 40px}}
 </style>
 
+<style id="rs-pilot-exit-fix">
+/* Stronger than the large-screen display:grid!important selector */
+#rs-pilot-screen.hidden,#mode-selection.hidden{display:none!important;visibility:hidden!important;pointer-events:none!important}
+#rs-pilot-screen .rs-pilot-card.rs-confirmed{animation:rsPilotConfirmFlash .16s steps(2,end) 3;border-color:#31ff69!important;box-shadow:0 0 0 5px #22ff66,0 0 30px #18ff7d!important}
+@keyframes rsPilotConfirmFlash{0%,100%{filter:brightness(1)}50%{filter:brightness(2.3) saturate(1.7)}}
+@media(prefers-reduced-motion:reduce){#rs-pilot-screen .rs-pilot-card.rs-confirmed{animation:none;background:#13693a!important}}
+</style>
 <style id="rs-pilot-layout-final">
 /* Layout oficial: grade 4+3 à esquerda, painel grande à direita. */
 @media(min-width:850px){
@@ -5066,6 +5073,18 @@ function updateTerrainEvent(){
   renderPilotDetail();
   syncSpotlight(entry);
  }
+ let pilotConfirming=false;
+ function confirmPilotByDoubleClick(entry,card){
+  if(pilotConfirming)return;
+  pilotConfirming=true;
+  selectPilotPreview(entry);
+  card.classList.add('rs-confirmed');
+  card.setAttribute('aria-label',entry[1]+' confirmado');
+  setTimeout(()=>{
+    document.getElementById('rs-pilot-confirm').click();
+    pilotConfirming=false;
+  },480);
+ }
  function renderPilotCards(){
   pilotGrid.replaceChildren();
   for(const entry of pilotEntries){
@@ -5081,6 +5100,8 @@ function updateTerrainEvent(){
    button.append(img,title,ship,status);
    button.addEventListener('click',()=>{chosenPilot=entry;pilotGrid.querySelectorAll('.rs-pilot-card').forEach((card,i)=>{const active=pilotEntries[i]===entry;card.classList.toggle('rs-pilot-selected',active);card.setAttribute('aria-pressed',String(active));});renderPilotDetail();syncSpotlight(entry);});
    // Update enlarged portrait immediately when pointing at a small card.
+   button.addEventListener('dblclick',()=>confirmPilotByDoubleClick(entry,button));
+   button.addEventListener('touchend',e=>{const now=Date.now();if(button._lastTap&&now-button._lastTap<380){e.preventDefault();confirmPilotByDoubleClick(entry,button)}button._lastTap=now;},{passive:false});
    button.addEventListener('pointerenter',()=>selectPilotPreview(entry));
    button.addEventListener('focus',()=>selectPilotPreview(entry));
    // Hover uses CSS only: avoid rebuilding all pilot cards on every pointer move.
@@ -5130,10 +5151,10 @@ function updateTerrainEvent(){
   try{const key='river_aircraft_unlocked_v1';const owned=JSON.parse(localStorage.getItem(key)||'[]');localStorage.setItem(key,JSON.stringify([...new Set([...(Array.isArray(owned)?owned:[]),...pilotEntries.map(p=>p[2])])]));}catch(e){}
   if(planeSelect&&[...planeSelect.options].some(o=>o.value===chosenPilot[2])){planeSelect.value=chosenPilot[2];planeSelect.dispatchEvent(new Event('change',{bubbles:true}));}
   pilotScreen.classList.add('hidden');
-  pilotScreen.style.display='none';
+  pilotScreen.style.setProperty('display','none','important');
   pilotScreen.setAttribute('aria-hidden','true');
   modeSelection.classList.add('hidden');
-  modeSelection.style.display='none';
+  modeSelection.style.setProperty('display','none','important');
   stopIntroMusic();updateLastChoice();syncSpotlight(chosenPilot);
   // Call official start routine directly instead of routing through an obscured button.
   enterGameplay();
