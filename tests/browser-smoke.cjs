@@ -18,7 +18,9 @@ const {chromium}=require('playwright');const {spawn}=require('node:child_process
     const ok = await page.evaluate(k => !!window[k],key);
     if(!ok) throw Error('Script ausente no BUILD: '+key);
   }
-  await page.locator('#menu-settings-btn').click();
+  // Main menu is a full-screen portal. Open settings through its public control.
+  await page.locator('#mode-settings').click();
+  await page.locator('#controller-settings').waitFor({state:'visible'});
   await page.evaluate(()=>{
     for(const [id,value] of [['music-volume','22'],['sfx-volume','31'],['sarcasm-level','4'],['pad-deadzone','30']]){
       const el=document.getElementById(id);el.value=value;el.dispatchEvent(new Event('input',{bubbles:true}));
@@ -42,20 +44,24 @@ const {chromium}=require('playwright');const {spawn}=require('node:child_process
   if (!await page.locator('#controller-settings').isVisible()) throw Error('Botão CONTROLE falhou');
   await page.locator('#pad-close').click();
   if (await page.locator('#controller-settings').isVisible()) throw Error('Botão VOLTAR falhou');
-  await page.locator('#quality-select').selectOption('balanced');
-  await page.locator('#plane-select').selectOption('vespa');
-  await page.locator('#level-select').selectOption('5');
-  console.log('Start hit test:',JSON.stringify(await page.evaluate(()=>{
-    const b=document.getElementById('start-btn'),r=b.getBoundingClientRect(),x=r.left+r.width/2,y=r.top+r.height/2;
-    return {x,y,target:document.elementFromPoint(x,y)?.id,overlay:document.getElementById('controller-settings').style.display,dialogOpen:controllerMenuOpen,scrollTop:document.getElementById('start-screen').scrollTop}
-  })));
-  await page.locator('#start-btn').click({timeout:12000});
-  await page.waitForTimeout(1500);
-  const result=await page.evaluate(()=>{const c=document.getElementById('gameCanvas');const p=c.getContext('2d').getImageData(0,0,Math.min(40,c.width),Math.min(40,c.height)).data;return {state:gameState,sector,aircraft:selectedPlane,hidden:document.getElementById('start-screen').classList.contains('hidden'),overlayVisible:getComputedStyle(document.getElementById('start-screen')).display!=='none',error:document.getElementById('runtime-error')?.textContent,canvas:!!c,painted:p.some((value,i)=>i%4===3&&value>0),active:document.getElementById('game-container').dataset.gameActive==='true'}});
-  console.log(JSON.stringify({result,errors},null,2));
-  if(result.sector!==5||result.aircraft!=='vespa'||result.state!=='PLAYING'||!result.hidden||result.overlayVisible||!result.active||!result.painted||result.error||errors.length)throw Error('O jogo não iniciou corretamente!');
-
-  const crtBefore=await page.locator('#crt-toggle').innerText();
+  // Real entry flow: menu → pilot gallery → double click → active campaign.
+  await page.locator('#mode-single').click();
+  await page.locator('#rs-pilot-screen').waitFor({state:'visible'});
+  const selectedCard=page.locator('#rs-pilot-grid .rs-pilot-card').nth(1);
+  await selectedCard.dblclick({delay:80});
+  await page.waitForFunction(()=>typeof gameState!=='undefined'&&gameState==='PLAYING',{timeout:15000});
+  const result=await page.evaluate(()=>{
+    const c=document.getElementById('gameCanvas');
+    return {state:gameState,sector,aircraft:selectedPlane,
+      menuDisplay:getComputedStyle(document.getElementById('mode-selection')).display,
+      pilotDisplay:getComputedStyle(document.getElementById('rs-pilot-screen')).display,
+      active:document.getElementById('game-container').dataset.gameActive==='true',
+      error:document.getElementById('runtime-error')?.textContent||'',canvas:!!c};
+  });
+  console.log('Campaign start from pilot:',JSON.stringify({result,errors}));
+  if(result.state!=='PLAYING'||result.pilotDisplay!=='none'||result.menuDisplay!=='none'||!result.active||result.error||errors.length)
+    throw Error('Fluxo menu/piloto/campanha falhou: '+JSON.stringify({result,errors}));
+    const crtBefore=await page.locator('#crt-toggle').innerText();
   await page.locator('#crt-toggle').click();
   console.log('CRT status:',JSON.stringify({before:crtBefore,after:await page.locator('#crt-toggle').innerText(),errors,notice:await page.locator('#runtime-error').count(),scripts:await page.evaluate(()=>({gameState:typeof gameState==='undefined'?'undefined':gameState,settings:!!document.getElementById('settings-plane')}))}));
   if (await page.locator('#crt-toggle').innerText()===crtBefore) throw Error('Botão CRT falhou');
