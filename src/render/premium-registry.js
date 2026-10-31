@@ -84,7 +84,7 @@ const ENEMY_ALIASES={
 const ENEMY_DISPLAY={
  HELI:[48,38],JET:[42,48],ZIGZAG:[42,40],DRONE:[38,38],
  MECHA_SWORD:[50,52],MECHA_GUN:[50,50],TANK:[52,43],SHIP:[54,46],
- SUB:[52,52],TURRET:[42,42],WARSHIP:[64,50],TUCANO:[54,44]
+ SUB:[52,52],TURRET:[42,42],WARSHIP:[70,54],TUCANO:[54,44],CRANE:[70,64]
 };
 const files=new Map();
 for(const [group,items] of Object.entries(CATALOG))for(const [id,path] of Object.entries(items)){
