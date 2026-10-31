@@ -4897,8 +4897,8 @@ function updateTerrainEvent(){
  ['jhow','Capt. Jhow','vespa','VESPA','jhow_vespa.png'],
  ['btata','Capt. B.Tata','cometa','COMETA','btata_cometa.png'],
  ['napas','Major Napas','fenix','FÊNIX','napas_fenix.png'],
- ['casper','Sarg. Casper','aguia_vtol','ÁGUIA VTOL','casper_aguia_vtol.png'],
- ['roger','Sarg. Roger','ufo_aurora','UFO AURORA','roger_ufo_aurora.png'],
+ ['casper','Sarg. Casper','helicoptero','ÁGUIA VTOL','casper_aguia_vtol.png'],
+ ['roger','Sarg. Roger','disco','UFO AURORA','roger_ufo_aurora.png'],
  ['dudu','Ten. Dudu','titan','TITAN','dudu_titan.png']
  ];
  const pilotScreen=document.getElementById('rs-pilot-screen'),pilotGrid=document.getElementById('rs-pilot-grid'),pilotDetail=document.getElementById('rs-pilot-detail');
@@ -4920,6 +4920,7 @@ function updateTerrainEvent(){
  document.getElementById('rs-pilot-confirm').onclick=()=>{
   try{localStorage.setItem('riverstorm_last_pilot_id',chosenPilot[0]);localStorage.setItem('riverstorm_last_pilot',chosenPilot[1]);localStorage.setItem('riverstorm_last_aircraft',chosenPilot[3]);}catch(e){}
   const planeSelect=document.getElementById('plane-select');
+  try{const key='river_aircraft_unlocked_v1';const owned=JSON.parse(localStorage.getItem(key)||'[]');localStorage.setItem(key,JSON.stringify([...new Set([...(Array.isArray(owned)?owned:[]),...pilotEntries.map(p=>p[2])])]));}catch(e){}
   if(planeSelect&&[...planeSelect.options].some(o=>o.value===chosenPilot[2])){planeSelect.value=chosenPilot[2];planeSelect.dispatchEvent(new Event('change',{bubbles:true}));}
   pilotScreen.classList.add('hidden');stopIntroMusic();updateLastChoice();
  };
