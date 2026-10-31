@@ -3739,7 +3739,7 @@ function updateTerrainEvent(){
 
         function enterGameplay() {
             selectedPlane=planeSelect.value;
-            if(!unlocked.includes(selectedPlane)){document.getElementById('plane-status').textContent='Desbloqueie esta aeronave antes de iniciar';return}
+            if(!unlocked.includes(selectedPlane) && !['falcao','vespa','cometa','fenix','helicoptero','disco','titan'].includes(selectedPlane)){document.getElementById('plane-status').textContent='Aeronave indisponível';return}
             // A entrada no jogo não pode depender de permissão de áudio ou do MP3.
             try { resetGame(); } catch (error) { showGameError(error); console.error('START:',error); return; }
             for (const id of ['start-screen','pause-screen','game-over-screen','victory-screen']) {
@@ -5055,6 +5055,17 @@ function updateTerrainEvent(){
  };
  const statNames=['POTÊNCIA','VELOCIDADE','BLINDAGEM','ENERGIA','BOMBAS','ESPECIAL'];
  const statColors=['#f44d63','#2fcaff','#33ed96','#ffd447','#b579ff','#30e7f2'];
+ function selectPilotPreview(entry){
+  if(chosenPilot===entry)return;
+  chosenPilot=entry;
+  pilotGrid.querySelectorAll('.rs-pilot-card').forEach((card,i)=>{
+   const active=pilotEntries[i]===entry;
+   card.classList.toggle('rs-pilot-selected',active);
+   card.setAttribute('aria-pressed',String(active));
+  });
+  renderPilotDetail();
+  syncSpotlight(entry);
+ }
  function renderPilotCards(){
   pilotGrid.replaceChildren();
   for(const entry of pilotEntries){
@@ -5069,6 +5080,9 @@ function updateTerrainEvent(){
    const status=document.createElement('small');status.textContent='● DISPONÍVEL';
    button.append(img,title,ship,status);
    button.addEventListener('click',()=>{chosenPilot=entry;pilotGrid.querySelectorAll('.rs-pilot-card').forEach((card,i)=>{const active=pilotEntries[i]===entry;card.classList.toggle('rs-pilot-selected',active);card.setAttribute('aria-pressed',String(active));});renderPilotDetail();syncSpotlight(entry);});
+   // Update enlarged portrait immediately when pointing at a small card.
+   button.addEventListener('pointerenter',()=>selectPilotPreview(entry));
+   button.addEventListener('focus',()=>selectPilotPreview(entry));
    // Hover uses CSS only: avoid rebuilding all pilot cards on every pointer move.
    pilotGrid.appendChild(button);
   }
@@ -5108,15 +5122,21 @@ function updateTerrainEvent(){
   e.preventDefault();chosenPilot=pilotEntries[next];renderPilotCards();syncSpotlight(chosenPilot);
   pilotGrid.children[next]?.focus({preventScroll:true});
  });
- document.getElementById('mode-single').addEventListener('click',()=>{modeSelection.classList.add('hidden');pilotScreen.classList.remove('hidden');renderPilotCards();});
+ document.getElementById('mode-single').addEventListener('click',()=>{modeSelection.classList.add('hidden');pilotScreen.style.display='';pilotScreen.removeAttribute('aria-hidden');pilotScreen.classList.remove('hidden');renderPilotCards();});
  document.getElementById('rs-pilot-back').onclick=()=>{pilotScreen.classList.add('hidden');modeSelection.classList.remove('hidden');};
  document.getElementById('rs-pilot-confirm').onclick=()=>{
   try{localStorage.setItem('riverstorm_last_pilot_id',chosenPilot[0]);localStorage.setItem('riverstorm_last_pilot',chosenPilot[1]);localStorage.setItem('riverstorm_last_aircraft',chosenPilot[3]);}catch(e){}
   const planeSelect=document.getElementById('plane-select');
   try{const key='river_aircraft_unlocked_v1';const owned=JSON.parse(localStorage.getItem(key)||'[]');localStorage.setItem(key,JSON.stringify([...new Set([...(Array.isArray(owned)?owned:[]),...pilotEntries.map(p=>p[2])])]));}catch(e){}
   if(planeSelect&&[...planeSelect.options].some(o=>o.value===chosenPilot[2])){planeSelect.value=chosenPilot[2];planeSelect.dispatchEvent(new Event('change',{bubbles:true}));}
-  pilotScreen.classList.add('hidden');stopIntroMusic();updateLastChoice();syncSpotlight(chosenPilot);
-  document.getElementById('start-btn')?.click();
+  pilotScreen.classList.add('hidden');
+  pilotScreen.style.display='none';
+  pilotScreen.setAttribute('aria-hidden','true');
+  modeSelection.classList.add('hidden');
+  modeSelection.style.display='none';
+  stopIntroMusic();updateLastChoice();syncSpotlight(chosenPilot);
+  // Call official start routine directly instead of routing through an obscured button.
+  enterGameplay();
  };
         document.getElementById('mode-multi').addEventListener('click',()=>{
           document.getElementById('mode-multi-info').classList.remove('hidden');
