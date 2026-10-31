@@ -1,0 +1,961 @@
+{
+  "schemaVersion": 1,
+  "status": "planned_not_extracted",
+  "referenceBoards": [
+    {
+      "id": "board_01",
+      "target": "assets/sprites/premium/referencias-aprovadas/boards/level01_rio_verde_boss01_ponte_fortificada.png",
+      "state": "user_uploaded_not_committed",
+      "immutable": true
+    },
+    {
+      "id": "board_02",
+      "target": "assets/sprites/premium/referencias-aprovadas/boards/boss02_encouracado_abissal_board_a.png",
+      "state": "user_uploaded_not_committed",
+      "immutable": true
+    },
+    {
+      "id": "board_03",
+      "target": "assets/sprites/premium/referencias-aprovadas/boards/bosses_library_20_board.png",
+      "state": "user_uploaded_not_committed",
+      "immutable": true
+    },
+    {
+      "id": "board_04",
+      "target": "assets/sprites/premium/referencias-aprovadas/boards/sprites_library_20_inimigos_e_recorrentes.png",
+      "state": "user_uploaded_not_committed",
+      "immutable": true
+    },
+    {
+      "id": "board_05",
+      "target": "assets/sprites/premium/referencias-aprovadas/boards/bosses_library_20_v2.png",
+      "state": "user_uploaded_not_committed",
+      "immutable": true
+    },
+    {
+      "id": "board_06",
+      "target": "assets/sprites/premium/referencias-aprovadas/boards/inimigos_cenarios_v41.png",
+      "state": "user_uploaded_not_committed",
+      "immutable": true
+    },
+    {
+      "id": "board_07",
+      "target": "assets/sprites/premium/referencias-aprovadas/boards/boss02_encouracado_abissal_board_b.png",
+      "state": "user_uploaded_not_committed",
+      "immutable": true
+    },
+    {
+      "id": "board_08",
+      "target": "assets/sprites/premium/referencias-aprovadas/boards/rio_atlas_cenario_efeitos_final.png",
+      "state": "user_uploaded_not_committed",
+      "immutable": true
+    }
+  ],
+  "outputRoots": {
+    "candidates": "assets/sprites/premium/candidates",
+    "approved": "assets/sprites/premium/approved",
+    "runtime": "assets/sprites/premium/runtime"
+  },
+  "naming": "lowercase_snake_case, frame_000.png etc; all images transparent PNG, pivot in metadata; preserve original boards",
+  "exclusiveEnemies": [
+    {
+      "mission": 1,
+      "id": "tucano",
+      "reference": "sprites_library_20_inimigos_e_recorrentes",
+      "target": "assets/sprites/premium/candidates/enemies/exclusive/01_tucano/",
+      "expected": [
+        "idle_000.png",
+        "move_000.png",
+        "attack_000.png",
+        "hurt_000.png",
+        "death_000.png"
+      ],
+      "state": "pending_extraction"
+    },
+    {
+      "mission": 2,
+      "id": "crane",
+      "reference": "sprites_library_20_inimigos_e_recorrentes",
+      "target": "assets/sprites/premium/candidates/enemies/exclusive/02_crane/",
+      "expected": [
+        "idle_000.png",
+        "move_000.png",
+        "attack_000.png",
+        "hurt_000.png",
+        "death_000.png"
+      ],
+      "state": "pending_extraction"
+    },
+    {
+      "mission": 3,
+      "id": "scorpion",
+      "reference": "sprites_library_20_inimigos_e_recorrentes",
+      "target": "assets/sprites/premium/candidates/enemies/exclusive/03_scorpion/",
+      "expected": [
+        "idle_000.png",
+        "move_000.png",
+        "attack_000.png",
+        "hurt_000.png",
+        "death_000.png"
+      ],
+      "state": "pending_extraction"
+    },
+    {
+      "mission": 4,
+      "id": "alligator",
+      "reference": "sprites_library_20_inimigos_e_recorrentes",
+      "target": "assets/sprites/premium/candidates/enemies/exclusive/04_alligator/",
+      "expected": [
+        "idle_000.png",
+        "move_000.png",
+        "attack_000.png",
+        "hurt_000.png",
+        "death_000.png"
+      ],
+      "state": "pending_extraction"
+    },
+    {
+      "mission": 5,
+      "id": "corsair",
+      "reference": "sprites_library_20_inimigos_e_recorrentes",
+      "target": "assets/sprites/premium/candidates/enemies/exclusive/05_corsair/",
+      "expected": [
+        "idle_000.png",
+        "move_000.png",
+        "attack_000.png",
+        "hurt_000.png",
+        "death_000.png"
+      ],
+      "state": "pending_extraction"
+    },
+    {
+      "mission": 6,
+      "id": "walrus",
+      "reference": "sprites_library_20_inimigos_e_recorrentes",
+      "target": "assets/sprites/premium/candidates/enemies/exclusive/06_walrus/",
+      "expected": [
+        "idle_000.png",
+        "move_000.png",
+        "attack_000.png",
+        "hurt_000.png",
+        "death_000.png"
+      ],
+      "state": "pending_extraction"
+    },
+    {
+      "mission": 7,
+      "id": "mantis",
+      "reference": "sprites_library_20_inimigos_e_recorrentes",
+      "target": "assets/sprites/premium/candidates/enemies/exclusive/07_mantis/",
+      "expected": [
+        "idle_000.png",
+        "move_000.png",
+        "attack_000.png",
+        "hurt_000.png",
+        "death_000.png"
+      ],
+      "state": "pending_extraction"
+    },
+    {
+      "mission": 8,
+      "id": "motojet",
+      "reference": "sprites_library_20_inimigos_e_recorrentes",
+      "target": "assets/sprites/premium/candidates/enemies/exclusive/08_motojet/",
+      "expected": [
+        "idle_000.png",
+        "move_000.png",
+        "attack_000.png",
+        "hurt_000.png",
+        "death_000.png"
+      ],
+      "state": "pending_extraction"
+    },
+    {
+      "mission": 9,
+      "id": "salamander",
+      "reference": "sprites_library_20_inimigos_e_recorrentes",
+      "target": "assets/sprites/premium/candidates/enemies/exclusive/09_salamander/",
+      "expected": [
+        "idle_000.png",
+        "move_000.png",
+        "attack_000.png",
+        "hurt_000.png",
+        "death_000.png"
+      ],
+      "state": "pending_extraction"
+    },
+    {
+      "mission": 10,
+      "id": "eagle",
+      "reference": "sprites_library_20_inimigos_e_recorrentes",
+      "target": "assets/sprites/premium/candidates/enemies/exclusive/10_eagle/",
+      "expected": [
+        "idle_000.png",
+        "move_000.png",
+        "attack_000.png",
+        "hurt_000.png",
+        "death_000.png"
+      ],
+      "state": "pending_extraction"
+    },
+    {
+      "mission": 11,
+      "id": "dredger",
+      "reference": "sprites_library_20_inimigos_e_recorrentes",
+      "target": "assets/sprites/premium/candidates/enemies/exclusive/11_dredger/",
+      "expected": [
+        "idle_000.png",
+        "move_000.png",
+        "attack_000.png",
+        "hurt_000.png",
+        "death_000.png"
+      ],
+      "state": "pending_extraction"
+    },
+    {
+      "mission": 12,
+      "id": "hovercar",
+      "reference": "sprites_library_20_inimigos_e_recorrentes",
+      "target": "assets/sprites/premium/candidates/enemies/exclusive/12_hovercar/",
+      "expected": [
+        "idle_000.png",
+        "move_000.png",
+        "attack_000.png",
+        "hurt_000.png",
+        "death_000.png"
+      ],
+      "state": "pending_extraction"
+    },
+    {
+      "mission": 13,
+      "id": "piranha",
+      "reference": "sprites_library_20_inimigos_e_recorrentes",
+      "target": "assets/sprites/premium/candidates/enemies/exclusive/13_piranha/",
+      "expected": [
+        "idle_000.png",
+        "move_000.png",
+        "attack_000.png",
+        "hurt_000.png",
+        "death_000.png"
+      ],
+      "state": "pending_extraction"
+    },
+    {
+      "mission": 14,
+      "id": "ice_ray",
+      "reference": "sprites_library_20_inimigos_e_recorrentes",
+      "target": "assets/sprites/premium/candidates/enemies/exclusive/14_ice_ray/",
+      "expected": [
+        "idle_000.png",
+        "move_000.png",
+        "attack_000.png",
+        "hurt_000.png",
+        "death_000.png"
+      ],
+      "state": "pending_extraction"
+    },
+    {
+      "mission": 15,
+      "id": "beetle",
+      "reference": "sprites_library_20_inimigos_e_recorrentes",
+      "target": "assets/sprites/premium/candidates/enemies/exclusive/15_beetle/",
+      "expected": [
+        "idle_000.png",
+        "move_000.png",
+        "attack_000.png",
+        "hurt_000.png",
+        "death_000.png"
+      ],
+      "state": "pending_extraction"
+    },
+    {
+      "mission": 16,
+      "id": "prism_wasp",
+      "reference": "sprites_library_20_inimigos_e_recorrentes",
+      "target": "assets/sprites/premium/candidates/enemies/exclusive/16_prism_wasp/",
+      "expected": [
+        "idle_000.png",
+        "move_000.png",
+        "attack_000.png",
+        "hurt_000.png",
+        "death_000.png"
+      ],
+      "state": "pending_extraction"
+    },
+    {
+      "mission": 17,
+      "id": "welder",
+      "reference": "sprites_library_20_inimigos_e_recorrentes",
+      "target": "assets/sprites/premium/candidates/enemies/exclusive/17_welder/",
+      "expected": [
+        "idle_000.png",
+        "move_000.png",
+        "attack_000.png",
+        "hurt_000.png",
+        "death_000.png"
+      ],
+      "state": "pending_extraction"
+    },
+    {
+      "mission": 18,
+      "id": "narwhal",
+      "reference": "sprites_library_20_inimigos_e_recorrentes",
+      "target": "assets/sprites/premium/candidates/enemies/exclusive/18_narwhal/",
+      "expected": [
+        "idle_000.png",
+        "move_000.png",
+        "attack_000.png",
+        "hurt_000.png",
+        "death_000.png"
+      ],
+      "state": "pending_extraction"
+    },
+    {
+      "mission": 19,
+      "id": "eel",
+      "reference": "sprites_library_20_inimigos_e_recorrentes",
+      "target": "assets/sprites/premium/candidates/enemies/exclusive/19_eel/",
+      "expected": [
+        "idle_000.png",
+        "move_000.png",
+        "attack_000.png",
+        "hurt_000.png",
+        "death_000.png"
+      ],
+      "state": "pending_extraction"
+    },
+    {
+      "mission": 20,
+      "id": "hybrid_hunter",
+      "reference": "sprites_library_20_inimigos_e_recorrentes",
+      "target": "assets/sprites/premium/candidates/enemies/exclusive/20_hybrid_hunter/",
+      "expected": [
+        "idle_000.png",
+        "move_000.png",
+        "attack_000.png",
+        "hurt_000.png",
+        "death_000.png"
+      ],
+      "state": "pending_extraction"
+    }
+  ],
+  "recurring": [
+    {
+      "id": "recon_plane",
+      "target": "assets/sprites/premium/candidates/enemies/recurring/recon_plane/",
+      "state": "pending_extraction"
+    },
+    {
+      "id": "helicopter",
+      "target": "assets/sprites/premium/candidates/enemies/recurring/helicopter/",
+      "state": "pending_extraction"
+    },
+    {
+      "id": "drone",
+      "target": "assets/sprites/premium/candidates/enemies/recurring/drone/",
+      "state": "pending_extraction"
+    },
+    {
+      "id": "mecha_sword",
+      "target": "assets/sprites/premium/candidates/enemies/recurring/mecha_sword/",
+      "state": "pending_extraction"
+    },
+    {
+      "id": "mecha_gun",
+      "target": "assets/sprites/premium/candidates/enemies/recurring/mecha_gun/",
+      "state": "pending_extraction"
+    },
+    {
+      "id": "tank",
+      "target": "assets/sprites/premium/candidates/enemies/recurring/tank/",
+      "state": "pending_extraction"
+    },
+    {
+      "id": "armed_boat",
+      "target": "assets/sprites/premium/candidates/enemies/recurring/armed_boat/",
+      "state": "pending_extraction"
+    },
+    {
+      "id": "submarine",
+      "target": "assets/sprites/premium/candidates/enemies/recurring/submarine/",
+      "state": "pending_extraction"
+    },
+    {
+      "id": "floating_turret",
+      "target": "assets/sprites/premium/candidates/enemies/recurring/floating_turret/",
+      "state": "pending_extraction"
+    },
+    {
+      "id": "warship",
+      "target": "assets/sprites/premium/candidates/enemies/recurring/warship/",
+      "state": "pending_extraction"
+    },
+    {
+      "id": "bomber",
+      "target": "assets/sprites/premium/candidates/enemies/recurring/bomber/",
+      "state": "pending_extraction"
+    },
+    {
+      "id": "elite_fighter",
+      "target": "assets/sprites/premium/candidates/enemies/recurring/elite_fighter/",
+      "state": "pending_extraction"
+    },
+    {
+      "id": "armed_island",
+      "target": "assets/sprites/premium/candidates/enemies/recurring/armed_island/",
+      "state": "pending_extraction"
+    },
+    {
+      "id": "dam_bridge",
+      "target": "assets/sprites/premium/candidates/enemies/recurring/dam_bridge/",
+      "state": "pending_extraction"
+    },
+    {
+      "id": "item_capsule",
+      "target": "assets/sprites/premium/candidates/enemies/recurring/item_capsule/",
+      "state": "pending_extraction"
+    },
+    {
+      "id": "floating_mine",
+      "target": "assets/sprites/premium/candidates/enemies/recurring/floating_mine/",
+      "state": "pending_extraction"
+    }
+  ],
+  "bosses": [
+    {
+      "sector": 1,
+      "id": "ponte_fortificada",
+      "reference": "level01_rio_verde_boss01_ponte_fortificada",
+      "target": "assets/sprites/premium/candidates/bosses/01_ponte_fortificada/",
+      "parts": [
+        "body",
+        "turret_left",
+        "turret_right",
+        "core"
+      ],
+      "states": [
+        "idle",
+        "move",
+        "attack",
+        "damage_100",
+        "damage_75",
+        "damage_50",
+        "damage_25",
+        "destroyed"
+      ],
+      "state": "pending_extraction"
+    },
+    {
+      "sector": 2,
+      "id": "encouracado_abissal",
+      "reference": "boss02_encouracado_abissal_board_a + boss02_encouracado_abissal_board_b",
+      "target": "assets/sprites/premium/candidates/bosses/02_encouracado_abissal/",
+      "parts": [
+        "body",
+        "turret_left",
+        "turret_right",
+        "core"
+      ],
+      "states": [
+        "idle",
+        "move",
+        "attack",
+        "damage_100",
+        "damage_75",
+        "damage_50",
+        "damage_25",
+        "destroyed"
+      ],
+      "state": "pending_extraction"
+    },
+    {
+      "sector": 3,
+      "id": "apache_escorpiao",
+      "reference": "bosses_library_20_board + bosses_library_20_v2",
+      "target": "assets/sprites/premium/candidates/bosses/03_apache_escorpiao/",
+      "parts": [
+        "body",
+        "turret_left",
+        "turret_right",
+        "core"
+      ],
+      "states": [
+        "idle",
+        "move",
+        "attack",
+        "damage_100",
+        "damage_75",
+        "damage_50",
+        "damage_25",
+        "destroyed"
+      ],
+      "state": "pending_extraction"
+    },
+    {
+      "sector": 4,
+      "id": "submarino_fantasma",
+      "reference": "bosses_library_20_board + bosses_library_20_v2",
+      "target": "assets/sprites/premium/candidates/bosses/04_submarino_fantasma/",
+      "parts": [
+        "body",
+        "turret_left",
+        "turret_right",
+        "core"
+      ],
+      "states": [
+        "idle",
+        "move",
+        "attack",
+        "damage_100",
+        "damage_75",
+        "damage_50",
+        "damage_25",
+        "destroyed"
+      ],
+      "state": "pending_extraction"
+    },
+    {
+      "sector": 5,
+      "id": "caca_tempestade",
+      "reference": "bosses_library_20_board + bosses_library_20_v2",
+      "target": "assets/sprites/premium/candidates/bosses/05_caca_tempestade/",
+      "parts": [
+        "body",
+        "turret_left",
+        "turret_right",
+        "core"
+      ],
+      "states": [
+        "idle",
+        "move",
+        "attack",
+        "damage_100",
+        "damage_75",
+        "damage_50",
+        "damage_25",
+        "destroyed"
+      ],
+      "state": "pending_extraction"
+    },
+    {
+      "sector": 6,
+      "id": "quebra_gelo_tita",
+      "reference": "bosses_library_20_board + bosses_library_20_v2",
+      "target": "assets/sprites/premium/candidates/bosses/06_quebra_gelo_tita/",
+      "parts": [
+        "body",
+        "turret_left",
+        "turret_right",
+        "core"
+      ],
+      "states": [
+        "idle",
+        "move",
+        "attack",
+        "damage_100",
+        "damage_75",
+        "damage_50",
+        "damage_25",
+        "destroyed"
+      ],
+      "state": "pending_extraction"
+    },
+    {
+      "sector": 7,
+      "id": "rainha_dos_drones",
+      "reference": "bosses_library_20_board + bosses_library_20_v2",
+      "target": "assets/sprites/premium/candidates/bosses/07_rainha_dos_drones/",
+      "parts": [
+        "body",
+        "turret_left",
+        "turret_right",
+        "core"
+      ],
+      "states": [
+        "idle",
+        "move",
+        "attack",
+        "damage_100",
+        "damage_75",
+        "damage_50",
+        "damage_25",
+        "destroyed"
+      ],
+      "state": "pending_extraction"
+    },
+    {
+      "sector": 8,
+      "id": "aranha_mecanica",
+      "reference": "bosses_library_20_board + bosses_library_20_v2",
+      "target": "assets/sprites/premium/candidates/bosses/08_aranha_mecanica/",
+      "parts": [
+        "body",
+        "turret_left",
+        "turret_right",
+        "core"
+      ],
+      "states": [
+        "idle",
+        "move",
+        "attack",
+        "damage_100",
+        "damage_75",
+        "damage_50",
+        "damage_25",
+        "destroyed"
+      ],
+      "state": "pending_extraction"
+    },
+    {
+      "sector": 9,
+      "id": "fortaleza_vulcanica",
+      "reference": "bosses_library_20_board + bosses_library_20_v2",
+      "target": "assets/sprites/premium/candidates/bosses/09_fortaleza_vulcanica/",
+      "parts": [
+        "body",
+        "turret_left",
+        "turret_right",
+        "core"
+      ],
+      "states": [
+        "idle",
+        "move",
+        "attack",
+        "damage_100",
+        "damage_75",
+        "damage_50",
+        "damage_25",
+        "destroyed"
+      ],
+      "state": "pending_extraction"
+    },
+    {
+      "sector": 10,
+      "id": "helicoptero_cerberus",
+      "reference": "bosses_library_20_board + bosses_library_20_v2",
+      "target": "assets/sprites/premium/candidates/bosses/10_helicoptero_cerberus/",
+      "parts": [
+        "body",
+        "turret_left",
+        "turret_right",
+        "core"
+      ],
+      "states": [
+        "idle",
+        "move",
+        "attack",
+        "damage_100",
+        "damage_75",
+        "damage_50",
+        "damage_25",
+        "destroyed"
+      ],
+      "state": "pending_extraction"
+    },
+    {
+      "sector": 11,
+      "id": "cruzador_dourado",
+      "reference": "bosses_library_20_board + bosses_library_20_v2",
+      "target": "assets/sprites/premium/candidates/bosses/11_cruzador_dourado/",
+      "parts": [
+        "body",
+        "turret_left",
+        "turret_right",
+        "core"
+      ],
+      "states": [
+        "idle",
+        "move",
+        "attack",
+        "damage_100",
+        "damage_75",
+        "damage_50",
+        "damage_25",
+        "destroyed"
+      ],
+      "state": "pending_extraction"
+    },
+    {
+      "sector": 12,
+      "id": "androide_noturno",
+      "reference": "bosses_library_20_board + bosses_library_20_v2",
+      "target": "assets/sprites/premium/candidates/bosses/12_androide_noturno/",
+      "parts": [
+        "body",
+        "turret_left",
+        "turret_right",
+        "core"
+      ],
+      "states": [
+        "idle",
+        "move",
+        "attack",
+        "damage_100",
+        "damage_75",
+        "damage_50",
+        "damage_25",
+        "destroyed"
+      ],
+      "state": "pending_extraction"
+    },
+    {
+      "sector": 13,
+      "id": "porta_helicopteros",
+      "reference": "bosses_library_20_board + bosses_library_20_v2",
+      "target": "assets/sprites/premium/candidates/bosses/13_porta_helicopteros/",
+      "parts": [
+        "body",
+        "turret_left",
+        "turret_right",
+        "core"
+      ],
+      "states": [
+        "idle",
+        "move",
+        "attack",
+        "damage_100",
+        "damage_75",
+        "damage_50",
+        "damage_25",
+        "destroyed"
+      ],
+      "state": "pending_extraction"
+    },
+    {
+      "sector": 14,
+      "id": "borboleta_aco",
+      "reference": "bosses_library_20_board + bosses_library_20_v2",
+      "target": "assets/sprites/premium/candidates/bosses/14_borboleta_aco/",
+      "parts": [
+        "body",
+        "turret_left",
+        "turret_right",
+        "core"
+      ],
+      "states": [
+        "idle",
+        "move",
+        "attack",
+        "damage_100",
+        "damage_75",
+        "damage_50",
+        "damage_25",
+        "destroyed"
+      ],
+      "state": "pending_extraction"
+    },
+    {
+      "sector": 15,
+      "id": "submarino_invisivel",
+      "reference": "bosses_library_20_board + bosses_library_20_v2",
+      "target": "assets/sprites/premium/candidates/bosses/15_submarino_invisivel/",
+      "parts": [
+        "body",
+        "turret_left",
+        "turret_right",
+        "core"
+      ],
+      "states": [
+        "idle",
+        "move",
+        "attack",
+        "damage_100",
+        "damage_75",
+        "damage_50",
+        "damage_25",
+        "destroyed"
+      ],
+      "state": "pending_extraction"
+    },
+    {
+      "sector": 16,
+      "id": "abelha_imperial",
+      "reference": "bosses_library_20_board + bosses_library_20_v2",
+      "target": "assets/sprites/premium/candidates/bosses/16_abelha_imperial/",
+      "parts": [
+        "body",
+        "turret_left",
+        "turret_right",
+        "core"
+      ],
+      "states": [
+        "idle",
+        "move",
+        "attack",
+        "damage_100",
+        "damage_75",
+        "damage_50",
+        "damage_25",
+        "destroyed"
+      ],
+      "state": "pending_extraction"
+    },
+    {
+      "sector": 17,
+      "id": "destroier_omega",
+      "reference": "bosses_library_20_board + bosses_library_20_v2",
+      "target": "assets/sprites/premium/candidates/bosses/17_destroier_omega/",
+      "parts": [
+        "body",
+        "turret_left",
+        "turret_right",
+        "core"
+      ],
+      "states": [
+        "idle",
+        "move",
+        "attack",
+        "damage_100",
+        "damage_75",
+        "damage_50",
+        "damage_25",
+        "destroyed"
+      ],
+      "state": "pending_extraction"
+    },
+    {
+      "sector": 18,
+      "id": "colosso_submerso",
+      "reference": "bosses_library_20_board + bosses_library_20_v2",
+      "target": "assets/sprites/premium/candidates/bosses/18_colosso_submerso/",
+      "parts": [
+        "body",
+        "turret_left",
+        "turret_right",
+        "core"
+      ],
+      "states": [
+        "idle",
+        "move",
+        "attack",
+        "damage_100",
+        "damage_75",
+        "damage_50",
+        "damage_25",
+        "destroyed"
+      ],
+      "state": "pending_extraction"
+    },
+    {
+      "sector": 19,
+      "id": "sentinela_eletrica",
+      "reference": "bosses_library_20_board + bosses_library_20_v2",
+      "target": "assets/sprites/premium/candidates/bosses/19_sentinela_eletrica/",
+      "parts": [
+        "body",
+        "turret_left",
+        "turret_right",
+        "core"
+      ],
+      "states": [
+        "idle",
+        "move",
+        "attack",
+        "damage_100",
+        "damage_75",
+        "damage_50",
+        "damage_25",
+        "destroyed"
+      ],
+      "state": "pending_extraction"
+    },
+    {
+      "sector": 20,
+      "id": "triarca_celestial",
+      "reference": "bosses_library_20_board + bosses_library_20_v2",
+      "target": "assets/sprites/premium/candidates/bosses/20_triarca_celestial/",
+      "parts": [
+        "body",
+        "turret_left",
+        "turret_right",
+        "core"
+      ],
+      "states": [
+        "idle",
+        "move",
+        "attack",
+        "damage_100",
+        "damage_75",
+        "damage_50",
+        "damage_25",
+        "destroyed"
+      ],
+      "state": "pending_extraction"
+    }
+  ],
+  "effects": [
+    {
+      "id": "enemy_shots",
+      "target": "assets/sprites/premium/candidates/fx/enemy_shots/",
+      "state": "pending_extraction"
+    },
+    {
+      "id": "torpedo",
+      "target": "assets/sprites/premium/candidates/fx/torpedo/",
+      "state": "pending_extraction"
+    },
+    {
+      "id": "missile",
+      "target": "assets/sprites/premium/candidates/fx/missile/",
+      "state": "pending_extraction"
+    },
+    {
+      "id": "air_bomb",
+      "target": "assets/sprites/premium/candidates/fx/air_bomb/",
+      "state": "pending_extraction"
+    },
+    {
+      "id": "trails",
+      "target": "assets/sprites/premium/candidates/fx/trails/",
+      "state": "pending_extraction"
+    },
+    {
+      "id": "explosions_small",
+      "target": "assets/sprites/premium/candidates/fx/explosions_small/",
+      "state": "pending_extraction"
+    },
+    {
+      "id": "explosions_medium",
+      "target": "assets/sprites/premium/candidates/fx/explosions_medium/",
+      "state": "pending_extraction"
+    },
+    {
+      "id": "explosions_large",
+      "target": "assets/sprites/premium/candidates/fx/explosions_large/",
+      "state": "pending_extraction"
+    },
+    {
+      "id": "splashes",
+      "target": "assets/sprites/premium/candidates/fx/splashes/",
+      "state": "pending_extraction"
+    },
+    {
+      "id": "wake",
+      "target": "assets/sprites/premium/candidates/fx/wake/",
+      "state": "pending_extraction"
+    },
+    {
+      "id": "water_reflections",
+      "target": "assets/sprites/premium/candidates/fx/water_reflections/",
+      "state": "pending_extraction"
+    },
+    {
+      "id": "whirlpools",
+      "target": "assets/sprites/premium/candidates/fx/whirlpools/",
+      "state": "pending_extraction"
+    }
+  ],
+  "metadataFields": [
+    "asset_id",
+    "source_board",
+    "source_rect_xywh",
+    "file",
+    "sha256",
+    "frame_count",
+    "size_px",
+    "pivot_xy_normalized",
+    "collision_bounds",
+    "intended_screen_width_fraction",
+    "approval_state"
+  ]
+}
