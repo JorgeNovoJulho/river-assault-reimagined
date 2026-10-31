@@ -54,6 +54,11 @@ jobs:
           test -s dist/assets/sprites/bosses/iron-wasp.svg
           test -s dist/assets/sprites/enemies/mecha-gun.svg
           test -s dist/assets/sprites/projectiles/plasma-blue.svg
+          # Copia defensiva após Vite: recursos estáticos externos ao bundle JS.
+          mkdir -p dist/assets/ui/premium/pilots dist/assets/ui/premium/menu dist/music
+          cp -v assets/ui/premium/pilots/*.png dist/assets/ui/premium/pilots/
+          cp -v assets/ui/premium/menu/*.png dist/assets/ui/premium/menu/
+          cp -v music/*.opus dist/music/
           # Os sete cards são requisito funcional da seleção premium.
           for pilot in snabo_falcao jhow_vespa btata_cometa napas_fenix casper_aguia_vtol roger_ufo_aurora dudu_titan; do
             test -s "dist/assets/ui/premium/pilots/${pilot}.png" || { echo "::error::Arte do piloto ausente no deploy: ${pilot}"; exit 1; }
