@@ -23,10 +23,17 @@ function paths(sector){
  const folder='candidates/biomes/mission_'+String(n).padStart(2,'0')+'_'+BIOMES[n-1]+'/';
  return {water:folder+'water.png',left:folder+'bank_left.png',right:folder+'bank_right.png'};
 }
+function approvedPaths(sector){
+ const n=Math.max(1,Math.min(20,Math.floor(Number(sector)||1)));
+ const folder='approved/environment/mission_'+String(n).padStart(2,'0')+'_'+BIOMES[n-1]+'/';
+ return {water:folder+'water.png',left:folder+'bank_left.png',right:folder+'bank_right.png'};
+}
 const fallback={water:'runtime/environment/water_calm.png',left:'runtime/environment/riverbank_left.png',right:'runtime/environment/riverbank_right.png'};
 function groupReady(paths){return Object.values(paths).every(path=>image(path).loaded);}
-function ready(sector){preload(sector);return groupReady(paths(sector))||groupReady(fallback);}
+function ready(sector){preload(sector);return groupReady(approvedPaths(sector))||groupReady(paths(sector))||groupReady(fallback);}
 function active(sector){
+ const approved=approvedPaths(sector);
+ if(groupReady(approved))return {mode:'approved',textures:approved};
  const mission=paths(sector);
  if(groupReady(mission))return {mode:'biome',textures:mission};
  if(groupReady(fallback))return {mode:'fallback',textures:fallback};
@@ -69,6 +76,7 @@ function paint(c,d,bankAt,riverPath){
 }
 function preload(sector){
  const n=Math.max(1,Math.min(20,Math.floor(Number(sector)||1)));
+ for(const p of Object.values(approvedPaths(n)))image(p);
  for(const p of Object.values(paths(n)))image(p);
  for(const p of Object.values(fallback))image(p);
 }
