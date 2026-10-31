@@ -4653,9 +4653,9 @@ function updateTerrainEvent(){
         const simulationClock = new window.RiverClock();
         function gameLoop(timestamp = 0) {
             try {
-            if(controllerMenuOpen && timestamp-(gameLoop.lastSettingsPoll||0)<140){return;}
+            if(controllerMenuOpen && timestamp-(gameLoop.lastSettingsPoll||0)<140){requestAnimationFrame(gameLoop);return;}
             if(controllerMenuOpen)gameLoop.lastSettingsPoll=timestamp;
-            if(gameState!=='PLAYING'&&!controllerMenuOpen && timestamp-(gameLoop.lastMenuFrame||0)<50){return;}
+            if(gameState!=='PLAYING'&&!controllerMenuOpen && timestamp-(gameLoop.lastMenuFrame||0)<50){requestAnimationFrame(gameLoop);return;}
             if(gameState!=='PLAYING'&&!controllerMenuOpen)gameLoop.lastMenuFrame=timestamp;
             gamepadState = physicalGamepad.poll();
             const parryPadPressed=!!physicalGamepad.lastButtons[4];
@@ -4948,6 +4948,7 @@ function updateTerrainEvent(){
         document.addEventListener('pointerdown',startIntroMusic,{once:true});
         document.addEventListener('keydown',startIntroMusic,{once:true});
         menuMusic.load();
+        startIntroMusic();
         const lastChoice=document.getElementById('mode-last-pilot');
         function updateLastChoice(){
           let pilot='',plane='';
@@ -4971,10 +4972,16 @@ function updateTerrainEvent(){
  const pilotScreen=document.getElementById('rs-pilot-screen'),pilotGrid=document.getElementById('rs-pilot-grid'),pilotDetail=document.getElementById('rs-pilot-detail');
  let chosenPilot=pilotEntries[0];
  try{const v=localStorage.getItem('riverstorm_last_pilot_id');chosenPilot=pilotEntries.find(p=>p[0]===v)||chosenPilot;}catch(e){}
- const pilotStats={
-  snabo:[6,6,8,7,6,6],jhow:[8,9,5,6,5,7],btata:[6,10,4,4,5,6],
-  napas:[10,7,4,5,6,8],casper:[6,5,10,8,7,5],roger:[5,7,6,10,5,10],dudu:[9,4,10,5,10,5]
- };
+ // Painel derivado do catálogo real: escala informativa, não uma segunda física.
+ const gamePlanes=window.RiverAircraft?.PLANES||{};
+ const pilotStats=Object.fromEntries(pilotEntries.map(p=>{
+   const plane=gamePlanes[p[2]]||{};
+   const speed=Number(plane.speed)||6.5,fuel=Number(plane.fuel)||.06;
+   const speedRating=Math.max(1,Math.min(10,Math.round(speed/8.2*10)));
+   const efficiency=Math.max(1,Math.min(10,Math.round(.09/fuel*5)));
+   const power=Math.max(1,Math.min(10,Math.round((plane.weapons||[]).length*1.5)));
+   return [p[0],[power,speedRating,plane.shieldMultiplier?9:6,efficiency,6,Math.min(10,Math.round((plane.weapons||[]).length*1.6))]];
+ }));
  const pilotDescriptions={
   snabo:'Equilíbrio, estabilidade e resistência.',
   jhow:'Agilidade e poder de fogo.',
@@ -5044,6 +5051,7 @@ function updateTerrainEvent(){
   try{const key='river_aircraft_unlocked_v1';const owned=JSON.parse(localStorage.getItem(key)||'[]');localStorage.setItem(key,JSON.stringify([...new Set([...(Array.isArray(owned)?owned:[]),...pilotEntries.map(p=>p[2])])]));}catch(e){}
   if(planeSelect&&[...planeSelect.options].some(o=>o.value===chosenPilot[2])){planeSelect.value=chosenPilot[2];planeSelect.dispatchEvent(new Event('change',{bubbles:true}));}
   pilotScreen.classList.add('hidden');stopIntroMusic();updateLastChoice();
+  document.getElementById('start-btn')?.click();
  };
         document.getElementById('mode-multi').addEventListener('click',()=>{
           document.getElementById('mode-multi-info').classList.remove('hidden');
