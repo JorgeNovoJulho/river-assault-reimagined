@@ -13,7 +13,7 @@ const CATALOG={
  fx:{explosion:'fx/explosion_atlas_4x3.png'},
  enemy:{
   HELI:'enemies/helicopter.png',JET:'enemies/jet.png',
-  ZIGZAG:'enemies/zigzag.png',TURRET:'enemies/turret.png',
+  ZIGZAG:'approved/enemies/recurring/recon_plane/idle_000.png',TURRET:'enemies/turret.png',
   TANK:'enemies/tank.png',SUB:'enemies/submarine.png',
   SHIP:'enemies/ship.png',MECHA_GUN:'enemies/mecha-gun.png',
   MECHA_SWORD:'enemies/mecha-sword.png',
