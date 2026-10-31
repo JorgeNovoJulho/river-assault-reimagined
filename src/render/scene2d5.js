@@ -1463,7 +1463,7 @@ function draw(c,d){
  }
  if(!d.invulnerable||Math.floor(Date.now()/110)%2){
    const aircraft=d.player.aircraftType||d.aircraft;
-   const premiumAircraft=aircraft==='falcao'?root.RiverPremium?.get('player','falcao'):null;
+   const premiumAircraft=root.RiverPremium?.aircraft(aircraft,d.player.boosting?'boost':d.player.specialActive?'especial':d.player.firing?'disparo':'normal');
    if(premiumAircraft){
      c.drawImage(premiumAircraft,d.player.x-27,d.player.y-32,54,64);
    }else{
@@ -1476,7 +1476,7 @@ function drawPlayerForeground(c,x,y,aircraft,invulnerable){
  if(invulnerable>0&&Math.floor(Date.now()/160)%6===0)return;
  c.save();
  c.shadowColor='#69eaff';c.shadowBlur=detailEnabled?8:3;
- const premiumAircraft=aircraft==='falcao'?root.RiverPremium?.get('player','falcao'):null;
+ const premiumAircraft=root.RiverPremium?.aircraft(aircraft,'normal');
  if(premiumAircraft){
    c.drawImage(premiumAircraft,x-27,y-32,54,64);
  }else{
