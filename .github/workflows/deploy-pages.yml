@@ -54,6 +54,10 @@ jobs:
           test -s dist/assets/sprites/bosses/iron-wasp.svg
           test -s dist/assets/sprites/enemies/mecha-gun.svg
           test -s dist/assets/sprites/projectiles/plasma-blue.svg
+          # Os sete cards são requisito funcional da seleção premium.
+          for pilot in snabo_falcao jhow_vespa btata_cometa napas_fenix casper_aguia_vtol roger_ufo_aurora dudu_titan; do
+            test -s "dist/assets/ui/premium/pilots/${pilot}.png" || { echo "::error::Arte do piloto ausente no deploy: ${pilot}"; exit 1; }
+          done
           test -s dist/assets/sprites/premium/runtime/player/fighter_candidate.png
           test -s dist/assets/sprites/premium/runtime/fx/explosion_atlas_4x3.png
           test -s dist/assets/sprites/premium/runtime/boss01/core.png
