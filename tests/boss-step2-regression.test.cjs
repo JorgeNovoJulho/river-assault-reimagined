@@ -7,7 +7,7 @@ test('barra especial do boss e dialogo sao independentes da arena',()=>{
 });
 test('EMP do boss dura no maximo 1.2 s e especiais têm recarga mínima',()=>{
  assert.ok(html.includes("player.effectTimer=72"));
- assert.ok(html.includes("Math.max(420,e.specialCooldown || 480)"));
+ assert.match(html,/Math\.max\(420,Math\.round\(\(e\.specialCooldown \|\| 480\)\/adaptiveThreat\)\)/);
  assert.ok(!html.includes("createFloatingText(player.x,player.y,'EMP · 5 S'"));
 });
 test('existem 20 identidades de boss e frases distintas por setor',()=>{

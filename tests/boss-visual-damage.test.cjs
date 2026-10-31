@@ -13,6 +13,6 @@ test('desgaste visual proporcional à vida sem alterar hitbox',()=>{
   assert.match(html,/if\(qualitySelect\.value!=='eco'\)/);
 });
 test('recarga mínima e EMP curto permanecem ativos',()=>{
-  assert.ok(html.includes('Math.max(420,e.specialCooldown || 480)'));
+  assert.match(html,/Math\.max\(420,Math\.round\(\(e\.specialCooldown \|\| 480\)\/adaptiveThreat\)\)/);
   assert.ok(html.includes("player.effectTimer=72"));
 });

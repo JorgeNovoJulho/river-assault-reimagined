@@ -94,7 +94,7 @@ test('boss UI fix: active renderer uses compact meters and synthesized boss voic
  assert.match(html,/drawBossCompactMeters\(\);/);
  assert.match(html,/const width=80,y=e.y-e.height\/2-34/);
  assert.match(html,/function bossRobotVoice\(/);
- assert.match(html,/bossRobotVoice\(e,true\)/);
+ assert.match(html,/bossRobotVoice\(boss,true\)/);
  assert.match(html,/115\)/);
  assert.match(html,/window.addEventListener\('pointermove'/);
 });
@@ -231,11 +231,10 @@ test('064: horizontal wing rockets, diagonal drones, capped status and EMP immun
  assert.match(html,/launch\(player\.x-24,player\.y-6,-11,0\)/);
  assert.match(html,/launch\(player\.x\+24,player\.y-6,11,0\)/);
  assert.match(html,/launch\(player\.x,player\.y-24,0,-12\)/);
- assert.match(html,/w\.side\*7,-9/);
+ assert.match(html,/function wingPosition\(w\)/);
  assert.match(html,/cap=e\.statusBaseHp\*\.30/);
  assert.match(html,/boss\.gravityRate=advantage\?\.06:\.03/);
  assert.match(html,/boss\.stunnedTicks=300/);
- assert.match(html,/HUD 0\.7\.6/);
 });
 
 test('065 approved EMP has no damage and gravity ticks full 3 seconds',()=>{

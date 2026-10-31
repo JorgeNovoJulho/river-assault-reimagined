@@ -82,7 +82,8 @@ test('progressão NG+ exige campanha legítima e limita patente',()=>{
  assert.match(html,/if\(journey<RANKS\.length\)journey\+\+/);
  assert.match(html,/if\(!campaignVerified\|\|\(nextSector!==sector&&nextSector!==sector\+1\)\)return false/);
  assert.match(html,/verifiedRun:true/);
- assert.match(html,/MISSÃO 20 CONCLUÍDA — MODO TESTE/);
+ assert.match(html,/MISSÃO 20 CONCLUÍDA — TREINAMENTO/);
+ assert.match(html,/conclua as vinte missões em sequência para receber promoção e bônus/);
 });
 test('perfil tem nome de 18 caracteres e indicadores de carreira',()=>{
  const html=fs.readFileSync('index.html','utf8');
@@ -126,7 +127,8 @@ test('projéteis são percorridos em ordem inversa evitando pular tiros removido
  assert.match(html,/for\(let index=bullets\.length-1;index>=0;index--\)/);
  assert.match(html,/for\(let index=enemyBullets\.length-1;index>=0;index--\)/);
  assert.match(html,/!Number\.isFinite\(eb\.x\)/);
- assert.match(html,/dodgeReflect:rollFrames>0\}\);addExplosion[\s\S]*?continue;/);
+ const enemyLoop=html.slice(html.indexOf('for(let index=enemyBullets.length-1;index>=0;index--)'),html.indexOf('// Subcomponentes destrutíveis'));
+ assert.match(enemyLoop,/enemyBullets\.splice\(index,1\)[\s\S]*?dodgeReflect:rollFrames>0[\s\S]*?continue;/);
 });
 
 test('ao avançar de missão efeitos hostis de boss são removidos',()=>{

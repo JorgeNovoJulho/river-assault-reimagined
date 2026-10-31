@@ -17,6 +17,6 @@ test('identidade acompanha o boss e preserva hitbox',()=>{
 test('balanceamento individual e limites dos especiais continuam presentes',()=>{
  assert.ok(src.includes('const BOSS_BALANCE_20='));
  assert.ok(src.includes('bossClimateStrength*bossBalance[0]'));
- assert.ok(src.includes('Math.max(420,e.specialCooldown || 480)'));
+ assert.match(src,/Math\.max\(420,Math\.round\(\(e\.specialCooldown \|\| 480\)\/adaptiveThreat\)\)/);
  assert.ok(src.includes('player.effectTimer=72'));
 });
