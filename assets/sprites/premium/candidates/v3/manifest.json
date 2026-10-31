@@ -1,0 +1,998 @@
+{
+  "version": "3",
+  "note": "PNG RGBA transparência real; imagens 2x não criam detalhes além do original; tiras de animação ainda precisam de separação e revisão",
+  "assets": [
+    {
+      "file": "enemies/exclusive/01_tucano/idle_000.png",
+      "source": "exclusive_atlas.png",
+      "box": [
+        3,
+        12,
+        287,
+        270
+      ],
+      "size": [
+        556,
+        506
+      ],
+      "sha256": "c008b555b898dbcb93f572baa53ed7490766e8f361017c164ade1634f3951fab",
+      "approval": "art_direction_approved; extraction_requires_runtime_visual_review"
+    },
+    {
+      "file": "enemies/exclusive/02_crane/idle_000.png",
+      "source": "exclusive_atlas.png",
+      "box": [
+        293,
+        12,
+        577,
+        270
+      ],
+      "size": [
+        568,
+        494
+      ],
+      "sha256": "2c7d7495526d0274f2630b554aec127b6bd30f144e2a44904be040f197bc3018",
+      "approval": "art_direction_approved; extraction_requires_runtime_visual_review"
+    },
+    {
+      "file": "enemies/exclusive/03_scorpion/idle_000.png",
+      "source": "exclusive_atlas.png",
+      "box": [
+        583,
+        12,
+        867,
+        270
+      ],
+      "size": [
+        568,
+        490
+      ],
+      "sha256": "3905a1affe919d078bb5fe56c6d22a2e9c866f74146b0f46403d608140e49bfe",
+      "approval": "art_direction_approved; extraction_requires_runtime_visual_review"
+    },
+    {
+      "file": "enemies/exclusive/04_alligator/idle_000.png",
+      "source": "exclusive_atlas.png",
+      "box": [
+        873,
+        12,
+        1157,
+        270
+      ],
+      "size": [
+        568,
+        490
+      ],
+      "sha256": "2c932c54e942ee1c2a9adc19f4388273b165a0dbf81d44a6833b77af219fada9",
+      "approval": "art_direction_approved; extraction_requires_runtime_visual_review"
+    },
+    {
+      "file": "enemies/exclusive/05_corsair/idle_000.png",
+      "source": "exclusive_atlas.png",
+      "box": [
+        1163,
+        12,
+        1447,
+        270
+      ],
+      "size": [
+        568,
+        462
+      ],
+      "sha256": "474280c293807dc450258a430a78331b6494d72d5b70c36019ad5b08f6838021",
+      "approval": "art_direction_approved; extraction_requires_runtime_visual_review"
+    },
+    {
+      "file": "enemies/exclusive/06_walrus/idle_000.png",
+      "source": "exclusive_atlas.png",
+      "box": [
+        3,
+        273,
+        287,
+        516
+      ],
+      "size": [
+        566,
+        484
+      ],
+      "sha256": "6d87f90a59a20bd8026852a3e244a701930e8c86de72004e269b56e77e3b5016",
+      "approval": "art_direction_approved; extraction_requires_runtime_visual_review"
+    },
+    {
+      "file": "enemies/exclusive/07_mantis/idle_000.png",
+      "source": "exclusive_atlas.png",
+      "box": [
+        293,
+        273,
+        577,
+        516
+      ],
+      "size": [
+        568,
+        486
+      ],
+      "sha256": "e51a514072a1b757c69a088ed08878b9186f7d00e8506649b412364a7aca7b0d",
+      "approval": "art_direction_approved; extraction_requires_runtime_visual_review"
+    },
+    {
+      "file": "enemies/exclusive/08_motojet/idle_000.png",
+      "source": "exclusive_atlas.png",
+      "box": [
+        583,
+        273,
+        867,
+        516
+      ],
+      "size": [
+        568,
+        486
+      ],
+      "sha256": "740c57c6d4fcd95d5203c3826d289e0c89888b42c9b767fd123965bfdfadf0b8",
+      "approval": "art_direction_approved; extraction_requires_runtime_visual_review"
+    },
+    {
+      "file": "enemies/exclusive/09_salamander/idle_000.png",
+      "source": "exclusive_atlas.png",
+      "box": [
+        873,
+        273,
+        1157,
+        516
+      ],
+      "size": [
+        568,
+        484
+      ],
+      "sha256": "1dbb151263defb8e5f554e53846aa2a595ed9566ee428862079aaeb93da851df",
+      "approval": "art_direction_approved; extraction_requires_runtime_visual_review"
+    },
+    {
+      "file": "enemies/exclusive/10_eagle/idle_000.png",
+      "source": "exclusive_atlas.png",
+      "box": [
+        1163,
+        273,
+        1447,
+        516
+      ],
+      "size": [
+        568,
+        476
+      ],
+      "sha256": "0d51b7841f4706fe99c8052212684eecac0e6ee95707db7e2d36d58f253aa8a1",
+      "approval": "art_direction_approved; extraction_requires_runtime_visual_review"
+    },
+    {
+      "file": "enemies/exclusive/11_dredger/idle_000.png",
+      "source": "exclusive_atlas.png",
+      "box": [
+        3,
+        520,
+        287,
+        771
+      ],
+      "size": [
+        548,
+        502
+      ],
+      "sha256": "51bbfe1a1d4901f9a2ca6ecd1165a46c4f2dd961afc0b0aeec0c8feb8fafb4d9",
+      "approval": "art_direction_approved; extraction_requires_runtime_visual_review"
+    },
+    {
+      "file": "enemies/exclusive/12_hovercar/idle_000.png",
+      "source": "exclusive_atlas.png",
+      "box": [
+        293,
+        520,
+        577,
+        771
+      ],
+      "size": [
+        568,
+        500
+      ],
+      "sha256": "989bbf9c40744e5350ced3b8a83c59a3f8cee1b639f5e148e31916b5871e3ac8",
+      "approval": "art_direction_approved; extraction_requires_runtime_visual_review"
+    },
+    {
+      "file": "enemies/exclusive/13_piranha/idle_000.png",
+      "source": "exclusive_atlas.png",
+      "box": [
+        583,
+        520,
+        867,
+        771
+      ],
+      "size": [
+        568,
+        500
+      ],
+      "sha256": "7c737b7eb3c3baddc344174dd2eb3f8d8c007bf28c2072e99042243714f54611",
+      "approval": "art_direction_approved; extraction_requires_runtime_visual_review"
+    },
+    {
+      "file": "enemies/exclusive/14_ice_ray/idle_000.png",
+      "source": "exclusive_atlas.png",
+      "box": [
+        873,
+        520,
+        1157,
+        771
+      ],
+      "size": [
+        568,
+        478
+      ],
+      "sha256": "90183483673f94af71a213b607ec4104f734008d2695ed9b8500ef3bc3b64deb",
+      "approval": "art_direction_approved; extraction_requires_runtime_visual_review"
+    },
+    {
+      "file": "enemies/exclusive/15_beetle/idle_000.png",
+      "source": "exclusive_atlas.png",
+      "box": [
+        1163,
+        520,
+        1447,
+        771
+      ],
+      "size": [
+        568,
+        486
+      ],
+      "sha256": "8c341e0d332887750c18c1e1f8971d9a83e14b544854b1198a82c48ac90db600",
+      "approval": "art_direction_approved; extraction_requires_runtime_visual_review"
+    },
+    {
+      "file": "enemies/exclusive/16_prism_wasp/idle_000.png",
+      "source": "exclusive_atlas.png",
+      "box": [
+        3,
+        775,
+        287,
+        1052
+      ],
+      "size": [
+        568,
+        554
+      ],
+      "sha256": "b2f6345f524b7f6f59dced08faeda55e3e2670a4526b1f98176aa8c0d80bc186",
+      "approval": "art_direction_approved; extraction_requires_runtime_visual_review"
+    },
+    {
+      "file": "enemies/exclusive/17_welder/idle_000.png",
+      "source": "exclusive_atlas.png",
+      "box": [
+        293,
+        775,
+        577,
+        1052
+      ],
+      "size": [
+        568,
+        554
+      ],
+      "sha256": "77279d87bb436e85a94e13eede2a124c5380344ced302fe73a603fb094e5cf2e",
+      "approval": "art_direction_approved; extraction_requires_runtime_visual_review"
+    },
+    {
+      "file": "enemies/exclusive/18_narwhal/idle_000.png",
+      "source": "exclusive_atlas.png",
+      "box": [
+        583,
+        775,
+        867,
+        1052
+      ],
+      "size": [
+        568,
+        554
+      ],
+      "sha256": "ed9247353cb3b46a63831d96c5a351ebab914dea12fd28ffa7b071fb8f819b67",
+      "approval": "art_direction_approved; extraction_requires_runtime_visual_review"
+    },
+    {
+      "file": "enemies/exclusive/19_eel/idle_000.png",
+      "source": "exclusive_atlas.png",
+      "box": [
+        873,
+        775,
+        1157,
+        1052
+      ],
+      "size": [
+        568,
+        554
+      ],
+      "sha256": "fdef695f6172a02efe1cdec7b83fc4433de83be7a88eb571e36ceb5c81d0617e",
+      "approval": "art_direction_approved; extraction_requires_runtime_visual_review"
+    },
+    {
+      "file": "enemies/exclusive/20_hybrid_hunter/idle_000.png",
+      "source": "exclusive_atlas.png",
+      "box": [
+        1163,
+        775,
+        1447,
+        1052
+      ],
+      "size": [
+        568,
+        554
+      ],
+      "sha256": "7a2592b3666bd1d4cddea35a25078c748f8c9ef71ee83bf9e1d06942e2d22034",
+      "approval": "art_direction_approved; extraction_requires_runtime_visual_review"
+    },
+    {
+      "file": "enemies/recurring/recon_plane/idle_000.png",
+      "source": "recurring_fx_atlas.png",
+      "box": [
+        2,
+        4,
+        224,
+        165
+      ],
+      "size": [
+        444,
+        320
+      ],
+      "sha256": "96e47a33c03d74ad183ec8896a6d2195f6fbf5af0e2ccd3a8bb017ed1f381d73",
+      "approval": "art_direction_approved; extraction_requires_runtime_visual_review"
+    },
+    {
+      "file": "enemies/recurring/attack_helicopter/idle_000.png",
+      "source": "recurring_fx_atlas.png",
+      "box": [
+        215,
+        4,
+        442,
+        163
+      ],
+      "size": [
+        454,
+        318
+      ],
+      "sha256": "c41092c71313e0524ab7f61f98d9bc285fd19792b0097ad7a4bb18f368fcd4d1",
+      "approval": "art_direction_approved; extraction_requires_runtime_visual_review"
+    },
+    {
+      "file": "enemies/recurring/drone/idle_000.png",
+      "source": "recurring_fx_atlas.png",
+      "box": [
+        439,
+        5,
+        590,
+        170
+      ],
+      "size": [
+        302,
+        322
+      ],
+      "sha256": "568968eff356bfe0aeaed1e2f654320b56ec95200712ace48474726bf599debe",
+      "approval": "art_direction_approved; extraction_requires_runtime_visual_review"
+    },
+    {
+      "file": "enemies/recurring/mecha_sword/idle_000.png",
+      "source": "recurring_fx_atlas.png",
+      "box": [
+        593,
+        3,
+        778,
+        173
+      ],
+      "size": [
+        370,
+        340
+      ],
+      "sha256": "d995bc9ae2de8f57c1066e393295117cc164803036c21780f714f96343a60afa",
+      "approval": "art_direction_approved; extraction_requires_runtime_visual_review"
+    },
+    {
+      "file": "enemies/recurring/mecha_gun/idle_000.png",
+      "source": "recurring_fx_atlas.png",
+      "box": [
+        780,
+        2,
+        983,
+        177
+      ],
+      "size": [
+        406,
+        350
+      ],
+      "sha256": "7601c05d88f7d476852402ab172caa62bc6db10481aea84f053b1b7d2ee7b106",
+      "approval": "art_direction_approved; extraction_requires_runtime_visual_review"
+    },
+    {
+      "file": "enemies/recurring/tank/idle_000.png",
+      "source": "recurring_fx_atlas.png",
+      "box": [
+        988,
+        4,
+        1196,
+        172
+      ],
+      "size": [
+        416,
+        326
+      ],
+      "sha256": "def14d101fc9b72d9bb314a7fb0ac7058a12ba5bf6f30c31c6c59a4556fb76fc",
+      "approval": "art_direction_approved; extraction_requires_runtime_visual_review"
+    },
+    {
+      "file": "enemies/recurring/armed_boat/idle_000.png",
+      "source": "recurring_fx_atlas.png",
+      "box": [
+        1198,
+        5,
+        1445,
+        170
+      ],
+      "size": [
+        494,
+        330
+      ],
+      "sha256": "13fea4629e927eb55481f02e345c241e50b5c8f660ed8f2aaeb01833b2561497",
+      "approval": "art_direction_approved; extraction_requires_runtime_visual_review"
+    },
+    {
+      "file": "enemies/recurring/submarine/idle_000.png",
+      "source": "recurring_fx_atlas.png",
+      "box": [
+        2,
+        170,
+        311,
+        315
+      ],
+      "size": [
+        618,
+        290
+      ],
+      "sha256": "fb2eeba605b7aa7f0345bd883cb3c2f0cbe8da06bcb775ec413b7f65c2df8030",
+      "approval": "art_direction_approved; extraction_requires_runtime_visual_review"
+    },
+    {
+      "file": "enemies/recurring/floating_turret/idle_000.png",
+      "source": "recurring_fx_atlas.png",
+      "box": [
+        305,
+        166,
+        506,
+        320
+      ],
+      "size": [
+        402,
+        308
+      ],
+      "sha256": "dfd8494d3e1ddea6cab3981fefeccc8a10e56eaacbf69a59d38bbe56a8b26aec",
+      "approval": "art_direction_approved; extraction_requires_runtime_visual_review"
+    },
+    {
+      "file": "enemies/recurring/warship/idle_000.png",
+      "source": "recurring_fx_atlas.png",
+      "box": [
+        511,
+        176,
+        805,
+        322
+      ],
+      "size": [
+        588,
+        292
+      ],
+      "sha256": "144995bf59693401ad41e62f10075a1de2397dd2f4eb50058bb1603e302293ff",
+      "approval": "art_direction_approved; extraction_requires_runtime_visual_review"
+    },
+    {
+      "file": "enemies/recurring/bomber/idle_000.png",
+      "source": "recurring_fx_atlas.png",
+      "box": [
+        808,
+        169,
+        1133,
+        320
+      ],
+      "size": [
+        650,
+        302
+      ],
+      "sha256": "53736f8ba4e64aed99a13bb9774ab56a9227796d0061a0c83c4f78a556bfa758",
+      "approval": "art_direction_approved; extraction_requires_runtime_visual_review"
+    },
+    {
+      "file": "enemies/recurring/elite_fighter/idle_000.png",
+      "source": "recurring_fx_atlas.png",
+      "box": [
+        1136,
+        168,
+        1445,
+        320
+      ],
+      "size": [
+        618,
+        304
+      ],
+      "sha256": "8bfca800f0cd3c2b59919c7ec4bfe17f359f5359f49d6c767fd5209c57b70971",
+      "approval": "art_direction_approved; extraction_requires_runtime_visual_review"
+    },
+    {
+      "file": "enemies/recurring/armed_island/idle_000.png",
+      "source": "recurring_fx_atlas.png",
+      "box": [
+        52,
+        321,
+        526,
+        514
+      ],
+      "size": [
+        948,
+        386
+      ],
+      "sha256": "01b6ddb085bcf62918c94daf465f296e3c6c990522773041e71728f69fd6c4e0",
+      "approval": "art_direction_approved; extraction_requires_runtime_visual_review"
+    },
+    {
+      "file": "enemies/recurring/dam_bridge/idle_000.png",
+      "source": "recurring_fx_atlas.png",
+      "box": [
+        535,
+        313,
+        997,
+        511
+      ],
+      "size": [
+        924,
+        396
+      ],
+      "sha256": "8258e5f9166cb75ee0ede90b7e850e3c5263fb2939cda7829ae596f00e07f211",
+      "approval": "art_direction_approved; extraction_requires_runtime_visual_review"
+    },
+    {
+      "file": "enemies/recurring/item_capsule/idle_000.png",
+      "source": "recurring_fx_atlas.png",
+      "box": [
+        1015,
+        316,
+        1152,
+        489
+      ],
+      "size": [
+        274,
+        346
+      ],
+      "sha256": "f8bcf549bdee16c1e1feaa81279c91933fcc9036b273851e68a42e6795cf513c",
+      "approval": "art_direction_approved; extraction_requires_runtime_visual_review"
+    },
+    {
+      "file": "enemies/recurring/floating_mine/idle_000.png",
+      "source": "recurring_fx_atlas.png",
+      "box": [
+        1160,
+        321,
+        1378,
+        488
+      ],
+      "size": [
+        436,
+        334
+      ],
+      "sha256": "cbc81751837b077358bdf324c7befa5a8562c9c4ba321b93644e18d2560c636f",
+      "approval": "art_direction_approved; extraction_requires_runtime_visual_review"
+    },
+    {
+      "file": "fx/shots/atlas_candidate.png",
+      "source": "recurring_fx_atlas.png",
+      "box": [
+        0,
+        516,
+        333,
+        627
+      ],
+      "size": [
+        666,
+        222
+      ],
+      "sha256": "7e1ca086132273ddd667d63bd82de3f996fc7702a778c77df299f98f19a97271",
+      "approval": "art_direction_approved; extraction_requires_runtime_visual_review"
+    },
+    {
+      "file": "fx/missiles/atlas_candidate.png",
+      "source": "recurring_fx_atlas.png",
+      "box": [
+        324,
+        511,
+        756,
+        630
+      ],
+      "size": [
+        864,
+        238
+      ],
+      "sha256": "b46ae40320e09d770d2646e442c512d2fe1e101a26c60325c2ed84abf798e0f8",
+      "approval": "art_direction_approved; extraction_requires_runtime_visual_review"
+    },
+    {
+      "file": "fx/water_splashes/atlas_candidate.png",
+      "source": "recurring_fx_atlas.png",
+      "box": [
+        763,
+        495,
+        1447,
+        628
+      ],
+      "size": [
+        1368,
+        266
+      ],
+      "sha256": "4f3ae9188a386f658c373276e2035a1a8c5581708907cccfa0d27cd44d6d63a6",
+      "approval": "art_direction_approved; extraction_requires_runtime_visual_review"
+    },
+    {
+      "file": "fx/explosions/atlas_candidate.png",
+      "source": "recurring_fx_atlas.png",
+      "box": [
+        0,
+        631,
+        558,
+        753
+      ],
+      "size": [
+        1116,
+        244
+      ],
+      "sha256": "ee405e372ff2a71a1661bc35118afe485cf473029cb3eebca6d352cb7d31eecf",
+      "approval": "art_direction_approved; extraction_requires_runtime_visual_review"
+    },
+    {
+      "file": "fx/items/atlas_candidate.png",
+      "source": "recurring_fx_atlas.png",
+      "box": [
+        561,
+        630,
+        1447,
+        754
+      ],
+      "size": [
+        1772,
+        248
+      ],
+      "sha256": "68b2ced9121a36faa14daf091cfc8e8a1e7a859d7bf551ab42dd35f7fc24dc1a",
+      "approval": "art_direction_approved; extraction_requires_runtime_visual_review"
+    },
+    {
+      "file": "fx/ice/atlas_candidate.png",
+      "source": "recurring_fx_atlas.png",
+      "box": [
+        0,
+        756,
+        455,
+        896
+      ],
+      "size": [
+        910,
+        280
+      ],
+      "sha256": "935d004c6a02a8ea01b74b3919c4ee6e6ebb404feff38311ed1a57f7f3ff83be",
+      "approval": "art_direction_approved; extraction_requires_runtime_visual_review"
+    },
+    {
+      "file": "fx/fire/atlas_candidate.png",
+      "source": "recurring_fx_atlas.png",
+      "box": [
+        460,
+        757,
+        745,
+        895
+      ],
+      "size": [
+        570,
+        276
+      ],
+      "sha256": "ad0a32acd491be42cc4b9804b912c0d7b10fb7c097a8c7bde4b6771bc10e7d18",
+      "approval": "art_direction_approved; extraction_requires_runtime_visual_review"
+    },
+    {
+      "file": "fx/lightning/atlas_candidate.png",
+      "source": "recurring_fx_atlas.png",
+      "box": [
+        745,
+        753,
+        914,
+        902
+      ],
+      "size": [
+        338,
+        298
+      ],
+      "sha256": "79b5ecfb31c4649e62ee02daa9de2d06dbc99968522df72046eb51e3c4585a31",
+      "approval": "art_direction_approved; extraction_requires_runtime_visual_review"
+    },
+    {
+      "file": "fx/gravity/atlas_candidate.png",
+      "source": "recurring_fx_atlas.png",
+      "box": [
+        920,
+        748,
+        1447,
+        900
+      ],
+      "size": [
+        1036,
+        304
+      ],
+      "sha256": "12f432c18508341daae4d5769105ea987f0cca198fdef52efc0fa1afdec1aec8",
+      "approval": "art_direction_approved; extraction_requires_runtime_visual_review"
+    },
+    {
+      "file": "fx/emp/atlas_candidate.png",
+      "source": "recurring_fx_atlas.png",
+      "box": [
+        0,
+        899,
+        313,
+        1079
+      ],
+      "size": [
+        626,
+        360
+      ],
+      "sha256": "c77afaf2554286e9dc4e0c7234c215710ee9f082f4594df86dfa2d84dc5d295b",
+      "approval": "art_direction_approved; extraction_requires_runtime_visual_review"
+    },
+    {
+      "file": "fx/poison/atlas_candidate.png",
+      "source": "recurring_fx_atlas.png",
+      "box": [
+        319,
+        894,
+        570,
+        1081
+      ],
+      "size": [
+        502,
+        374
+      ],
+      "sha256": "80033b1fa8e952eba69e1dac5ed808376635f2379b41a0ad98ce6d5fe5e29d7a",
+      "approval": "art_direction_approved; extraction_requires_runtime_visual_review"
+    },
+    {
+      "file": "fx/bleeding/atlas_candidate.png",
+      "source": "recurring_fx_atlas.png",
+      "box": [
+        574,
+        896,
+        715,
+        1078
+      ],
+      "size": [
+        282,
+        364
+      ],
+      "sha256": "14cff2df415efbb933ad1b817b10d70569e4a85366db1b5aecf3d4bccf687e9e",
+      "approval": "art_direction_approved; extraction_requires_runtime_visual_review"
+    },
+    {
+      "file": "fx/parry_shield/atlas_candidate.png",
+      "source": "recurring_fx_atlas.png",
+      "box": [
+        711,
+        899,
+        927,
+        1084
+      ],
+      "size": [
+        432,
+        370
+      ],
+      "sha256": "8d303cc96930d7619ebae0a5c137ce27ec0e0e399ec622f5458807b94b5f5b21",
+      "approval": "art_direction_approved; extraction_requires_runtime_visual_review"
+    },
+    {
+      "file": "fx/sword_rush/atlas_candidate.png",
+      "source": "recurring_fx_atlas.png",
+      "box": [
+        931,
+        898,
+        1126,
+        1081
+      ],
+      "size": [
+        390,
+        366
+      ],
+      "sha256": "aac548c478be0b3b4ecc2675e6f052c4ad7bb4159902f28991f53cd8c49978cc",
+      "approval": "art_direction_approved; extraction_requires_runtime_visual_review"
+    },
+    {
+      "file": "fx/reflect_burst/atlas_candidate.png",
+      "source": "recurring_fx_atlas.png",
+      "box": [
+        1130,
+        898,
+        1263,
+        1082
+      ],
+      "size": [
+        266,
+        368
+      ],
+      "sha256": "3976ba2fc1f7b11735662b4970305ac3a158bafb56954ba3562ec596b2e0fd30",
+      "approval": "art_direction_approved; extraction_requires_runtime_visual_review"
+    },
+    {
+      "file": "fx/bomb_shockwave/atlas_candidate.png",
+      "source": "recurring_fx_atlas.png",
+      "box": [
+        1261,
+        900,
+        1446,
+        1084
+      ],
+      "size": [
+        370,
+        368
+      ],
+      "sha256": "178d3561697e8efc6ceedfad4bdf9599bb29e18807367f6a90ac4c7173f87771",
+      "approval": "art_direction_approved; extraction_requires_runtime_visual_review"
+    },
+    {
+      "file": "bosses/01_ponte_fortificada/body_full.png",
+      "source": "boss_01_02_atlas.png",
+      "box": [
+        0,
+        0,
+        728,
+        285
+      ],
+      "size": [
+        1456,
+        570
+      ],
+      "sha256": "18878e6467d69d295196d80ebe99ea0680cabc9b7444306dd948637fc26c783c",
+      "approval": "art_direction_approved; extraction_requires_runtime_visual_review"
+    },
+    {
+      "file": "bosses/01_ponte_fortificada/modules.png",
+      "source": "boss_01_02_atlas.png",
+      "box": [
+        724,
+        0,
+        1164,
+        288
+      ],
+      "size": [
+        880,
+        576
+      ],
+      "sha256": "4bbb5ab4d89d5f2c4a77dd641d69b7b0173aa7c8f12949c5591cb26b23699273",
+      "approval": "art_direction_approved; extraction_requires_runtime_visual_review"
+    },
+    {
+      "file": "bosses/01_ponte_fortificada/projectiles_explosions.png",
+      "source": "boss_01_02_atlas.png",
+      "box": [
+        1158,
+        0,
+        1448,
+        292
+      ],
+      "size": [
+        580,
+        584
+      ],
+      "sha256": "b59e9de91871ccdee0116b76f665b474f92d92ea803c9c8df3ade3cca2cc9226",
+      "approval": "art_direction_approved; extraction_requires_runtime_visual_review"
+    },
+    {
+      "file": "bosses/01_ponte_fortificada/damage_strip.png",
+      "source": "boss_01_02_atlas.png",
+      "box": [
+        0,
+        289,
+        1448,
+        401
+      ],
+      "size": [
+        1434,
+        112
+      ],
+      "sha256": "255e325156cba74da2ac59ba261c74ad7963a6b2235db4260f8c962148332471",
+      "approval": "art_direction_approved; extraction_requires_runtime_visual_review"
+    },
+    {
+      "file": "bosses/01_ponte_fortificada/movement_strip.png",
+      "source": "boss_01_02_atlas.png",
+      "box": [
+        0,
+        408,
+        1448,
+        531
+      ],
+      "size": [
+        1415,
+        123
+      ],
+      "sha256": "d5ad87170a7d86b2469411774c3f840e2e4f3017c1bf2be431d2992aa2298a94",
+      "approval": "art_direction_approved; extraction_requires_runtime_visual_review"
+    },
+    {
+      "file": "bosses/02_encouracado_abissal/body_full.png",
+      "source": "boss_01_02_atlas.png",
+      "box": [
+        0,
+        538,
+        654,
+        773
+      ],
+      "size": [
+        1308,
+        470
+      ],
+      "sha256": "8b6891dc38b9f07467ea400b0a2fe350ef9951acf146ebe9d06c0b676c0c6cd6",
+      "approval": "art_direction_approved; extraction_requires_runtime_visual_review"
+    },
+    {
+      "file": "bosses/02_encouracado_abissal/modules.png",
+      "source": "boss_01_02_atlas.png",
+      "box": [
+        656,
+        538,
+        1160,
+        779
+      ],
+      "size": [
+        1008,
+        482
+      ],
+      "sha256": "5c2098cbd5188cc9559e28dfcd8ba75b61396a2f0f48345be687f7ae5db84359",
+      "approval": "art_direction_approved; extraction_requires_runtime_visual_review"
+    },
+    {
+      "file": "bosses/02_encouracado_abissal/projectiles_explosions.png",
+      "source": "boss_01_02_atlas.png",
+      "box": [
+        1158,
+        536,
+        1448,
+        783
+      ],
+      "size": [
+        580,
+        494
+      ],
+      "sha256": "3a626894f02996da81042e64e8aa02a4fb812a91248a9efed9190d12d77346c0",
+      "approval": "art_direction_approved; extraction_requires_runtime_visual_review"
+    },
+    {
+      "file": "bosses/02_encouracado_abissal/damage_strip.png",
+      "source": "boss_01_02_atlas.png",
+      "box": [
+        0,
+        780,
+        1448,
+        913
+      ],
+      "size": [
+        1427,
+        133
+      ],
+      "sha256": "6163e00b963d9da64809234dd967864700a70189af8634ccc7027beb21692009",
+      "approval": "art_direction_approved; extraction_requires_runtime_visual_review"
+    },
+    {
+      "file": "bosses/02_encouracado_abissal/movement_strip.png",
+      "source": "boss_01_02_atlas.png",
+      "box": [
+        0,
+        915,
+        1448,
+        1086
+      ],
+      "size": [
+        1427,
+        159
+      ],
+      "sha256": "88bb4b402db4c8cf70d1d89c801de9135eb24e19391b662840fb727f3b2ee6e3",
+      "approval": "art_direction_approved; extraction_requires_runtime_visual_review"
+    }
+  ]
+}

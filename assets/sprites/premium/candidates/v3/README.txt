@@ -1,0 +1,1 @@
+RiverStorm V3: 20 inimigos exclusivos individuais, 16 unidades/estruturas, 16 grupos de FX/habilidades e 10 seções Boss 01/02, masters de referência. Todos PNG RGBA. As tiras de animação dos bosses não são quadros individuais. Revisar silhuetas antes de homologar. Para importar ao jogo usar apenas os frames aprovados nas pastas runtime, não estas referências.
