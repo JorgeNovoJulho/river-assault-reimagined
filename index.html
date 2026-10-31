@@ -138,7 +138,28 @@
  #btn-bomb{min-width:65px!important;min-height:54px!important}
  #touch-controls{padding-bottom:env(safe-area-inset-bottom)!important;max-width:100%!important;box-sizing:border-box!important;gap:6px!important}\n #touch-controls button{font-size:clamp(10px,2.5vw,13px)!important}\n #compact-hud{max-width:100%!important;overflow-x:auto!important}\n #boss-dialogue-strip{max-width:100%!important;box-sizing:border-box!important}
 }
-</style></style></head>
+</style></style><style id="riverstorm-mobile-repair-20261031">
+@media (pointer:coarse), (max-width:700px){
+ body{background:#0b2030!important}
+ #game-container.crt-effect::before{display:none!important}
+ #game-container{background:#183f58!important;box-shadow:none!important}
+ #compact-hud{position:relative!important;padding:3px 5px!important;border-width:1px!important;overflow:hidden!important}
+ #compact-hud .rs-hud-grid,#compact-hud .rs-hud-footer{display:none!important}
+ #compact-hud.rs-hud-expanded .rs-hud-grid{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important}
+ #compact-hud.rs-hud-expanded .rs-hud-footer{display:flex!important}
+ #compact-hud #rs-mobile-hud-toggle{display:block!important;width:100%;min-height:27px;background:#16445d;color:#effcff;border:1px solid #4e91aa;border-radius:5px;font:700 12px system-ui}
+ #touch-controls{height:108px!important;min-height:108px!important;padding:5px 9px!important;gap:6px!important;border-radius:10px!important}
+ #virtual-joystick{width:96px!important;min-width:96px!important}
+ .joystick-base{width:88px!important}
+ .action-cluster{gap:4px!important}
+ #touch-controls button{font-size:11px!important;min-height:43px!important}
+ #btn-fire{width:75px!important;min-width:75px!important;height:88px!important;min-height:88px!important}
+ #parry-btn,#sword-rush-btn{opacity:.83!important;font-size:11px!important;transform:scale(.77);transform-origin:right bottom}
+ #game-container #graphics-toggle{opacity:.75}
+ #gameCanvas{filter:brightness(1.23) contrast(1.06)!important}
+}
+@media (pointer:fine) and (min-width:701px){#rs-mobile-hud-toggle{display:none!important}}
+</style></head>
 <body class="h-screen w-screen flex flex-col items-center justify-center p-2 sm:p-4">
 
     <!-- Moldura Principal do Jogo -->
@@ -800,7 +821,14 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
           try{localStorage.setItem(XP_STORE,String(pilotXP))}catch(e){}
           if(pilotLevel>previous){createFloatingText(player.x,player.y-65,'NÍVEL '+pilotLevel+'!','#facc15');addExplosion(player.x,player.y,'#facc15',18)}
         }
-        let crtEnabled = true;
+        let crtEnabled = !window.matchMedia('(pointer:coarse), (max-width:700px)').matches;
+        if(!crtEnabled){document.getElementById('game-container')?.classList.remove('crt-effect');document.getElementById('crt-toggle').textContent='CRT: DES';}
+        const mobileHud=document.getElementById('compact-hud');
+        if(mobileHud){
+          const toggle=document.createElement('button');toggle.id='rs-mobile-hud-toggle';toggle.type='button';toggle.textContent='▸ HUD · expandir';
+          toggle.setAttribute('aria-expanded','false');mobileHud.prepend(toggle);
+          toggle.addEventListener('click',()=>{const open=mobileHud.classList.toggle('rs-hud-expanded');toggle.textContent=open?'▾ HUD · recolher':'▸ HUD · expandir';toggle.setAttribute('aria-expanded',String(open));});
+        }
 
         // Propriedades do Jogador
         let player = {
@@ -3063,9 +3091,12 @@ function updateTerrainEvent(){
                 const vertical=(down?1:0)-(up?1:0);
                 player.currentScrollSpeed=player.baseScrollSpeed*(up?1.5:down?0.72:1);
                 const normalization=Math.hypot(horizontal,vertical)||1;
-                player.x+=horizontal*player.speed/normalization;
-                player.y+=vertical*player.speed/normalization;
-                if(mouseInput.active&&!horizontal){
+                const analogActive=activeJoystickPointer!==null;
+                const moveX=analogActive?analogJoystickX:horizontal/normalization;
+                const moveY=analogActive?analogJoystickY:vertical/normalization;
+                player.x+=moveX*player.speed;
+                player.y+=moveY*player.speed;
+                if(mouseInput.active&&!horizontal&&activeJoystickPointer===null){
                     player.x+=Math.max(-player.speed,Math.min(player.speed,mouseInput.x-player.x));
                     if(!up&&!down)player.y+=Math.max(-player.speed,Math.min(player.speed,mouseInput.y-player.y));
                 }
@@ -4775,8 +4806,10 @@ function updateTerrainEvent(){
         const joystick = document.getElementById('virtual-joystick');
         const knob = document.getElementById('joystick-knob');
         let activeJoystickPointer = null;
+        let analogJoystickX=0,analogJoystickY=0;
         function resetJoystick() {
             activeJoystickPointer = null;
+            analogJoystickX=0;analogJoystickY=0;
             ['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].forEach(k => keys[k] = false);
             knob.style.left = '50%'; knob.style.top = '50%';
         }
@@ -4789,7 +4822,11 @@ function updateTerrainEvent(){
             if (distance > radius) { dx = dx / distance * radius; dy = dy / distance * radius; }
             knob.style.left = `calc(50% + ${dx}px)`;
             knob.style.top = `calc(50% + ${dy}px)`;
-            const deadzone = radius * 0.24;
+            const deadzone = radius * 0.20;
+            const strength=Math.min(1,Math.hypot(dx,dy)/radius);
+            const amount=strength<.20?0:Math.pow((strength-.20)/.80,1.45);
+            analogJoystickX=distance>0?dx/Math.max(1,Math.hypot(dx,dy))*amount:0;
+            analogJoystickY=distance>0?dy/Math.max(1,Math.hypot(dx,dy))*amount:0;
             keys.ArrowLeft = dx < -deadzone;
             keys.ArrowRight = dx > deadzone;
             keys.ArrowUp = dy < -deadzone;
