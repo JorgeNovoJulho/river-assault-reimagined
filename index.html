@@ -4779,7 +4779,16 @@ function updateTerrainEvent(){
         }
 
         const resolutionSelect=document.getElementById('resolution-select');
-        try{const stored=localStorage.getItem('riverstorm_resolution_v1');if(['auto','1080p','4k'].includes(stored))resolutionSelect.value=stored;}catch(error){}
+        try{
+          const stored=localStorage.getItem('riverstorm_resolution_v1');
+          // Migration for old builds that accidentally left 4K as a default:
+          // prioritize fluidity once, keeping 4K selectable manually afterward.
+          if(stored==='4k'&&!localStorage.getItem('riverstorm_performance_migrated_v1')){
+            resolutionSelect.value='auto';
+            localStorage.setItem('riverstorm_resolution_v1','auto');
+            localStorage.setItem('riverstorm_performance_migrated_v1','1');
+          }else if(['auto','1080p','4k'].includes(stored))resolutionSelect.value=stored;
+        }catch(error){}
         resolutionSelect.addEventListener('change',()=>{try{localStorage.setItem('riverstorm_resolution_v1',resolutionSelect.value);}catch(error){}resizeCanvas();});
                 window.addEventListener('resize', resizeCanvas);
         resizeCanvas();
