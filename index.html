@@ -777,7 +777,13 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
             balanced:{dprMax:2,glow:.5,particles:.85},
             enhanced:{dprMax:3,glow:1,particles:1}
         };
-        function activeVisualProfile(){return visualProfile[document.getElementById('quality-select')?.value]||visualProfile.eco}
+        const riverMobile=window.matchMedia('(pointer:coarse)').matches||window.innerWidth<700;
+        const riverLowPower=riverMobile&&((navigator.deviceMemory||4)<=4||(navigator.hardwareConcurrency||4)<=4);
+        function activeVisualProfile(){
+          const selected=document.getElementById('quality-select')?.value;
+          const p=visualProfile[selected]||visualProfile.eco;
+          return riverMobile?{...p,dprMax:Math.min(p.dprMax,riverLowPower?1:1.5),particles:Math.min(p.particles,riverLowPower?.55:.8)}:p;
+        }
         function beginLogicalFrame(){ctx.setTransform(canvas.width/VIRTUAL_WIDTH,0,0,canvas.height/VIRTUAL_HEIGHT,0,0);ctx.imageSmoothingEnabled=true}
         let lastBackingWidth=0,lastBackingHeight=0;
 
@@ -4769,7 +4775,11 @@ function updateTerrainEvent(){
             const preset=requested==='4k'?5.4:requested==='1080p'?2.7:null;
             // 400x600 (2:3): 1080x1620 ou 2160x3240. 4K representa a largura
             // interna de 2160 pixels; nao muda a resolucao fisica da tela.
-            const density=preset||Math.min(targetDpr,Math.max(1,window.devicePixelRatio||1),Math.sqrt(4000000/(VIRTUAL_WIDTH*VIRTUAL_HEIGHT)));
+            // Mobile never allocates multi-megapixel buffers by accident.
+            // PC keeps manual UHD/4K, while auto follows display density.
+            const density=riverMobile
+              ? Math.min(riverLowPower?1:1.5,targetDpr,Math.max(1,window.devicePixelRatio||1))
+              : (preset||Math.min(targetDpr,Math.max(1,window.devicePixelRatio||1),Math.sqrt(4000000/(VIRTUAL_WIDTH*VIRTUAL_HEIGHT))));
             const indicator=document.getElementById('resolution-effective');
             if(indicator)indicator.textContent='Renderização: '+Math.round(VIRTUAL_WIDTH*density)+' × '+Math.round(VIRTUAL_HEIGHT*density)+' pixels';
             // A base lógica permanece 400x600; o backing store em maior resolução melhora antialiasing sem alterar hitboxes.
@@ -4781,6 +4791,10 @@ function updateTerrainEvent(){
             beginLogicalFrame();
         }
 
+        // Select platform-appropriate defaults for first-run devices.
+        try{
+          if(!localStorage.getItem('river_quality')){localStorage.setItem('river_quality',riverMobile?'eco':'balanced');qualitySelect.value=riverMobile?'eco':'balanced';}
+        }catch(e){}
         const resolutionSelect=document.getElementById('resolution-select');
         try{
           const stored=localStorage.getItem('riverstorm_resolution_v1');
