@@ -274,7 +274,23 @@ body #controller-settings:not(.hidden){position:fixed!important;z-index:1200!imp
 @media(max-width:700px){#rs-pilot-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}#rs-pilot-detail{grid-template-columns:1fr!important}#rs-pilot-detail .rs-pilot-feature-art{height:260px}#rs-pilot-detail .rs-pilot-stat{grid-template-columns:92px 1fr 40px}}
 </style>
 
-<div id="start-screen" class="absolute inset-0 bg-black/90 flex flex-col items-center justify-start p-3 text-center z-30">
+<style id="rs-pilot-layout-final">
+/* Layout oficial: grade 4+3 à esquerda, painel grande à direita. */
+@media(min-width:850px){
+ #rs-pilot-screen:not(.hidden){display:grid!important;grid-template-columns:minmax(0,49%) minmax(0,51%)!important;grid-template-rows:auto auto minmax(0,1fr) auto!important;gap:8px 12px!important;overflow:hidden!important;box-sizing:border-box!important}
+ #rs-pilot-screen>h2,#rs-pilot-screen>p{grid-column:1/-1!important;margin:0!important}
+ #rs-pilot-grid{grid-column:1!important;grid-row:3!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;grid-template-rows:repeat(2,minmax(0,1fr))!important;align-content:stretch!important;height:100%!important}
+ #rs-pilot-screen .rs-pilot-card{height:100%!important;min-height:0!important;justify-content:space-between!important}
+ #rs-pilot-screen .rs-pilot-card img{height:calc(100% - 69px)!important;max-height:none!important;min-height:0!important}
+ #rs-pilot-detail{grid-column:2!important;grid-row:3!important;grid-template-columns:43% 57%!important;min-height:0!important;height:100%!important;margin:0!important}
+ #rs-pilot-detail .rs-pilot-feature-art{height:100%!important;max-height:70dvh!important}
+ #rs-pilot-screen>div:last-child{grid-column:1/-1!important;grid-row:4!important}
+}
+#rs-pilot-screen .rs-pilot-card{contain:layout paint style}
+#rs-pilot-screen .rs-pilot-card img{filter:none!important}
+#rs-menu-spotlight{background:#04152a!important;isolation:isolate}
+#rs-menu-spotlight .rs-spotlight-image{max-height:82%!important;object-fit:contain!important}
+</style><div id="start-screen" class="absolute inset-0 bg-black/90 flex flex-col items-center justify-start p-3 text-center z-30">
             <div id="rs-pilot-screen" class="hidden" style="position:absolute;inset:0;z-index:96;overflow:auto;background:linear-gradient(#03101de0,#03101ef4),url('./assets/ui/premium/menu/2b81e191-9306-4a6e-aabf-049f60939aa0.png') center/cover;box-sizing:border-box;padding:clamp(12px,3vw,28px);color:#e3f8ff">
 <h2 style="font:900 clamp(25px,4vw,46px) system-ui;color:#61e3ff;text-align:center;margin:0 0 12px">SELEÇÃO DE PILOTOS</h2>
 <p style="text-align:center;font-weight:700;color:#ffd45d;margin:0 0 12px">TODOS DESBLOQUEADOS — ESCOLHA SEU ESQUADRÃO</p>
@@ -4659,9 +4675,9 @@ function updateTerrainEvent(){
         const simulationClock = new window.RiverClock();
         function gameLoop(timestamp = 0) {
             try {
-            if(controllerMenuOpen && timestamp-(gameLoop.lastSettingsPoll||0)<140){requestAnimationFrame(gameLoop);return;}
+            if(controllerMenuOpen && timestamp-(gameLoop.lastSettingsPoll||0)<140){setTimeout(()=>requestAnimationFrame(gameLoop),100);return;}
             if(controllerMenuOpen)gameLoop.lastSettingsPoll=timestamp;
-            if(gameState!=='PLAYING'&&!controllerMenuOpen && timestamp-(gameLoop.lastMenuFrame||0)<120){requestAnimationFrame(gameLoop);return;}
+            if(gameState!=='PLAYING'&&!controllerMenuOpen && timestamp-(gameLoop.lastMenuFrame||0)<120){setTimeout(()=>requestAnimationFrame(gameLoop),100);return;}
             if(gameState!=='PLAYING'&&!controllerMenuOpen)gameLoop.lastMenuFrame=timestamp;
             gamepadState = physicalGamepad.poll();
             const parryPadPressed=!!physicalGamepad.lastButtons[4];
@@ -5021,15 +5037,18 @@ function updateTerrainEvent(){
    button.setAttribute('aria-pressed',String(entry===chosenPilot));
    const img=document.createElement('img');
    img.src='./assets/ui/premium/pilots/'+entry[4];img.alt=entry[1]+' com '+entry[3];
-   img.loading='eager';img.decoding='async';img.onerror=()=>{img.alt='Arte de '+entry[1]+' indisponível';button.classList.add('rs-image-missing');};
+   img.loading='lazy';img.decoding='async';img.onerror=()=>{img.alt='Arte de '+entry[1]+' indisponível';button.classList.add('rs-image-missing');};
    const title=document.createElement('strong');title.textContent=entry[1];
    const ship=document.createElement('span');ship.textContent=entry[3];
    const status=document.createElement('small');status.textContent='● DISPONÍVEL';
    button.append(img,title,ship,status);
-   button.addEventListener('click',()=>{chosenPilot=entry;renderPilotCards();syncSpotlight(entry);});
+   button.addEventListener('click',()=>{chosenPilot=entry;pilotGrid.querySelectorAll('.rs-pilot-card').forEach((card,i)=>{const active=pilotEntries[i]===entry;card.classList.toggle('rs-pilot-selected',active);card.setAttribute('aria-pressed',String(active));});renderPilotDetail();syncSpotlight(entry);});
    // Hover uses CSS only: avoid rebuilding all pilot cards on every pointer move.
    pilotGrid.appendChild(button);
   }
+  renderPilotDetail();
+ }
+ function renderPilotDetail(){
   pilotDetail.replaceChildren();
   const art=document.createElement('img');art.className='rs-pilot-feature-art';art.decoding='async';
   art.src='./assets/ui/premium/pilots/'+chosenPilot[4];art.alt=chosenPilot[1]+' e nave '+chosenPilot[3];
