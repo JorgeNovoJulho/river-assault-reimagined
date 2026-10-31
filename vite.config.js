@@ -93,7 +93,24 @@ function copyAndVersionRuntime() {
         };
         copyTree(premiumRoot);
       }
-      // Aeronaves Arcade Premium: PNGs aprovados e manifesto obrigatórios no build web.
+      // V3 homologado: copiar integralmente os PNGs individuais para a versão web.
+      // A pasta approved é distinta do runtime legado e antes não chegava ao dist.
+      const approvedRoot=resolve('assets/sprites/premium/approved');
+      if(!existsSync(approvedRoot))throw new Error('Biblioteca V3 aprovada ausente');
+      const copyApproved=(source)=>{
+        for(const ent of readdirSync(source,{withFileTypes:true})){
+          const current=resolve(source,ent.name);
+          if(ent.isDirectory())copyApproved(current);
+          else if(ent.isFile()&&/\.png$/i.test(ent.name)){
+            const rel=current.slice(resolve('.').length+1);
+            const target=resolve('dist',rel);
+            mkdirSync(dirname(target),{recursive:true});
+            copyFileSync(current,target);
+          }
+        }
+      };
+      copyApproved(approvedRoot);
+            // Aeronaves Arcade Premium: PNGs aprovados e manifesto obrigatórios no build web.
       const aircraftRoot=resolve('assets/sprites/premium/aircraft');
       const aircraftManifest=JSON.parse(readFileSync(resolve(aircraftRoot,'manifest.json'),'utf8'));
       const aircraftIds=['falcao','vespa','cometa','fenix','helicoptero','disco','titan'];
