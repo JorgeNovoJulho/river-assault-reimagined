@@ -5149,15 +5149,22 @@ function updateTerrainEvent(){
   try{localStorage.setItem('riverstorm_last_pilot_id',chosenPilot[0]);localStorage.setItem('riverstorm_last_pilot',chosenPilot[1]);localStorage.setItem('riverstorm_last_aircraft',chosenPilot[3]);}catch(e){}
   const planeSelect=document.getElementById('plane-select');
   try{const key='river_aircraft_unlocked_v1';const owned=JSON.parse(localStorage.getItem(key)||'[]');localStorage.setItem(key,JSON.stringify([...new Set([...(Array.isArray(owned)?owned:[]),...pilotEntries.map(p=>p[2])])]));}catch(e){}
-  if(planeSelect&&[...planeSelect.options].some(o=>o.value===chosenPilot[2])){planeSelect.value=chosenPilot[2];planeSelect.dispatchEvent(new Event('change',{bubbles:true}));}
+  // Pilot selection is authoritative; never fall back to a previously selected plane.
+  const canonicalPlane=pilotEntries.find(p=>p[0]===chosenPilot[0])?.[2];
+  if(!canonicalPlane)return;
+  if(planeSelect){planeSelect.value=canonicalPlane;planeSelect.dispatchEvent(new Event('change',{bubbles:true}));}
+  selectedPlane=canonicalPlane;
+  try{localStorage.setItem('riverstorm_last_aircraft_id',canonicalPlane)}catch(e){}
   pilotScreen.classList.add('hidden');
   pilotScreen.style.setProperty('display','none','important');
   pilotScreen.setAttribute('aria-hidden','true');
   modeSelection.classList.add('hidden');
   modeSelection.style.setProperty('display','none','important');
   stopIntroMusic();updateLastChoice();syncSpotlight(chosenPilot);
-  // Call official start routine directly instead of routing through an obscured button.
+  // Start with the authoritative pilot/ship pair, even after UI change events.
   enterGameplay();
+  if(selectedPlane!==canonicalPlane){selectedPlane=canonicalPlane; if(typeof player!=='undefined'&&player)player.aircraftType=canonicalPlane;}
+  
  };
         document.getElementById('mode-multi').addEventListener('click',()=>{
           document.getElementById('mode-multi-info').classList.remove('hidden');
