@@ -10,12 +10,17 @@ const assets=[
  ['enemy-sub','assets/sprites/enemies/submarine.svg'],
  ['island','assets/sprites/terrain/island-tropical.svg'],
  ['beam','assets/sprites/projectiles/plasma-blue.svg'],
- ['fighter','assets/sprites/player/riverstorm-fighter.svg'],
  ['bank-left','assets/sprites/terrain/river-bank-left.svg'],
  ['bank-right','assets/sprites/terrain/river-bank-right.svg'],
  ['water-detail','assets/sprites/terrain/water-detail.svg'],
  ['island-detail','assets/sprites/terrain/river-island-detail.svg']
 ] as const;
+const PILOT_AIRCRAFT={snabo:'falcao',jhow:'vespa',btata:'cometa',napas:'fenix',casper:'helicoptero',roger:'disco',dudu:'titan'} as const;
+type PilotId=keyof typeof PILOT_AIRCRAFT;
+const requestedPilot=new URLSearchParams(window.location.search).get('pilot')?.toLowerCase()||'snabo';
+const selectedPilot: PilotId=Object.prototype.hasOwnProperty.call(PILOT_AIRCRAFT,requestedPilot)?requestedPilot as PilotId:'snabo';
+const activeAircraft=PILOT_AIRCRAFT[selectedPilot];
+const aircraftStates=['normal','disparo','boost','especial'] as const;
 type Enemy={sprite:Phaser.GameObjects.Image;hp:number;speed:number;fireAt:number};
 type Bullet={sprite:Phaser.GameObjects.Image;vy:number;damage:number;hostile:boolean};
 class PhaserArena extends Phaser.Scene {
@@ -54,6 +59,7 @@ class PhaserArena extends Phaser.Scene {
    'island-detail':{width:180,height:110}
   };
   for(const [key,file] of assets)this.load.svg(key,'./'+file,rasterSizes[key]);
+  for(const state of aircraftStates)this.load.image('fighter-'+state,'./assets/sprites/premium/aircraft/'+activeAircraft+'_'+state+'.png');
   this.load.on('loaderror',(file:Phaser.Loader.File)=>console.warn('Phaser sprite:',file.key));
  }
  create(){
@@ -72,7 +78,7 @@ class PhaserArena extends Phaser.Scene {
   this.ship=this.add.triangle(WIDTH/2,HEIGHT-130,0,42,28,0,56,42,0x96e7f2);
   this.ship.setStrokeStyle(3,0xfed084);
   this.ship.setAlpha(0); // Hitbox original intacta; a nave SVG e somente visual.
-  this.shipVisual=this.add.image(this.ship.x,this.ship.y,'fighter').setDisplaySize(52,61).setDepth(5);
+  this.shipVisual=this.add.image(this.ship.x,this.ship.y,'fighter-normal').setDisplaySize(52,61).setDepth(5);
   this.hud=this.add.text(12,14,'',{fontFamily:'monospace',fontSize:'17px',color:'#f2f9ff'}).setDepth(10);
   this.add.text(12,61,'SETAS/WASD mover · ESPAÇO atirar · toque arrastar e atirar · R reiniciar',{fontFamily:'monospace',fontSize:'12px',color:'#c6eaff',wordWrap:{width:WIDTH-24}}).setDepth(10);
   this.keys=this.input.keyboard!.createCursorKeys();
@@ -116,6 +122,10 @@ class PhaserArena extends Phaser.Scene {
   if(this.pointerActive){this.ship.x+=(this.pointerX-this.ship.x)*Math.min(.25*dt,1);this.ship.y+=(this.pointerY-this.ship.y)*Math.min(.25*dt,1);}
   this.ship.x=Phaser.Math.Clamp(this.ship.x,26,WIDTH-26);this.ship.y=Phaser.Math.Clamp(this.ship.y,100,HEIGHT-30);
   this.ship.setFillStyle(time<this.invulnerableUntil?0xff6b71:0x96e7f2);
+  const firing=this.keys.space.isDown||this.wasd.SPACE.isDown||this.pointerActive;
+  const boosting=this.keys.up.isDown||this.wasd.W.isDown;
+  const aircraftTexture=boosting?'fighter-boost':firing?'fighter-disparo':'fighter-normal';
+  if(this.shipVisual.texture.key!==aircraftTexture)this.shipVisual.setTexture(aircraftTexture);
   this.shipVisual.setPosition(this.ship.x,this.ship.y).setTint(time<this.invulnerableUntil?0xff899a:0xffffff);
   for(const bank of this.banks){bank.y+=1.25*dt;if(bank.y>HEIGHT+240)bank.y-=1440;}
   for(const tile of this.waterTiles){tile.y+=1.25*dt;if(tile.y>HEIGHT+240)tile.y-=1440;}
@@ -145,7 +155,7 @@ class PhaserArena extends Phaser.Scene {
    }
   }
   if(this.bossHp<=0){this.bossHp=180;this.points+=2000;this.boss.setTexture(['boss-1','boss-2','boss-3'][Math.floor(this.points/2000)%3]);}
-  this.hud.setText('PHASER 4 + TS | '+Math.round(this.game.loop.actualFps)+' FPS  HP '+this.lives+'  BOSS '+this.bossHp+'/180  PTS '+this.points);
+  this.hud.setText('PHASER 4 + TS | '+selectedPilot.toUpperCase()+' / '+activeAircraft.toUpperCase()+' | '+Math.round(this.game.loop.actualFps)+' FPS  HP '+this.lives+'  BOSS '+this.bossHp+'/180  PTS '+this.points);
  }
 }
 new Phaser.Game({
