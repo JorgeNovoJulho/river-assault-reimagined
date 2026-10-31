@@ -1551,10 +1551,27 @@ function draw(c,d){
  }
  atmosphereByTime(c,d);
 }
+const premiumAircraftStates={};
+for(const id of ['falcao','vespa','cometa','fenix','helicoptero','disco','titan']){
+ premiumAircraftStates[id]={};
+ for(const state of ['normal','disparo','especial','boost']){
+  const img=new Image();
+  img.src='./assets/sprites/premium/aircraft/'+id+'_'+state+'.png';
+  premiumAircraftStates[id][state]=img;
+ }
+}
+function premiumAircraftFrame(aircraft){
+ const id=String(aircraft||'').toLowerCase(),states=premiumAircraftStates[id];
+ if(!states)return null;
+ const t=Date.now(),active=(typeof window!=='undefined'&&window.RiverStormPremiumAircraftState)||'normal';
+ return rasterReady(states[active])?states[active]:rasterReady(states.normal)?states.normal:null;
+}
 function drawPlayerForeground(c,x,y,aircraft,invulnerable){
  if(invulnerable>0&&Math.floor(Date.now()/160)%6===0)return;
  c.save();
  c.shadowColor='#69eaff';c.shadowBlur=detailEnabled?8:3;
+ const frame=premiumAircraftFrame(aircraft);
+ if(frame){drawSpriteContained(c,frame,x,y,45,54);c.restore();return;}
  if(String(aircraft||'').toLowerCase()==='falcao'&&rasterReady(premiumRuntime.fighter)){
   c.drawImage(premiumRuntime.fighter,x-19,y-24,38,46);
   c.restore();return;
