@@ -226,6 +226,8 @@
 /* Menu Arcade Premium: arte inteira, com áreas de ação HTML exatamente sobre os botões.
    O menu anterior continua no DOM apenas para a navegação interna após Single Player. */
 #mode-selection:not(.hidden){position:fixed!important;inset:0!important;z-index:1000!important;width:100vw!important;height:100dvh!important;max-width:none!important;margin:0!important;padding:0!important;overflow:hidden!important;background:#020a15!important;display:flex!important;align-items:center!important;justify-content:center!important}
+#mode-selection>:not(#rs-menu-art){display:none!important}
+#controller-settings:not(.hidden){position:fixed!important;z-index:2000!important;inset:4vh max(5vw,15px)!important;max-height:90dvh!important;overflow:auto!important;background:#05172af7!important}
 #rs-menu-art{position:relative;width:min(100vw,177.586dvh);aspect-ratio:1648 / 928;max-height:100dvh;background:url('./assets/ui/premium/menu/2b81e191-9306-4a6e-aabf-049f60939aa0.png') center / 100% 100% no-repeat;box-shadow:0 0 70px #0078ec55;flex-shrink:0}
 #rs-menu-art>#mode-single,#rs-menu-art>#mode-multi,#rs-menu-art>#mode-settings{position:absolute!important;left:3.6%!important;width:35.4%!important;max-width:none!important;height:10.3%!important;margin:0!important;padding:0!important;border:2px solid transparent!important;border-radius:14px!important;background:transparent!important;color:transparent!important;text-shadow:none!important;box-shadow:none!important;font-size:0!important;transform:none!important;cursor:pointer}
 #rs-menu-art>#mode-single{top:32.2%!important}
