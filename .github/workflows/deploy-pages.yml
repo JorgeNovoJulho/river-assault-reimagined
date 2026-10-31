@@ -23,11 +23,9 @@ jobs:
           node-version: '24'
       - name: Instalar dependencias
         run: npm install --no-audit --no-fund
-      # Registrar falhas de regressão sem impedir a publicação: a suíte legada
-      # também é executada em CI separado e tem verificações desatualizadas.
-      - name: Diagnóstico de regressões legadas (não bloqueante)
+      # Falhas de regressão bloqueiam publicação oficial até a correção.
+      - name: Validar regressões antes da publicação
         run: npm test
-        continue-on-error: true
       - name: Validar Phaser TypeScript
         run: npm run check:phaser
       - name: Compilar jogo original e arena
