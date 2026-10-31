@@ -39,7 +39,7 @@ jobs:
           grep -q 'premium-environment' index.html
       - name: Auditar sprites existentes (não bloquear compilação parcial)
         run: |
-          node scripts/audit-premium-assets.cjs
+          node scripts/audit-premium-assets.cjs || echo "::warning::Auditoria Premium: faltas/SHAs inconsistentes, build apenas diagnóstico"
           node scripts/check-premium-environment.cjs || echo "::warning::Texturas de cenário ainda não instaladas no repositório; build de avaliação visual parcial"
       - name: Publicar artefato de teste isolado
         uses: actions/upload-artifact@v4
