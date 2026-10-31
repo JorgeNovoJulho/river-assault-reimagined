@@ -156,6 +156,11 @@
  .joystick-base{width:88px!important}
  .action-cluster{gap:4px!important}
  #touch-controls button{font-size:11px!important;min-height:43px!important}
+ #touch-controls .action-cluster{display:grid!important;grid-template-columns:repeat(3,minmax(54px,1fr))!important;grid-template-rows:repeat(2,minmax(40px,1fr))!important;flex:1;min-width:0;max-width:calc(100% - 102px)}
+ #touch-controls .action-cluster button{min-width:0!important;max-width:100%!important;min-height:0!important;height:100%!important;border-radius:9px!important}
+ #touch-controls #btn-fire{grid-column:3;grid-row:1 / span 2;border-radius:40px!important;height:100%!important;width:100%!important;min-width:0!important;min-height:0!important}
+ #touch-controls #parry-btn,#touch-controls #boss-skill-use{position:static!important;inset:auto!important;transform:none!important;opacity:1!important;z-index:auto!important}
+
  #btn-fire{width:75px!important;min-width:75px!important;height:88px!important;min-height:88px!important}
  #parry-btn,#sword-rush-btn{opacity:.83!important;font-size:11px!important;transform:scale(.77);transform-origin:right bottom}
  #game-container #graphics-toggle{opacity:.75}
@@ -826,6 +831,23 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
         }
         let crtEnabled = !window.matchMedia('(pointer:coarse), (max-width:700px)').matches;
         if(!crtEnabled){document.getElementById('game-container')?.classList.remove('crt-effect');document.getElementById('crt-toggle').textContent='CRT: DES';}
+        // Em telas touch, os poderes ficam no painel inferior, jamais sobre o rio.
+        if(window.matchMedia('(pointer:coarse), (max-width:700px)').matches){
+          const actions=document.querySelector('#touch-controls .action-cluster');
+          for(const id of ['parry-btn','boss-skill-use']){
+            const button=document.getElementById(id);
+            if(button&&actions){
+              actions.appendChild(button);
+              button.style.setProperty('position','static','important');
+              button.style.setProperty('inset','auto','important');
+              button.style.setProperty('transform','none','important');
+              button.style.setProperty('width','auto','important');
+              button.style.setProperty('min-height','42px','important');
+              button.style.setProperty('font-size','10px','important');
+              button.style.setProperty('padding','5px','important');
+            }
+          }
+        }
         const mobileHud=document.getElementById('compact-hud');
         if(mobileHud){
           const toggle=document.createElement('button');toggle.id='rs-mobile-hud-toggle';toggle.type='button';toggle.textContent='▸ HUD · expandir';
