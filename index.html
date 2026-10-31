@@ -4969,9 +4969,9 @@ function updateTerrainEvent(){
             try{initRiver();render();requestAnimationFrame(gameLoop);}
             catch(error){showGameError(error);console.error(error)}
         });
-    </script>
-    <!-- Comparador experimental: mantém toda a lógica original do jogo. -->
-    <script>
+    
+        // Graphics preview controller retained in main inline script.
+
     (function(){
       function installPreviewControl(){
         if(!window.RiverGraphicsPreview||document.getElementById('graphics-preview-toggle'))return;
@@ -4986,6 +4986,9 @@ function updateTerrainEvent(){
       if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',installPreviewControl);
       else installPreviewControl();
     })();
-    </script>
+    
+</script>
+    <!-- Comparador experimental: mantém toda a lógica original do jogo. -->
+    
 </body>
 </html>
