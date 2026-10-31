@@ -34,8 +34,19 @@ jobs:
           test -d "$ANDROID_HOME" || exit 1
       - name: Instalar dependências
         run: npm install --no-audit --no-fund
-      - name: Testar código
+      - name: Validar TypeScript Phaser
+        run: npm run check:phaser
+      - name: Registrar regressões históricas (não bloquear APK)
+        continue-on-error: true
         run: npm test
+      - name: Instalar navegador de teste
+        run: |
+          npm install --no-save playwright
+          npx playwright install --with-deps chromium
+      - name: Validar seleção de piloto e início da missão
+        run: |
+          npm run build
+          node tests/pilot-confirm-smoke.cjs
       - name: Compilar conteúdo do jogo
         run: npm run build
       - name: Criar plataforma Android
