@@ -4675,9 +4675,9 @@ function updateTerrainEvent(){
         const simulationClock = new window.RiverClock();
         function gameLoop(timestamp = 0) {
             try {
-            if(controllerMenuOpen && timestamp-(gameLoop.lastSettingsPoll||0)<140){setTimeout(()=>requestAnimationFrame(gameLoop),100);return;}
+            if(controllerMenuOpen && timestamp-(gameLoop.lastSettingsPoll||0)<140)return;
             if(controllerMenuOpen)gameLoop.lastSettingsPoll=timestamp;
-            if(gameState!=='PLAYING'&&!controllerMenuOpen && timestamp-(gameLoop.lastMenuFrame||0)<120){setTimeout(()=>requestAnimationFrame(gameLoop),100);return;}
+            if(gameState!=='PLAYING'&&!controllerMenuOpen && timestamp-(gameLoop.lastMenuFrame||0)<120)return;
             if(gameState!=='PLAYING'&&!controllerMenuOpen)gameLoop.lastMenuFrame=timestamp;
             gamepadState = physicalGamepad.poll();
             const parryPadPressed=!!physicalGamepad.lastButtons[4];
@@ -4744,7 +4744,7 @@ function updateTerrainEvent(){
             if(gameState === "PLAYING") simulationClock.advance(timestamp, update);
             else simulationClock.reset();
             // A simulação mantém 60 passos/s; o desenho se adapta ao desempenho real.
-            const quality=localStorage.getItem('river_quality')||'eco';
+            const quality=document.getElementById('quality-select')?.value||'eco';
             const renderInterval=quality==='eco'&&gameLoop.slowDevice?1000/30:1000/60;
             if(timestamp-(gameLoop.lastRender||0)>=renderInterval){
                 const start=performance.now();render();gameLoop.lastRender=timestamp;
@@ -4756,7 +4756,10 @@ function updateTerrainEvent(){
                 console.error('River Assault runtime:',error);
                 showGameError(error);
             } finally {
-                requestAnimationFrame(gameLoop);
+                // One scheduler only. Former early-return paths queued another RAF
+                // and the finally block queued one too, multiplying concurrent loops.
+                if(gameState==='PLAYING'&&!controllerMenuOpen)requestAnimationFrame(gameLoop);
+                else setTimeout(()=>requestAnimationFrame(gameLoop),80);
             }
         }
 
