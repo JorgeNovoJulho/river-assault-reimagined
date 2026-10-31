@@ -45,6 +45,28 @@ const {spawn}=require('node:child_process');
   });
   console.log('Performance baseline (CI, not physical device):',JSON.stringify(metrics));
   if(!metrics.frames||!metrics.canvasPixels)throw Error('Sem animação ou superfície de renderização: '+JSON.stringify(metrics));
+  // Exercitar o caminho mobile em dispositivo emulado (não equivale a aparelho físico).
+  const mobile=await browser.newPage({viewport:{width:390,height:844},deviceScaleFactor:2,isMobile:true,hasTouch:true});
+  try{
+    const mobileErrors=[];mobile.on('pageerror',e=>mobileErrors.push(e.message));
+    await mobile.goto('http://127.0.0.1:4174/',{waitUntil:'domcontentloaded'});
+    await mobile.locator('#mode-single').click();
+    await mobile.locator('#rs-pilot-screen').waitFor({state:'visible'});
+    const mobileCard=mobile.locator('#rs-pilot-grid .rs-pilot-card').first();
+    const bounds=await mobileCard.boundingBox();
+    if(!bounds)throw Error('Card de piloto inacessível no mobile');
+    await mobileCard.dispatchEvent('dblclick',{bubbles:true});
+    await mobile.waitForFunction(()=>typeof gameState!=='undefined'&&gameState==='PLAYING',{timeout:15000});
+    const mobileResult=await mobile.evaluate(()=>({
+      state:gameState,pilotDisplay:getComputedStyle(document.getElementById('rs-pilot-screen')).display,
+      canvasPixels:(()=>{const c=document.querySelector('canvas');return c?c.width*c.height:0})(),
+      viewport:[innerWidth,innerHeight],devicePixelRatio:devicePixelRatio
+    }));
+    console.log('Mobile emulation baseline:',JSON.stringify({mobileResult,mobileErrors}));
+    if(mobileResult.state!=='PLAYING'||mobileResult.pilotDisplay!=='none'||!mobileResult.canvasPixels||mobileErrors.length)
+      throw Error('Fluxo mobile falhou: '+JSON.stringify({mobileResult,mobileErrors}));
+  }finally{await mobile.close();}
+
 
  }finally{await browser?.close();server.kill();}
 })().catch(e=>{console.error(e);process.exitCode=1});
