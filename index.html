@@ -139,9 +139,9 @@
  #game-container.crt-effect::before{display:none!important}
  #game-container{background:#183f58!important;box-shadow:none!important}
  #compact-hud{position:relative!important;padding:3px 5px!important;border-width:1px!important;overflow:hidden!important}
- #compact-hud .rs-hud-grid,#compact-hud .rs-hud-footer{display:none!important}
+ #compact-hud .rs-hud-grid,#compact-hud .rs-hud-footer,#compact-hud #pilot-progress{display:none!important}
  #compact-hud.rs-hud-expanded .rs-hud-grid{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important}
- #compact-hud.rs-hud-expanded .rs-hud-footer{display:flex!important}
+ #compact-hud.rs-hud-expanded .rs-hud-footer,#compact-hud.rs-hud-expanded #pilot-progress{display:flex!important}
  #compact-hud #rs-mobile-hud-toggle{display:block!important;width:100%;min-height:27px;background:#16445d;color:#effcff;border:1px solid #4e91aa;border-radius:5px;font:700 12px system-ui}
  #touch-controls{height:108px!important;min-height:108px!important;padding:5px 9px!important;gap:6px!important;border-radius:10px!important}
  #virtual-joystick{width:96px!important;min-width:96px!important}
@@ -159,7 +159,7 @@
  #gameCanvas{filter:brightness(1.08) contrast(1.04) saturate(1.10)!important;image-rendering:auto}
 }
 @media (pointer:fine) and (min-width:701px){#rs-mobile-hud-toggle{display:none!important}}
-</style></head>
+</style><style id="riverstorm-no-crt-ever">.crt-effect,.crt-effect::before,.crt-effect::after{filter:none!important;box-shadow:none!important}.crt-effect::before,.crt-effect::after{content:none!important;display:none!important}#gameCanvas{image-rendering:auto;}</style></head>
 <body class="h-screen w-screen flex flex-col items-center justify-center p-2 sm:p-4">
 
     <!-- Moldura Principal do Jogo -->
@@ -821,7 +821,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
           if(pilotLevel>previous){createFloatingText(player.x,player.y-65,'NÍVEL '+pilotLevel+'!','#facc15');addExplosion(player.x,player.y,'#facc15',18)}
         }
         // O modo CRT foi aposentado da apresentação Premium: nunca é salvo nem reativado.
-        const crtEnabled = false;
+        const crtEnabled = false; // CRT removido permanentemente
         document.getElementById('game-container')?.classList.remove('crt-effect');
         // Em telas touch, os poderes ficam no painel inferior, jamais sobre o rio.
         if(window.matchMedia('(pointer:coarse), (max-width:700px)').matches){
@@ -856,8 +856,8 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
             width: 28,
             height: 32,
             speed: 6.5,
-            baseScrollSpeed: 3.2,
-            currentScrollSpeed: 3.2,
+            baseScrollSpeed: 2.72,
+            currentScrollSpeed: 2.72,
             fuel: 100,
             maxFuel: 100,
             fuelDepletionRate: 0.05,
@@ -3764,8 +3764,8 @@ function updateTerrainEvent(){
             player.aircraftVisual=selectedPlane;
             try{localStorage.setItem('river_active_plane',selectedPlane)}catch(error){}
             player.speed = config.speed;
-            player.baseScrollSpeed = config.scroll;
-            player.currentScrollSpeed = config.scroll;
+            player.baseScrollSpeed = config.scroll * 0.85; // 15% menos rolagem, sem alterar duração da missão
+            player.currentScrollSpeed = player.baseScrollSpeed;
             player.fuelDepletionRate = config.fuel*.8*Math.max(.72,1-(journey-1)*.018);
             player.weapon = config.weapons[0];
             player.weaponTimer = 0;
@@ -4840,9 +4840,9 @@ function updateTerrainEvent(){
             if (distance > radius) { dx = dx / distance * radius; dy = dy / distance * radius; }
             knob.style.left = `calc(50% + ${dx}px)`;
             knob.style.top = `calc(50% + ${dy}px)`;
-            const deadzone = radius * 0.20;
+            const deadzone = radius * 0.28;
             const strength=Math.min(1,Math.hypot(dx,dy)/radius);
-            const amount=strength<.20?0:Math.pow((strength-.20)/.80,1.45);
+            const amount=strength<.28?0:Math.pow((strength-.28)/.72,1.85)*.72;
             analogJoystickX=distance>0?dx/Math.max(1,Math.hypot(dx,dy))*amount:0;
             analogJoystickY=distance>0?dy/Math.max(1,Math.hypot(dx,dy))*amount:0;
             keys.ArrowLeft = dx < -deadzone;
