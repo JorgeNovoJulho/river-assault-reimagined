@@ -55,8 +55,8 @@ function aircraft(id,state='normal'){
  if(!entry)return null;
  if(!entry.img){
   const im=new Image();entry.img=im;
-  im.onload=()=>{entry.loaded=true};
-  im.onerror=()=>{entry.loaded=false};
+  im.onload=()=>{entry.loaded=true;window.dispatchEvent(new CustomEvent('riverstorm-aircraft-ready',{detail:{id,state}}))};
+  im.onerror=()=>{entry.loaded=false;console.warn('Sprite Arcade Premium indisponível:',id,state)};
   im.src=entry.base+entry.path;
  }
  return entry.loaded&&entry.img.naturalWidth>0?entry.img:null;
