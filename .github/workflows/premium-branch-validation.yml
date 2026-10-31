@@ -1,0 +1,38 @@
+name: RiverStorm Premium - validação de branch
+on:
+  push:
+    branches: [riverstorm-premium-nucleo]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - name: Testar campanha e 28 sprites das aeronaves
+        run: npm test
+      - name: TypeScript e Phaser
+        run: npm run check:phaser
+      - name: Compilar pacote PC/Mobile Web
+        run: npm run build
+      - name: Validar pacote entregue
+        run: |
+          test -s dist/index.html
+          test -s dist/phaser-lab.html
+          for id in falcao vespa cometa fenix helicoptero disco titan; do
+            for state in normal disparo boost especial; do
+              test -s "dist/assets/sprites/premium/aircraft/${id}_${state}.png"
+            done
+          done
+      - uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: riverstorm-premium-pc-mobile-web
+          path: dist/
+          if-no-files-found: error
