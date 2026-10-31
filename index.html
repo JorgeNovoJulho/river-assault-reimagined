@@ -37,16 +37,8 @@
             box-shadow: 0 0 30px rgba(0, 0, 0, 0.8), 0 0 15px rgba(59, 130, 246, 0.3);
         }
 
-        .crt-effect::before {
-            content: " ";
-            display: block;
-            position: absolute;
-            top: 0; left: 0; bottom: 0; right: 0;
-            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
-            z-index: 20;
-            background-size: 100% 4px, 6px 100%;
-            pointer-events: none;
-        }
+        /* CRT removido: nenhuma scanline, máscara de cor ou camada de tela antiga. */
+        .crt-effect::before { content:none!important; display:none!important; }
 
         #start-screen{background:radial-gradient(ellipse at 50% 26%,rgba(16,124,146,.35),transparent 50%),linear-gradient(155deg,rgba(3,18,34,.96),rgba(7,12,28,.96)),#071424!important;}
         #start-screen::before{content:"";position:absolute;inset:0;pointer-events:none;opacity:.28;background:repeating-linear-gradient(147deg,transparent 0 56px,rgba(75,175,205,.13) 57px 59px,transparent 60px 120px);animation:riverMenu 15s linear infinite}
@@ -164,7 +156,7 @@
  #btn-fire{width:75px!important;min-width:75px!important;height:88px!important;min-height:88px!important}
  #parry-btn,#sword-rush-btn{opacity:.83!important;font-size:11px!important;transform:scale(.77);transform-origin:right bottom}
  #game-container #graphics-toggle{opacity:.75}
- #gameCanvas{filter:brightness(1.23) contrast(1.06)!important}
+ #gameCanvas{filter:brightness(1.08) contrast(1.04) saturate(1.10)!important;image-rendering:auto}
 }
 @media (pointer:fine) and (min-width:701px){#rs-mobile-hud-toggle{display:none!important}}
 </style></head>
@@ -374,7 +366,6 @@
       <div class="rs-hud-footer"><span id="hud-version" style="color:#38bdf8;font-size:8px">HUD 0.7.6</span><span id="mission-hud">SELVA DA AURORA</span><b id="sector-hud">SETOR 1</b><span id="hud-environment" title="Período do dia e clima">☀ DIA · CÉU LIMPO</span><span id="hud-pilot-name" title="Piloto">PILOTO</span><span id="hud-rank">J1 SOLDADO</span></div>
     </section>
     <div id="rs-bottom-actions" aria-label="Opções rápidas">
-      <button id="crt-toggle" type="button" hidden aria-hidden="true">CRT: DES</button>
       <button id="controller-settings-btn" type="button">⚙ CONTROLE</button>
       <button id="track-next" type="button">⏭</button>
       <button id="music-library" type="button">♫ MÚSICAS</button>
@@ -445,7 +436,7 @@ body>div:first-of-type{flex:0 0 auto;width:100%;max-width:960px;min-height:34px;
 body>div:first-of-type>div{gap:4px;flex-wrap:wrap;justify-content:flex-end}
 body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
 #game-container{position:relative;flex:1 1 auto!important;min-height:120px!important;max-height:none!important;width:min(100%,920px);border:2px solid #326483!important;border-radius:16px!important;overflow:hidden;isolation:isolate}
-#gameCanvas{display:block;width:100%;height:100%;object-fit:fill}
+#gameCanvas{display:block;width:100%;height:100%;object-fit:fill;filter:brightness(1.08) contrast(1.04) saturate(1.10);image-rendering:auto}
 #touch-controls{flex:0 0 auto;width:min(100%,920px);max-width:100%;min-height:0!important;height:clamp(104px,21dvh,158px);padding:4px 10px!important;gap:12px;display:flex;justify-content:space-between;align-items:center;background:linear-gradient(165deg,rgba(35,59,80,.93),rgba(10,19,35,.94));border:1px solid #466e87;border-radius:20px;margin:0 0 3px;box-shadow:0 6px 24px rgba(0,0,0,.38)}
 #virtual-joystick{width:clamp(86px,27vw,132px);height:100%;min-width:0;touch-action:none}
 .joystick-base{width:min(100%,clamp(86px,25vw,126px));height:auto;aspect-ratio:1;border:2px solid #5b829a;background:radial-gradient(circle at 35% 25%,#375d72,#14283c 56%,#0b1425);box-shadow:inset 0 6px 13px #07121f,0 0 0 5px #132638}
@@ -829,8 +820,9 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
           try{localStorage.setItem(XP_STORE,String(pilotXP))}catch(e){}
           if(pilotLevel>previous){createFloatingText(player.x,player.y-65,'NÍVEL '+pilotLevel+'!','#facc15');addExplosion(player.x,player.y,'#facc15',18)}
         }
-        let crtEnabled = false;
-        if(!crtEnabled){document.getElementById('game-container')?.classList.remove('crt-effect');document.getElementById('crt-toggle').textContent='CRT: DES';}
+        // O modo CRT foi aposentado da apresentação Premium: nunca é salvo nem reativado.
+        const crtEnabled = false;
+        document.getElementById('game-container')?.classList.remove('crt-effect');
         // Em telas touch, os poderes ficam no painel inferior, jamais sobre o rio.
         if(window.matchMedia('(pointer:coarse), (max-width:700px)').matches){
           const actions=document.querySelector('#touch-controls .action-cluster');
@@ -2866,7 +2858,8 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
         function drawClimateOverlay(){
           const weather=sectorWeather(),night=sectorTime()==='NIGHT';
           ctx.save();
-          if(night){ctx.fillStyle='rgba(10,16,56,.12)';ctx.fillRect(0,0,VIRTUAL_WIDTH,VIRTUAL_HEIGHT);}
+          // Atmosfera legível: aplicada com transparência baixa, sem contaminar os PNGs.
+          if(night){ctx.fillStyle='rgba(10,16,56,.055)';ctx.fillRect(0,0,VIRTUAL_WIDTH,VIRTUAL_HEIGHT);}
           if(weather==='HEAT'){
             const intensity=.014+climateHeat*.032;
             ctx.fillStyle='rgba(255,118,21,'+intensity+')';ctx.fillRect(0,0,VIRTUAL_WIDTH,VIRTUAL_HEIGHT);
@@ -2874,8 +2867,8 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
               ctx.strokeStyle='rgba(255,198,97,.14)';ctx.beginPath();ctx.moveTo(x-45,y);ctx.quadraticCurveTo(x+Math.sin(missionTicks*.025+i)*18,y-25,x+45,y-40);ctx.stroke();}
           }else if(weather==='FOG'){
             for(let i=0;i<3;i++){const x=(i*119+missionTicks*.12+sector*19)%(VIRTUAL_WIDTH+180)-90,y=(i*145+missionTicks*.06)%VIRTUAL_HEIGHT;
-              const grad=ctx.createRadialGradient(x,y,12,x,y,115);grad.addColorStop(0,'rgba(201,225,234,.12)');grad.addColorStop(1,'rgba(201,225,234,0)');
-              ctx.fillStyle=grad;ctx.beginPath();ctx.arc(x,y,115,0,Math.PI*2);ctx.fill();}
+              const grad=ctx.createRadialGradient(x,y,12,x,y,100);grad.addColorStop(0,'rgba(219,238,245,.055)');grad.addColorStop(1,'rgba(219,238,245,0)');
+              ctx.fillStyle=grad;ctx.beginPath();ctx.arc(x,y,100,0,Math.PI*2);ctx.fill();}
           }else if(weather==='SNOW'){
             ctx.fillStyle='rgba(215,235,255,'+(.035+climateSnow*.09)+')';ctx.fillRect(0,0,VIRTUAL_WIDTH,VIRTUAL_HEIGHT);
             ctx.fillStyle='rgba(245,250,255,.8)';
@@ -4951,13 +4944,6 @@ function updateTerrainEvent(){
             gameState = 'PLAYING';
             playlist.resume();
             document.getElementById('pause-screen').classList.add('hidden');
-        });
-
-        document.getElementById('crt-toggle').addEventListener('click', () => {
-            crtEnabled = false;
-            const container = document.getElementById('game-container');
-            container.classList.remove('crt-effect');
-            document.getElementById('crt-toggle').innerText = 'CRT: DES';
         });
 
         document.getElementById('sound-toggle').addEventListener('click', () => {

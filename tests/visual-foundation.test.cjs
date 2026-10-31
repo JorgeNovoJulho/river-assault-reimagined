@@ -57,7 +57,7 @@ test('approved compact HUD occupies bottom and preserves control ids',()=>{
  assert.match(html,/id="hud-score"/);
  assert.match(html,/id="boss-special-hud"/);
  assert.match(html,/function drawHUD\(/);
- for(const id of ['hi-score-text','crt-toggle','controller-settings-btn','track-next','music-library','music-toggle','sound-toggle'])
+ for(const id of ['hi-score-text','controller-settings-btn','track-next','music-library','music-toggle','sound-toggle'])
    assert.equal((html.match(new RegExp('id="'+id+'"','g'))||[]).length,1);
  assert.ok(html.indexOf('id="compact-hud"')>html.indexOf('id="game-over-screen"'));
 });

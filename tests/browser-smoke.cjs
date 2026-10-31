@@ -55,10 +55,9 @@ const {chromium}=require('playwright');const {spawn}=require('node:child_process
   console.log(JSON.stringify({result,errors},null,2));
   if(result.sector!==5||result.aircraft!=='vespa'||result.state!=='PLAYING'||!result.hidden||result.overlayVisible||!result.active||!result.painted||result.error||errors.length)throw Error('O jogo não iniciou corretamente!');
 
-  const crtBefore=await page.locator('#crt-toggle').innerText();
-  await page.locator('#crt-toggle').click();
-  console.log('CRT status:',JSON.stringify({before:crtBefore,after:await page.locator('#crt-toggle').innerText(),errors,notice:await page.locator('#runtime-error').count(),scripts:await page.evaluate(()=>({gameState:typeof gameState==='undefined'?'undefined':gameState,settings:!!document.getElementById('settings-plane')}))}));
-  if (await page.locator('#crt-toggle').innerText()===crtBefore) throw Error('Botão CRT falhou');
+  const crtStatus=await page.evaluate(()=>({enabled:crtEnabled,hasButton:!!document.getElementById('crt-toggle'),hasClass:document.getElementById('game-container').classList.contains('crt-effect')}));
+  console.log('CRT status:',JSON.stringify({crtStatus,errors,notice:await page.locator('#runtime-error').count()}));
+  if(crtStatus.enabled||crtStatus.hasButton||crtStatus.hasClass)throw Error('CRT ainda está disponível ou ativo');
   const soundBefore=await page.locator('#sound-toggle').innerText();
   await page.locator('#sound-toggle').click();
   if (await page.locator('#sound-toggle').innerText()===soundBefore) throw Error('Botão SOM falhou');
