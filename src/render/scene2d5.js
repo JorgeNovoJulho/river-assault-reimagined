@@ -1441,7 +1441,9 @@ function draw(c,d){
  if(!premiumEnvironment){
    terrainSignature(c,d,t);landmark(c,d,t);mapSetPieces(c,d,t);enhancedWorld(c,d,t);livingSetDressing(c,d,t);
  }else{
-   mapSetPieces(c,d,t);
+   // Evitar a antiga camada de edifícios geométricos por cima das margens PNG.
+   // Obstáculos com colisão continuam sendo renderizados no fluxo próprio.
+   if(Number(d.sector)!==2)mapSetPieces(c,d,t);
  }
  c.restore();
  // Atmosfera sobre todo o mapa, sem recorte costeiro.
