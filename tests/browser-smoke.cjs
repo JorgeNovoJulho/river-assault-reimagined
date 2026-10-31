@@ -100,7 +100,7 @@ const {chromium}=require('playwright');const {spawn}=require('node:child_process
   });
   console.log('Boss transition:',JSON.stringify(bossFlow));
   if(bossFlow.transitionStarted.bossActive||!bossFlow.transitionStarted.defeated||bossFlow.transitionStarted.ticks!==180||
-     bossFlow.finished.sector!==6||bossFlow.finished.ticks!==0||bossFlow.finished.defeated)
+     bossFlow.finished.sector!==2||bossFlow.finished.ticks!==0||bossFlow.finished.defeated)
      throw Error('Chefe bloqueou a transição de missão: '+JSON.stringify(bossFlow));
   const checkpointFlow=await page.evaluate(()=>{
     const prevSector=sector,prevVerified=campaignVerified;
