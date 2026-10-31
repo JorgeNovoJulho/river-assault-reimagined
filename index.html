@@ -214,7 +214,7 @@
         <!-- Tela Inicial / Menu Principal -->
         <style id="rs-premium-main-menu">
 #start-screen:has(#mode-selection:not(.hidden)) #controller-settings{z-index:120!important;position:fixed!important;inset:3vh 4vw!important;max-height:94vh!important;border:2px solid #31caff;border-radius:16px;box-shadow:0 0 0 100vmax #000b,0 0 40px #03a5ee65!important}
-#mode-selection{background:linear-gradient(90deg,#041123e8,#04152bb8),url('./assets/ui/premium/menu/menu_arcade.png') center/cover no-repeat,linear-gradient(135deg,#071b30,#061025)!important;gap:13px!important}
+#mode-selection{background:linear-gradient(90deg,#041123e8,#04152bb8),url('./assets/ui/premium/menu/2b81e191-9306-4a6e-aabf-049f60939aa0.png') center/cover no-repeat,linear-gradient(135deg,#071b30,#061025)!important;gap:13px!important}
 #mode-selection>h2{font:900 clamp(35px,7vw,75px)/1 'Arial Black',Impact,sans-serif!important;background:linear-gradient(#fff,#79d7ff 45%,#1161b7 80%,#ff8b4b);background-clip:text;-webkit-background-clip:text;color:transparent!important;text-shadow:0 6px 25px #007df355;letter-spacing:.06em}
 #mode-selection #mode-single,#mode-selection #mode-multi,#mode-selection #mode-settings{max-width:440px;width:min(90vw,440px)!important;transition:transform .16s,filter .16s,box-shadow .16s;cursor:pointer;font:900 clamp(17px,2.7vw,23px) system-ui!important;box-shadow:inset 0 0 14px #0de9ff35,0 6px 20px #0009}
 #mode-selection #mode-single{background:linear-gradient(105deg,#87400c,#c67e16)!important;border-color:#ffcb52!important}
@@ -222,9 +222,26 @@
 #mode-selection button:hover,#mode-selection button:focus-visible,#mode-selection button.rs-selected{transform:scale(1.035);filter:brightness(1.32);outline:2px solid #fff8a8;outline-offset:3px;box-shadow:0 0 25px #00caff9c!important}
 @media(max-width:620px){#mode-selection{padding:12px!important}#mode-selection>h2{font-size:clamp(31px,10vw,54px)!important}#mode-selection button{padding:13px!important}}
 @media(prefers-reduced-motion:reduce){#mode-selection button{transition:none!important}}
+
+/* Menu Arcade Premium: arte inteira, com áreas de ação HTML exatamente sobre os botões.
+   O menu anterior continua no DOM apenas para a navegação interna após Single Player. */
+#mode-selection:not(.hidden){position:fixed!important;inset:0!important;z-index:1000!important;width:100vw!important;height:100dvh!important;max-width:none!important;margin:0!important;padding:0!important;overflow:hidden!important;background:#020a15!important;display:flex!important;align-items:center!important;justify-content:center!important}
+#rs-menu-art{position:relative;width:min(100vw,177.586dvh);aspect-ratio:1648 / 928;max-height:100dvh;background:url('./assets/ui/premium/menu/2b81e191-9306-4a6e-aabf-049f60939aa0.png') center / 100% 100% no-repeat;box-shadow:0 0 70px #0078ec55;flex-shrink:0}
+#rs-menu-art>#mode-single,#rs-menu-art>#mode-multi,#rs-menu-art>#mode-settings{position:absolute!important;left:3.6%!important;width:35.4%!important;max-width:none!important;height:10.3%!important;margin:0!important;padding:0!important;border:2px solid transparent!important;border-radius:14px!important;background:transparent!important;color:transparent!important;text-shadow:none!important;box-shadow:none!important;font-size:0!important;transform:none!important;cursor:pointer}
+#rs-menu-art>#mode-single{top:32.2%!important}
+#rs-menu-art>#mode-multi{top:43.6%!important}
+#rs-menu-art>#mode-settings{top:55.1%!important}
+#rs-menu-art>button:hover,#rs-menu-art>button:focus-visible,#rs-menu-art>button.rs-selected{border-color:#fff8b7!important;background:#fff4a51e!important;box-shadow:0 0 24px #ffb800, inset 0 0 24px #ffcc0070!important;outline:none!important;filter:none!important;transform:none!important}
+#rs-menu-art>#mode-last-pilot{position:absolute!important;right:4%!important;top:70.5%!important;width:36%!important;max-width:none!important;padding:5px!important;overflow:hidden!important;white-space:nowrap!important;text-overflow:ellipsis!important;background:#021023dd!important;color:#fff!important;font:700 clamp(9px,1.1vw,15px) system-ui!important;border:1px solid #00baff!important}
+#rs-menu-art>#mode-menu-music{position:absolute;left:4%;bottom:2%;max-width:55%;padding:5px 10px;border-radius:7px;background:#001124dc;color:#d8f8ff!important;font:600 clamp(9px,.85vw,12px) system-ui!important}
+#rs-menu-art>#riverstorm-update-notice{display:none!important}
+#mode-multi-info:not(.hidden){position:absolute;z-index:3;left:22%;top:28%;width:56%!important;max-width:none!important;padding:20px!important;background:#061b32f5!important;border:2px solid #4bd8ff!important;color:white!important}
+#start-screen:has(#mode-selection:not(.hidden)){background:#020a15!important}
+#start-screen:has(#mode-selection:not(.hidden)) #controller-settings:not(.hidden){position:fixed!important;z-index:1200!important;inset:4vh max(5vw,15px)!important;max-height:90dvh!important;background:#05172af5!important}
+@media(max-width:650px){#rs-menu-art>#mode-last-pilot{top:69%;font-size:8px!important}#rs-menu-art>#mode-menu-music{bottom:1%;padding:2px;font-size:8px!important}}
 </style>
 <div id="start-screen" class="absolute inset-0 bg-black/90 flex flex-col items-center justify-start p-3 text-center z-30">
-            <div id="rs-pilot-screen" class="hidden" style="position:absolute;inset:0;z-index:96;overflow:auto;background:linear-gradient(#03101de0,#03101ef4),url('./assets/ui/premium/menu/menu_arcade.png') center/cover;box-sizing:border-box;padding:clamp(12px,3vw,28px);color:#e3f8ff">
+            <div id="rs-pilot-screen" class="hidden" style="position:absolute;inset:0;z-index:96;overflow:auto;background:linear-gradient(#03101de0,#03101ef4),url('./assets/ui/premium/menu/2b81e191-9306-4a6e-aabf-049f60939aa0.png') center/cover;box-sizing:border-box;padding:clamp(12px,3vw,28px);color:#e3f8ff">
 <h2 style="font:900 clamp(25px,4vw,46px) system-ui;color:#61e3ff;text-align:center;margin:0 0 12px">SELEÇÃO DE PILOTOS</h2>
 <p style="text-align:center;font-weight:700;color:#ffd45d;margin:0 0 12px">TODOS DESBLOQUEADOS — ESCOLHA SEU ESQUADRÃO</p>
 <div id="rs-pilot-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;max-width:1050px;margin:auto"></div>
@@ -244,7 +261,7 @@
 <button id="mode-settings" type="button" style="width:min(94%,440px);padding:17px;color:#d6f9ff;background:#082e57;border:2px solid #41caff;border-radius:12px;font-weight:900">⚙ CONFIGURAÇÕES</button>
 <div id="mode-last-pilot" aria-live="polite" style="width:min(94%,440px);color:#aaf2ff;font:700 12px system-ui;padding:8px 12px;background:#001529b8;border:1px solid #287ab1;border-radius:9px">ÚLTIMA SELEÇÃO: carregando...</div>
 <div id="mode-menu-music" style="color:#ffd97d;font:600 11px system-ui">♫ Tema de abertura: clique ou pressione uma tecla para tocar</div>
-<audio id="riverstorm-intro-audio" src="./music/lucidez-menu.opus" preload="none" loop></audio>
+<audio id="riverstorm-intro-audio" src="./music/Lucidez-_GALM-NOVA_-feat-Fhenrir-St.George.opus" preload="none" loop></audio>
 <div id="riverstorm-update-notice" role="status" style="font-size:11px;color:#b7d9fb;max-width:350px">Verificando informações da versão...</div>
 </div>
 <h1 id="start-headline" aria-label="RiverStorm"><span>RIVER</span><span>STORM</span></h1>
@@ -4860,6 +4877,17 @@ function updateTerrainEvent(){
 
         // Seleção de modo antes do hangar: não altera a campanha solo.
         const modeSelection=document.getElementById('mode-selection');
+        // Montar botões reais sobre a arte estática aprovada: sem duplicar a UI desenhada.
+        const premiumMenu=document.getElementById('mode-selection');
+        const premiumArt=document.createElement('div');
+        premiumArt.id='rs-menu-art';
+        for(const id of ['mode-single','mode-multi','mode-settings','mode-last-pilot','mode-menu-music','riverstorm-update-notice','mode-multi-info']){
+          const node=document.getElementById(id);if(node)premiumArt.appendChild(node);
+        }
+        premiumMenu.appendChild(premiumArt);
+        document.getElementById('mode-single').setAttribute('aria-label','Single Player');
+        document.getElementById('mode-multi').setAttribute('aria-label','Multiplayer');
+        document.getElementById('mode-settings').setAttribute('aria-label','Configurações');
         const modeSettings=document.getElementById('mode-settings');
         modeSettings.addEventListener('click',()=>{showControllerSettings(true);document.getElementById('controller-settings').focus({preventScroll:true});});
         const menuMusic=document.getElementById('riverstorm-intro-audio');
