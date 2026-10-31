@@ -4984,7 +4984,7 @@ function updateTerrainEvent(){
  function syncSpotlight(entry){if(!entry)return;const url='./assets/ui/premium/pilots/'+entry[4];if(spotlightImage.getAttribute('src')!==url)spotlightImage.src=url;spotlightImage.alt=entry[1]+' — '+entry[3];spotlightCaption.textContent=entry[1]+' · '+entry[3];}
  const pilotScreen=document.getElementById('rs-pilot-screen'),pilotGrid=document.getElementById('rs-pilot-grid'),pilotDetail=document.getElementById('rs-pilot-detail');
  let chosenPilot=pilotEntries[0];
- try{const v=localStorage.getItem('riverstorm_last_pilot_id');chosenPilot=pilotEntries.find(p=>p[0]===v)||chosenPilot;}catch(e){}
+ try{const v=localStorage.getItem('riverstorm_last_pilot_id'),label=localStorage.getItem('riverstorm_last_pilot'),ship=localStorage.getItem('riverstorm_last_aircraft');chosenPilot=pilotEntries.find(p=>p[0]===v)||pilotEntries.find(p=>p[1]===label&&(!ship||p[3]===ship))||pilotEntries.find(p=>p[1]===label)||chosenPilot;}catch(e){}
  syncSpotlight(chosenPilot);
  // Painel derivado do catálogo real: escala informativa, não uma segunda física.
  const gamePlanes=window.RiverAircraft?.PLANES||{};
