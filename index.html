@@ -242,6 +242,11 @@
 #start-screen:has(#mode-selection:not(.hidden)){background:#020a15!important}
 body #controller-settings:not(.hidden){position:fixed!important;z-index:1200!important;inset:4vh max(5vw,15px)!important;max-height:90dvh!important;background:#05172af5!important}
 @media(max-width:650px){#rs-menu-art>#mode-last-pilot{top:69%;font-size:8px!important}#rs-menu-art>#mode-menu-music{bottom:1%;padding:2px;font-size:8px!important}}
+#rs-menu-spotlight{position:absolute;right:3.6%;top:11.5%;width:29%;height:59%;z-index:3;overflow:hidden;border:2px solid #39d8ff;border-radius:12px;background:#04152a;box-shadow:0 0 12px #00aaffb0;display:flex;flex-direction:column;align-items:center;justify-content:space-between;box-sizing:border-box;pointer-events:none}
+#rs-menu-spotlight .rs-spotlight-heading{width:100%;background:linear-gradient(90deg,#fbd35c,#a66f18);color:#15192c;font:900 clamp(9px,1vw,16px) system-ui;padding:4px;box-sizing:border-box}
+#rs-menu-spotlight .rs-spotlight-image{display:block;width:100%;height:78%;object-fit:contain;object-position:center;min-height:0}
+#rs-menu-spotlight .rs-spotlight-caption{color:#dbf8ff;font:900 clamp(10px,1.1vw,18px) system-ui;padding:5px 2px}
+@media(max-width:650px){#rs-menu-spotlight{top:10%;height:60%}#rs-menu-spotlight .rs-spotlight-image{height:75%}}
 </style>
 <style id="rs-pilot-premium-style">
 #rs-pilot-screen:not(.hidden){display:flex!important;flex-direction:column!important;min-height:100dvh!important;padding:clamp(10px,2vw,25px)!important;background:linear-gradient(#021024ec,#020d20ee),url('./assets/ui/premium/menu/2b81e191-9306-4a6e-aabf-049f60939aa0.png') center/cover!important}
@@ -4969,9 +4974,18 @@ function updateTerrainEvent(){
  ['roger','Sarg. Roger','disco','UFO AURORA','roger_ufo_aurora.png'],
  ['dudu','Ten. Dudu','titan','TITAN','dudu_titan.png']
  ];
+// Menu spotlight: the original screenshot has a fixed pilot/aircraft baked into its background.
+ const menuArt=document.getElementById('rs-menu-art');
+ const menuSpotlight=document.createElement('div');menuSpotlight.id='rs-menu-spotlight';
+ const spotlightHeading=document.createElement('div');spotlightHeading.className='rs-spotlight-heading';spotlightHeading.textContent='PILOTO EM DESTAQUE';
+ const spotlightImage=document.createElement('img');spotlightImage.className='rs-spotlight-image';spotlightImage.decoding='async';spotlightImage.alt='Piloto selecionado';
+ const spotlightCaption=document.createElement('div');spotlightCaption.className='rs-spotlight-caption';
+ menuSpotlight.append(spotlightHeading,spotlightImage,spotlightCaption);menuArt?.append(menuSpotlight);
+ function syncSpotlight(entry){if(!entry)return;const url='./assets/ui/premium/pilots/'+entry[4];if(spotlightImage.getAttribute('src')!==url)spotlightImage.src=url;spotlightImage.alt=entry[1]+' — '+entry[3];spotlightCaption.textContent=entry[1]+' · '+entry[3];}
  const pilotScreen=document.getElementById('rs-pilot-screen'),pilotGrid=document.getElementById('rs-pilot-grid'),pilotDetail=document.getElementById('rs-pilot-detail');
  let chosenPilot=pilotEntries[0];
  try{const v=localStorage.getItem('riverstorm_last_pilot_id');chosenPilot=pilotEntries.find(p=>p[0]===v)||chosenPilot;}catch(e){}
+ syncSpotlight(chosenPilot);
  // Painel derivado do catálogo real: escala informativa, não uma segunda física.
  const gamePlanes=window.RiverAircraft?.PLANES||{};
  const pilotStats=Object.fromEntries(pilotEntries.map(p=>{
@@ -5001,17 +5015,17 @@ function updateTerrainEvent(){
    button.setAttribute('aria-pressed',String(entry===chosenPilot));
    const img=document.createElement('img');
    img.src='./assets/ui/premium/pilots/'+entry[4];img.alt=entry[1]+' com '+entry[3];
-   img.loading='lazy';img.onerror=()=>{img.alt='Arte de '+entry[1]+' indisponível';button.classList.add('rs-image-missing');};
+   img.loading='eager';img.decoding='async';img.onerror=()=>{img.alt='Arte de '+entry[1]+' indisponível';button.classList.add('rs-image-missing');};
    const title=document.createElement('strong');title.textContent=entry[1];
    const ship=document.createElement('span');ship.textContent=entry[3];
    const status=document.createElement('small');status.textContent='● DISPONÍVEL';
    button.append(img,title,ship,status);
-   button.addEventListener('click',()=>{chosenPilot=entry;renderPilotCards();});
-   button.addEventListener('mouseenter',()=>{if(chosenPilot!==entry){chosenPilot=entry;renderPilotCards();}});
+   button.addEventListener('click',()=>{chosenPilot=entry;renderPilotCards();syncSpotlight(entry);});
+   // Hover uses CSS only: avoid rebuilding all pilot cards on every pointer move.
    pilotGrid.appendChild(button);
   }
   pilotDetail.replaceChildren();
-  const art=document.createElement('img');art.className='rs-pilot-feature-art';
+  const art=document.createElement('img');art.className='rs-pilot-feature-art';art.decoding='async';
   art.src='./assets/ui/premium/pilots/'+chosenPilot[4];art.alt=chosenPilot[1]+' e nave '+chosenPilot[3];
   const side=document.createElement('div');side.className='rs-pilot-feature-content';
   const tag=document.createElement('div');tag.className='rs-feature-tag';tag.textContent='PILOTO SELECIONADO';
@@ -5040,7 +5054,7 @@ function updateTerrainEvent(){
   else if(e.key==='Enter'&&e.target.closest('.rs-pilot-card')){document.getElementById('rs-pilot-confirm').click();return;}
   else if(e.key==='Escape'){document.getElementById('rs-pilot-back').click();return;}
   else return;
-  e.preventDefault();chosenPilot=pilotEntries[next];renderPilotCards();
+  e.preventDefault();chosenPilot=pilotEntries[next];renderPilotCards();syncSpotlight(chosenPilot);
   pilotGrid.children[next]?.focus({preventScroll:true});
  });
  document.getElementById('mode-single').addEventListener('click',()=>{modeSelection.classList.add('hidden');pilotScreen.classList.remove('hidden');renderPilotCards();});
@@ -5050,7 +5064,7 @@ function updateTerrainEvent(){
   const planeSelect=document.getElementById('plane-select');
   try{const key='river_aircraft_unlocked_v1';const owned=JSON.parse(localStorage.getItem(key)||'[]');localStorage.setItem(key,JSON.stringify([...new Set([...(Array.isArray(owned)?owned:[]),...pilotEntries.map(p=>p[2])])]));}catch(e){}
   if(planeSelect&&[...planeSelect.options].some(o=>o.value===chosenPilot[2])){planeSelect.value=chosenPilot[2];planeSelect.dispatchEvent(new Event('change',{bubbles:true}));}
-  pilotScreen.classList.add('hidden');stopIntroMusic();updateLastChoice();
+  pilotScreen.classList.add('hidden');stopIntroMusic();updateLastChoice();syncSpotlight(chosenPilot);
   document.getElementById('start-btn')?.click();
  };
         document.getElementById('mode-multi').addEventListener('click',()=>{
