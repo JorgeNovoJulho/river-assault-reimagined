@@ -1453,12 +1453,13 @@ function draw(c,d){
    if(e.type==='BOSS'&&Number(d.sector)<=2&&drawPremiumBossV3(c,e,d.sector)){
      // O master da Ponte já possui torres e canhões aprovados: nenhum módulo
      // vetorial legado deve ser desenhado sobre a composição raster.
-     if(Number(d.sector)!==1)bossAccessories(c,e,d);
+     // Os corpos raster V3 dos Bosses 01/02 já incluem os módulos visuais.
+     // Não sobrepor torres e halos procedurais ao corpo Premium.
    }else if(e.type==='BOSS'&&Number(d.sector)===2&&premiumBoss02.complete&&premiumBoss02.naturalWidth>0){
      // Imagem raster recortada, centrada na hitbox original; nao troca IA ou partes.
      const bw=e.width||90,bh=e.height||90;
      c.drawImage(premiumBoss02,e.x-bw/2,e.y-bh/2,bw,bh);
-     bossAccessories(c,e,d);
+     // Boss 02 raster legado: evitar adereços antigos sobre a arte.
    }else if(e.type==='BOSS'&&Number(d.sector)>=1&&Number(d.sector)<=20&&bossSpriteImages[Number(d.sector)-1].complete&&bossSpriteImages[Number(d.sector)-1].naturalWidth){const sprite=bossSpriteImages[Number(d.sector)-1];c.drawImage(sprite,e.x-(e.width||90)*.5,e.y-(e.height||90)*.5,e.width||90,e.height||90);bossAccessories(c,e,d);}
    else {
      // Um único render por entidade: PNG Premium substitui (não sobrepõe)
@@ -1479,9 +1480,9 @@ function draw(c,d){
        continue;
      }else{
        // Diagnóstico apenas: registra uma lacuna real sem modificar combate.
-       if(Number(d.sector)===1&&!visualFallbackLogged.has(e.type)){
-         visualFallbackLogged.add(e.type);
-         console.warn('[RiverStorm Premium] fallback visual na Missão 1:',e.type);
+       if(Number(d.sector)<=2&&!visualFallbackLogged.has(d.sector+':'+e.type)){
+         visualFallbackLogged.add(d.sector+':'+e.type);
+         console.warn('[RiverStorm Premium] fallback visual na Missão '+d.sector+':',e.type);
        }
        const replacement=commonEnemySprites[e.type];
        if(replacement&&replacement.complete&&replacement.naturalWidth){
