@@ -4359,7 +4359,7 @@ function updateTerrainEvent(){
             drawBombs();drawBombAftershock();
             drawRescueBoats();
             // Torres acopladas: cascos detalhados desaparecem ao serem destruídos.
-            for(const boss of enemies){if(boss.type!=='BOSS'||boss.hp<=0)continue;
+            for(const boss of enemies){if(boss.type!=='BOSS'||boss.hp<=0||Number(boss.bossId||sector)===1)continue;
               for(const side of [-1,1]){if((side<0?boss.turretLeftHp:boss.turretRightHp)<=0)continue;
                 ctx.save();ctx.translate(boss.x+side*boss.width*.37,boss.y+boss.height*.15);
                 ctx.fillStyle='#26374a';ctx.strokeStyle='#e3c17a';ctx.lineWidth=1.5;

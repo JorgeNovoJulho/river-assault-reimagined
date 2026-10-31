@@ -1334,7 +1334,9 @@ function bossPresentation(c,d){
  if(!detailEnabled)return;
  const now=Date.now()*.001;
  for(const e of d.enemies||[]){
-  if(e.type!=='BOSS'||e.hp<=0)continue;
+  // Boss 01 possui leitura, módulos e luzes no master raster aprovado.
+  // Não acrescentar halo/anéis genéricos que poluem o casco.
+  if(e.type!=='BOSS'||e.hp<=0||Number(e.bossId||d.sector)===1)continue;
   const radius=Math.max(32,(e.width||90)*.39),phase=(e.bossId||d.sector||1)%5;
   c.save();c.translate(e.x,e.y);
   const damaged=e.maxHp>0&&e.hp/e.maxHp<.4;
@@ -1412,12 +1414,14 @@ const premiumBoss02=new Image();
 premiumBoss02.src='./assets/sprites/premium/runtime/bosses/boss02_casco_sem_quadro.png';
 // Corpos V3 aprovados. A simulação continua responsável por módulos, vida e IA.
 const premiumBossV3=[null,new Image(),new Image()];
+const visualFallbackLogged=new Set();
 premiumBossV3[1].src='./assets/sprites/premium/approved/bosses/01_ponte_fortificada/atlas_v3/body_full.png';
 premiumBossV3[2].src='./assets/sprites/premium/approved/bosses/02_encouracado_abissal/atlas_v3/body_full.png';
 function drawPremiumBossV3(c,e,sector){
  const image=premiumBossV3[Number(sector)];
  if(!image||!image.complete||!image.naturalWidth)return false;
- const w=Math.min(Math.max(132,(e.width||90)*1.55),260);
+ // A Ponte Fortificada domina a arena visualmente sem modificar sua hitbox.
+ const w=Number(sector)===1?Math.min(Math.max(214,(e.width||90)*1.9),300):Math.min(Math.max(132,(e.width||90)*1.55),260);
  const h=w*image.naturalHeight/image.naturalWidth;
  c.save();c.imageSmoothingEnabled=true;c.drawImage(image,e.x-w*.5,e.y-h*.5,w,h);c.restore();
  return true;
@@ -1447,7 +1451,9 @@ function draw(c,d){
  for(const e of d.enemies||[]){
    if(e.hp<=0||e.y+(e.height||40)<-45||e.y-(e.height||40)>d.h+45||e.x+(e.width||40)<-45||e.x-(e.width||40)>d.w+45)continue;
    if(e.type==='BOSS'&&Number(d.sector)<=2&&drawPremiumBossV3(c,e,d.sector)){
-     bossAccessories(c,e,d);
+     // O master da Ponte já possui torres e canhões aprovados: nenhum módulo
+     // vetorial legado deve ser desenhado sobre a composição raster.
+     if(Number(d.sector)!==1)bossAccessories(c,e,d);
    }else if(e.type==='BOSS'&&Number(d.sector)===2&&premiumBoss02.complete&&premiumBoss02.naturalWidth>0){
      // Imagem raster recortada, centrada na hitbox original; nao troca IA ou partes.
      const bw=e.width||90,bh=e.height||90;
@@ -1459,12 +1465,24 @@ function draw(c,d){
      // a silhueta procedural; IA, animações de posição e hitboxes intocadas.
      const premiumId=e.type==='BIOME_ENEMY'?e.biomeId:e.type;
      const premium=root.RiverPremium?.get('enemy',premiumId);
+     const hasDeclaredPremium=root.RiverPremium?.declared?.('enemy',premiumId);
      if(premium){
+       const [displayW,displayH]=root.RiverPremium.displaySize?.(premiumId,e.width||36,e.height||36)||[e.width||36,e.height||36];
        c.save();
        c.translate(e.x,e.y);
-       c.drawImage(premium,-(e.width||36)/2,-(e.height||36)/2,e.width||36,e.height||36);
+       c.imageSmoothingEnabled=true;
+       c.drawImage(premium,-displayW/2,-displayH/2,displayW,displayH);
        c.restore();
+     }else if(hasDeclaredPremium){
+       // Enquanto o PNG V3 pré-carregado termina, não substituí-lo por uma
+       // silhueta geométrica de identidade incompatível.
+       continue;
      }else{
+       // Diagnóstico apenas: registra uma lacuna real sem modificar combate.
+       if(Number(d.sector)===1&&!visualFallbackLogged.has(e.type)){
+         visualFallbackLogged.add(e.type);
+         console.warn('[RiverStorm Premium] fallback visual na Missão 1:',e.type);
+       }
        const replacement=commonEnemySprites[e.type];
        if(replacement&&replacement.complete&&replacement.naturalWidth){
          enemy(c,e,t.time);

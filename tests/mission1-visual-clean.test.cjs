@@ -20,3 +20,22 @@ test('cenário da Missão 1 mantém água clara e atmosfera de baixa opacidade',
   assert.match(scene,/weather==='sand'\?\.055:weather==='ash'\?\.065:\.055/);
   assert.match(html,/rgba\(219,238,245,\.055\)/);
 });
+
+test('inimigos Premium declarados não caem em placeholder e usam escala visual independente',()=>{
+  for(const id of ['HELI','JET','ZIGZAG','DRONE','MECHA_SWORD','MECHA_GUN','TANK','SHIP','SUB','TURRET','WARSHIP','TUCANO']){
+    assert.match(registry,new RegExp(id+":"));
+  }
+  assert.match(registry,/const ENEMY_DISPLAY=/);
+  assert.match(registry,/function declared\(group,id\)/);
+  assert.match(registry,/function preload\(\)/);
+  assert.match(scene,/const hasDeclaredPremium=root\.RiverPremium\?\.declared\?\.\('enemy',premiumId\)/);
+  assert.match(scene,/else if\(hasDeclaredPremium\)\{/);
+  assert.match(scene,/displaySize\?\.\(premiumId,e\.width\|\|36,e\.height\|\|36\)/);
+});
+
+test('Boss 01 usa o corpo raster Premium sem módulos legados sobrepostos',()=>{
+  assert.match(scene,/Number\(sector\)===1\?Math\.min\(Math\.max\(214,/);
+  assert.match(scene,/if\(Number\(d\.sector\)!==1\)bossAccessories\(c,e,d\)/);
+  assert.match(scene,/Number\(e\.bossId\|\|d\.sector\)===1\)continue/);
+  assert.match(html,/Number\(boss\.bossId\|\|sector\)===1\)continue/);
+});
