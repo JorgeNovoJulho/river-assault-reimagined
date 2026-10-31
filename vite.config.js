@@ -1,5 +1,5 @@
 import { defineConfig } from 'vite';
-import { copyFileSync, mkdirSync, existsSync, readFileSync, writeFileSync } from 'node:fs';
+import { copyFileSync, mkdirSync, existsSync, readFileSync, writeFileSync, readdirSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 
 const legacyScripts = [
@@ -91,6 +91,18 @@ function copyAndVersionRuntime() {
         if (!existsSync(source)) throw new Error('Imagem premium obrigatória ausente: ' + file);
         mkdirSync(dirname(target), { recursive: true });
         copyFileSync(source, target);
+      }
+      // Recursos aprovados do menu: não são importações de JS, por isso devem
+      // ser copiados explicitamente para o Pages; sem isso os cartões dão 404.
+      for (const folder of ['assets/ui/premium/pilots', 'assets/ui/premium/menu', 'music']) {
+        const sourceDir=resolve(folder);
+        if (!existsSync(sourceDir)) continue;
+        for (const fileName of readdirSync(sourceDir)) {
+          if (!/\\.(png|jpg|jpeg|webp|opus|mp3|ogg|wav)$/i.test(fileName)) continue;
+          const from=resolve(folder,fileName),to=resolve('dist',folder,fileName);
+          mkdirSync(dirname(to),{recursive:true});
+          copyFileSync(from,to);
+        }
       }
       writeFileSync(indexPath, html);
       writeFileSync(resolve('dist/build-info.json'), JSON.stringify({
