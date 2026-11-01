@@ -2710,6 +2710,9 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
         }
         function drawRescueBoats(){
             for(const b of rescueBoats){
+                const premiumSOS=window.RiverPremium?.get('pickup','SOS');
+                if(premiumSOS){ctx.drawImage(premiumSOS,b.x-25,b.y-30,50,55);continue;}
+                if(window.RiverPremium?.declared('pickup','SOS'))continue;
                 ctx.save();ctx.translate(b.x,b.y);
                 const bob=Math.sin(Date.now()/380+b.phase)*2;
                 ctx.translate(0,bob);
@@ -2724,6 +2727,9 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
         function drawFuelDepots() {
             // Posto de reabastecimento: capsula industrial sobre plataforma flutuante.
             for(const f of fuelDepots){
+                const premiumGas=window.RiverPremium?.get('pickup','GAS');
+                if(premiumGas){ctx.drawImage(premiumGas,f.x-22,f.y-24,44,48);continue;}
+                if(window.RiverPremium?.declared('pickup','GAS'))continue;
                 ctx.save();ctx.translate(f.x,f.y);
                 const bob=Math.sin(missionTicks*.07+f.x)*1.5;
                 ctx.translate(0,bob);
@@ -3613,8 +3619,23 @@ function updateTerrainEvent(){
         }
 
         function drawHUD(){
-            drawFusionStatus();
-            ctx.save();ctx.fillStyle='#f1f5f9';ctx.font='bold 11px system-ui';ctx.fillText('ACERTOS: '+missionHits[Math.max(0,Math.min(19,sector-1))]+'  '+hitGrade(missionHits[Math.max(0,Math.min(19,sector-1))]),14,119);ctx.restore();
+            // HUD Premium: indicadores persistentes ficam fora da área jogável.
+            const fusionLabel=fusionTicks>0?'FUSÃO ATIVA':fusionCooldown>0?'FUSÃO '+Math.ceil(fusionCooldown/60)+'s':'FUSÃO PRONTA';
+            const comboHits=missionHits[Math.max(0,Math.min(19,sector-1))];
+            const ensureActionBar=()=>{
+              let bar=document.getElementById('rs-hud-action-bar');
+              if(bar)return bar;
+              const hud=document.getElementById('hud-score')?.closest('div[class]')?.parentElement?.parentElement||document.getElementById('hud-score')?.parentElement;
+              if(!hud)return null;
+              bar=document.createElement('div');bar.id='rs-hud-action-bar';
+              bar.style.cssText='display:flex;flex-wrap:wrap;gap:5px;justify-content:center;align-items:center;background:#051627;color:#b9f5ff;font:700 10px system-ui;padding:5px;border:1px solid #177cac;border-radius:6px;width:100%;box-sizing:border-box';
+              hud.appendChild(bar);return bar;
+            };
+            const actionBar=ensureActionBar();
+            if(actionBar){
+              const ready=parryCooldown<=0;
+              actionBar.textContent=fusionLabel+'  •  ACERTOS '+comboHits+' '+hitGrade(comboHits)+'  •  PARRY [V] '+(ready?'PRONTO':Math.ceil(parryCooldown/60)+'s')+'  •  '+(bossActive?'PODER':'INVESTIDA')+' [C] '+(swordRushCooldown>0?Math.ceil(swordRushCooldown/60)+'s':'PRONTO');
+            }
             const set=(id,value)=>{const el=document.getElementById(id);if(el && el.textContent!==String(value))el.textContent=String(value)};
             set('hud-score',String(score).padStart(6,'0'));
             set('hud-pilot-level',pilotLevel+' / 100');
