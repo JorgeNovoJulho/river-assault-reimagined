@@ -28,6 +28,11 @@ const CATALOG={
   SUB:'approved/enemies/recurring/submarine/idle_000.png',
   MECHA_GUN:'approved/enemies/recurring/mecha_gun/idle_000.png',
   MECHA_SWORD:'approved/enemies/recurring/mecha_sword/idle_000.png',
+  FLOATING_MINE:'approved/enemies/recurring/floating_mine/idle_000.png',
+  BOMBER:'approved/enemies/recurring/bomber/idle_000.png',
+  ARMED_ISLAND:'approved/enemies/recurring/armed_island/idle_000.png',
+  DAM_BRIDGE:'approved/enemies/recurring/dam_bridge/idle_000.png',
+  ITEM_CAPSULE:'approved/enemies/recurring/item_capsule/idle_000.png',
   TUCANO:'approved/enemies/exclusive/01_tucano/idle_000.png',
   CRANE:'approved/enemies/exclusive/02_crane/idle_000.png',
   SCORPION:'approved/enemies/exclusive/03_scorpion/idle_000.png',
@@ -77,14 +82,17 @@ const ENEMY_ALIASES={
  RECON_PLANE:'ZIGZAG',RECON:'ZIGZAG',HELICOPTER:'HELI',ATTACK_HELICOPTER:'HELI',
  DRONE:'DRONE',MECHA_SWORD:'MECHA_SWORD',MECHA_GUN:'MECHA_GUN',TANK:'TANK',
  ARMED_BOAT:'SHIP',SUBMARINE:'SUB',FLOATING_TURRET:'TURRET',WARSHIP:'WARSHIP',
- HELI:'HELI',JET:'JET',ZIGZAG:'ZIGZAG',SHIP:'SHIP',SUB:'SUB',TURRET:'TURRET'
+ HELI:'HELI',JET:'JET',ZIGZAG:'ZIGZAG',SHIP:'SHIP',SUB:'SUB',TURRET:'TURRET',
+ MINE:'FLOATING_MINE',FLOATING_MINE:'FLOATING_MINE',BOMBER:'BOMBER',
+ ARMED_ISLAND:'ARMED_ISLAND',DAM_BRIDGE:'DAM_BRIDGE',ITEM_CAPSULE:'ITEM_CAPSULE'
 };
 // Tamanho visual independente da hitbox para não reduzir os masters Premium
 // ao tamanho das caixas lógicas originalmente usadas pelo canvas legado.
 const ENEMY_DISPLAY={
- HELI:[48,38],JET:[42,48],ZIGZAG:[42,40],DRONE:[38,38],
- MECHA_SWORD:[50,52],MECHA_GUN:[50,50],TANK:[52,43],SHIP:[54,46],
- SUB:[52,52],TURRET:[42,42],WARSHIP:[70,54],TUCANO:[54,44],CRANE:[70,64]
+ HELI:[68,56],JET:[62,64],ZIGZAG:[60,55],DRONE:[52,52],
+ MECHA_SWORD:[70,72],MECHA_GUN:[70,70],TANK:[70,60],SHIP:[78,64],
+ SUB:[78,70],TURRET:[55,55],WARSHIP:[110,78],TUCANO:[70,60],CRANE:[76,70],
+ FLOATING_MINE:[45,45],BOMBER:[78,73],ARMED_ISLAND:[86,72],DAM_BRIDGE:[130,50],ITEM_CAPSULE:[46,48]
 };
 const files=new Map();
 for(const [group,items] of Object.entries(CATALOG))for(const [id,path] of Object.entries(items)){
