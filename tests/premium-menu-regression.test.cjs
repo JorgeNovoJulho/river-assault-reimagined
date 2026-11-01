@@ -15,7 +15,7 @@ test('approved opening image is available and CSS is not overridden by old proce
 });
 
 test('seven approved pilot portraits are present and selection detail uses actual image',()=>{
-  assert.match(html,/id="rs-premium-pilots"/);
+  assert.match(html,/screen\.id='rs-premium-pilots'/);
   for(const id of pilotIds){
     const path='assets/ui/premium/pilots/'+id+'.png';
     assert.ok(fs.existsSync(path),'missing official pilot portrait: '+path);
