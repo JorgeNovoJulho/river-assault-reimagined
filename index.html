@@ -4955,17 +4955,46 @@ function updateTerrainEvent(){
             const ids=['falcao','vespa','cometa','fenix','helicoptero','disco','titan'];
             const art=['snabo_falcao','jhow_vespa','btata_cometa','napas_fenix','casper_aguia_vtol','roger_ufo_aurora','dudu_titan'];
             const names=['FALCÃO','VESPA','COMETA','FÊNIX','ÁGUIA VTOL','AURORA','TITAN'];
+            // Painel ampliado independente: as artes oficiais não são recortadas no card.
+            screen.style.display='flex';screen.style.flexDirection='column';screen.style.alignItems='center';
+            const layout=document.createElement('div');layout.style.cssText='display:grid;grid-template-columns:minmax(0,1fr) minmax(220px,34%);gap:12px;width:100%;max-width:1300px;align-items:start';
+            const detail=document.createElement('aside');detail.id='rs-premium-pilot-detail';detail.style.cssText='border:2px solid #27c8fb;border-radius:12px;background:#021529ee;padding:10px;text-align:center;min-width:0';
+            detail.innerHTML='<strong style="color:#fcd56a">PILOTO EM DESTAQUE</strong><img id="rs-pilot-detail-photo" alt="Piloto e nave selecionados" style="width:100%;height:clamp(210px,40vh,420px);object-fit:contain;display:block"><h3 id="rs-pilot-detail-name" style="color:#70e8ff;margin:5px"></h3><div id="rs-pilot-detail-bars" style="text-align:left;color:#e8f9ff"></div><button id="rs-pilot-confirm" type="button" style="width:100%;padding:12px;background:#076653;border:2px solid #44e4b9;color:white;border-radius:8px;font-weight:bold">CONFIRMAR PILOTO E CONTINUAR</button>';
             const cards=screen.querySelector('#rs-premium-pilot-cards');
+            cards.style.cssText='display:grid;grid-template-columns:repeat(auto-fit,minmax(125px,1fr));gap:9px;width:100%;margin:0';
+            cards.parentElement.insertBefore(layout,cards);layout.append(cards,detail);
+            const responsive=document.createElement('style');responsive.textContent='@media(max-width:700px){#rs-premium-pilot-cards{grid-template-columns:repeat(2,minmax(0,1fr))!important}#rs-premium-pilots>div:has(#rs-premium-pilot-cards){grid-template-columns:1fr!important}#rs-pilot-detail-photo{height:240px!important}}';screen.append(responsive);
+            let current=0;
+            const stats=['VELOCIDADE','BLINDAGEM','AUTONOMIA','ARMAMENTO'];
+            const highlight=(i)=>{
+              current=i;
+              const detailPhoto=screen.querySelector('#rs-pilot-detail-photo');
+              detailPhoto.src='./assets/ui/premium/pilots/'+art[i]+'.png';
+              screen.querySelector('#rs-pilot-detail-name').textContent=names[i];
+              const bars=screen.querySelector('#rs-pilot-detail-bars');bars.replaceChildren();
+              for(const label of stats){
+                const wrap=document.createElement('div');wrap.style.cssText='margin:7px 0;font:700 11px system-ui';
+                wrap.textContent=label;
+                const track=document.createElement('div');track.style.cssText='height:8px;background:#183754;border-radius:5px;margin-top:3px';
+                const fill=document.createElement('div');fill.style.cssText='height:100%;background:#38d5ff;border-radius:5px;width:70%';track.append(fill);wrap.append(track);bars.append(wrap);
+              }
+              cards.querySelectorAll('button').forEach((b,j)=>b.style.borderColor=j===i?'#ffdf62':'#20abdf');
+            };
+            const confirm=()=>{
+              const select=document.getElementById('plane-select');
+              if(select){select.value=ids[current];select.dispatchEvent(new Event('change',{bubbles:true}));}
+              try{localStorage.setItem('riverstorm:lastSelectedShip',ids[current]);}catch(e){}
+              screen.classList.add('hidden');modeSelection.classList.add('hidden');
+            };
+            detail.querySelector('#rs-pilot-confirm').addEventListener('click',confirm);
             for(let i=0;i<ids.length;i++){
               const card=document.createElement('button');card.type='button';card.style.cssText='border:2px solid #20abdf;background:#051f34;padding:8px;border-radius:12px;color:white;cursor:pointer';
               const pic=document.createElement('img');pic.src='./assets/ui/premium/pilots/'+art[i]+'.png';pic.alt='Piloto '+names[i];pic.style.cssText='width:100%;height:175px;object-fit:contain';
               card.append(pic);const t=document.createElement('strong');t.textContent=names[i];card.append(t);cards.append(card);
-              card.addEventListener('click',()=>{
-                const select=document.getElementById('plane-select');
-                if(select){select.value=ids[i];select.dispatchEvent(new Event('change',{bubbles:true}));}
-                screen.classList.add('hidden');modeSelection.classList.add('hidden');
-              });
+              card.addEventListener('click',()=>highlight(i));
+              card.addEventListener('dblclick',()=>{highlight(i);confirm();});
             }
+            try{const saved=localStorage.getItem('riverstorm:lastSelectedShip');highlight(Math.max(0,ids.indexOf(saved)));}catch(e){highlight(0);}
             screen.querySelector('#rs-premium-pilot-back').addEventListener('click',()=>screen.classList.add('hidden'));
           }
           screen.classList.remove('hidden');
