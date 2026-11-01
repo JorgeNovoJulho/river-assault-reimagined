@@ -523,14 +523,16 @@ function islands(c,items,t){
  const industrial=/CIDADE|INDUSTRIAL|ESTALEIRO|RUÍNAS|PORTO/.test(t.name);
  const volcanic=/LAVA|VULC|MAGMA/.test(t.name);
  for(const p of items){
-  const premiumIsland=window.RiverPremium?.get('terrain','ARMED_ISLAND');
+  // Evitar reciclar a ilha tropical da Missão 01 no porto industrial da Missão 02.
+  // Mantém o relevo legível até existirem sprites industriais individuais aprovados.
+  const premiumIsland=!industrial?window.RiverPremium?.get('terrain','ARMED_ISLAND'):null;
   if(premiumIsland){
     c.save();c.drawImage(premiumIsland,p.x-p.width*.52,p.y-p.height*.52,p.width*1.04,p.height*1.04);c.restore();
     continue;
   }
   // O catálogo declarou uma ilha raster aprovada: aguardar o preload em vez
   // de deixar o SVG legado aparecer por um quadro durante o carregamento.
-  if(window.RiverPremium?.declared('terrain','ARMED_ISLAND'))continue;
+  if(!industrial&&window.RiverPremium?.declared('terrain','ARMED_ISLAND'))continue;
   const terrainSprite=(p.maxHp>0&&p.hp/p.maxHp<=.45)?islandSpriteImages[2]:islandSpriteImages[((p.shape||0)%2+2)%2];
   if(terrainSprite.complete&&terrainSprite.naturalWidth){
     c.save();c.drawImage(terrainSprite,p.x-p.width*.52,p.y-p.height*.52,p.width*1.04,p.height*1.04);c.restore();
