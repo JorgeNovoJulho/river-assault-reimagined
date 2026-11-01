@@ -6,29 +6,13 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   premium-build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Restaurar mestres exatos das margens da Missão 02
-        run: |
-          set -euo pipefail
-          base='assets/sprites/premium/approved/environment/mission_02_industrial'
-          cat .github/mission2-payload/bank_left.png.b64.* | base64 --decode > "$base/bank_left.png"
-          cat .github/mission2-payload/bank_right.png.b64.* | base64 --decode > "$base/bank_right.png"
-          echo '7b4395a868b6c8299d6191be04edeea48e4b024d1da22d8cdddeec6f8d851900  '"$base"'/bank_left.png' | sha256sum --check
-          echo 'a18c9cf8910805062540a7a3f3ddd07bd360f25564455fe26a29c17bdf362802  '"$base"'/bank_right.png' | sha256sum --check
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git fetch --depth=1 origin 652c6dd19ca6f58a0da4c8337795baa2bca3b3aa
-          git checkout FETCH_HEAD -- .github/workflows/premium-preview.yml
-          git add "$base/bank_left.png" "$base/bank_right.png" .github/workflows/premium-preview.yml
-          git rm .github/mission2-payload/bank_left.png.b64.0 .github/mission2-payload/bank_left.png.b64.1 .github/mission2-payload/bank_left.png.b64.2 .github/mission2-payload/bank_right.png.b64.0 .github/mission2-payload/bank_right.png.b64.1 .github/mission2-payload/bank_right.png.b64.2 .github/workflows/restore-mission2-banks.yml
-          git commit -m 'fix(premium): restore exact approved Mission 02 bank masters'
-          git push
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
@@ -50,6 +34,7 @@ jobs:
         run: |
           test -s dist/index.html
           test -s dist/src/render/premium-registry.js
+          test -s dist/src/render/premium-environment.js
           test -s dist/src/render/scene2d5.js
           grep -q 'premium-environment' index.html
       - name: Auditar sprites existentes (não bloquear compilação parcial)
