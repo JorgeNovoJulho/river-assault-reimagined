@@ -585,6 +585,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
     <script src="./src/render/scene2d5.js"></script>
     <script src="./src/render/premium-registry.js"></script>
     <script src="./src/render/premium-environment.js"></script>
+    <audio id="menu-theme-audio" src="./music/menu-lucidez.opus" preload="auto" loop hidden aria-label="Lucidez — música da abertura"></audio>
     <script src="./src/audio/music.js"></script>
     <script src="./src/audio/sfx-modern.js"></script>
     <script src="./src/audio/playlist.js"></script>
@@ -3830,7 +3831,7 @@ function updateTerrainEvent(){
             document.getElementById('mission-banner').textContent=campaign.at(sector).name;
             gameState = 'PLAYING';
             simulationClock.reset();
-            try{soundtrack.stop();playlist.startNewGame()}catch(error){console.warn('Playlist indisponível:',error)}
+            try{menuMusic.stop();soundtrack.stop();playlist.startNewGame()}catch(error){console.warn('Playlist indisponível:',error)}
         }
 
         function fireBankMissiles(){
@@ -4663,8 +4664,16 @@ function updateTerrainEvent(){
         if(window.RiverSFX)window.RiverSFX.volume=userPrefs.sfx/100;
         const soundtrack=new window.RiverMusic();
         soundtrack.volume=userPrefs.music/100*.16;
+        const menuMusic=new window.RiverMenuMusic();
+        function syncMenuMusic(gesture=false){menuMusic.sync(gameState==='START'&&playlist.audio.paused,playlist.enabled,userPrefs.music/100,gesture);}
+        document.addEventListener('pointerdown',()=>syncMenuMusic(true),{capture:true});
+        document.addEventListener('keydown',()=>syncMenuMusic(true),{capture:true});
+        setInterval(syncMenuMusic,250);
+        syncMenuMusic();
         document.getElementById('music-toggle').addEventListener('click',()=>{
-            const on=playlist.toggle();
+            const on=gameState==='START'?(playlist.enabled=!playlist.enabled):playlist.toggle();
+            if(gameState==='START')playlist.pause();
+            syncMenuMusic(true);
             if(!on)soundtrack.stop();
             
             document.getElementById('music-toggle').textContent='MÚSICA: '+(on?'LIG':'DES');

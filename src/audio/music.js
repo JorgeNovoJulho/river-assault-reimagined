@@ -31,4 +31,28 @@ class RiverMusic {
  toggle(){this.enabled=!this.enabled;if(!this.enabled)this.stop();else this.start();return this.enabled}
 }
 root.RiverMusic=RiverMusic;
+class RiverMenuMusic {
+ constructor(){
+  this.audio=document.getElementById('menu-theme-audio')||new Audio('./music/menu-lucidez.opus');
+  this.audio.preload='auto';this.audio.loop=true;this.active=false;this.pending=false;this.blocked=false;
+  this.audio.addEventListener('error',()=>this.status('Música da abertura indisponível'));
+ }
+ status(message){
+  let label=document.getElementById('menu-music-status');
+  if(!label){const screen=document.getElementById('mode-selection');if(!screen)return;
+   label=document.createElement('small');label.id='menu-music-status';label.setAttribute('aria-live','polite');screen.appendChild(label);}
+  label.textContent=message;
+ }
+ sync(active,enabled,volume,gesture=false){
+  this.active=!!active&&!!enabled;this.audio.volume=Math.max(0,Math.min(1,Number(volume)||0));
+  if(!this.active){this.audio.pause();return;}
+  if(!this.audio.paused||this.pending||this.blocked&&!gesture)return;
+  this.pending=true;this.blocked=false;
+  this.audio.play().then(()=>{if(!this.active)this.audio.pause();else this.status('♫ Lucidez — GALM NOVA feat. Fhenrir St.George');})
+   .catch(e=>{if(e.name==='NotAllowedError'){this.blocked=true;this.status('♫ Clique ou toque para ouvir Lucidez');}})
+   .finally(()=>{this.pending=false;});
+ }
+ stop(){this.active=false;this.audio.pause();}
+}
+root.RiverMenuMusic=RiverMenuMusic;
 })(window);

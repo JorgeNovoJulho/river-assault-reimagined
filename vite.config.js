@@ -1,6 +1,16 @@
 import { defineConfig } from 'vite';
 import { copyFileSync, mkdirSync, existsSync, readFileSync, writeFileSync, readdirSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
+import { createHash } from 'node:crypto';
+
+// Transporte lossless da faixa original; a compilação verifica os bytes antes
+// de publicar o OPUS, sem transcodificar nem alterar a música aprovada.
+const menuSource=resolve('assets/audio/menu');
+const menuManifest=JSON.parse(readFileSync(resolve(menuSource,'manifest.json'),'utf8'));
+const menuBytes=Buffer.from(menuManifest.parts.map(p=>readFileSync(resolve(menuSource,p),'utf8')).join(''),'base64');
+if(createHash('sha256').update(menuBytes).digest('hex')!==menuManifest.sha256)throw new Error('SHA-256 da música de abertura inválido');
+mkdirSync(resolve('public/music'),{recursive:true});
+writeFileSync(resolve('public/music/menu-lucidez.opus'),menuBytes);
 
 const legacyScripts = [
   'src/input/gamepad.js',

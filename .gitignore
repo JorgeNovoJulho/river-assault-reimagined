@@ -1,5 +1,6 @@
 node_modules/
 dist/
+public/music/menu-lucidez.opus
 .env
 .env.*
 !.env.example
