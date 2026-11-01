@@ -234,7 +234,7 @@
         <!-- Telas de Interface Overlay -->
         <!-- Tela Inicial / Menu Principal -->
         <div id="start-screen" class="absolute inset-0 bg-black/90 flex flex-col items-center justify-start p-3 text-center z-30">
-            <div id="mode-selection" style="position:absolute;inset:0;z-index:95;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:22px;background:linear-gradient(155deg,#03131e 5%,#13344b 52%,#080c20 100%);overflow:auto">
+            <div id="mode-selection" style="background-image:linear-gradient(#061327dd,#071c37e8),url(./assets/ui/premium/menu/2b81e191-9306-4a6e-aabf-049f60939aa0.png);background-position:center;background-size:cover;position:absolute;inset:0;z-index:95;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:22px;background:linear-gradient(155deg,#03131e 5%,#13344b 52%,#080c20 100%);overflow:auto">
 <h2 style="font-size:clamp(24px,6vw,37px);font-weight:900;color:#7de8ff;letter-spacing:2px">RIVER STORM</h2>
 <p style="max-width:320px;font-size:12px;color:#bdd8ed">ESCOLHA O MODO DE JOGO</p>
 <button id="mode-single" type="button" style="width:min(94%,330px);padding:18px;background:#0d6557;border:2px solid #56f0c7;border-radius:12px;color:white;font-weight:900">✈ SINGLE PLAYER</button>
@@ -4919,7 +4919,33 @@ function updateTerrainEvent(){
 
         // Seleção de modo antes do hangar: não altera a campanha solo.
         const modeSelection=document.getElementById('mode-selection');
-        document.getElementById('mode-single').addEventListener('click',()=>{modeSelection.classList.add('hidden');});
+        document.getElementById('mode-single').addEventListener('click',()=>{
+          // Seleção visual restaurada sem alterar o núcleo do hangar/campanha.
+          let screen=document.getElementById('rs-premium-pilots');
+          if(!screen){
+            screen=document.createElement('section');screen.id='rs-premium-pilots';
+            screen.setAttribute('aria-label','Seleção de pilotos RiverStorm');
+            screen.style.cssText='position:absolute;inset:0;z-index:110;background:linear-gradient(#031329e8,#061d35f2),url(./assets/ui/premium/menu/2b81e191-9306-4a6e-aabf-049f60939aa0.png) center/cover;overflow:auto;padding:16px;box-sizing:border-box;color:#ebfaff;text-align:center';
+            screen.innerHTML='<h2 style="font:900 clamp(26px,5vw,46px) system-ui;color:#6eeaff;margin:3px">SELEÇÃO DE PILOTOS</h2><p style="color:#fbd472;font-weight:bold">ESCOLHA SUA AERONAVE</p><div id="rs-premium-pilot-cards" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(138px,1fr));gap:12px;max-width:1050px;margin:16px auto"></div><button id="rs-premium-pilot-back" style="padding:12px 20px;border:1px solid #55cfff;background:#10253c;color:white;border-radius:8px">VOLTAR</button>';
+            modeSelection.parentElement.appendChild(screen);
+            const ids=['falcao','vespa','cometa','fenix','helicoptero','disco','titan'];
+            const art=['snabo_falcao','jhow_vespa','btata_cometa','napas_fenix','casper_aguia_vtol','roger_ufo_aurora','dudu_titan'];
+            const names=['FALCÃO','VESPA','COMETA','FÊNIX','ÁGUIA VTOL','AURORA','TITAN'];
+            const cards=screen.querySelector('#rs-premium-pilot-cards');
+            for(let i=0;i<ids.length;i++){
+              const card=document.createElement('button');card.type='button';card.style.cssText='border:2px solid #20abdf;background:#051f34;padding:8px;border-radius:12px;color:white;cursor:pointer';
+              const pic=document.createElement('img');pic.src='./assets/ui/premium/pilots/'+art[i]+'.png';pic.alt='Piloto '+names[i];pic.style.cssText='width:100%;height:175px;object-fit:contain';
+              card.append(pic);const t=document.createElement('strong');t.textContent=names[i];card.append(t);cards.append(card);
+              card.addEventListener('click',()=>{
+                const select=document.getElementById('plane-select');
+                if(select){select.value=ids[i];select.dispatchEvent(new Event('change',{bubbles:true}));}
+                screen.classList.add('hidden');modeSelection.classList.add('hidden');
+              });
+            }
+            screen.querySelector('#rs-premium-pilot-back').addEventListener('click',()=>screen.classList.add('hidden'));
+          }
+          screen.classList.remove('hidden');
+        });
         document.getElementById('mode-multi').addEventListener('click',()=>{
           document.getElementById('mode-multi-info').classList.remove('hidden');
           document.getElementById('mode-single').classList.add('hidden');
