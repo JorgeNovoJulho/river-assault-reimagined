@@ -523,6 +523,8 @@ function islands(c,items,t){
  const industrial=/CIDADE|INDUSTRIAL|ESTALEIRO|RUÍNAS|PORTO/.test(t.name);
  const volcanic=/LAVA|VULC|MAGMA/.test(t.name);
  for(const p of items){
+  const premiumIsland=root.RiverPremium?.get('terrain','ISLAND');
+  if(premiumIsland){c.save();c.drawImage(premiumIsland,p.x-p.width*.6,p.y-p.height*.6,p.width*1.2,p.height*1.2);c.restore();continue;}
   const terrainSprite=(p.maxHp>0&&p.hp/p.maxHp<=.45)?islandSpriteImages[2]:islandSpriteImages[((p.shape||0)%2+2)%2];
   if(terrainSprite.complete&&terrainSprite.naturalWidth){
     c.save();c.drawImage(terrainSprite,p.x-p.width*.52,p.y-p.height*.52,p.width*1.04,p.height*1.04);c.restore();
