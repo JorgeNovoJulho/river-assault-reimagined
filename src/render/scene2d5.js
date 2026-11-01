@@ -1336,7 +1336,7 @@ function bossPresentation(c,d){
  for(const e of d.enemies||[]){
   // Boss 01 possui leitura, módulos e luzes no master raster aprovado.
   // Não acrescentar halo/anéis genéricos que poluem o casco.
-  if(e.type!=='BOSS'||e.hp<=0||Number(e.bossId||d.sector)===1)continue;
+  if(e.type!=='BOSS'||e.hp<=0||Number(e.bossId||d.sector)<=2)continue;
   const radius=Math.max(32,(e.width||90)*.39),phase=(e.bossId||d.sector||1)%5;
   c.save();c.translate(e.x,e.y);
   const damaged=e.maxHp>0&&e.hp/e.maxHp<.4;
@@ -1421,7 +1421,7 @@ function drawPremiumBossV3(c,e,sector){
  const image=premiumBossV3[Number(sector)];
  if(!image||!image.complete||!image.naturalWidth)return false;
  // A Ponte Fortificada domina a arena visualmente sem modificar sua hitbox.
- const w=Number(sector)===1?Math.min(Math.max(214,(e.width||90)*1.9),300):Math.min(Math.max(132,(e.width||90)*1.55),260);
+ const w=Number(sector)===1?Math.min(Math.max(214,(e.width||90)*1.9),300):Number(sector)===2?Math.min(Math.max(210,(e.width||90)*1.8),280):Math.min(Math.max(132,(e.width||90)*1.55),260);
  const h=w*image.naturalHeight/image.naturalWidth;
  c.save();c.imageSmoothingEnabled=true;c.drawImage(image,e.x-w*.5,e.y-h*.5,w,h);c.restore();
  return true;

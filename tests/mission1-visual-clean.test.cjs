@@ -33,11 +33,11 @@ test('inimigos Premium declarados não caem em placeholder e usam escala visual 
   assert.match(scene,/displaySize\?\.\(premiumId,e\.width\|\|36,e\.height\|\|36\)/);
 });
 
-test('Boss 01 usa o corpo raster Premium sem módulos legados sobrepostos',()=>{
+test('Bosses V3 usam os corpos raster Premium sem módulos legados sobrepostos',()=>{
   assert.match(scene,/Number\(sector\)===1\?Math\.min\(Math\.max\(214,/);
   assert.match(scene,/if\(e\.type==='BOSS'&&Number\(d\.sector\)<=2&&drawPremiumBossV3\(c,e,d\.sector\)\)/);
   const block=scene.slice(scene.indexOf("if(e.type==='BOSS'&&Number(d.sector)<=2"),scene.indexOf("}else if(e.type==='BOSS'&&Number(d.sector)===2"));
   assert.doesNotMatch(block,/bossAccessories\(c,e,d\)/,'Bosses V3 não podem ter acessórios legados sobrepostos');
-  assert.match(scene,/Number\(e\.bossId\|\|d\.sector\)===1\)continue/);
-  assert.match(html,/Number\(boss\.bossId\|\|sector\)===1\)continue/);
+  assert.match(scene,/Number\(e\.bossId\|\|d\.sector\)<=2\)continue/);
+  assert.match(html,/Number\(boss\.bossId\|\|sector\)<=2\)continue/);
 });

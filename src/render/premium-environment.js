@@ -53,8 +53,10 @@ function paint(c,d,bankAt,riverPath){
  const water=image(item.textures.water).img;
  const left=image(item.textures.left).img,right=image(item.textures.right).img;
  c.save();riverPath(c,riverPoints);c.clip();
- const scale=Math.max(1,w/water.naturalWidth),tileH=water.naturalHeight*scale;
- const offset=((dist*.5)%tileH+tileH)%tileH;
+ // Masters 1024px: cobrem mais de uma viewport e rolam devagar, evitando
+ // emendas e repetição curta sem interferir nas curvas do leito do rio.
+ const scale=Math.max(w/water.naturalWidth,h*1.55/water.naturalHeight),tileH=water.naturalHeight*scale;
+ const offset=((dist*.18)%tileH+tileH)%tileH;
  for(let y=offset-tileH;y<h;y+=tileH)c.drawImage(water,0,y,w,tileH);
  c.restore();
  for(const [side,im] of [['left',left],['right',right]]){
@@ -67,8 +69,10 @@ function paint(c,d,bankAt,riverPath){
    for(let y=h;y>=0;y-=5)c.lineTo(bankAt(riverPoints,y,w)[1],y);
   }
   c.closePath();c.clip();
-  const tw=Math.max(140,Math.round(w*.47)),th=tw*im.naturalHeight/im.naturalWidth;
-  const start=((dist*.5)%th+th)%th;
+  // Painéis portuários altos: a repetição fica fora da leitura principal.
+  const th=Math.max(h*1.55,Math.round(w*.92*im.naturalHeight/im.naturalWidth));
+  const tw=th*im.naturalWidth/im.naturalHeight;
+  const start=((dist*.18)%th+th)%th;
   for(let y=start-th;y<h;y+=th)c.drawImage(im,side==='left'?0:w-tw,y,tw,th);
   c.restore();
  }
