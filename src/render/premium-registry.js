@@ -55,8 +55,8 @@ const CATALOG={
   HYBRID_HUNTER:'approved/enemies/exclusive/20_hybrid_hunter/idle_000.png'
  },
  terrain:{
-  ISLAND:'terrain/island.png',BRIDGE:'terrain/bridge.png',
-  DAM:'terrain/dam.png',BRIDGE_DAMAGED:'terrain/bridge-damaged.png',
+  ISLAND:'approved/enemies/recurring/armed_island/idle_000.png',BRIDGE:'approved/enemies/recurring/dam_bridge/idle_000.png',
+  DAM:'approved/enemies/recurring/dam_bridge/idle_000.png',BRIDGE_DAMAGED:'terrain/bridge-damaged.png',
   DAM_DAMAGED:'terrain/dam-damaged.png'
  },
  pickup:{
@@ -97,7 +97,7 @@ const ENEMY_DISPLAY={
 const files=new Map();
 for(const [group,items] of Object.entries(CATALOG))for(const [id,path] of Object.entries(items)){
  // Só arquivos existentes são habilitados por padrão. Nada de usar imagens erradas.
- const supported=(group==='player'&&id==='falcao')||(group==='fx'&&id==='explosion')||(group==='enemy'&&path.startsWith('approved/'))||(group==='enemy'&&(id==='TURRET'||id==='SHIP'));
+ const supported=(group==='player'&&id==='falcao')||(group==='fx'&&id==='explosion')||((group==='enemy'||group==='terrain')&&path.startsWith('approved/'))||(group==='enemy'&&(id==='TURRET'||id==='SHIP'));
  files.set(group+':'+id,{path,loaded:false,supported,img:null,base:path.startsWith('approved/')?'./assets/sprites/premium/':BASE});
 }
 for(const id of AIRCRAFT_IDS)for(const state of AIRCRAFT_STATES){
