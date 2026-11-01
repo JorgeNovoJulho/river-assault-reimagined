@@ -23,7 +23,8 @@ jobs:
           echo 'a18c9cf8910805062540a7a3f3ddd07bd360f25564455fe26a29c17bdf362802  '"$base"'/bank_right.png' | sha256sum --check
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git checkout HEAD^ -- .github/workflows/premium-preview.yml
+          git fetch --depth=1 origin 652c6dd19ca6f58a0da4c8337795baa2bca3b3aa
+          git checkout FETCH_HEAD -- .github/workflows/premium-preview.yml
           git add "$base/bank_left.png" "$base/bank_right.png" .github/workflows/premium-preview.yml
           git rm .github/mission2-payload/bank_left.png.b64.0 .github/mission2-payload/bank_left.png.b64.1 .github/mission2-payload/bank_left.png.b64.2 .github/mission2-payload/bank_right.png.b64.0 .github/mission2-payload/bank_right.png.b64.1 .github/mission2-payload/bank_right.png.b64.2 .github/workflows/restore-mission2-banks.yml
           git commit -m 'fix(premium): restore exact approved Mission 02 bank masters'
