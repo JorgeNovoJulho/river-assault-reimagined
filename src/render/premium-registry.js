@@ -61,7 +61,8 @@ const CATALOG={
  },
  pickup:{
   BOMB:'items/bomb.png',SHIELD:'items/shield.png',FUEL:'items/fuel.png',
-  DRONES:'items/drones.png',REPAIR:'items/repair.png'
+  DRONES:'items/drones.png',REPAIR:'items/repair.png',
+  CAPSULE:'approved/enemies/recurring/item_capsule/idle_000.png'
  },
  projectile:{
   SINGLE:'projectiles/single.png',DOUBLE:'projectiles/double.png',
@@ -97,7 +98,7 @@ const ENEMY_DISPLAY={
 const files=new Map();
 for(const [group,items] of Object.entries(CATALOG))for(const [id,path] of Object.entries(items)){
  // Só arquivos existentes são habilitados por padrão. Nada de usar imagens erradas.
- const supported=(group==='player'&&id==='falcao')||(group==='fx'&&id==='explosion')||((group==='enemy'||group==='terrain')&&path.startsWith('approved/'))||(group==='enemy'&&(id==='TURRET'||id==='SHIP'));
+ const supported=(group==='player'&&id==='falcao')||(group==='fx'&&id==='explosion')||((group==='enemy'||group==='terrain'||group==='pickup')&&path.startsWith('approved/'))||(group==='enemy'&&(id==='TURRET'||id==='SHIP'));
  files.set(group+':'+id,{path,loaded:false,supported,img:null,base:path.startsWith('approved/')?'./assets/sprites/premium/':BASE});
 }
 for(const id of AIRCRAFT_IDS)for(const state of AIRCRAFT_STATES){
