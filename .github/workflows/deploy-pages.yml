@@ -54,6 +54,10 @@ jobs:
           cp -a premium-source/dist/. dist/premium-preview/
           printf '{"premium_sha":"%s","source":"riverstorm-premium-nucleo"}\n' "$(git -C premium-source rev-parse HEAD)" > dist/premium-preview/preview-version.json
           test -s dist/premium-preview/index.html
+          grep -q 'rs-premium-pilots' dist/premium-preview/index.html
+          for pilot in snabo_falcao jhow_vespa btata_cometa napas_fenix casper_aguia_vtol roger_ufo_aurora dudu_titan; do
+            test -s "dist/premium-preview/assets/ui/premium/pilots/${pilot}.png"
+          done
           test -s dist/premium-preview/preview-version.json
       - name: Garantir arena e assets no artefato
         shell: bash
