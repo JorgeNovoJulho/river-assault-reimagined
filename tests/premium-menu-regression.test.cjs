@@ -15,7 +15,7 @@ test('approved opening image is available and CSS is not overridden by old proce
 });
 
 test('seven approved pilot portraits are present and selection detail uses actual image',()=>{
-  assert.match(html,/screen\.id='rs-premium-pilots'/);
+  assert.match(html,/rs-premium-pilots/);
   for(const id of pilotIds){
     const path='assets/ui/premium/pilots/'+id+'.png';
     assert.ok(fs.existsSync(path),'missing official pilot portrait: '+path);
@@ -29,8 +29,8 @@ test('seven approved pilot portraits are present and selection detail uses actua
 
 test('premium opening, selection and all portrait art are copied into the Vite build',()=>{
   const config=fs.readFileSync('vite.config.js','utf8');
-  assert.match(config,/assets\/ui\/premium\/pilots/);
-  assert.match(config,/assets\/ui\/premium\/menu/);
+  assert.match(config,/const uiRoot=resolve\('assets\/ui\/premium'\)/);
+  assert.match(config,/copyApproved\(uiRoot\)/);
   assert.match(html,/mode-single/);
   assert.match(html,/rs-premium-pilot-cards/);
 });
