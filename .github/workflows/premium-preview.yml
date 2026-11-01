@@ -7,12 +7,6 @@ on:
 
 permissions:
   contents: read
-  pages: write
-  id-token: write
-
-concurrency:
-  group: pages
-  cancel-in-progress: false
 
 jobs:
   premium-build:
@@ -60,34 +54,6 @@ jobs:
           echo '::error::Suíte original encontrou regressões. Artefato disponível para diagnóstico, mas NÃO homologado.'
           exit 1
 
-  deploy-preview:
-    needs: premium-build
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: main
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-      - run: npm install --no-audit --no-fund
-      - run: npm run build
-      - uses: actions/download-artifact@v4
-        with:
-          name: riverstorm-premium-web-${{ github.sha }}
-          path: dist/premium-preview
-      - name: Identificar e validar prévia
-        run: |
-          test -s dist/premium-preview/assets/ui/premium/pilots/snabo_falcao.png
-          test -s dist/premium-preview/assets/ui/premium/menu/2b81e191-9306-4a6e-aabf-049f60939aa0.png
-          printf '{"premium_sha":"%s"}\n' "$GITHUB_SHA" > dist/premium-preview/preview-version.json
-          touch dist/.nojekyll
-      - uses: actions/configure-pages@v5
-      - uses: actions/upload-pages-artifact@v3
-        with:
-          path: dist
-      - id: deployment
-        uses: actions/deploy-pages@v4
+  # A publicação permanece no deploy-pages.yml da main: a proteção do
+  # ambiente github-pages permite somente essa branch. Esse workflow compila
+  # a Premium isoladamente em /premium-preview/ sem mudar a campanha oficial.

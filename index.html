@@ -1869,6 +1869,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
                     ctx.drawImage(premiumPickup,-20,-24,40,48);
                     ctx.restore();continue;
                 }
+                if(window.RiverPremium?.declared('pickup',p.type==='WINGMAN'||p.type==='DRONE'?'DRONES':p.type)){ctx.restore();continue;}
 
                 // Capsula aprovada para itens cujo desenho individual ainda nao foi homologado.
                 // A legenda original preserva a identidade funcional (GAS, MULT, BOM etc.).
@@ -2642,6 +2643,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
                 const slabY=-p.height/2;
                 const condition=(p.maxHp>0&&p.hp/p.maxHp<=.45)?'_DAMAGED':'';
                 const premiumTerrainImage=window.RiverPremium?.get('terrain',p.type+condition)||window.RiverPremium?.get('terrain',p.type);
+                if(!premiumTerrainImage&&(window.RiverPremium?.declared('terrain',p.type+condition)||window.RiverPremium?.declared('terrain',p.type))){ctx.restore();continue;}
                 const terrainImage=premiumTerrainImage||terrainStructureImages[p.type+condition]||terrainStructureImages[p.type];
                 if(terrainImage&&terrainImage.complete&&terrainImage.naturalWidth){
                   // A travessia permanece aberta: renderizar apenas as duas faixas sólidas.
