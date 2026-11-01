@@ -1869,6 +1869,16 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
                     ctx.restore();continue;
                 }
 
+                // Capsula aprovada para itens cujo desenho individual ainda nao foi homologado.
+                // A legenda original preserva a identidade funcional (GAS, MULT, BOM etc.).
+                const capsule=window.RiverPremium?.get('pickup','CAPSULE');
+                if(capsule){
+                    ctx.drawImage(capsule,-23,-23,46,46);
+                    ctx.fillStyle='#ffffff';ctx.strokeStyle='#061826';ctx.lineWidth=3;
+                    ctx.font='bold 10px monospace';ctx.textAlign='center';ctx.textBaseline='middle';
+                    ctx.strokeText(st.label,0,0);ctx.fillText(st.label,0,0);
+                    ctx.restore();continue;
+                }
                 // Halo e ripples do coletavel, sem dependencias de imagens externas.
                 ctx.fillStyle='rgba(0,8,25,.38)';ctx.beginPath();ctx.ellipse(2,15,24,8,0,0,7);ctx.fill();
                 ctx.strokeStyle=st.color;ctx.globalAlpha=.35;ctx.lineWidth=1.5;ctx.beginPath();ctx.ellipse(0,14,23,8,0,0,7);ctx.stroke();ctx.globalAlpha=1;
