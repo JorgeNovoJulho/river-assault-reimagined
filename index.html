@@ -4992,22 +4992,47 @@ function updateTerrainEvent(){
               }
               cards.querySelectorAll('button').forEach((b,j)=>b.style.borderColor=j===i?'#ffdf62':'#20abdf');
             };
+            let confirming=false,lastCard=-1,lastCardClick=0;
             const confirm=()=>{
+              if(confirming)return;
               const select=document.getElementById('plane-select');
               if(select){select.value=ids[current];select.dispatchEvent(new Event('change',{bubbles:true}));}
+              if(!unlocked.includes(ids[current])){
+                screen.querySelector('#rs-pilot-detail-name').textContent=names[current]+' — DESBLOQUEIE NO HANGAR';
+                return;
+              }
+              confirming=true;
               try{localStorage.setItem('riverstorm:lastSelectedShip',ids[current]);}catch(e){}
-              screen.classList.add('hidden');modeSelection.classList.add('hidden');
+              const card=cards.children[current];
+              card.classList.add('rs-pilot-confirming');
+              setTimeout(()=>{
+                // Usar a entrada completa da campanha (resolução, HUD, áudio e
+                // overlays), não apenas esconder a seleção e revelar o hangar.
+                enterGameplay();
+                if(gameState==='PLAYING'){screen.classList.add('hidden');modeSelection.classList.add('hidden');}
+                card.classList.remove('rs-pilot-confirming');confirming=false;
+              },420);
             };
             detail.querySelector('#rs-pilot-confirm').addEventListener('click',confirm);
             for(let i=0;i<ids.length;i++){
               const card=document.createElement('button');card.type='button';card.style.cssText='border:2px solid #20abdf;background:#051f34;padding:8px;border-radius:12px;color:white;cursor:pointer';
               const pic=document.createElement('img');pic.src='./assets/ui/premium/pilots/'+art[i]+'.png';pic.alt='Piloto '+names[i];pic.style.cssText='width:100%;height:175px;object-fit:contain';
               card.append(pic);const t=document.createElement('strong');t.textContent=names[i];card.append(t);cards.append(card);
-              card.addEventListener('click',()=>highlight(i));
-              card.addEventListener('dblclick',()=>{highlight(i);confirm();});
+              card.dataset.aircraft=ids[i];
+              card.addEventListener('click',()=>{
+                if(confirming)return;
+                highlight(i);
+                const now=performance.now();
+                if(lastCard===i&&now-lastCardClick<450){lastCard=-1;confirm();}
+                else{lastCard=i;lastCardClick=now;}
+              });
+              card.addEventListener('dblclick',()=>{if(!confirming){highlight(i);confirm();}});
             }
             try{const saved=localStorage.getItem('riverstorm:lastSelectedShip');highlight(Math.max(0,ids.indexOf(saved)));}catch(e){highlight(0);}
-            screen.querySelector('#rs-premium-pilot-back').addEventListener('click',()=>screen.classList.add('hidden'));
+            const flash=document.createElement('style');
+            flash.textContent='@keyframes rsPilotConfirm{0%,100%{border-color:#42ff87;box-shadow:0 0 20px #42ff87}50%{border-color:#fff;box-shadow:0 0 3px #42ff87}}.rs-pilot-confirming{animation:rsPilotConfirm .14s linear 3;outline:2px solid #42ff87}';
+            screen.append(flash);
+            screen.querySelector('#rs-premium-pilot-back').addEventListener('click',()=>{if(!confirming)screen.classList.add('hidden')});
           }
           screen.classList.remove('hidden');
         });
