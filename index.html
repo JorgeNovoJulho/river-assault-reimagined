@@ -2206,7 +2206,9 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
                 // A lógica e o movimento do inimigo continuam sendo os originais.
                 const rasterEnemy=window.RiverPremium?.get('enemy',e.type==='BIOME_ENEMY'?(e.biomeId||'TUCANO'):e.type);
                 if(rasterEnemy&&e.type!=='BOSS'&&e.type!=='MEGAZORD'){
-                    ctx.drawImage(rasterEnemy,-(e.width||32)/2,-(e.height||32)/2,e.width||32,e.height||32);
+                    const id=e.type==='BIOME_ENEMY'?(e.biomeId||'TUCANO'):e.type;
+                    const [dw,dh]=window.RiverPremium?.displaySize?.(id,e.width||32,e.height||32)||[e.width||32,e.height||32];
+                    ctx.drawImage(rasterEnemy,-dw/2,-dh/2,dw,dh);
                     ctx.restore();
                     return;
                 }
