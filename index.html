@@ -3626,16 +3626,27 @@ function updateTerrainEvent(){
             const ensureActionBar=()=>{
               let bar=document.getElementById('rs-hud-action-bar');
               if(bar)return bar;
-              const hud=document.getElementById('hud-score')?.closest('div[class]')?.parentElement?.parentElement||document.getElementById('hud-score')?.parentElement;
+              const hud=document.getElementById('compact-hud');
               if(!hud)return null;
               bar=document.createElement('div');bar.id='rs-hud-action-bar';
               bar.style.cssText='display:flex;flex-wrap:wrap;gap:5px;justify-content:center;align-items:center;background:#051627;color:#b9f5ff;font:700 10px system-ui;padding:5px;border:1px solid #177cac;border-radius:6px;width:100%;box-sizing:border-box';
+              const status=document.createElement('span');status.id='rs-hud-action-status';bar.append(status);
+              const meter=document.createElement('progress');meter.id='rs-fusion-meter';meter.max=360;meter.setAttribute('aria-label','Recarga da fusão');meter.style.cssText='width:70px;height:8px;accent-color:#42e8b4';bar.append(meter);
+              // Mover os botões reais preserva os handlers de toque e teclado.
+              // A mesma faixa funciona no desktop e no painel inferior mobile.
+              for(const id of ['parry-btn','boss-skill-use']){
+                const button=document.getElementById(id);if(!button)continue;
+                for(const [key,value] of Object.entries({position:'static',inset:'auto',transform:'none','font-size':'10px',padding:'4px 7px','min-height':'30px',opacity:'1'}))button.style.setProperty(key,value,'important');
+                bar.append(button);
+              }
               hud.appendChild(bar);return bar;
             };
             const actionBar=ensureActionBar();
             if(actionBar){
-              const ready=parryCooldown<=0;
-              actionBar.textContent=fusionLabel+'  •  ACERTOS '+comboHits+' '+hitGrade(comboHits)+'  •  PARRY [V] '+(ready?'PRONTO':Math.ceil(parryCooldown/60)+'s')+'  •  '+(bossActive?'PODER':'INVESTIDA')+' [C] '+(swordRushCooldown>0?Math.ceil(swordRushCooldown/60)+'s':'PRONTO');
+              const status=document.getElementById('rs-hud-action-status');
+              status.textContent=fusionLabel+' • ACERTOS '+comboHits+' '+hitGrade(comboHits);
+              document.getElementById('rs-fusion-meter').value=fusionTicks>0?fusionTicks:Math.max(0,360-fusionCooldown);
+              parryButton.textContent=parryTicks>0?'ESCUDO '+Math.ceil(parryTicks/60)+'s':'PARRY [V] '+(parryCooldown>0?Math.ceil(parryCooldown/60)+'s':'PRONTO');
             }
             const set=(id,value)=>{const el=document.getElementById(id);if(el && el.textContent!==String(value))el.textContent=String(value)};
             set('hud-score',String(score).padStart(6,'0'));
