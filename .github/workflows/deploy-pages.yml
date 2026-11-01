@@ -37,6 +37,7 @@ jobs:
         with:
           ref: riverstorm-premium-nucleo
           path: premium-source
+      # Atualizar cópia isolada da branch Premium a cada push na main.
       - name: Compilar prévia Premium navegável (sem substituir a campanha)
         shell: bash
         run: |
