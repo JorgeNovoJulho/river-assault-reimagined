@@ -523,8 +523,14 @@ function islands(c,items,t){
  const industrial=/CIDADE|INDUSTRIAL|ESTALEIRO|RUÍNAS|PORTO/.test(t.name);
  const volcanic=/LAVA|VULC|MAGMA/.test(t.name);
  for(const p of items){
-  const premiumIsland=root.RiverPremium?.get('terrain','ISLAND');
-  if(premiumIsland){c.save();c.drawImage(premiumIsland,p.x-p.width*.6,p.y-p.height*.6,p.width*1.2,p.height*1.2);c.restore();continue;}
+  const premiumIsland=window.RiverPremium?.get('terrain','ARMED_ISLAND');
+  if(premiumIsland){
+    c.save();c.drawImage(premiumIsland,p.x-p.width*.52,p.y-p.height*.52,p.width*1.04,p.height*1.04);c.restore();
+    continue;
+  }
+  // O catálogo declarou uma ilha raster aprovada: aguardar o preload em vez
+  // de deixar o SVG legado aparecer por um quadro durante o carregamento.
+  if(window.RiverPremium?.declared('terrain','ARMED_ISLAND'))continue;
   const terrainSprite=(p.maxHp>0&&p.hp/p.maxHp<=.45)?islandSpriteImages[2]:islandSpriteImages[((p.shape||0)%2+2)%2];
   if(terrainSprite.complete&&terrainSprite.naturalWidth){
     c.save();c.drawImage(terrainSprite,p.x-p.width*.52,p.y-p.height*.52,p.width*1.04,p.height*1.04);c.restore();
@@ -1417,8 +1423,8 @@ premiumBoss02.src='./assets/sprites/premium/runtime/bosses/boss02_casco_sem_quad
 // Corpos V3 aprovados. A simulação continua responsável por módulos, vida e IA.
 const premiumBossV3=[null,new Image(),new Image()];
 const visualFallbackLogged=new Set();
-premiumBossV3[1].src='./assets/sprites/premium/approved/bosses/01_ponte_fortificada/atlas_v3/body_full.png';
-premiumBossV3[2].src='./assets/sprites/premium/approved/bosses/02_encouracado_abissal/atlas_v3/body_full.png';
+premiumBossV3[1].src='./assets/sprites/premium/approved/bosses/01_ponte_fortificada/body_full.png';
+premiumBossV3[2].src='./assets/sprites/premium/approved/bosses/02_encouracado_abissal/body_full.png';
 function drawPremiumBossV3(c,e,sector){
  const image=premiumBossV3[Number(sector)];
  if(!image||!image.complete||!image.naturalWidth)return false;

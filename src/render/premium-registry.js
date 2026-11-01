@@ -12,11 +12,13 @@ const CATALOG={
  player:{falcao:'player/fighter_candidate.png'},
  fx:{explosion:'fx/explosion_atlas_4x3.png'},
  enemy:{
-  HELI:'enemies/helicopter.png',JET:'enemies/jet.png',
-  ZIGZAG:'approved/enemies/recurring/recon_plane/idle_000.png',TURRET:'enemies/turret.png',
-  TANK:'enemies/tank.png',SUB:'enemies/submarine.png',
-  SHIP:'enemies/ship.png',MECHA_GUN:'enemies/mecha-gun.png',
-  MECHA_SWORD:'enemies/mecha-sword.png',
+  HELI:'approved/enemies/recurring/attack_helicopter/idle_000.png',
+  RECON_PLANE:'approved/enemies/recurring/recon_plane/idle_000.png',
+  ZIGZAG:'approved/enemies/recurring/recon_plane/idle_000.png',
+  TURRET:'approved/enemies/recurring/floating_turret/idle_000.png',
+  TANK:'approved/enemies/recurring/tank/idle_000.png',SUB:'approved/enemies/recurring/submarine/idle_000.png',
+  SHIP:'approved/enemies/recurring/armed_boat/idle_000.png',MECHA_GUN:'approved/enemies/recurring/mecha_gun/idle_000.png',
+  MECHA_SWORD:'approved/enemies/recurring/mecha_sword/idle_000.png',
   // Recorrentes V3: somente IDs já usados pela simulação. A camada é visual.
   DRONE:'approved/enemies/recurring/drone/idle_000.png',
   HELI:'approved/enemies/recurring/attack_helicopter/idle_000.png',
@@ -24,15 +26,12 @@ const CATALOG={
   TANK:'approved/enemies/recurring/tank/idle_000.png',
   TURRET:'approved/enemies/recurring/floating_turret/idle_000.png',
   SHIP:'approved/enemies/recurring/armed_boat/idle_000.png',
-  WARSHIP:'approved/enemies/recurring/warship/idle_000.png',
+  WARSHIP:'approved/enemies/recurring/warship/idle_000.png',BOMBER:'approved/enemies/recurring/bomber/idle_000.png',
+  FLOATING_MINE:'approved/enemies/recurring/floating_mine/idle_000.png',
+  ITEM_CAPSULE:'approved/enemies/recurring/item_capsule/idle_000.png',
   SUB:'approved/enemies/recurring/submarine/idle_000.png',
   MECHA_GUN:'approved/enemies/recurring/mecha_gun/idle_000.png',
   MECHA_SWORD:'approved/enemies/recurring/mecha_sword/idle_000.png',
-  FLOATING_MINE:'approved/enemies/recurring/floating_mine/idle_000.png',
-  BOMBER:'approved/enemies/recurring/bomber/idle_000.png',
-  ARMED_ISLAND:'approved/enemies/recurring/armed_island/idle_000.png',
-  DAM_BRIDGE:'approved/enemies/recurring/dam_bridge/idle_000.png',
-  ITEM_CAPSULE:'approved/enemies/recurring/item_capsule/idle_000.png',
   TUCANO:'approved/enemies/exclusive/01_tucano/idle_000.png',
   CRANE:'approved/enemies/exclusive/02_crane/idle_000.png',
   SCORPION:'approved/enemies/exclusive/03_scorpion/idle_000.png',
@@ -55,14 +54,21 @@ const CATALOG={
   HYBRID_HUNTER:'approved/enemies/exclusive/20_hybrid_hunter/idle_000.png'
  },
  terrain:{
-  ISLAND:'approved/enemies/recurring/armed_island/idle_000.png',BRIDGE:'approved/enemies/recurring/dam_bridge/idle_000.png',
-  DAM:'approved/enemies/recurring/dam_bridge/idle_000.png',BRIDGE_DAMAGED:'terrain/bridge-damaged.png',
+  ISLAND:'approved/environment/mission_01_rio_verde/structures/armed_island_small.png',
+  ARMED_ISLAND:'approved/environment/mission_01_rio_verde/structures/armed_island_small.png',
+  BRIDGE:'approved/environment/mission_01_rio_verde/structures/bridge_section.png',
+  DAM:'approved/environment/mission_01_rio_verde/structures/river_structure_destructible.png',
+  BRIDGE_DAMAGED:'approved/environment/mission_01_rio_verde/structures/bridge_damaged.png',
   DAM_DAMAGED:'terrain/dam-damaged.png'
  },
  pickup:{
-  BOMB:'items/bomb.png',SHIELD:'items/shield.png',FUEL:'items/fuel.png',
-  DRONES:'items/drones.png',REPAIR:'items/repair.png',
-  CAPSULE:'approved/enemies/recurring/item_capsule/idle_000.png'
+  BOMB:'approved/items/bomb.png',SHIELD:'approved/items/shield.png',FUEL:'approved/items/gas.png',
+  GAS:'approved/items/gas.png',SOS:'approved/items/sos.png',RESCUE:'approved/items/sos.png',
+  SPECIAL:'approved/items/special_weapon.png',WEAPON_ITEM:'approved/items/special_weapon.png',
+  DRONES:'approved/items/wingman_drone.png',WINGMAN:'approved/items/wingman_drone.png',
+  LIFE:'approved/items/life.png',HP:'approved/items/life.png',XP:'approved/items/xp.png',
+  COIN:'approved/items/coin.png',MX:'approved/items/multiplier_mx.png',MUL:'approved/items/multiplier_mx.png',MULTIPLIER:'approved/items/multiplier_mx.png',
+  REPAIR:'approved/items/life.png'
  },
  projectile:{
   SINGLE:'projectiles/single.png',DOUBLE:'projectiles/double.png',
@@ -80,25 +86,23 @@ const CATALOG={
 // IDs da simulação legada e os nomes descritivos da biblioteca V3.
 // Esta resolução é só visual: IA, dano, colisão e cadência permanecem intocados.
 const ENEMY_ALIASES={
- RECON_PLANE:'ZIGZAG',RECON:'ZIGZAG',HELICOPTER:'HELI',ATTACK_HELICOPTER:'HELI',
+ RECON_PLANE:'RECON_PLANE',RECON:'RECON_PLANE',HELICOPTER:'HELI',ATTACK_HELICOPTER:'HELI',
  DRONE:'DRONE',MECHA_SWORD:'MECHA_SWORD',MECHA_GUN:'MECHA_GUN',TANK:'TANK',
- ARMED_BOAT:'SHIP',SUBMARINE:'SUB',FLOATING_TURRET:'TURRET',WARSHIP:'WARSHIP',
- HELI:'HELI',JET:'JET',ZIGZAG:'ZIGZAG',SHIP:'SHIP',SUB:'SUB',TURRET:'TURRET',
- MINE:'FLOATING_MINE',FLOATING_MINE:'FLOATING_MINE',BOMBER:'BOMBER',
- ARMED_ISLAND:'ARMED_ISLAND',DAM_BRIDGE:'DAM_BRIDGE',ITEM_CAPSULE:'ITEM_CAPSULE'
+ ARMED_BOAT:'SHIP',SUBMARINE:'SUB',FLOATING_TURRET:'TURRET',WARSHIP:'WARSHIP',BOMBER:'BOMBER',
+ FLOATING_MINE:'FLOATING_MINE',MINE:'FLOATING_MINE',ITEM_CAPSULE:'ITEM_CAPSULE',
+ HELI:'HELI',JET:'JET',ZIGZAG:'ZIGZAG',SHIP:'SHIP',SUB:'SUB',TURRET:'TURRET'
 };
 // Tamanho visual independente da hitbox para não reduzir os masters Premium
 // ao tamanho das caixas lógicas originalmente usadas pelo canvas legado.
 const ENEMY_DISPLAY={
- HELI:[68,56],JET:[62,64],ZIGZAG:[60,55],DRONE:[52,52],
+ HELI:[68,56],JET:[62,64],RECON_PLANE:[62,64],ZIGZAG:[62,64],DRONE:[52,52],
  MECHA_SWORD:[70,72],MECHA_GUN:[70,70],TANK:[70,60],SHIP:[78,64],
- SUB:[78,70],TURRET:[55,55],WARSHIP:[110,78],TUCANO:[70,60],CRANE:[76,70],
- FLOATING_MINE:[45,45],BOMBER:[78,73],ARMED_ISLAND:[86,72],DAM_BRIDGE:[130,50],ITEM_CAPSULE:[46,48]
+ SUB:[78,70],TURRET:[55,55],WARSHIP:[110,78],BOMBER:[78,73],FLOATING_MINE:[45,45],ITEM_CAPSULE:[46,46],TUCANO:[54,44],CRANE:[70,64]
 };
 const files=new Map();
 for(const [group,items] of Object.entries(CATALOG))for(const [id,path] of Object.entries(items)){
  // Só arquivos existentes são habilitados por padrão. Nada de usar imagens erradas.
- const supported=(group==='player'&&id==='falcao')||(group==='fx'&&id==='explosion')||((group==='enemy'||group==='terrain'||group==='pickup')&&path.startsWith('approved/'))||(group==='enemy'&&(id==='TURRET'||id==='SHIP'));
+ const supported=(group==='player'&&id==='falcao')||(group==='fx'&&id==='explosion')||path.startsWith('approved/');
  files.set(group+':'+id,{path,loaded:false,supported,img:null,base:path.startsWith('approved/')?'./assets/sprites/premium/':BASE});
 }
 for(const id of AIRCRAFT_IDS)for(const state of AIRCRAFT_STATES){

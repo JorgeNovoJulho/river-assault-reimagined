@@ -110,6 +110,10 @@ function copyAndVersionRuntime() {
         }
       };
       copyApproved(approvedRoot);
+      // Artes referenciadas por CSS/runtime não entram no grafo de imports.
+      const uiRoot=resolve('assets/ui/premium');
+      if(!existsSync(uiRoot))throw new Error('Artes oficiais de abertura/seleção ausentes');
+      copyApproved(uiRoot);
             // Aeronaves Arcade Premium: PNGs aprovados e manifesto obrigatórios no build web.
       const aircraftRoot=resolve('assets/sprites/premium/aircraft');
       const aircraftManifest=JSON.parse(readFileSync(resolve(aircraftRoot,'manifest.json'),'utf8'));
