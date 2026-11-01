@@ -4968,15 +4968,18 @@ function updateTerrainEvent(){
             const stats=['VELOCIDADE','BLINDAGEM','AUTONOMIA','ARMAMENTO'];
             const highlight=(i)=>{
               current=i;
+              const previewSelect=document.getElementById('plane-select');
+              if(previewSelect){previewSelect.value=ids[i];previewSelect.dispatchEvent(new Event('change',{bubbles:true}));}
               const detailPhoto=screen.querySelector('#rs-pilot-detail-photo');
               detailPhoto.src='./assets/ui/premium/pilots/'+art[i]+'.png';
               screen.querySelector('#rs-pilot-detail-name').textContent=names[i];
               const bars=screen.querySelector('#rs-pilot-detail-bars');bars.replaceChildren();
-              for(const label of stats){
+              for(const [idx,label] of stats.entries()){
                 const wrap=document.createElement('div');wrap.style.cssText='margin:7px 0;font:700 11px system-ui';
                 wrap.textContent=label;
                 const track=document.createElement('div');track.style.cssText='height:8px;background:#183754;border-radius:5px;margin-top:3px';
-                const fill=document.createElement('div');fill.style.cssText='height:100%;background:#38d5ff;border-radius:5px;width:70%';track.append(fill);wrap.append(track);bars.append(wrap);
+                const source=document.getElementById(['hangar-speed-bar','hangar-shield-bar','hangar-range-bar','hangar-fire-bar'][idx]);
+                const fill=document.createElement('div');fill.style.cssText='height:100%;background:#38d5ff;border-radius:5px;width:'+(source?.style.width||'0%');track.append(fill);wrap.append(track);bars.append(wrap);
               }
               cards.querySelectorAll('button').forEach((b,j)=>b.style.borderColor=j===i?'#ffdf62':'#20abdf');
             };
