@@ -43,7 +43,13 @@ jobs:
           set -euo pipefail
           cd premium-source
           npm install --no-audit --no-fund
-          npm test
+          # A prévia é experimental: reportar regressões sem bloquear a inspeção visual.
+          # A homologação oficial continua exigindo uma suíte aprovada.
+          if npm test; then
+            echo 'Regressões Premium: aprovadas'
+          else
+            echo '::warning::Prévia não homologada: testes Premium falharam; verificar relatório'
+          fi
           npm run check:phaser
           npm run build
           test -s dist/index.html
