@@ -32,6 +32,29 @@ jobs:
         run: npm run check:phaser
       - name: Compilar jogo original e arena
         run: npm run build
+      - name: Baixar branch Premium em diretório isolado
+        uses: actions/checkout@v4
+        with:
+          ref: riverstorm-premium-nucleo
+          path: premium-source
+      - name: Compilar prévia Premium navegável (sem substituir a campanha)
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd premium-source
+          npm install --no-audit --no-fund
+          npm test
+          npm run check:phaser
+          npm run build
+          test -s dist/index.html
+          test -s dist/assets/sprites/premium/approved/enemies/recurring/drone/idle_000.png
+          test -s dist/assets/sprites/premium/approved/environment/mission_02_industrial/water.png
+          cd ..
+          mkdir -p dist/premium-preview
+          cp -a premium-source/dist/. dist/premium-preview/
+          printf '{"premium_sha":"%s","source":"riverstorm-premium-nucleo"}\n' "$(git -C premium-source rev-parse HEAD)" > dist/premium-preview/preview-version.json
+          test -s dist/premium-preview/index.html
+          test -s dist/premium-preview/preview-version.json
       - name: Garantir arena e assets no artefato
         shell: bash
         run: |
