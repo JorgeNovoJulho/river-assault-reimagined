@@ -252,6 +252,15 @@ display:flex!important;flex-direction:column!important;align-items:center!import
 #rs-premium-pilots>div:has(#rs-premium-pilot-cards){grid-template-columns:1fr!important}
 }
 </style>
+<style id="rs-render-proportion-and-featured-v11">
+/* Canvas logico 400x600: proporcao preservada mesmo em monitor ultrawide. */
+#gameCanvas{display:block!important;width:100%!important;height:100%!important;object-fit:contain!important;object-position:center center!important;image-rendering:pixelated!important;filter:none!important}
+#game-container{background:#020a19!important}
+#start-screen:not(.hidden)>#mode-selection #rs-menu-featured-pilot{left:calc(var(--rs-art-left,0px) + var(--rs-art-width,100%) * .676)!important;top:calc(var(--rs-art-top,0px) + var(--rs-art-height,100%) * .09)!important;width:calc(var(--rs-art-width,100%) * .296)!important;height:calc(var(--rs-art-height,100%) * .66)!important;background:#06182b!important;border:0!important;box-shadow:none!important;overflow:hidden!important;border-radius:0!important}
+#start-screen:not(.hidden)>#mode-selection #rs-menu-featured-pilot::before{content:"";position:absolute;inset:0;z-index:1;background:#06182b!important}
+#start-screen:not(.hidden)>#mode-selection #rs-menu-featured-photo{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;object-fit:cover!important;object-position:center center!important;z-index:2!important;background:#06182b!important}
+@media(max-width:700px){#start-screen:not(.hidden)>#mode-selection #rs-menu-featured-pilot{display:none!important}}
+</style>
 </head>
 <body class="h-screen w-screen flex flex-col items-center justify-center p-2 sm:p-4">
 
@@ -807,7 +816,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
             enhanced:{dprMax:3,glow:1,particles:1}
         };
         function activeVisualProfile(){return visualProfile[document.getElementById('quality-select')?.value]||visualProfile.eco}
-        function beginLogicalFrame(){ctx.setTransform(canvas.width/VIRTUAL_WIDTH,0,0,canvas.height/VIRTUAL_HEIGHT,0,0);ctx.imageSmoothingEnabled=true}
+        function beginLogicalFrame(){ctx.setTransform(canvas.width/VIRTUAL_WIDTH,0,0,canvas.height/VIRTUAL_HEIGHT,0,0);ctx.imageSmoothingEnabled=false}
         let lastBackingWidth=0,lastBackingHeight=0;
 
         const VIRTUAL_WIDTH = 400;
