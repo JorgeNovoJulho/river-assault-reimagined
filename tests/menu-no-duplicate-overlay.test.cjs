@@ -1,0 +1,4 @@
+const test=require('node:test');const assert=require('node:assert/strict');const fs=require('node:fs');const h=fs.readFileSync('index.html','utf8');
+test('arte oficial constitui menu unico sem titulo e botoes HTML sobrepostos',()=>{assert.match(h,/#mode-selection>h2,#mode-selection>p,#riverstorm-update-notice\{display:none!important/);assert.match(h,/#mode-selection #mode-single,#mode-selection #mode-multi\{position:absolute!important/);assert.match(h,/background:transparent!important/);});
+test('selecao nao reaproveita imagem com menu antigo como fundo',()=>{assert.match(h,/screen\.style\.cssText='position:absolute;inset:0;z-index:110;background:#041225/);assert.doesNotMatch(h,/screen\.style\.cssText='[^']*url\(\.\/assets\/ui\/premium\/menu/);});
+test('confirmacao por duplo clique dispara uma unica vez',()=>{assert.match(h,/if\(event\.detail>=2\)confirm\(\)/);assert.doesNotMatch(h,/card\.addEventListener\('dblclick'/);});

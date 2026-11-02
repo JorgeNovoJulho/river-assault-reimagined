@@ -160,17 +160,40 @@
 }
 @media (pointer:fine) and (min-width:701px){#rs-mobile-hud-toggle{display:none!important}}
 </style><style id="rs-video-reference-ui">
-#game-container:has(#start-screen:not(.hidden)){max-width:min(96vw,1250px)!important;max-height:min(94vh,840px)!important}
-#mode-selection{justify-content:flex-start!important;align-items:flex-start!important;padding:clamp(14px,3vw,35px)!important;gap:10px!important;text-align:left!important}
-#mode-selection h2{font-size:clamp(32px,6vw,76px)!important;letter-spacing:3px!important;line-height:1.05!important;text-shadow:0 4px 12px #020b1b,0 0 18px #035d9a}
-#mode-selection>p{font-weight:900!important;color:#ffe59b!important;max-width:600px!important;letter-spacing:1px!important}
-#mode-selection #mode-single,#mode-selection #mode-multi{width:min(36%,330px)!important;min-width:205px!important;box-shadow:0 0 15px #00aaff70!important}
-#rs-premium-pilots{width:100%!important;height:100%!important;background-color:#06152a!important}
-#rs-premium-pilots h2{width:100%!important}
-#rs-premium-pilot-detail{display:flex!important;flex-direction:column!important;min-height:440px!important;justify-content:center!important}
-#rs-pilot-detail-photo{object-fit:contain!important;min-width:0!important}
+/* A arte oficial ja traz logotipo, botoes e cards desenhados. Somente hotspots DOM. */
+#game-container:has(#start-screen:not(.hidden)){max-width:min(96vw,1100px)!important;max-height:min(94vh,840px)!important;aspect-ratio:4/3}
+#start-screen{padding:0!important;background:#020b19!important}
+#mode-selection{display:block!important;overflow:hidden!important;padding:0!important;text-align:left!important;
+background-image:url('./assets/ui/premium/menu/2b81e191-9306-4a6e-aabf-049f60939aa0.png')!important;
+background-position:center!important;background-size:100% 100%!important;background-repeat:no-repeat!important;}
+#mode-selection>h2,#mode-selection>p,#riverstorm-update-notice{display:none!important}
+#mode-selection #mode-single,#mode-selection #mode-multi{position:absolute!important;left:1%!important;width:34%!important;min-width:0!important;
+height:10.2%!important;padding:0!important;margin:0!important;border:0!important;border-radius:0!important;
+background:transparent!important;box-shadow:none!important;font-size:0!important;color:transparent!important;cursor:pointer!important}
+#mode-selection #mode-single{top:31.5%!important}
+#mode-selection #mode-multi{top:42%!important}
+#mode-selection #mode-single:hover,#mode-selection #mode-multi:hover,#mode-selection #mode-single:focus-visible,#mode-selection #mode-multi:focus-visible{
+outline:3px solid #65f8ff!important;outline-offset:-3px!important;border-radius:10px!important;background:#32dbff1a!important}
+#mode-multi-info{position:absolute!important;z-index:4!important;left:3%!important;top:26%!important;width:min(40%,360px)!important;background:#04152af4!important}
+#rs-premium-pilots{position:absolute!important;inset:0!important;z-index:110!important;box-sizing:border-box!important;
+background:#041225!important;overflow:auto!important;display:flex;flex-direction:column;align-items:center;padding:clamp(10px,2vw,20px)!important}
+#rs-premium-pilots h2{width:100%!important;font-size:clamp(24px,4.6vw,48px)!important}
+#rs-premium-pilots>div:has(#rs-premium-pilot-cards){grid-template-columns:minmax(0,1.9fr) minmax(240px,1fr)!important;max-width:1150px!important;gap:16px!important}
+#rs-premium-pilot-cards{grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:9px!important}
+#rs-premium-pilot-cards button{min-width:0!important;overflow:hidden!important}
+#rs-premium-pilot-cards img{height:clamp(110px,18vh,180px)!important}
+#rs-premium-pilot-detail{min-width:0!important;box-sizing:border-box!important}
+#rs-pilot-detail-photo{object-fit:contain!important;max-height:36vh!important}
 #rs-premium-pilot-cards button:hover{box-shadow:0 0 12px #47dbff!important}
-@media(max-width:700px){#mode-selection{align-items:center!important;text-align:center!important}#mode-selection #mode-single,#mode-selection #mode-multi{width:min(95%,330px)!important}#rs-premium-pilot-detail{min-height:0!important}}
+@media(max-width:700px){
+#game-container:has(#start-screen:not(.hidden)){aspect-ratio:auto;min-height:75vh!important}
+#mode-selection{background-size:cover!important}
+#mode-selection #mode-single,#mode-selection #mode-multi{left:2%!important;width:43%!important}
+#rs-premium-pilots>div:has(#rs-premium-pilot-cards){grid-template-columns:1fr!important}
+#rs-premium-pilot-cards{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+#rs-premium-pilot-cards img{height:145px!important}
+#rs-pilot-detail-photo{height:240px!important;max-height:none!important}
+}
 </style><style id="riverstorm-no-crt-ever">.crt-effect,.crt-effect::before,.crt-effect::after{filter:none!important;box-shadow:none!important}.crt-effect::before,.crt-effect::after{content:none!important;display:none!important}#gameCanvas{image-rendering:auto;}</style></head>
 <body class="h-screen w-screen flex flex-col items-center justify-center p-2 sm:p-4">
 <style>#game-container #start-screen #mode-selection{width:100%!important;max-width:none!important;box-sizing:border-box;background:linear-gradient(#03132922,#061d3544),url('./assets/ui/premium/menu/2b81e191-9306-4a6e-aabf-049f60939aa0.png') center/cover!important}</style>
@@ -4981,7 +5004,7 @@ function updateTerrainEvent(){
           if(!screen){
             screen=document.createElement('section');screen.id='rs-premium-pilots';
             screen.setAttribute('aria-label','Seleção de pilotos RiverStorm');
-            screen.style.cssText='position:absolute;inset:0;z-index:110;background:linear-gradient(#031329e8,#061d35f2),url(./assets/ui/premium/menu/2b81e191-9306-4a6e-aabf-049f60939aa0.png) center/cover;overflow:auto;padding:16px;box-sizing:border-box;color:#ebfaff;text-align:center';
+            screen.style.cssText='position:absolute;inset:0;z-index:110;background:#041225;overflow:auto;padding:16px;box-sizing:border-box;color:#ebfaff;text-align:center';
             screen.innerHTML='<h2 style="font:900 clamp(26px,5vw,46px) system-ui;color:#6eeaff;margin:3px">SELEÇÃO DE PILOTOS</h2><p style="color:#fbd472;font-weight:bold">ESCOLHA SUA AERONAVE</p><div id="rs-premium-pilot-cards" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(138px,1fr));gap:12px;max-width:1050px;margin:16px auto"></div><button id="rs-premium-pilot-back" style="padding:12px 20px;border:1px solid #55cfff;background:#10253c;color:white;border-radius:8px">VOLTAR</button>';
             modeSelection.parentElement.appendChild(screen);
             const ids=['falcao','vespa','cometa','fenix','helicoptero','disco','titan'];
@@ -4995,7 +5018,7 @@ function updateTerrainEvent(){
             const cards=screen.querySelector('#rs-premium-pilot-cards');
             cards.style.cssText='display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;width:100%;margin:0';
             cards.parentElement.insertBefore(layout,cards);layout.append(cards,detail);
-            const responsive=document.createElement('style');responsive.textContent='@media(max-width:700px){#rs-premium-pilot-cards{grid-template-columns:repeat(2,minmax(0,1fr))!important}#rs-premium-pilots>div:has(#rs-premium-pilot-cards){grid-template-columns:1fr!important}#rs-pilot-detail-photo{height:240px!important}}';screen.append(responsive);
+            // Responsividade centralizada no CSS Premium; nenhum estilo antigo injetado.
             let current=0;
             const stats=['VELOCIDADE','BLINDAGEM','AUTONOMIA','ARMAMENTO'];
             const highlight=(i)=>{
@@ -5042,14 +5065,11 @@ function updateTerrainEvent(){
               const pic=document.createElement('img');pic.src='./assets/ui/premium/pilots/'+art[i]+'.png';pic.alt='Piloto '+names[i];pic.style.cssText='width:100%;height:175px;object-fit:contain';
               card.append(pic);const t=document.createElement('strong');t.textContent=names[i];card.append(t);cards.append(card);
               card.dataset.aircraft=ids[i];
-              card.addEventListener('click',()=>{
+              card.addEventListener('click',(event)=>{
                 if(confirming)return;
                 highlight(i);
-                const now=performance.now();
-                if(lastCard===i&&now-lastCardClick<450){lastCard=-1;confirm();}
-                else{lastCard=i;lastCardClick=now;}
+                if(event.detail>=2)confirm();
               });
-              card.addEventListener('dblclick',()=>{if(!confirming){highlight(i);confirm();}});
             }
             try{const saved=localStorage.getItem('riverstorm:lastSelectedShip');highlight(Math.max(0,ids.indexOf(saved)));}catch(e){highlight(0);}
             const flash=document.createElement('style');
