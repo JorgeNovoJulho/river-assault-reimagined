@@ -20,6 +20,12 @@ jobs:
         run: npm run check:phaser
       - name: Compilar pacote PC/Mobile Web
         run: npm run build
+      - name: Instalar Chromium para teste real de navegação
+        run: |
+          npm install --no-save playwright
+          npx playwright install --with-deps chromium
+      - name: Testar Single Player e seleção em desktop e mobile
+        run: node tests/premium-browser-flow.cjs
       - name: Validar pacote entregue
         run: |
           test -s dist/index.html
