@@ -1214,7 +1214,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
             structures = [];
             fuelDepots = [];
             let currentCenter = VIRTUAL_WIDTH / 2;
-            let currentWidth = 280;
+            let currentWidth = Math.min(VIRTUAL_WIDTH * 0.67, VIRTUAL_WIDTH - 56);
 
             for (let y = VIRTUAL_HEIGHT + 20; y >= -100; y -= segmentHeight) {
                 riverPoints.push({
@@ -1247,12 +1247,12 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
                 if (!bossActive) {
                     // Variabilidade de curvas do cânion
                     const shift = (Math.random() - 0.5) * 16;
-                    nextCenter = Math.max(100, Math.min(VIRTUAL_WIDTH - 100, lastPoint.center + shift));
-                    nextWidth = Math.max(180, Math.min(320, lastPoint.width + (Math.random() - 0.5) * 10));
+                    nextCenter = Math.max(VIRTUAL_WIDTH * 0.36, Math.min(VIRTUAL_WIDTH * 0.64, lastPoint.center + shift));
+                    nextWidth = Math.max(VIRTUAL_WIDTH * 0.57, Math.min(VIRTUAL_WIDTH * 0.73, lastPoint.width + (Math.random() - 0.5) * 8));
                 } else {
                     // Cânion se alarga na luta contra o chefe
                     nextCenter += (VIRTUAL_WIDTH / 2 - nextCenter) * 0.1;
-                    nextWidth += (320 - nextWidth) * 0.1;
+                    nextWidth += (Math.min(VIRTUAL_WIDTH * 0.76, VIRTUAL_WIDTH - 40) - nextWidth) * 0.1;
                 }
 
                 const newPoint = { y: newY, center: nextCenter, width: nextWidth };
