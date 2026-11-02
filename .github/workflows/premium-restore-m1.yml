@@ -1,0 +1,40 @@
+name: Restore approved Mission 01 raster masters
+on:
+  workflow_dispatch:
+  push:
+    branches: [riverstorm-premium-nucleo]
+    paths:
+      - '.github/workflows/premium-restore-m1.yml'
+permissions:
+  contents: write
+jobs:
+  restore:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: riverstorm-premium-nucleo
+          fetch-depth: 0
+      - name: Read existing raster masters from official main
+        run: |
+          set -euo pipefail
+          git fetch origin main
+          source='assets/sprites/premium/runtime/environment'
+          dest='assets/sprites/premium/approved/environment/mission_01_rio_verde'
+          mkdir -p "$dest" "$source"
+          for spec in 'water_calm.png water.png' 'riverbank_left.png bank_left.png' 'riverbank_right.png bank_right.png'; do
+            read -r from to <<< "$spec"
+            git show "origin/main:$source/$from" > "$dest/$to"
+            cp "$dest/$to" "$source/$from"
+            test -s "$dest/$to"
+          done
+          node scripts/check-mission01-raster.cjs
+      - name: Commit approved Mission 01 textures
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add assets/sprites/premium/approved/environment/mission_01_rio_verde/*.png assets/sprites/premium/runtime/environment/*.png
+          if ! git diff --cached --quiet; then
+            git commit -m "assets(m1): restore original raster river and banks from official main"
+            git push origin HEAD:riverstorm-premium-nucleo
+          fi
