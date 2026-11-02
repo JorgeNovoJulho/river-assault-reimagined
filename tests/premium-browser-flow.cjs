@@ -24,6 +24,10 @@ const assert=require('node:assert/strict');
       const selection=page.locator('#rs-premium-pilots');
       await selection.waitFor({state:'visible',timeout:10000});
       assert.equal(await page.locator('#rs-premium-pilot-cards button').count(),7,'Sete pilotos obrigatórios');
+      const isolation=await page.evaluate(()=>({old:getComputedStyle(document.getElementById('mode-selection')).display,selectionRect:document.getElementById('rs-premium-pilots').getBoundingClientRect().toJSON(),vw:innerWidth,vh:innerHeight}));
+      assert.equal(isolation.old,'none','Tela anterior continua visivel na selecao');
+      assert.ok(isolation.selectionRect.width>=isolation.vw-3&&isolation.selectionRect.height>=isolation.vh-3,'Selecao deve cobrir toda a viewport');
+
       const visible=await selection.evaluate(el=>({display:getComputedStyle(el).display,visibility:getComputedStyle(el).visibility,pointer:getComputedStyle(el).pointerEvents,rect:el.getBoundingClientRect().toJSON()}));
       assert.notEqual(visible.display,'none');
       assert.equal(visible.visibility,'visible');
