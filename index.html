@@ -3865,6 +3865,7 @@ function updateTerrainEvent(){
             }
             const screen=document.getElementById('game-container');
             screen.dataset.gameActive='true';
+            resizeCanvas(); // recalcular campo apos ocultar o menu fullscreen
             document.getElementById('start-btn').blur();
             try { render(); } catch(error){showGameError(error);console.error('FIRST FRAME:',error)}
             try { sound.init(); } catch(error){console.warn('Áudio indisponível',error)}
