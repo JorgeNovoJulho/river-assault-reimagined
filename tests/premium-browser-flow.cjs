@@ -18,6 +18,8 @@ const assert=require('node:assert/strict');
       await page.goto('http://127.0.0.1:4173/',{waitUntil:'domcontentloaded'});
       await page.locator('#mode-single').waitFor({state:'visible',timeout:15000});
       assert.equal(await page.locator('#rs-premium-pilots').count(),0,'Tela de pilotos não deve montar antes do clique');
+      const opening=await page.evaluate(()=>{const r=document.getElementById('mode-selection').getBoundingClientRect();return {width:r.width,height:r.height,screenWidth:innerWidth,screenHeight:innerHeight,legacy:getComputedStyle(document.getElementById('start-main')).display}});
+      if(opening.width<opening.screenWidth-5||opening.height<opening.screenHeight-5||opening.legacy!=='none')throw Error('Abertura reduzida ou hangar legado visivel: '+JSON.stringify(opening));
       await page.locator('#mode-single').click({timeout:12000});
       const selection=page.locator('#rs-premium-pilots');
       await selection.waitFor({state:'visible',timeout:10000});
