@@ -165,7 +165,9 @@ body{padding:0!important;min-height:100dvh!important;display:flex!important;flex
 #game-container{width:100%!important;max-width:none!important;max-height:none!important;min-height:0!important;flex:1 1 auto!important;margin:0!important;border-width:2px!important;box-sizing:border-box!important}
 #game-container:has(#start-screen:not(.hidden)){width:100%!important;max-height:100dvh!important;min-height:calc(100dvh - 2px)!important;aspect-ratio:auto!important}
 #start-screen{padding:0!important;overflow:hidden!important;background:#020a19!important}
-#start-screen>:not(#mode-selection){visibility:hidden!important;pointer-events:none!important}
+#start-screen>:not(#mode-selection):not(#rs-premium-pilots){visibility:hidden!important;pointer-events:none!important}
+#start-screen #rs-premium-pilots:not(.hidden){visibility:visible!important;pointer-events:auto!important;display:flex!important;z-index:220!important}
+#start-screen #rs-premium-pilots.hidden{display:none!important}
 #mode-selection{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;display:block!important;overflow:hidden!important;padding:0!important;
 background:url('./assets/ui/premium/menu/2b81e191-9306-4a6e-aabf-049f60939aa0.png') center/contain no-repeat!important}
 #mode-selection>h2,#mode-selection>p,#riverstorm-update-notice{display:none!important}
