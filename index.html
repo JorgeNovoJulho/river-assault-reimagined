@@ -159,30 +159,36 @@
  #gameCanvas{filter:brightness(1.08) contrast(1.04) saturate(1.10)!important;image-rendering:auto}
 }
 @media (pointer:fine) and (min-width:701px){#rs-mobile-hud-toggle{display:none!important}}
-</style><style id="riverstorm-no-crt-ever">.crt-effect,.crt-effect::before,.crt-effect::after{filter:none!important;box-shadow:none!important}.crt-effect::before,.crt-effect::after{content:none!important;display:none!important}#gameCanvas{image-rendering:auto;}</style><style id="rs-menu-layout-hud-v4">
-#game-container:has(#start-screen:not(.hidden)){max-width:min(96vw,1180px)!important;max-height:min(94vh,860px)!important;aspect-ratio:4/3}
-#start-screen{padding:0!important;overflow:hidden!important;background:#020a19!important}
+</style><style id="riverstorm-no-crt-ever">.crt-effect,.crt-effect::before,.crt-effect::after{filter:none!important;box-shadow:none!important}.crt-effect::before,.crt-effect::after{content:none!important;display:none!important}#gameCanvas{image-rendering:auto;}</style><style id="rs-responsive-ui-v5">
+/* Full-viewport shell; only visual sizing changes, no gameplay mechanics. */
+html,body{width:100%!important;min-height:100%!important;margin:0!important}
+body{padding:4px!important;min-height:100dvh!important;align-items:stretch!important;justify-content:flex-start!important}
+#game-container{width:min(100%,1400px)!important;max-width:none!important;max-height:none!important;min-height:0!important;margin:0 auto!important;flex:1 1 auto!important;box-sizing:border-box!important}
+#game-container:has(#start-screen:not(.hidden)){width:min(100%,calc(96dvh * 1.33333),1400px)!important;max-height:96dvh!important;aspect-ratio:4/3!important;flex:0 1 auto!important}
+#start-screen{padding:0!important;background:#020a19!important;overflow:hidden!important}
 #start-screen>:not(#mode-selection){visibility:hidden!important;pointer-events:none!important}
-#mode-selection{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;box-sizing:border-box!important;display:block!important;overflow:hidden!important;padding:0!important;background:url('./assets/ui/premium/menu/2b81e191-9306-4a6e-aabf-049f60939aa0.png') center/100% 100% no-repeat!important}
+#mode-selection{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;padding:0!important;display:block!important;overflow:hidden!important;background:url('./assets/ui/premium/menu/2b81e191-9306-4a6e-aabf-049f60939aa0.png') center/contain no-repeat!important}
 #mode-selection>h2,#mode-selection>p,#riverstorm-update-notice{display:none!important}
-#mode-selection #mode-single,#mode-selection #mode-multi,#mode-selection #mode-settings{position:absolute!important;left:0!important;width:35.5%!important;height:10.5%!important;padding:0!important;margin:0!important;border:0!important;box-shadow:none!important;border-radius:0!important;background:transparent!important;color:transparent!important;font-size:0!important;min-width:0!important;z-index:104!important;cursor:pointer!important}
-#mode-single{top:31%!important}#mode-multi{top:42%!important}#mode-settings{top:53%!important}
-#mode-selection button:is(:hover,:focus-visible){outline:2px solid #7ce9ff!important;outline-offset:-2px!important;background:#19b9ff1a!important}
-#rs-menu-featured-pilot{position:absolute!important;left:73%!important;top:17%!important;width:20%!important;height:47%!important;z-index:103!important;display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;overflow:hidden!important;background:#071c31!important;border:0!important;box-shadow:none!important;color:#effaff!important;pointer-events:none!important}
-#rs-menu-featured-photo{width:92%!important;height:78%!important;object-fit:contain!important;min-height:0!important}
-#rs-menu-featured-name,#rs-menu-featured-ship{font:800 clamp(10px,1.3vw,16px) system-ui!important;text-align:center!important}
+#mode-selection #mode-single,#mode-selection #mode-multi,#mode-selection #mode-settings{position:absolute!important;left:2%!important;width:35%!important;height:10.6%!important;padding:0!important;margin:0!important;border:0!important;background:transparent!important;box-shadow:none!important;color:transparent!important;font-size:0!important;min-width:0!important;cursor:pointer!important;z-index:104!important}
+#mode-selection #mode-single{top:31%!important}#mode-selection #mode-multi{top:42%!important}#mode-selection #mode-settings{top:53%!important}
+#mode-selection button:is(:hover,:focus-visible){outline:2px solid #65e8ff!important;outline-offset:-2px!important;background:#10bfff19!important}
+#rs-menu-featured-pilot{position:absolute!important;left:74.5%!important;top:18%!important;width:18%!important;height:46%!important;background:#061a2c!important;border:0!important;box-shadow:none!important;overflow:hidden!important;z-index:103!important;display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;pointer-events:none!important}
+#rs-menu-featured-photo{width:100%!important;height:78%!important;min-height:0!important;object-fit:contain!important}
+#rs-menu-featured-name,#rs-menu-featured-ship{font:700 clamp(10px,1.2vw,15px) system-ui!important;color:#eafaff!important;text-align:center!important}
 #controller-settings:not(.hidden){position:absolute!important;inset:0!important;z-index:250!important;visibility:visible!important}
-#rs-premium-pilots{position:absolute!important;inset:0!important;z-index:110!important;background:#041225!important;overflow:auto!important;padding:14px!important;box-sizing:border-box!important}
-#rs-premium-pilots>div:has(#rs-premium-pilot-cards){width:100%!important;grid-template-columns:minmax(0,1.75fr) minmax(210px,1fr)!important;gap:12px!important}
+#rs-premium-pilots{position:absolute!important;inset:0!important;background:#041225!important;overflow:auto!important;z-index:110!important;box-sizing:border-box!important;padding:12px!important}
+#rs-premium-pilots>div:has(#rs-premium-pilot-cards){grid-template-columns:minmax(0,1.8fr) minmax(210px,1fr)!important;gap:12px!important;width:100%!important}
 #rs-premium-pilot-cards{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:8px!important}
-#rs-premium-pilot-cards img{height:clamp(90px,17vh,150px)!important;object-fit:contain!important}
+#rs-premium-pilot-cards img{height:clamp(90px,17vh,155px)!important;object-fit:contain!important}
 #rs-pilot-detail-photo{height:clamp(130px,30vh,280px)!important;object-fit:contain!important}
-#rs-hud-action-bar{display:grid!important;grid-template-columns:minmax(130px,1.5fr) 90px minmax(105px,1fr) minmax(130px,1.1fr)!important;align-items:center!important;justify-content:stretch!important;gap:8px!important;width:100%!important;min-height:42px!important;padding:5px 8px!important;overflow:hidden!important;flex-wrap:nowrap!important}
-#rs-hud-action-status{display:block!important;min-width:0!important;white-space:nowrap!important;text-overflow:ellipsis!important;overflow:hidden!important;font:700 10px system-ui!important}
-#rs-fusion-meter{width:100%!important;min-width:0!important;height:8px!important}
-#rs-hud-action-bar #parry-btn,#rs-hud-action-bar #boss-skill-use{position:static!important;inset:auto!important;transform:none!important;animation:none!important;transition:background-color .15s ease!important;opacity:1!important;visibility:visible!important;min-width:0!important;width:100%!important;height:30px!important;min-height:30px!important;max-width:none!important;margin:0!important;padding:3px 6px!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;box-sizing:border-box!important;font:700 10px system-ui!important}
-@media(max-width:700px){#rs-hud-action-bar{grid-template-columns:minmax(0,1fr) 70px!important;gap:5px!important}#rs-hud-action-bar #parry-btn,#rs-hud-action-bar #boss-skill-use{height:32px!important}
-#rs-premium-pilots>div:has(#rs-premium-pilot-cards){grid-template-columns:1fr!important}#rs-premium-pilot-cards{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
+#rs-hud-action-bar{display:grid!important;grid-template-columns:minmax(110px,1.7fr) minmax(65px,.7fr) minmax(110px,1fr) minmax(130px,1fr)!important;align-items:center!important;gap:7px!important;width:100%!important;box-sizing:border-box!important;min-height:42px!important;padding:4px 7px!important;overflow:hidden!important}
+#rs-hud-action-status{min-width:0!important;overflow:hidden!important;text-overflow:ellipsis!important;white-space:nowrap!important}
+#rs-fusion-meter{width:100%!important;min-width:0!important}
+#rs-hud-action-bar #parry-btn,#rs-hud-action-bar #boss-skill-use{position:static!important;inset:auto!important;transform:none!important;animation:none!important;opacity:1!important;visibility:visible!important;min-width:0!important;max-width:none!important;width:100%!important;height:30px!important;min-height:30px!important;margin:0!important;white-space:nowrap!important;padding:4px!important;font-size:10px!important}
+#parry-btn:not(#rs-hud-action-bar #parry-btn){visibility:hidden!important}
+@media(max-width:700px){body{padding:0!important}#game-container{width:100%!important;border-width:2px!important}#game-container:has(#start-screen:not(.hidden)){width:100%!important;max-height:calc(100dvh - 4px)!important;aspect-ratio:4/3!important}
+#rs-premium-pilots>div:has(#rs-premium-pilot-cards){grid-template-columns:1fr!important}#rs-premium-pilot-cards{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+#rs-hud-action-bar{grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;gap:5px!important}}
 </style></head>
 <body class="h-screen w-screen flex flex-col items-center justify-center p-2 sm:p-4">
 <style>#game-container #start-screen #mode-selection{width:100%!important;max-width:none!important;box-sizing:border-box;background:linear-gradient(#03132922,#061d3544),url('./assets/ui/premium/menu/2b81e191-9306-4a6e-aabf-049f60939aa0.png') center/cover!important}</style>
@@ -3665,7 +3671,7 @@ function updateTerrainEvent(){
                 for(const [key,value] of Object.entries({position:'static',inset:'auto',transform:'none','font-size':'10px',padding:'4px 7px','min-height':'30px',opacity:'1'}))button.style.setProperty(key,value,'important');
                 bar.append(button);
               }
-              hud.appendChild(bar);return bar;
+              hud.appendChild(bar);bar.dataset.rsMounted='true';return bar;
             };
             const actionBar=ensureActionBar();
             if(actionBar){
