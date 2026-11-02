@@ -28,15 +28,6 @@ jobs:
             cp "$dest/$to" "$source/$from"
             test -s "$dest/$to"
           done
-          for file in assets/sprites/premium/candidates/environment/01_rio_verde/water_*_candidate.png; do
-            test -f "$file" || continue
-            python3 - "$file" <<'PY'
-import sys,struct,os
-b=open(sys.argv[1],'rb').read(24)
-if b[:8]==bytes.fromhex('89504e470d0a1a0a'):
- print('CANDIDATE',os.path.basename(sys.argv[1]),*struct.unpack('>II',b[16:24]))
-PY
-          done
           node scripts/check-mission01-raster.cjs
       - name: Commit approved Mission 01 textures
         run: |
