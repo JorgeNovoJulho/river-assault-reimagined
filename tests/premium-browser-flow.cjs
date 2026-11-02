@@ -43,8 +43,9 @@ const assert=require('node:assert/strict');
       assert.equal(state.error,'','Erro de runtime ao iniciar');
       assert.deepEqual(errors,[],'Exceções JS detectadas');
       const renderCheck=await page.evaluate(()=>{const c=document.getElementById('gameCanvas'),style=getComputedStyle(c);return {fit:style.objectFit,mode:style.imageRendering,ratio:c.width/c.height,logical:400/600}});
-      assert.equal(renderCheck.fit,'contain','Canvas nao pode esticar o aspecto logico');
-      assert.ok(Math.abs(renderCheck.ratio-renderCheck.logical)<0.002,'Canvas backing store deformado');
+      assert.equal(renderCheck.fit,'fill','Canvas deve ocupar toda a area cuja largura logica acompanha o HUD');
+      const aspect=await page.evaluate(()=>{const c=document.getElementById('gameCanvas'),r=c.getBoundingClientRect();return {backing:c.width/c.height,display:r.width/r.height,width:r.width,screen:innerWidth}});
+      assert.ok(Math.abs(aspect.backing-aspect.display)<0.012,'Proporcao do backing store nao acompanha largura exibida');
       await page.close();
     }
   }finally{await browser?.close();server.kill('SIGKILL');}
