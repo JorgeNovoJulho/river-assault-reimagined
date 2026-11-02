@@ -192,6 +192,19 @@ display:flex!important;flex-direction:column!important;align-items:center!import
 #rs-hud-action-bar #parry-btn,#rs-hud-action-bar #boss-skill-use{position:static!important;inset:auto!important;transform:none!important;animation:none!important;opacity:1!important;visibility:visible!important;min-width:0!important;width:100%!important;height:30px!important;min-height:30px!important;padding:4px!important;margin:0!important;font-size:10px!important}
 #game-container:not([data-game-active="true"]) #parry-btn{display:none!important}
 @media(max-width:750px){#rs-premium-pilots>div:has(#rs-premium-pilot-cards){grid-template-columns:1fr!important}#rs-premium-pilot-cards{grid-template-columns:repeat(2,minmax(0,1fr))!important}#rs-hud-action-bar{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
+</style><style id="rs-selection-final-patch">
+#rs-premium-pilots{position:absolute!important;inset:0!important;z-index:220!important;background:#061326!important;overflow:auto!important;padding:clamp(12px,2vw,24px)!important;box-sizing:border-box!important}
+#rs-premium-pilots.hidden{display:none!important}
+#rs-premium-pilots>div:has(#rs-premium-pilot-cards){grid-template-columns:minmax(0,1.6fr) minmax(270px,1fr)!important;max-width:1800px!important;width:100%!important;gap:clamp(12px,1.6vw,22px)!important}
+#rs-premium-pilot-cards{grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:clamp(8px,1vw,16px)!important}
+#rs-premium-pilot-cards button{min-width:0!important;transition:box-shadow .12s,border-color .12s!important;border:2px solid #20abdf!important}
+#rs-premium-pilot-cards button:is(:hover,:focus-visible),#rs-premium-pilot-cards button.rs-selected{border-color:#ffe45c!important;box-shadow:0 0 16px #ffe45c99!important}
+#rs-premium-pilot-cards button.rs-pilot-confirming{animation:rsPilotConfirm .14s linear 3!important;border-color:#44ff8d!important;outline:2px solid #44ff8d!important}
+#rs-premium-pilot-cards img{height:clamp(115px,22vh,250px)!important;object-fit:contain!important;max-width:100%!important}
+#rs-pilot-detail-photo{height:clamp(170px,39vh,470px)!important;object-fit:contain!important}
+#mode-selection #mode-single,#mode-selection #mode-multi,#mode-selection #mode-settings{z-index:200!important}
+#game-container:not([data-game-active="true"]) #parry-btn{display:none!important}
+@media(max-width:850px){#rs-premium-pilots>div:has(#rs-premium-pilot-cards){grid-template-columns:1fr!important}#rs-premium-pilot-cards{grid-template-columns:repeat(2,minmax(0,1fr))!important}#rs-premium-pilot-cards img{height:145px!important}}
 </style></head>
 <body class="h-screen w-screen flex flex-col items-center justify-center p-2 sm:p-4">
 <style>#game-container #start-screen #mode-selection{width:100%!important;max-width:none!important;box-sizing:border-box;background:linear-gradient(#03132922,#061d3544),url('./assets/ui/premium/menu/2b81e191-9306-4a6e-aabf-049f60939aa0.png') center/cover!important}</style>
@@ -5071,7 +5084,7 @@ function updateTerrainEvent(){
                 const source=document.getElementById(['hangar-speed-bar','hangar-shield-bar','hangar-range-bar','hangar-fire-bar'][idx]);
                 const fill=document.createElement('div');fill.style.cssText='height:100%;background:#38d5ff;border-radius:5px;width:'+(source?.style.width||'0%');track.append(fill);wrap.append(track);bars.append(wrap);
               }
-              cards.querySelectorAll('button').forEach((b,j)=>b.style.borderColor=j===i?'#ffdf62':'#20abdf');
+              cards.querySelectorAll('button').forEach((b,j)=>{b.classList.toggle('rs-selected',j===i);b.setAttribute('aria-pressed',String(j===i));});
             };
             let confirming=false,lastCard=-1,lastCardClick=0;
             const confirm=()=>{
@@ -5100,6 +5113,12 @@ function updateTerrainEvent(){
               const pic=document.createElement('img');pic.src='./assets/ui/premium/pilots/'+art[i]+'.png';pic.alt='Piloto '+names[i];pic.style.cssText='width:100%;height:175px;object-fit:contain';
               card.append(pic);const t=document.createElement('strong');t.textContent=names[i];card.append(t);cards.append(card);
               card.dataset.aircraft=ids[i];
+              card.setAttribute('aria-label','Selecionar '+names[i]);
+              card.addEventListener('keydown',event=>{
+                const delta={ArrowRight:1,ArrowLeft:-1,ArrowDown:4,ArrowUp:-4}[event.key];
+                if(delta){event.preventDefault();const next=(i+delta+ids.length)%ids.length;highlight(next);cards.children[next].focus();}
+                if(event.key==='Enter'){event.preventDefault();highlight(i);confirm();}
+              });
               card.addEventListener('click',(event)=>{
                 if(confirming)return;
                 highlight(i);
@@ -5112,7 +5131,7 @@ function updateTerrainEvent(){
             screen.append(flash);
             screen.querySelector('#rs-premium-pilot-back').addEventListener('click',()=>{if(!confirming)screen.classList.add('hidden')});
           }
-          screen.classList.remove('hidden');
+          screen.classList.remove('hidden');screen.style.display='flex';
         });
         document.getElementById('mode-multi').addEventListener('click',()=>{
           document.getElementById('mode-multi-info').classList.remove('hidden');
