@@ -237,6 +237,21 @@ display:flex!important;flex-direction:column!important;align-items:center!import
 #start-screen:not(.hidden)>#mode-selection #rs-menu-featured-pilot{display:none!important}
 }
 </style>
+<style id="rs-premium-composition-v10">
+/* Corrige composição sem tocar no gameplay. A arte completa não pode ser cortada. */
+#start-screen:not(.hidden)>#mode-selection:not(.hidden){background-size:contain!important;background-position:center center!important;background-color:#030d1c!important}
+#start-screen:not(.hidden)>#mode-selection #rs-menu-featured-pilot{left:calc(var(--rs-art-left,0px) + var(--rs-art-width,100%) * .744)!important;top:calc(var(--rs-art-top,0px) + var(--rs-art-height,100%) * .125)!important;width:calc(var(--rs-art-width,100%) * .18)!important;height:calc(var(--rs-art-height,100%) * .51)!important;background:#06182b!important;box-shadow:none!important;border:0!important;border-radius:3px!important;overflow:hidden!important}
+#start-screen:not(.hidden)>#mode-selection #rs-menu-featured-photo{position:absolute!important;inset:0!important;display:block!important;width:100%!important;height:100%!important;object-fit:cover!important;object-position:center 35%!important}
+#start-screen:not(.hidden)>#mode-selection #rs-menu-featured-name,#start-screen:not(.hidden)>#mode-selection #rs-menu-featured-ship{display:none!important}
+#start-screen:not(.hidden)>#rs-premium-pilots:not(.hidden){position:fixed!important;inset:0!important;width:100vw!important;height:100dvh!important;max-width:none!important;max-height:none!important;z-index:9999!important;overflow:auto!important;background:#041225!important;box-sizing:border-box!important}
+#start-screen:has(>#rs-premium-pilots:not(.hidden))>#mode-selection{display:none!important;visibility:hidden!important;pointer-events:none!important}
+#rs-premium-pilots>div:has(#rs-premium-pilot-cards){width:min(100%,1650px)!important;max-width:1650px!important;box-sizing:border-box!important;grid-template-columns:minmax(0,1.75fr) minmax(260px,1fr)!important;margin-inline:auto!important}
+@media(max-width:700px){
+#start-screen:not(.hidden)>#mode-selection:not(.hidden){background-size:contain!important}
+#start-screen:not(.hidden)>#mode-selection #rs-menu-featured-pilot{display:none!important}
+#rs-premium-pilots>div:has(#rs-premium-pilot-cards){grid-template-columns:1fr!important}
+}
+</style>
 </head>
 <body class="h-screen w-screen flex flex-col items-center justify-center p-2 sm:p-4">
 
@@ -5062,7 +5077,7 @@ function updateTerrainEvent(){
             if(!art.naturalWidth||!art.naturalHeight)return;
             const w=modeSelection.clientWidth,h=modeSelection.clientHeight;
             const ratio=art.naturalWidth/art.naturalHeight;
-            const drawnW=Math.max(w,h*ratio),drawnH=drawnW/ratio;
+            const drawnW=Math.min(w,h*ratio),drawnH=drawnW/ratio;
             const left=(w-drawnW)/2,top=(h-drawnH)/2;
             for(const [name,value] of Object.entries({'--rs-art-left':left+'px','--rs-art-top':top+'px','--rs-art-width':drawnW+'px','--rs-art-height':drawnH+'px'}))modeSelection.style.setProperty(name,value);
           };
@@ -5162,9 +5177,9 @@ function updateTerrainEvent(){
             const flash=document.createElement('style');
             flash.textContent='@keyframes rsPilotConfirm{0%,100%{border-color:#42ff87;box-shadow:0 0 20px #42ff87}50%{border-color:#fff;box-shadow:0 0 3px #42ff87}}.rs-pilot-confirming{animation:rsPilotConfirm .14s linear 3;outline:2px solid #42ff87}';
             screen.append(flash);
-            screen.querySelector('#rs-premium-pilot-back').addEventListener('click',()=>{if(!confirming){screen.classList.add('hidden');screen.setAttribute('aria-hidden','true');}});
+            screen.querySelector('#rs-premium-pilot-back').addEventListener('click',()=>{if(!confirming){screen.classList.add('hidden');screen.setAttribute('aria-hidden','true');modeSelection.classList.remove('hidden');}});
           }
-          screen.classList.remove('hidden');screen.style.display='flex';screen.style.visibility='visible';screen.style.pointerEvents='auto';screen.setAttribute('aria-hidden','false');
+          screen.classList.remove('hidden');screen.style.display='flex';screen.style.visibility='visible';screen.style.pointerEvents='auto';screen.setAttribute('aria-hidden','false');modeSelection.classList.add('hidden');
         });
         document.getElementById('mode-multi').addEventListener('click',()=>{
           document.getElementById('mode-multi-info').classList.remove('hidden');
