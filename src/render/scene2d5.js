@@ -1440,7 +1440,10 @@ const bossSpriteFiles=['iron-wasp.svg','abyss-manta.svg','crimson-rotor.svg','gr
 const bossSpriteImages=bossSpriteFiles.map(name=>{const im=new Image();im.src='./assets/sprites/bosses/'+name;return im;});
 function draw(c,d){
  const t=THEMES[((d.sector-1)%THEMES.length+THEMES.length)%THEMES.length];
- landscape(c,d,t);
+ // Evitar pintura procedural sob o raster aprovado: PNGs podem ter alfa.
+ // Para setores sem biblioteca raster completa, preservar o núcleo antigo.
+ const premiumReady=Boolean(window.RiverPremiumEnvironment?.ready(d.sector));
+ if(!premiumReady)landscape(c,d,t);
  // Texturas PNG do pacote oficial de cenário: camadas separadas e presas às
  // margens calculadas pelo jogo original, preservando o corredor navegável.
  const env=window.RiverPremiumEnvironment;
