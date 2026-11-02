@@ -261,6 +261,11 @@ display:flex!important;flex-direction:column!important;align-items:center!import
 #start-screen:not(.hidden)>#mode-selection #rs-menu-featured-photo{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;object-fit:cover!important;object-position:center center!important;z-index:2!important;background:#06182b!important}
 @media(max-width:700px){#start-screen:not(.hidden)>#mode-selection #rs-menu-featured-pilot{display:none!important}}
 </style>
+<style id="rs-dynamic-viewport-v12">
+/* A area jogavel fica alinhada ao HUD; a resolucao logica acompanha a proporcao. */
+#game-container:not(:has(#start-screen:not(.hidden))){width:min(100%,920px)!important;max-width:920px!important;margin-inline:auto!important}
+#game-container:not(:has(#start-screen:not(.hidden))) #gameCanvas{width:100%!important;height:100%!important;object-fit:fill!important;filter:none!important;image-rendering:pixelated!important}
+</style>
 </head>
 <body class="h-screen w-screen flex flex-col items-center justify-center p-2 sm:p-4">
 
@@ -819,7 +824,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
         function beginLogicalFrame(){ctx.setTransform(canvas.width/VIRTUAL_WIDTH,0,0,canvas.height/VIRTUAL_HEIGHT,0,0);ctx.imageSmoothingEnabled=false}
         let lastBackingWidth=0,lastBackingHeight=0;
 
-        const VIRTUAL_WIDTH = 400;
+        let VIRTUAL_WIDTH = 400;
         const VIRTUAL_HEIGHT = 600;
 
         // Estado do Jogo
@@ -4895,6 +4900,17 @@ function updateTerrainEvent(){
         }
 
         function resizeCanvas() {
+            const stage=canvas.getBoundingClientRect();
+            const availableWidth=Math.max(1,stage.width);
+            const availableHeight=Math.max(1,stage.height);
+            const nextLogicalWidth=Math.max(400,Math.min(1200,Math.round(VIRTUAL_HEIGHT*availableWidth/availableHeight)));
+            if(nextLogicalWidth!==VIRTUAL_WIDTH){
+                const delta=(nextLogicalWidth-VIRTUAL_WIDTH)/2;
+                VIRTUAL_WIDTH=nextLogicalWidth;
+                if(Array.isArray(riverPoints))for(const point of riverPoints)point.center+=delta;
+                if(typeof player==='object'&&player){player.x+=delta;if(Number.isFinite(player.targetX))player.targetX+=delta;}
+                for(const array of [enemies,bullets,enemyBullets,islands,rescueBoats,structures,fuelDepots])if(Array.isArray(array))for(const entity of array){if(Number.isFinite(entity.x))entity.x+=delta;}
+            }
             const targetDpr=activeVisualProfile().dprMax;
             const requested=document.getElementById('resolution-select')?.value||'auto';
             const preset=requested==='4k'?5.4:requested==='1080p'?2.7:null;
