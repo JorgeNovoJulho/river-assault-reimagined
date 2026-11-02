@@ -5106,8 +5106,9 @@ function updateTerrainEvent(){
                 return;
               }
               confirming=true;
-              try{localStorage.setItem('riverstorm:lastSelectedShip',ids[current]);localStorage.setItem('river_active_plane',ids[current]);}catch(e){}syncFeaturedPilot();
+              try{localStorage.setItem('riverstorm:lastSelectedShip',ids[current]);localStorage.setItem('river_active_plane',ids[current]);}catch(e){}if(typeof syncFeaturedPilot==='function')syncFeaturedPilot();
               const card=cards.children[current];
+              if(!card){confirming=false;return;}
               card.classList.add('rs-pilot-confirming');
               setTimeout(()=>{
                 // Usar a entrada completa da campanha (resolução, HUD, áudio e
@@ -5139,9 +5140,9 @@ function updateTerrainEvent(){
             const flash=document.createElement('style');
             flash.textContent='@keyframes rsPilotConfirm{0%,100%{border-color:#42ff87;box-shadow:0 0 20px #42ff87}50%{border-color:#fff;box-shadow:0 0 3px #42ff87}}.rs-pilot-confirming{animation:rsPilotConfirm .14s linear 3;outline:2px solid #42ff87}';
             screen.append(flash);
-            screen.querySelector('#rs-premium-pilot-back').addEventListener('click',()=>{if(!confirming)screen.classList.add('hidden')});
+            screen.querySelector('#rs-premium-pilot-back').addEventListener('click',()=>{if(!confirming){screen.classList.add('hidden');screen.setAttribute('aria-hidden','true');}});
           }
-          screen.classList.remove('hidden');screen.style.display='flex';
+          screen.classList.remove('hidden');screen.style.display='flex';screen.style.visibility='visible';screen.style.pointerEvents='auto';screen.setAttribute('aria-hidden','false');
         });
         document.getElementById('mode-multi').addEventListener('click',()=>{
           document.getElementById('mode-multi-info').classList.remove('hidden');
