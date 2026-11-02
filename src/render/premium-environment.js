@@ -25,15 +25,16 @@ function paths(sector){
 }
 function approvedPaths(sector){
  const n=Math.max(1,Math.min(20,Math.floor(Number(sector)||1)));
- const folder='approved/environment/mission_'+String(n).padStart(2,'0')+'_'+BIOMES[n-1]+'/';
+ const folder=n===1?'approved/environment/mission_01_rio_verde/':'approved/environment/mission_'+String(n).padStart(2,'0')+'_'+BIOMES[n-1]+'/';
  return {water:folder+'water.png',left:folder+'bank_left.png',right:folder+'bank_right.png'};
 }
 const fallback={water:'runtime/environment/water_calm.png',left:'runtime/environment/riverbank_left.png',right:'runtime/environment/riverbank_right.png'};
 function groupReady(paths){return Object.values(paths).every(path=>image(path).loaded);}
-function ready(sector){preload(sector);return groupReady(approvedPaths(sector))||groupReady(paths(sector))||groupReady(fallback);}
+function ready(sector){preload(sector);const n=Number(sector)||1;return groupReady(approvedPaths(sector))||(n>2&&(groupReady(paths(sector))||groupReady(fallback)));}
 function active(sector){
  const approved=approvedPaths(sector);
  if(groupReady(approved))return {mode:'approved',textures:approved};
+ if(Number(sector)<=2)return null; // Sem fallback genérico em missões homologadas.
  const mission=paths(sector);
  if(groupReady(mission))return {mode:'biome',textures:mission};
  if(groupReady(fallback))return {mode:'fallback',textures:fallback};

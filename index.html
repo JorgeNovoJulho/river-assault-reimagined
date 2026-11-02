@@ -159,6 +159,18 @@
  #gameCanvas{filter:brightness(1.08) contrast(1.04) saturate(1.10)!important;image-rendering:auto}
 }
 @media (pointer:fine) and (min-width:701px){#rs-mobile-hud-toggle{display:none!important}}
+</style><style id="rs-video-reference-ui">
+#game-container:has(#start-screen:not(.hidden)){max-width:min(96vw,1250px)!important;max-height:min(94vh,840px)!important}
+#mode-selection{justify-content:flex-start!important;align-items:flex-start!important;padding:clamp(14px,3vw,35px)!important;gap:10px!important;text-align:left!important}
+#mode-selection h2{font-size:clamp(32px,6vw,76px)!important;letter-spacing:3px!important;line-height:1.05!important;text-shadow:0 4px 12px #020b1b,0 0 18px #035d9a}
+#mode-selection>p{font-weight:900!important;color:#ffe59b!important;max-width:600px!important;letter-spacing:1px!important}
+#mode-selection #mode-single,#mode-selection #mode-multi{width:min(36%,330px)!important;min-width:205px!important;box-shadow:0 0 15px #00aaff70!important}
+#rs-premium-pilots{width:100%!important;height:100%!important;background-color:#06152a!important}
+#rs-premium-pilots h2{width:100%!important}
+#rs-premium-pilot-detail{display:flex!important;flex-direction:column!important;min-height:440px!important;justify-content:center!important}
+#rs-pilot-detail-photo{object-fit:contain!important;min-width:0!important}
+#rs-premium-pilot-cards button:hover{box-shadow:0 0 12px #47dbff!important}
+@media(max-width:700px){#mode-selection{align-items:center!important;text-align:center!important}#mode-selection #mode-single,#mode-selection #mode-multi{width:min(95%,330px)!important}#rs-premium-pilot-detail{min-height:0!important}}
 </style><style id="riverstorm-no-crt-ever">.crt-effect,.crt-effect::before,.crt-effect::after{filter:none!important;box-shadow:none!important}.crt-effect::before,.crt-effect::after{content:none!important;display:none!important}#gameCanvas{image-rendering:auto;}</style></head>
 <body class="h-screen w-screen flex flex-col items-center justify-center p-2 sm:p-4">
 <style>#game-container #start-screen #mode-selection{width:100%!important;max-width:none!important;box-sizing:border-box;background:linear-gradient(#03132922,#061d3544),url('./assets/ui/premium/menu/2b81e191-9306-4a6e-aabf-049f60939aa0.png') center/cover!important}</style>
@@ -4981,7 +4993,7 @@ function updateTerrainEvent(){
             const detail=document.createElement('aside');detail.id='rs-premium-pilot-detail';detail.style.cssText='border:2px solid #27c8fb;border-radius:12px;background:#021529ee;padding:10px;text-align:center;min-width:0';
             detail.innerHTML='<strong style="color:#fcd56a">PILOTO EM DESTAQUE</strong><img id="rs-pilot-detail-photo" alt="Piloto e nave selecionados" style="width:100%;height:clamp(210px,40vh,420px);object-fit:contain;display:block"><h3 id="rs-pilot-detail-name" style="color:#70e8ff;margin:5px"></h3><div id="rs-pilot-detail-bars" style="text-align:left;color:#e8f9ff"></div><button id="rs-pilot-confirm" type="button" style="width:100%;padding:12px;background:#076653;border:2px solid #44e4b9;color:white;border-radius:8px;font-weight:bold">CONFIRMAR PILOTO E CONTINUAR</button>';
             const cards=screen.querySelector('#rs-premium-pilot-cards');
-            cards.style.cssText='display:grid;grid-template-columns:repeat(auto-fit,minmax(125px,1fr));gap:9px;width:100%;margin:0';
+            cards.style.cssText='display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;width:100%;margin:0';
             cards.parentElement.insertBefore(layout,cards);layout.append(cards,detail);
             const responsive=document.createElement('style');responsive.textContent='@media(max-width:700px){#rs-premium-pilot-cards{grid-template-columns:repeat(2,minmax(0,1fr))!important}#rs-premium-pilots>div:has(#rs-premium-pilot-cards){grid-template-columns:1fr!important}#rs-pilot-detail-photo{height:240px!important}}';screen.append(responsive);
             let current=0;
