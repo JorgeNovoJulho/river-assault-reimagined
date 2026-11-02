@@ -215,7 +215,19 @@ display:flex!important;flex-direction:column!important;align-items:center!import
 #rs-premium-pilot-cards button:hover,#rs-premium-pilot-cards button:focus-visible{border-color:#ffe45c!important;box-shadow:0 0 18px #ffe45ca6!important}
 #rs-premium-pilot-cards button.rs-pilot-confirming{border-color:#42ff87!important;box-shadow:0 0 22px #42ff87!important}
 #game-container:not([data-game-active="true"]) #parry-btn{display:none!important}
-</style></head>
+</style><style id="rs-opening-fullscreen-repair">
+/* A abertura é uma única imagem oficial, nunca uma coluna do antigo hangar. */
+#game-container:has(#start-screen:not(.hidden)){position:fixed!important;inset:0!important;width:100vw!important;height:100dvh!important;min-height:100dvh!important;max-width:none!important;max-height:none!important;margin:0!important;border:0!important;border-radius:0!important;overflow:hidden!important;z-index:500!important}
+#start-screen:not(.hidden){position:absolute!important;inset:0!important;display:block!important;width:100%!important;height:100%!important;max-width:none!important;max-height:none!important;margin:0!important;padding:0!important;overflow:hidden!important;transform:none!important;z-index:500!important}
+#start-screen:not(.hidden)>:not(#mode-selection):not(#rs-premium-pilots){display:none!important;visibility:hidden!important;pointer-events:none!important}
+#start-screen:not(.hidden)>#mode-selection{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;max-width:none!important;max-height:none!important;min-width:0!important;min-height:0!important;margin:0!important;padding:0!important;border:0!important;display:block!important;overflow:hidden!important;box-sizing:border-box!important;background-image:url('./assets/ui/premium/menu/2b81e191-9306-4a6e-aabf-049f60939aa0.png')!important;background-size:cover!important;background-position:center center!important;background-repeat:no-repeat!important}
+#start-screen:not(.hidden)>#mode-selection.hidden{display:none!important}
+#start-screen:not(.hidden)>#rs-premium-pilots:not(.hidden){position:absolute!important;inset:0!important;width:100%!important;height:100%!important;z-index:700!important;display:flex!important}
+#start-screen:not(.hidden)>#mode-selection #rs-menu-featured-pilot{z-index:103!important}
+#start-screen:not(.hidden)>#mode-selection #mode-single,#start-screen:not(.hidden)>#mode-selection #mode-multi,#start-screen:not(.hidden)>#mode-selection #mode-settings{z-index:220!important}
+@media(max-width:700px){#start-screen:not(.hidden)>#mode-selection{background-size:cover!important}}
+</style>
+</head>
 <body class="h-screen w-screen flex flex-col items-center justify-center p-2 sm:p-4">
 
 
@@ -5040,7 +5052,7 @@ function updateTerrainEvent(){
             if(!art.naturalWidth||!art.naturalHeight)return;
             const w=modeSelection.clientWidth,h=modeSelection.clientHeight;
             const ratio=art.naturalWidth/art.naturalHeight;
-            const drawnW=Math.min(w,h*ratio),drawnH=drawnW/ratio;
+            const drawnW=Math.max(w,h*ratio),drawnH=drawnW/ratio;
             const left=(w-drawnW)/2,top=(h-drawnH)/2;
             for(const [name,value] of Object.entries({'--rs-art-left':left+'px','--rs-art-top':top+'px','--rs-art-width':drawnW+'px','--rs-art-height':drawnH+'px'}))modeSelection.style.setProperty(name,value);
           };
