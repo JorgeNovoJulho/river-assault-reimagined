@@ -227,6 +227,16 @@ display:flex!important;flex-direction:column!important;align-items:center!import
 #start-screen:not(.hidden)>#mode-selection #mode-single,#start-screen:not(.hidden)>#mode-selection #mode-multi,#start-screen:not(.hidden)>#mode-selection #mode-settings{z-index:220!important}
 @media(max-width:700px){#start-screen:not(.hidden)>#mode-selection{background-size:cover!important}}
 </style>
+<style id="rs-opening-mobile-hotspots">
+@media(max-width:700px){
+#start-screen:not(.hidden)>#mode-selection{background-position:center!important;background-size:cover!important}
+#start-screen:not(.hidden)>#mode-selection #mode-single,#start-screen:not(.hidden)>#mode-selection #mode-multi,#start-screen:not(.hidden)>#mode-selection #mode-settings{position:absolute!important;left:5vw!important;right:5vw!important;width:90vw!important;height:clamp(48px,8vh,74px)!important;min-height:48px!important;max-width:90vw!important;box-sizing:border-box!important;border:2px solid #f6ce54!important;border-radius:12px!important;background:#07172cde!important;color:#ffe8aa!important;font:900 clamp(14px,4.6vw,20px) system-ui!important;box-shadow:0 0 24px #000a!important;z-index:300!important;top:auto!important}
+#start-screen:not(.hidden)>#mode-selection #mode-single{bottom:27vh!important}
+#start-screen:not(.hidden)>#mode-selection #mode-multi{bottom:17vh!important}
+#start-screen:not(.hidden)>#mode-selection #mode-settings{bottom:7vh!important}
+#start-screen:not(.hidden)>#mode-selection #rs-menu-featured-pilot{display:none!important}
+}
+</style>
 </head>
 <body class="h-screen w-screen flex flex-col items-center justify-center p-2 sm:p-4">
 
