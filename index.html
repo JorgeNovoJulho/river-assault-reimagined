@@ -1214,7 +1214,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
             structures = [];
             fuelDepots = [];
             let currentCenter = VIRTUAL_WIDTH / 2;
-            let currentWidth = Math.min(VIRTUAL_WIDTH * 0.67, VIRTUAL_WIDTH - 56);
+            let currentWidth = Math.min(VIRTUAL_WIDTH * 0.69, VIRTUAL_WIDTH - 40);
 
             for (let y = VIRTUAL_HEIGHT + 20; y >= -100; y -= segmentHeight) {
                 riverPoints.push({
@@ -1246,9 +1246,11 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
 
                 if (!bossActive) {
                     // Variabilidade de curvas do cânion
-                    const shift = (Math.random() - 0.5) * 16;
-                    nextCenter = Math.max(VIRTUAL_WIDTH * 0.36, Math.min(VIRTUAL_WIDTH * 0.64, lastPoint.center + shift));
-                    nextWidth = Math.max(VIRTUAL_WIDTH * 0.57, Math.min(VIRTUAL_WIDTH * 0.73, lastPoint.width + (Math.random() - 0.5) * 8));
+                    const shift = (Math.random() - 0.5) * Math.min(12, VIRTUAL_WIDTH * 0.015);
+                    nextWidth = Math.max(VIRTUAL_WIDTH * 0.63, Math.min(VIRTUAL_WIDTH * 0.73, lastPoint.width + (Math.random() - 0.5) * 8));
+                    // Garante margem minima dos dois lados; a curva nao deve deslocar todo o leito para fora do campo.
+                    const centerAllowance=Math.max(0,(VIRTUAL_WIDTH-nextWidth)/2-16);
+                    nextCenter = Math.max(VIRTUAL_WIDTH/2-centerAllowance, Math.min(VIRTUAL_WIDTH/2+centerAllowance, lastPoint.center + shift));
                 } else {
                     // Cânion se alarga na luta contra o chefe
                     nextCenter += (VIRTUAL_WIDTH / 2 - nextCenter) * 0.1;
