@@ -210,6 +210,20 @@ background:#041225!important;overflow:auto!important;display:flex;flex-direction
 #rs-premium-pilot-cards{grid-template-columns:repeat(4,minmax(0,1fr))!important}
 #rs-premium-pilot-cards button{min-width:0!important}#rs-premium-pilot-cards img{height:clamp(110px,18vh,175px)!important}
 @media(max-width:700px){#game-container:has(#start-screen:not(.hidden)){aspect-ratio:auto!important;min-height:75vh!important}#mode-selection{background-size:100% 100%!important}#rs-premium-pilots>div:has(#rs-premium-pilot-cards){grid-template-columns:1fr!important}#rs-premium-pilot-cards{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
+</style><style id="rs-menu-artboard-fix">
+#mode-selection{display:grid!important;place-items:center!important;background:none!important;padding:0!important;overflow:hidden!important}
+#rs-menu-board{position:relative!important;width:min(100%,calc(100vh * 1.5))!important;height:auto!important;max-height:100%!important;aspect-ratio:var(--rs-menu-ratio,1.5)!important;min-height:0!important;box-sizing:border-box!important;flex-shrink:1!important;background-image:url('./assets/ui/premium/menu/2b81e191-9306-4a6e-aabf-049f60939aa0.png');background-position:center;background-size:100% 100%;background-repeat:no-repeat}
+#rs-menu-board #mode-single,#rs-menu-board #mode-multi,#rs-menu-board #mode-settings{left:0!important;width:39%!important;height:11%!important;z-index:8!important}
+#rs-menu-board #mode-single{top:31%!important}#rs-menu-board #mode-multi{top:42%!important}#rs-menu-board #mode-settings{top:53%!important}
+#rs-menu-board #rs-menu-featured-pilot{z-index:7!important;left:70.5%!important;top:16%!important;width:27%!important;height:53%!important;overflow:hidden!important}
+#rs-menu-board #rs-menu-featured-pilot img{min-height:0!important}
+#controller-settings:not(.hidden){z-index:250!important;position:absolute!important;inset:0!important;pointer-events:auto!important}
+#rs-premium-pilots{background:#041225!important;overflow:auto!important;display:flex!important;flex-direction:column!important;align-items:center!important}
+#rs-premium-pilots>div:has(#rs-premium-pilot-cards){width:100%!important;max-width:1150px!important;grid-template-columns:minmax(0,1.8fr) minmax(210px,1fr)!important;align-items:start!important}
+#rs-premium-pilot-cards{grid-template-columns:repeat(4,minmax(0,1fr))!important}
+#rs-premium-pilot-cards img{height:clamp(90px,16vh,150px)!important}
+#rs-premium-pilot-detail{min-height:0!important}#rs-pilot-detail-photo{height:clamp(130px,30vh,300px)!important}
+@media(max-width:700px){#rs-menu-board{width:100%!important}#rs-premium-pilots>div:has(#rs-premium-pilot-cards){grid-template-columns:1fr!important}#rs-premium-pilot-cards{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
 </style></head>
 <body class="h-screen w-screen flex flex-col items-center justify-center p-2 sm:p-4">
 <style>#game-container #start-screen #mode-selection{width:100%!important;max-width:none!important;box-sizing:border-box;background:linear-gradient(#03132922,#061d3544),url('./assets/ui/premium/menu/2b81e191-9306-4a6e-aabf-049f60939aa0.png') center/cover!important}</style>
@@ -5028,8 +5042,28 @@ function updateTerrainEvent(){
           document.getElementById('rs-menu-featured-ship').textContent='NAVE: '+rsFeatureNames[ix];
         }
         syncFeaturedPilot();
+        // Artboard independente: coordenadas dos hotspots seguem a imagem inteira.
+        (function mountPremiumBoard(){
+          const board=document.createElement('div');board.id='rs-menu-board';
+          while(modeSelection.firstChild)board.appendChild(modeSelection.firstChild);
+          modeSelection.appendChild(board);
+          const art=new Image();
+          art.onload=()=>{
+            if(!art.naturalWidth||!art.naturalHeight)return;
+            const ratio=art.naturalWidth/art.naturalHeight;
+            board.style.setProperty('--rs-menu-ratio',String(ratio));
+            const host=modeSelection.getBoundingClientRect();
+            const w=Math.min(host.width,host.height*ratio);
+            board.style.width=w+'px';
+            board.style.maxHeight='100%';
+          };
+          art.src='./assets/ui/premium/menu/2b81e191-9306-4a6e-aabf-049f60939aa0.png';
+          new ResizeObserver(()=>{if(art.complete&&art.naturalWidth)art.onload()}).observe(modeSelection);
+        })();
         document.getElementById('mode-settings').addEventListener('click',()=>{
           showControllerSettings(true);
+          const dialog=document.getElementById('controller-settings');
+          if(dialog){dialog.style.zIndex='250';dialog.style.display='block';}
         });
 
         document.getElementById('mode-single').addEventListener('click',()=>{

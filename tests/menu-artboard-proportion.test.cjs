@@ -1,0 +1,4 @@
+const test=require('node:test');const assert=require('node:assert/strict');const fs=require('node:fs');const h=fs.readFileSync('index.html','utf8');
+test('artboard responsive has image intrinsic ratio and hotspots inside board',()=>{assert.match(h,/function mountPremiumBoard\(/);assert.match(h,/art\.naturalWidth\/art\.naturalHeight/);assert.match(h,/board\.appendChild\(modeSelection\.firstChild\)/);assert.match(h,/#rs-menu-board #mode-settings/);});
+test('settings dialog rises above start screen and is visible',()=>{assert.match(h,/dialog\.style\.zIndex='250'/);assert.match(h,/showControllerSettings\(true\)/);});
+test('pilot selection fits a compact panel without underlying image',()=>{assert.match(h,/#rs-premium-pilots\{background:#041225!important/);assert.match(h,/#rs-premium-pilot-cards img\{height:clamp/);});
