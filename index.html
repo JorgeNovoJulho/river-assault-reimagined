@@ -4910,7 +4910,7 @@ function updateTerrainEvent(){
             if(nextLogicalWidth!==VIRTUAL_WIDTH){
                 const delta=(nextLogicalWidth-VIRTUAL_WIDTH)/2;
                 VIRTUAL_WIDTH=nextLogicalWidth;
-                if(Array.isArray(riverPoints))for(const point of riverPoints)point.center+=delta;
+                if(Array.isArray(riverPoints))for(const point of riverPoints){point.center+=delta;point.width=Math.max(nextLogicalWidth*.63,Math.min(nextLogicalWidth*.73,point.width*(nextLogicalWidth/Math.max(1,nextLogicalWidth-delta*2))));}
                 if(typeof player==='object'&&player){player.x+=delta;if(Number.isFinite(player.targetX))player.targetX+=delta;}
                 for(const array of [enemies,bullets,enemyBullets,islands,rescueBoats,structures,fuelDepots])if(Array.isArray(array))for(const entity of array){if(Number.isFinite(entity.x))entity.x+=delta;}
             }
