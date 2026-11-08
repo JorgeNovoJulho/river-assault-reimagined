@@ -1976,9 +1976,10 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
             for(const p of powerups){
                 const st=styles[p.type]||{color:p.color||'#facc15',icon:p.label||'★',label:p.type.slice(0,3)};
                 ctx.save();ctx.translate(p.x,p.y+Math.sin(missionTicks*.075+p.x)*2);
-                const premiumPickup=window.RiverPremium?.get('pickup',p.type==='WINGMAN'||p.type==='DRONE'?'DRONES':p.type);
+                const premiumPickup=window.RiverPremium?.get('pickup',p.type==='WINGMAN'||p.type==='DRONE'?'DRONES':p.type,sector);
                 if(premiumPickup){
-                    ctx.drawImage(premiumPickup,-20,-24,40,48);
+                    if(Number(sector)===1)window.RiverPremium.drawFitted(ctx,premiumPickup,0,0,34,38);
+                    else ctx.drawImage(premiumPickup,-20,-24,40,48);
                     ctx.restore();continue;
                 }
                 if(window.RiverPremium?.declared('pickup',p.type==='WINGMAN'||p.type==='DRONE'?'DRONES':p.type)){ctx.restore();continue;}
@@ -2754,7 +2755,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
                 const half=p.width/2,gate=Math.min(half-12,Math.max(28,(p.opening||100)/2));
                 const slabY=-p.height/2;
                 const condition=(p.maxHp>0&&p.hp/p.maxHp<=.45)?'_DAMAGED':'';
-                const premiumTerrainImage=window.RiverPremium?.get('terrain',p.type+condition)||window.RiverPremium?.get('terrain',p.type);
+                const premiumTerrainImage=window.RiverPremium?.get('terrain',p.type+condition,sector)||window.RiverPremium?.get('terrain',p.type,sector);
                 if(!premiumTerrainImage&&(window.RiverPremium?.declared('terrain',p.type+condition)||window.RiverPremium?.declared('terrain',p.type))){ctx.restore();continue;}
                 const terrainImage=premiumTerrainImage||terrainStructureImages[p.type+condition]||terrainStructureImages[p.type];
                 if(terrainImage&&terrainImage.complete&&terrainImage.naturalWidth){
@@ -2763,7 +2764,14 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
                   ctx.rect(-half,slabY,half-gate,p.height);
                   ctx.rect(gate,slabY,half-gate,p.height);
                   ctx.clip();
-                  ctx.drawImage(terrainImage,-half,slabY,p.width,p.height);
+                  if(Number(sector)===1&&premiumTerrainImage){
+                    const span=half-gate;
+                    if(condition)ctx.filter='brightness(.68) saturate(.8)';
+                    ctx.drawImage(terrainImage,-half,slabY,span,p.height);
+                    ctx.save();ctx.scale(-1,1);
+                    ctx.drawImage(terrainImage,-half,slabY,span,p.height);
+                    ctx.restore();
+                  }else ctx.drawImage(terrainImage,-half,slabY,p.width,p.height);
                   ctx.restore();
                   ctx.fillStyle='rgba(42,160,203,.20)';ctx.fillRect(-gate+2,slabY,2*gate-4,p.height);
                   ctx.strokeStyle='#a5f3fc';ctx.lineWidth=1.5;ctx.setLineDash([8,7]);
@@ -2822,8 +2830,12 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
         }
         function drawRescueBoats(){
             for(const b of rescueBoats){
-                const premiumSOS=window.RiverPremium?.get('pickup','SOS');
-                if(premiumSOS){ctx.drawImage(premiumSOS,b.x-25,b.y-30,50,55);continue;}
+                const premiumSOS=window.RiverPremium?.get('pickup','SOS',sector);
+                if(premiumSOS){
+                    if(Number(sector)===1)window.RiverPremium.drawFitted(ctx,premiumSOS,b.x,b.y,42,46);
+                    else ctx.drawImage(premiumSOS,b.x-25,b.y-30,50,55);
+                    continue;
+                }
                 if(window.RiverPremium?.declared('pickup','SOS'))continue;
                 ctx.save();ctx.translate(b.x,b.y);
                 const bob=Math.sin(Date.now()/380+b.phase)*2;
@@ -2839,8 +2851,12 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
         function drawFuelDepots() {
             // Posto de reabastecimento: capsula industrial sobre plataforma flutuante.
             for(const f of fuelDepots){
-                const premiumGas=window.RiverPremium?.get('pickup','GAS');
-                if(premiumGas){ctx.drawImage(premiumGas,f.x-22,f.y-24,44,48);continue;}
+                const premiumGas=window.RiverPremium?.get('pickup','GAS',sector);
+                if(premiumGas){
+                    if(Number(sector)===1)window.RiverPremium.drawFitted(ctx,premiumGas,f.x,f.y,38,44);
+                    else ctx.drawImage(premiumGas,f.x-22,f.y-24,44,48);
+                    continue;
+                }
                 if(window.RiverPremium?.declared('pickup','GAS'))continue;
                 ctx.save();ctx.translate(f.x,f.y);
                 const bob=Math.sin(missionTicks*.07+f.x)*1.5;

@@ -516,7 +516,7 @@ function enemy(c,e,time){
 }
 const islandSpriteFiles=['island-tropical.svg','island-rock.svg','island-scorched.svg'];
 const islandSpriteImages=islandSpriteFiles.map(name=>{const img=new Image();img.src='./assets/sprites/terrain/'+name;return img;});
-function islands(c,items,t){
+function islands(c,items,t,sector){
  // Materiais de relevo: renderizacao deterministica em camadas, sem sprites vetoriais lisos.
  const icy=/ÁRTICO|GLACIAL|FIORDE|NEVE|ICE/.test(t.name);
  const desert=/DESERTO|OÁSIS|DUNAS/.test(t.name);
@@ -525,9 +525,10 @@ function islands(c,items,t){
  for(const p of items){
   // Evitar reciclar a ilha tropical da Missão 01 no porto industrial da Missão 02.
   // Mantém o relevo legível até existirem sprites industriais individuais aprovados.
-  const premiumIsland=!industrial?window.RiverPremium?.get('terrain','ARMED_ISLAND'):null;
+  const premiumIsland=!industrial?window.RiverPremium?.get('terrain','ARMED_ISLAND',sector):null;
   if(premiumIsland){
-    c.save();c.drawImage(premiumIsland,p.x-p.width*.52,p.y-p.height*.52,p.width*1.04,p.height*1.04);c.restore();
+    if(Number(sector)===1)window.RiverPremium.drawFitted(c,premiumIsland,p.x,p.y,p.width,p.height);
+    else c.drawImage(premiumIsland,p.x-p.width*.52,p.y-p.height*.52,p.width*1.04,p.height*1.04);
     continue;
   }
   // O catálogo declarou uma ilha raster aprovada: aguardar o preload em vez
@@ -1462,7 +1463,7 @@ function draw(c,d){
  // Atmosfera sobre todo o mapa, sem recorte costeiro.
  biomeAtmosphere(c,d,t);
  // Culling explícito: evitar traçar sprites fora da tela e preservar FPS em ondas intensas.
- islands(c,(d.islands||[]).filter(p=>p.y+(p.height||0)>-32&&p.y-(p.height||0)<d.h+32&&p.x+(p.width||0)>-32&&p.x-(p.width||0)<d.w+32),t);
+ islands(c,(d.islands||[]).filter(p=>p.y+(p.height||0)>-32&&p.y-(p.height||0)<d.h+32&&p.x+(p.width||0)>-32&&p.x-(p.width||0)<d.w+32),t,d.sector);
  for(const e of d.enemies||[]){
    if(e.hp<=0||e.y+(e.height||40)<-45||e.y-(e.height||40)>d.h+45||e.x+(e.width||40)<-45||e.x-(e.width||40)>d.w+45)continue;
    if(e.type==='BOSS'&&Number(d.sector)<=2&&drawPremiumBossV3(c,e,d.sector)){
@@ -1480,14 +1481,15 @@ function draw(c,d){
      // Um único render por entidade: PNG Premium substitui (não sobrepõe)
      // a silhueta procedural; IA, animações de posição e hitboxes intocadas.
      const premiumId=e.type==='BIOME_ENEMY'?e.biomeId:e.type;
-     const premium=root.RiverPremium?.get('enemy',premiumId);
+     const premium=root.RiverPremium?.get('enemy',premiumId,d.sector);
      const hasDeclaredPremium=root.RiverPremium?.declared?.('enemy',premiumId);
      if(premium){
        const [displayW,displayH]=root.RiverPremium.displaySize?.(premiumId,e.width||36,e.height||36)||[e.width||36,e.height||36];
        c.save();
        c.translate(e.x,e.y);
        c.imageSmoothingEnabled=true;
-       c.drawImage(premium,-displayW/2,-displayH/2,displayW,displayH);
+       if(Number(d.sector)===1)root.RiverPremium.drawRioVerdeEnemy(c,premium,premiumId,0,0);
+       else c.drawImage(premium,-displayW/2,-displayH/2,displayW,displayH);
        c.restore();
      }else if(hasDeclaredPremium){
        // Enquanto o PNG V3 pré-carregado termina, não substituí-lo por uma
@@ -1534,5 +1536,5 @@ function drawPlayerForeground(c,x,y,aircraft,invulnerable){
  }
  c.restore();
 }
-root.RiverVisuals={cinematicBossSkill,draw,plane,enemy,drawPlayerForeground,THEMES,BIOME_DETAILS,drawIslands(c,items,sector){const t=THEMES[((sector-1)%THEMES.length+THEMES.length)%THEMES.length];islands(c,items,t)}};
+root.RiverVisuals={cinematicBossSkill,draw,plane,enemy,drawPlayerForeground,THEMES,BIOME_DETAILS,drawIslands(c,items,sector){const t=THEMES[((sector-1)%THEMES.length+THEMES.length)%THEMES.length];islands(c,items,t,sector)}};
 })(window);
