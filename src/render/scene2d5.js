@@ -525,15 +525,15 @@ function islands(c,items,t,sector){
  for(const p of items){
   // Evitar reciclar a ilha tropical da Missão 01 no porto industrial da Missão 02.
   // Mantém o relevo legível até existirem sprites industriais individuais aprovados.
-  const premiumIsland=!industrial?window.RiverPremium?.get('terrain','ARMED_ISLAND',sector):null;
+  const premiumIsland=(!industrial||Number(sector)===2)?window.RiverPremium?.get('terrain','ARMED_ISLAND',sector):null;
   if(premiumIsland){
-    if(Number(sector)===1)window.RiverPremium.drawFitted(c,premiumIsland,p.x,p.y,p.width,p.height);
+    if(Number(sector)<=2)window.RiverPremium.drawFitted(c,premiumIsland,p.x,p.y,p.width,p.height);
     else c.drawImage(premiumIsland,p.x-p.width*.52,p.y-p.height*.52,p.width*1.04,p.height*1.04);
     continue;
   }
   // O catálogo declarou uma ilha raster aprovada: aguardar o preload em vez
   // de deixar o SVG legado aparecer por um quadro durante o carregamento.
-  if(!industrial&&window.RiverPremium?.declared('terrain','ARMED_ISLAND'))continue;
+  if(Number(sector)===2||(!industrial&&window.RiverPremium?.declared('terrain','ARMED_ISLAND')))continue;
   const terrainSprite=(p.maxHp>0&&p.hp/p.maxHp<=.45)?islandSpriteImages[2]:islandSpriteImages[((p.shape||0)%2+2)%2];
   if(terrainSprite.complete&&terrainSprite.naturalWidth){
     c.save();c.drawImage(terrainSprite,p.x-p.width*.52,p.y-p.height*.52,p.width*1.04,p.height*1.04);c.restore();
@@ -1428,11 +1428,12 @@ const premiumBossV3=[null,new Image(),new Image()];
 const visualFallbackLogged=new Set();
 premiumBossV3[1].src='./assets/sprites/premium/approved/bosses/01_ponte_fortificada/body_full.png';
 premiumBossV3[2].src='./assets/sprites/premium/approved/bosses/02_encouracado_abissal/body_full.png';
-function drawPremiumBossV3(c,e,sector){
+function drawPremiumBossV3(c,e,sector,viewportWidth){
  const image=premiumBossV3[Number(sector)];
  if(!image||!image.complete||!image.naturalWidth)return false;
  // A Ponte Fortificada domina a arena visualmente sem modificar sua hitbox.
- const w=Number(sector)===1?Math.min(Math.max(214,(e.width||90)*1.9),300):Number(sector)===2?Math.min(Math.max(210,(e.width||90)*1.8),280):Math.min(Math.max(132,(e.width||90)*1.55),260);
+ const size=Number(sector)===1?Math.min(Math.max(214,(e.width||90)*1.9),300):Number(sector)===2?Math.min(Math.max(210,(e.width||90)*1.8),280):Math.min(Math.max(132,(e.width||90)*1.55),260);
+ const w=Number(sector)===2?Math.min(size,viewportWidth*.88):size;
  const h=w*image.naturalHeight/image.naturalWidth;
  c.save();c.imageSmoothingEnabled=true;c.drawImage(image,e.x-w*.5,e.y-h*.5,w,h);c.restore();
  return true;
@@ -1443,30 +1444,39 @@ function draw(c,d){
  const t=THEMES[((d.sector-1)%THEMES.length+THEMES.length)%THEMES.length];
  // Evitar pintura procedural sob o raster aprovado: PNGs podem ter alfa.
  // Para setores sem biblioteca raster completa, preservar o núcleo antigo.
- const premiumReady=Boolean(window.RiverPremiumEnvironment?.ready(d.sector));
+ const early=Number(d.sector)<=2;
+ if(early){c.fillStyle='#102c36';c.fillRect(0,0,d.w,d.h);}
+ const premiumReady=early||Boolean(window.RiverPremiumEnvironment?.ready(d.sector));
  if(!premiumReady)landscape(c,d,t);
  // Texturas PNG do pacote oficial de cenário: camadas separadas e presas às
  // margens calculadas pelo jogo original, preservando o corredor navegável.
  const env=window.RiverPremiumEnvironment;
  const premiumEnvironment=Boolean(env?.ready(d.sector)&&env.paint(c,d,bankAt,riverPath));
- c.save();clipShoreLand(c,d.riverPoints,d.w,d.h);
- // Com texturas premium carregadas, não desenhar novamente terreno procedural
- // sobre as margens. Preservar somente elementos interativos e atmosfera.
- if(!premiumEnvironment){
-   terrainSignature(c,d,t);landmark(c,d,t);mapSetPieces(c,d,t);enhancedWorld(c,d,t);livingSetDressing(c,d,t);
- }else{
-   // Evitar a antiga camada de edifícios geométricos por cima das margens PNG.
-   // Obstáculos com colisão continuam sendo renderizados no fluxo próprio.
-   if(Number(d.sector)!==2)mapSetPieces(c,d,t);
+ // Os dois primeiros cenarios usam apenas a biblioteca raster para o terreno.
+ if(!early){
+   c.save();clipShoreLand(c,d.riverPoints,d.w,d.h);
+   if(!premiumEnvironment){
+     terrainSignature(c,d,t);landmark(c,d,t);mapSetPieces(c,d,t);enhancedWorld(c,d,t);livingSetDressing(c,d,t);
+   }else mapSetPieces(c,d,t);
+   c.restore();
  }
- c.restore();
  // Atmosfera sobre todo o mapa, sem recorte costeiro.
- biomeAtmosphere(c,d,t);
+ if(!early)biomeAtmosphere(c,d,t);
  // Culling explícito: evitar traçar sprites fora da tela e preservar FPS em ondas intensas.
  islands(c,(d.islands||[]).filter(p=>p.y+(p.height||0)>-32&&p.y-(p.height||0)<d.h+32&&p.x+(p.width||0)>-32&&p.x-(p.width||0)<d.w+32),t,d.sector);
  for(const e of d.enemies||[]){
    if(e.hp<=0||e.y+(e.height||40)<-45||e.y-(e.height||40)>d.h+45||e.x+(e.width||40)<-45||e.x-(e.width||40)>d.w+45)continue;
-   if(e.type==='BOSS'&&Number(d.sector)<=2&&drawPremiumBossV3(c,e,d.sector)){
+   if(early&&e.terrainObstacle){
+     const sprite=root.RiverPremium?.get('terrain','TARGET',d.sector);
+     if(sprite){
+       c.save();
+       if(e.hp/e.maxHp<.67)c.filter=e.hp/e.maxHp<.34?'brightness(.62) saturate(.7)':'brightness(.82)';
+       root.RiverPremium.drawFitted(c,sprite,e.x,e.y,e.width+8,e.height+8);
+       c.restore();
+     }
+     continue;
+   }
+   if(e.type==='BOSS'&&Number(d.sector)<=2&&drawPremiumBossV3(c,e,d.sector,d.w)){
      // O master da Ponte já possui torres e canhões aprovados: nenhum módulo
      // vetorial legado deve ser desenhado sobre a composição raster.
      // Os corpos raster V3 dos Bosses 01/02 já incluem os módulos visuais.
@@ -1476,7 +1486,7 @@ function draw(c,d){
      const bw=e.width||90,bh=e.height||90;
      c.drawImage(premiumBoss02,e.x-bw/2,e.y-bh/2,bw,bh);
      // Boss 02 raster legado: evitar adereços antigos sobre a arte.
-   }else if(e.type==='BOSS'&&Number(d.sector)>=1&&Number(d.sector)<=20&&bossSpriteImages[Number(d.sector)-1].complete&&bossSpriteImages[Number(d.sector)-1].naturalWidth){const sprite=bossSpriteImages[Number(d.sector)-1];c.drawImage(sprite,e.x-(e.width||90)*.5,e.y-(e.height||90)*.5,e.width||90,e.height||90);bossAccessories(c,e,d);}
+   }else if(e.type==='BOSS'&&Number(d.sector)>2&&Number(d.sector)<=20&&bossSpriteImages[Number(d.sector)-1].complete&&bossSpriteImages[Number(d.sector)-1].naturalWidth){const sprite=bossSpriteImages[Number(d.sector)-1];c.drawImage(sprite,e.x-(e.width||90)*.5,e.y-(e.height||90)*.5,e.width||90,e.height||90);bossAccessories(c,e,d);}
    else {
      // Um único render por entidade: PNG Premium substitui (não sobrepõe)
      // a silhueta procedural; IA, animações de posição e hitboxes intocadas.
@@ -1488,7 +1498,7 @@ function draw(c,d){
        c.save();
        c.translate(e.x,e.y);
        c.imageSmoothingEnabled=true;
-       if(Number(d.sector)===1)root.RiverPremium.drawRioVerdeEnemy(c,premium,premiumId,0,0);
+       if(early)root.RiverPremium.drawEarlyMissionEnemy(c,premium,premiumId,0,0);
        else c.drawImage(premium,-displayW/2,-displayH/2,displayW,displayH);
        c.restore();
      }else if(hasDeclaredPremium){
@@ -1501,6 +1511,7 @@ function draw(c,d){
          visualFallbackLogged.add(d.sector+':'+e.type);
          console.warn('[RiverStorm Premium] fallback visual na Missão '+d.sector+':',e.type);
        }
+       if(early)continue;
        const replacement=commonEnemySprites[e.type];
        if(replacement&&replacement.complete&&replacement.naturalWidth){
          enemy(c,e,t.time);
