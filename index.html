@@ -460,6 +460,72 @@ display:flex!important;flex-direction:column!important;align-items:center!import
  #boss-dialogue-strip:not(.hidden){max-height:48px;overflow:auto}
 }
 </style>
+<style id="rs-mobile-opening">
+@media (pointer:coarse){
+ html:not(.rs-native-windows) #start-screen:not(.hidden)>#mode-selection:not(.hidden){
+  --mobile-menu-width:min(100%,540px);
+  display:grid!important;grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(136px,1fr) repeat(3,auto);
+  justify-items:center;align-items:center;gap:clamp(6px,1.4dvh,13px)!important;
+  padding:max(calc(env(safe-area-inset-top) + 10px),min(max(21dvh,39vw),38dvh)) max(14px,env(safe-area-inset-right)) max(28px,calc(env(safe-area-inset-bottom) + 23px)) max(14px,env(safe-area-inset-left))!important;
+  background:#061424 url('./assets/ui/premium/menu/mobile-opening.png') center top/100% max(100%,215vw) no-repeat!important;
+  overflow-x:hidden!important;overflow-y:auto!important;overscroll-behavior:contain
+ }
+ html:not(.rs-native-windows) #start-screen:not(.hidden)>#mode-selection .rs-mode-hotspot{
+  position:relative!important;inset:auto!important;width:var(--mobile-menu-width)!important;height:auto!important;
+  min-height:clamp(48px,8dvh,70px)!important;padding:8px 12px!important;margin:0!important;
+  border:1px solid #45cfff!important;border-radius:10px!important;background:linear-gradient(#103d60,#071a30)!important;
+  color:#effbff!important;font:850 clamp(15px,3.5vw,22px)/1.2 system-ui!important;
+  text-shadow:0 1px 3px #001222;box-shadow:inset 0 0 0 2px #5edcff30,0 4px 13px #000a!important
+ }
+ html:not(.rs-native-windows) #start-screen:not(.hidden)>#mode-selection #mode-single{
+  grid-row:2;background:linear-gradient(#ffe391,#ce861c)!important;border-color:#ffdd79!important;
+  color:#211200!important;text-shadow:none
+ }
+ html:not(.rs-native-windows) #start-screen:not(.hidden)>#mode-selection #mode-multi{grid-row:3}
+ html:not(.rs-native-windows) #start-screen:not(.hidden)>#mode-selection #mode-settings{grid-row:4}
+ html:not(.rs-native-windows) #start-screen:not(.hidden)>#mode-selection #rs-menu-featured-pilot{
+  grid-row:1;position:relative!important;inset:auto!important;width:var(--mobile-menu-width)!important;height:min(100%,430px)!important;
+  min-height:130px!important;margin:0!important;padding:8px 10px!important;display:grid!important;
+  grid-template-rows:auto minmax(0,1fr) auto auto;justify-items:center;gap:4px!important;
+  background:linear-gradient(#08263abb,#051629ed)!important;border:1px solid #56d5f5!important;
+  border-radius:12px!important;overflow:hidden;box-shadow:0 4px 18px #0009!important
+ }
+ html:not(.rs-native-windows) #rs-menu-featured-pilot::before{
+  content:'PILOTO EM DESTAQUE';font:900 clamp(11px,2.5vw,15px) system-ui;letter-spacing:.10em;color:#ffda86
+ }
+ html:not(.rs-native-windows) #start-screen:not(.hidden)>#mode-selection #rs-menu-featured-photo{
+  grid-row:2;width:100%!important;height:100%!important;max-height:none!important;min-height:0!important;
+  margin:0!important;object-fit:contain!important;object-position:center
+ }
+ html:not(.rs-native-windows) #rs-menu-featured-ship-art{width:37%;height:54%;right:5%;bottom:16%}
+ html:not(.rs-native-windows) #rs-menu-featured-name{
+  display:block;grid-row:3;max-width:100%;overflow-wrap:anywhere;font:800 clamp(13px,2.6vw,19px) system-ui!important;color:#eefaff!important
+ }
+ html:not(.rs-native-windows) #start-screen:not(.hidden)>#mode-selection #rs-menu-featured-ship{
+  grid-row:4;position:static!important;font:900 clamp(13px,2.7vw,19px) system-ui!important;color:#ffdb88!important;
+  padding:3px 7px!important;background:none!important
+ }
+ html:not(.rs-native-windows) #rs-menu-featured-pilot:disabled #rs-menu-featured-ship{display:none!important}
+ html:not(.rs-native-windows) #riverstorm-update-notice{bottom:max(4px,env(safe-area-inset-bottom));right:max(12px,env(safe-area-inset-right))}
+ html:not(.rs-native-windows) #mode-selection:has(#mode-multi-info:not(.hidden)) .rs-mode-hotspot,
+ html:not(.rs-native-windows) #start-screen:not(.hidden)>#mode-selection:has(#mode-multi-info:not(.hidden)) #rs-menu-featured-pilot{display:none!important}
+ html:not(.rs-native-windows) #mode-selection:has(#mode-multi-info:not(.hidden)) #mode-multi-info{
+  grid-row:1 / -1;align-self:center;width:var(--mobile-menu-width)!important;max-height:100%;overflow:auto
+ }
+}
+@media (pointer:coarse) and (orientation:landscape){
+ html:not(.rs-native-windows) #start-screen:not(.hidden)>#mode-selection:not(.hidden){
+  grid-template-columns:minmax(0,1fr) minmax(240px,56%);grid-template-rows:minmax(104px,1fr) repeat(3,auto);
+  padding:max(8px,env(safe-area-inset-top)) max(14px,env(safe-area-inset-right)) max(23px,env(safe-area-inset-bottom)) max(14px,env(safe-area-inset-left))!important;
+  background-size:42% auto!important;background-position:left top!important;
+ }
+ html:not(.rs-native-windows) #start-screen:not(.hidden)>#mode-selection .rs-mode-hotspot,
+ html:not(.rs-native-windows) #start-screen:not(.hidden)>#mode-selection #rs-menu-featured-pilot,
+ html:not(.rs-native-windows) #mode-selection #mode-multi-info{grid-column:2}
+ html:not(.rs-native-windows) #start-screen:not(.hidden)>#mode-selection #rs-menu-featured-pilot{min-height:104px!important}
+ html:not(.rs-native-windows) #start-screen:not(.hidden)>#mode-selection .rs-mode-hotspot{min-height:44px!important}
+}
+</style>
 </head>
 <body class="h-screen w-screen flex flex-col items-center justify-center p-2 sm:p-4">
 
@@ -948,6 +1014,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
     <script type="module" src="./src/net/peer-client.js"></script>
     <script src="./src/net/room-lobby.js"></script>
     <script>
+        if(window.__TAURI__)document.documentElement.classList.add("rs-native-windows");
         // --- SINTETIZADOR DE ÁUDIO CHIPTUNE RETRO (Web Audio API) ---
         class SoundEngine {
             constructor() {

@@ -1,6 +1,26 @@
 const {chromium}=require('playwright');
 const {spawn}=require('node:child_process');
 const assert=require('node:assert/strict');
+async function assertMobileOpening(page,viewport){
+  await page.locator('#mode-single').waitFor({state:'visible'});
+  const opening=await page.evaluate(async ()=>{
+    const menu=document.getElementById('mode-selection');
+    const source=getComputedStyle(menu).backgroundImage.match(/url\("([^"]+)"\)/)?.[1];
+    const image=new Image();image.src=source;await image.decode();
+    const ids=['rs-menu-featured-pilot','mode-single','mode-multi','mode-settings'];
+    return {source,imageWidth:image.naturalWidth,imageHeight:image.naturalHeight,
+      width:innerWidth,height:innerHeight,boxes:ids.map(id=>document.getElementById(id).getBoundingClientRect().toJSON()),
+      textSize:parseFloat(getComputedStyle(document.getElementById('mode-single')).fontSize)};
+  });
+  assert.match(opening.source,/mobile-opening/);
+  assert.ok(opening.imageHeight>opening.imageWidth&&opening.textSize>=15);
+  for(const [i,box] of opening.boxes.entries()){
+    assert.ok(box.width>=180&&box.height>=44&&box.left>=0&&box.right<=opening.width&&box.bottom<=opening.height,
+      JSON.stringify({viewport,i,box}));
+    if(i)assert.ok(opening.boxes[i-1].bottom<=box.top+1,JSON.stringify({viewport,i,opening}));
+  }
+}
+
 (async()=>{
   const server=spawn(process.execPath,['node_modules/vite/bin/vite.js','preview','--host','127.0.0.1','--port','4173'],{stdio:'pipe'});
   let browser;
@@ -23,6 +43,7 @@ const assert=require('node:assert/strict');
       assert.equal(await page.locator('#rs-premium-pilots').count(),0,'Tela de pilotos não deve montar antes do clique');
       const opening=await page.evaluate(()=>{const r=document.getElementById('mode-selection').getBoundingClientRect();return {width:r.width,height:r.height,screenWidth:innerWidth,screenHeight:innerHeight,legacy:getComputedStyle(document.getElementById('start-main')).display}});
       if(opening.width<opening.screenWidth-5||opening.height<opening.screenHeight-5||opening.legacy!=='none')throw Error('Abertura reduzida ou hangar legado visivel: '+JSON.stringify(opening));
+      if(viewport.width>=600){
       await page.waitForFunction(()=>Number.parseFloat(document.getElementById('mode-selection').style.getPropertyValue('--rs-art-width'))>0);
       const hotspots=await page.evaluate(()=>{
         const css=document.getElementById('mode-selection').style;
@@ -36,6 +57,9 @@ const assert=require('node:assert/strict');
       const artRegions=[[.032,.323,.359,.111],[.032,.438,.359,.111],[.032,.55,.359,.111],[.664,.151,.308,.551]];
       for(const [i,box] of hotspots.entries())for(const [j,value] of box.entries()){
         assert.ok(Math.abs(value-artRegions[i][j])<.005,'Hotspot fora da arte: '+i+' '+box.join(','));
+      }
+      }else{
+        await assertMobileOpening(page,viewport);
       }
       const unlockMusic=page.locator('#menu-theme-play');
       await page.waitForFunction(()=>!document.getElementById('menu-theme-audio').paused||
@@ -536,6 +560,7 @@ const assert=require('node:assert/strict');
     for(const viewport of [{width:320,height:568},{width:568,height:320},{width:844,height:390},{width:768,height:1024},{width:1024,height:768}]){
       const page=await browser.newPage({viewport,isMobile:true,hasTouch:true});
       await page.goto('http://127.0.0.1:4173/',{waitUntil:'domcontentloaded'});
+      await assertMobileOpening(page,viewport);
       await page.locator('#mode-settings').click();
       await page.locator('#rs-tutorial-settings').click();
       const guide=page.locator('#rs-flight-tutorial');
