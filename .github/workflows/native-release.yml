@@ -58,7 +58,7 @@ jobs:
           if-no-files-found: error
 
   android:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
@@ -72,7 +72,10 @@ jobs:
         with:
           distribution: temurin
           java-version: '21'
-      - uses: android-actions/setup-android@v3
+      - name: Preparar SDK Android 35
+        run: |
+          sdkmanager --install "platforms;android-35" "build-tools;35.0.0"
+          test -x "$ANDROID_HOME/build-tools/35.0.0/apksigner"
       - run: npm ci
       - run: npm test
       - name: Compilar APK
@@ -96,7 +99,7 @@ jobs:
           keystore=$(mktemp)
           trap 'rm -f "$keystore"' EXIT
           printf '%s' "$RIVER_ANDROID_KEYSTORE" | base64 --decode > "$keystore"
-          tools=$(find "$ANDROID_HOME/build-tools" -mindepth 1 -maxdepth 1 -type d | sort -V | tail -1)
+          tools="$ANDROID_HOME/build-tools/35.0.0"
           mkdir -p release-assets
           "$tools/zipalign" -p -f 4 android/app/build/outputs/apk/release/app-release-unsigned.apk "$RUNNER_TEMP/riverstorm-aligned.apk"
           "$tools/apksigner" sign --ks "$keystore" --ks-key-alias "$RIVER_ANDROID_KEY_ALIAS" \
