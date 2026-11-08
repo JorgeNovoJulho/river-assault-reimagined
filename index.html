@@ -405,6 +405,29 @@ body:has(#rs-premium-pilots:not(.hidden),#boss-skill-picker:not(.hidden)) #graph
 .rs-damage-list div{padding:5px 7px;border:1px solid #254760;border-radius:5px;background:#07182b;color:#d4efff;font-size:11px}
 #victory-medal:not([hidden]){display:block}
 </style>
+<style id="rs-flight-tutorial-style">
+#rs-flight-tutorial{
+ position:fixed;inset:0;box-sizing:border-box;width:min(calc(100% - 20px),780px);max-height:calc(100dvh - 20px);margin:auto;
+ padding:0;border:1px solid #47cde7;border-radius:15px;overflow:auto;color:#e9f7ff;
+ background:linear-gradient(#061425db,#050d1a 60%),url('./assets/ui/premium/pilots/briefing-bay.png') center top/cover;
+ font:14px/1.5 system-ui,sans-serif;
+}
+#rs-flight-tutorial::backdrop{background:#020914df}
+.rs-tutorial-wrap{padding:clamp(14px,3vw,28px)}
+.rs-tutorial-kicker{color:#79e1f5;letter-spacing:.14em;font-size:11px;font-weight:800}
+#rs-tutorial-heading{font-size:clamp(21px,5vw,34px);font-weight:950;color:#ffdc8d;margin:3px 0 8px}
+.rs-tutorial-actions{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0 0}
+#rs-flight-tutorial button,#rs-tutorial-settings{min-height:44px;padding:8px 13px;border:1px solid #4584a6;border-radius:8px;background:#113047;color:#e7f8ff;font-weight:800}
+#rs-flight-tutorial .rs-tutorial-primary,#rs-flight-tutorial button[aria-pressed=true]{background:#ffcf71;color:#251608;border-color:#ffe2aa}
+#rs-flight-tutorial button:focus-visible{outline:3px solid #88efff;outline-offset:2px}
+.rs-tutorial-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:13px}
+.rs-tutorial-command{background:#0b2032e8;border:1px solid #294e68;border-radius:8px;padding:10px;min-width:0}
+.rs-tutorial-command h3{font-weight:850;color:#9de8ff;margin-bottom:6px}
+.rs-tutorial-command kbd{display:inline-block;background:#1e4059;border:1px solid #527795;border-bottom-width:2px;border-radius:4px;padding:1px 5px;margin:0 4px 5px 0;color:#fff;font:700 11px system-ui}
+.rs-tutorial-command p,.rs-tutorial-note{font-size:12px;color:#c5e0ee}
+.rs-tutorial-note{margin-top:12px;padding:10px;border-left:3px solid #d5a251;background:#132331}
+@media(max-width:480px){.rs-tutorial-grid{grid-template-columns:1fr}}
+</style>
 </head>
 <body class="h-screen w-screen flex flex-col items-center justify-center p-2 sm:p-4">
 
@@ -428,6 +451,7 @@ body:has(#rs-premium-pilots:not(.hidden),#boss-skill-picker:not(.hidden)) #graph
 
         <div id="controller-settings" class="hidden absolute inset-0 bg-slate-950/95 z-50 p-4 overflow-auto text-sm" role="dialog" aria-modal="true" aria-label="Configuração do controle">
             <h2 class="text-xl font-bold text-cyan-300 mb-2">CONFIGURAR CONTROLE</h2>
+            <button id="rs-tutorial-settings" type="button">TUTORIAL DE VOO</button>
             <button id="rs-update-open" type="button">ATUALIZAÇÕES DO JOGO</button>
             <button id="rs-trophy-room-open" type="button">SALA DE TROFÉUS</button>
             <dialog id="rs-trophy-room" class="rs-awards-backdrop" aria-labelledby="rs-trophy-heading">
@@ -845,6 +869,33 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
 #start-screen:not(.hidden)>#start-main{padding-bottom:116px!important}
 }
 </style>
+<dialog id="rs-flight-tutorial" aria-labelledby="rs-tutorial-heading">
+  <div class="rs-tutorial-wrap">
+    <p class="rs-tutorial-kicker">RIVERSTORM / BRIEFING DE VOO</p>
+    <h2 id="rs-tutorial-heading">Antes de decolar</h2>
+    <section id="rs-tutorial-intro">
+      <p>Aprenda a pilotar, atacar e defender sua nave antes da Missão 1. Você pode rever o guia nas Configurações.</p>
+      <div class="rs-tutorial-actions">
+        <button id="rs-tutorial-view" class="rs-tutorial-primary" type="button">VER TUTORIAL</button>
+        <button id="rs-tutorial-skip" type="button">PULAR E INICIAR MISSÃO 1</button>
+      </div>
+    </section>
+    <section id="rs-tutorial-guide" hidden>
+      <p>Escolha a plataforma para ver os comandos e quando usar cada um.</p>
+      <div class="rs-tutorial-actions" role="group" aria-label="Plataforma">
+        <button id="rs-tutorial-windows" type="button" aria-pressed="false">WINDOWS</button>
+        <button id="rs-tutorial-mobile" type="button" aria-pressed="false">CELULAR</button>
+      </div>
+      <div id="rs-tutorial-commands" class="rs-tutorial-grid" aria-live="polite"></div>
+      <p id="rs-tutorial-platform-note" class="rs-tutorial-note"></p>
+      <p class="rs-tutorial-note"><strong>Durante a missão.</strong> Sobrevoe postos de combustível e botes SOS para abastecer ou resgatar. Observe o escudo e as recargas no painel. Antes de enfrentar um chefe, o Arsenal permite equipar um poder disponível ou lutar sem poder.</p>
+    </section>
+    <div class="rs-tutorial-actions">
+      <button id="rs-tutorial-back" type="button">VOLTAR</button>
+      <button id="rs-tutorial-start" class="rs-tutorial-primary" type="button" hidden>INICIAR MISSÃO 1</button>
+    </div>
+  </div>
+</dialog>
     <script src="./src/input/gamepad.js"></script>
     <script src="./src/game/aircraft.js"></script>
     <script src="./src/game/clock.js"></script>
@@ -5131,7 +5182,7 @@ function updateTerrainEvent(){
         });
         window.addEventListener('keydown',e=>{
             if(!controllerMenuOpen)return;
-            if(e.code==='Escape'&&document.getElementById('rs-update-dialog').open)return;
+            if(e.code==='Escape'&&(document.getElementById('rs-update-dialog').open||flightTutorial.open))return;
             if(e.code==='Escape'){e.preventDefault();if(trophyRoom.open){trophyRoom.close();return;}if(pendingRemap){pendingRemap=null;mapHelp.textContent='Remapeamento cancelado.'}else showControllerSettings(false)}
         });
         window.addEventListener('gamepadconnected',()=>{lastControllerStatus='';});
@@ -5253,6 +5304,7 @@ function updateTerrainEvent(){
         const simulationClock = new window.RiverClock();
         function gameLoop(timestamp = 0) {
             try {
+            if(flightTutorial.open){simulationClock.reset();return;}
             if(controllerMenuOpen && timestamp-(gameLoop.lastSettingsPoll||0)<140){return;}
             if(controllerMenuOpen)gameLoop.lastSettingsPoll=timestamp;
             if(gameState!=='PLAYING'&&!controllerMenuOpen && timestamp-(gameLoop.lastMenuFrame||0)<50){return;}
@@ -5310,7 +5362,8 @@ function updateTerrainEvent(){
             previousMenuDirection=false;previousMenuConfirm=false;
             const inRoomLobby=gameState==='START'&&!document.getElementById('mode-multi-info').classList.contains('hidden');
             if (gamepadState.justPause&&!inRoomLobby) {
-                if (gameState === 'START' || gameState === 'GAMEOVER') { sound.init(); resetGame(); }
+                if(gameState==='START')startSoloFlight(enterGameplay);
+                else if(gameState==='GAMEOVER'){sound.init();resetGame();}
                 else togglePause();
             }
             if (gameState === 'PLAYING' && gamepadState.justBomb) triggerBomb();
@@ -5405,6 +5458,7 @@ function updateTerrainEvent(){
         canvas.addEventListener('contextmenu', e => e.preventDefault());
         // --- INPUTS & CONTROLES ---
         window.addEventListener('keydown', e => {
+            if(flightTutorial.open||controllerMenuOpen||e.defaultPrevented)return;
             if (keys.hasOwnProperty(e.code)) { e.preventDefault(); keys[e.code] = true; }
 
             if (e.code === 'Space' || e.code === 'KeyZ') { if(!e.repeat)fireWeapon(); }
@@ -5413,15 +5467,7 @@ function updateTerrainEvent(){
             if((e.code==='KeyQ'||e.code==='KeyE')&&!e.repeat){e.preventDefault();activateRoll(e.code==='KeyQ'?-1:1)}
             if (e.code === 'KeyX' || e.code === 'KeyF' || e.code === 'ShiftLeft') {if(!e.repeat)triggerBomb();}
 
-            if (e.code === 'KeyP' || e.code === 'Escape') {
-                if (gameState === 'PLAYING') {
-                    gameState = 'PAUSED';
-                    document.getElementById('pause-screen').classList.remove('hidden');
-                } else if (gameState === 'PAUSED') {
-                    gameState = 'PLAYING';
-                    document.getElementById('pause-screen').classList.add('hidden');
-                }
-            }
+            if((e.code==='KeyP'||e.code==='Escape')&&!e.repeat)togglePause();
         });
 
         window.addEventListener('keyup', e => {
@@ -5665,8 +5711,10 @@ function updateTerrainEvent(){
               setTimeout(()=>{
                 // Usar a entrada completa da campanha (resolução, HUD, áudio e
                 // overlays), não apenas esconder a seleção e revelar o hangar.
-                enterGameplay();
-                if(gameState==='PLAYING'){screen.classList.add('hidden');modeSelection.classList.add('hidden');}
+                startSoloFlight(()=>{
+                  enterGameplay();
+                  if(gameState==='PLAYING'){screen.classList.add('hidden');modeSelection.classList.add('hidden');}
+                });
                 card.classList.remove('rs-pilot-confirming');confirming=false;
               },420);
             };
@@ -5724,7 +5772,79 @@ function updateTerrainEvent(){
           document.getElementById('mode-single').classList.remove('hidden');
           document.getElementById('mode-multi').classList.remove('hidden');
         });
-        document.getElementById('start-btn').addEventListener('click', enterGameplay);
+        const flightTutorial=document.getElementById('rs-flight-tutorial');
+        const tutorialKey='riverstorm_flight_tutorial_v1';
+        let tutorialSeen=false,pendingSoloFlight=null;
+        try{tutorialSeen=localStorage.getItem(tutorialKey)==='1';}catch(error){}
+        const flightCommands=[
+          ['Pilotar',['WASD','Setas','Mover mouse'],['Joystick virtual'],'Mova a nave em quatro direções. Com teclado ou joystick, subir acelera a rolagem e descer reduz o avanço.'],
+          ['Disparar',['Espaço','Z','Mouse esquerdo'],['TIRO'],'Mantenha pressionado para disparar continuamente. Armas coletadas têm munição própria. Quando ela acaba, a nave volta ao tiro padrão.'],
+          ['Lançar bomba',['X','F','Shift esquerdo','Mouse direito'],['BOMBA'],'A bomba avança e explode em área. Cada lançamento consome uma unidade do estoque mostrado no botão.'],
+          ['Esquivar',['Q ←','E →'],['↶ ESQUIVA','ESQUIVA ↷'],'Role para o lado escolhido para escapar de colisões e rebater projéteis. Aguarde a breve recarga antes de rolar de novo.'],
+          ['Defender e refletir',['V'],['PARRY','ESCUDO'],'Ative o escudo refletor. Com o escudo ativo, aperte novamente perto do impacto para tentar uma defesa precisa. O botão mostra quando a defesa recarregou.'],
+          ['Investida e poder',['C'],['INVESTIDA','PODER'],'Fora da luta contra chefes, investe contra o inimigo mais próximo. Na luta, usa o poder equipado no Arsenal se houver cargas e a recarga tiver terminado.'],
+          ['Fundir com as auxiliares',['Segure tiro + bomba'],['Segure TIRO + toque BOMBA'],'Com uma nave auxiliar ativa e a fusão pronta, mantenha o tiro pressionado e acione a bomba para ativar a fusão. O painel indica quando ela está disponível.'],
+          ['Pausar e continuar',['P','Esc'],['PAUSA'],'Abra o menu para continuar a missão, ajustar controles ou salvar e sair na campanha solo.']
+        ];
+        function showFlightGuide(platform){
+          document.getElementById('rs-tutorial-heading').textContent='Manual de voo';
+          document.getElementById('rs-tutorial-intro').hidden=true;
+          document.getElementById('rs-tutorial-guide').hidden=false;
+          document.getElementById('rs-tutorial-start').hidden=!pendingSoloFlight;
+          const mobile=platform==='mobile';
+          for(const name of ['windows','mobile']){
+            document.getElementById('rs-tutorial-'+name).setAttribute('aria-pressed',String(name===platform));
+          }
+          const cards=flightCommands.map(([title,windows,touch,description])=>{
+            const card=document.createElement('article');card.className='rs-tutorial-command';
+            const heading=document.createElement('h3');heading.textContent=title;card.append(heading);
+            for(const command of mobile?touch:windows){
+              const key=document.createElement('kbd');key.textContent=command;card.append(key);
+            }
+            const text=document.createElement('p');text.textContent=description;card.append(text);
+            return card;
+          });
+          document.getElementById('rs-tutorial-commands').replaceChildren(...cards);
+          document.getElementById('rs-tutorial-platform-note').textContent=mobile
+            ?'Use o polegar esquerdo no joystick e o direito nos botões. Parry e Poder ficam no painel acima dos botões de toque.'
+            :'Controle USB ou Bluetooth, no padrão Xbox: analógico esquerdo ou direcional para pilotar, A para tiro, B para bomba, Menu para pausa, LB para Parry, LT e RT para esquiva, e X para investida ou poder. Tiro, bomba e pausa podem ser remapeados nas Configurações.';
+        }
+        const defaultTutorialPlatform=()=>matchMedia('(pointer:coarse)').matches?'mobile':'windows';
+        function startSoloFlight(launch){
+          if(flightTutorial.open)return;
+          if(tutorialSeen||Number(levelSelector.value)!==1){launch();return;}
+          pendingSoloFlight=launch;
+          document.getElementById('rs-tutorial-heading').textContent='Antes de decolar';
+          document.getElementById('rs-tutorial-intro').hidden=false;
+          document.getElementById('rs-tutorial-guide').hidden=true;
+          document.getElementById('rs-tutorial-start').hidden=true;
+          flightTutorial.showModal();
+          document.getElementById('rs-tutorial-view').focus();
+        }
+        function launchAfterTutorial(){
+          const launch=pendingSoloFlight;if(!launch)return;
+          pendingSoloFlight=null;tutorialSeen=true;
+          try{localStorage.setItem(tutorialKey,'1');}catch(error){}
+          flightTutorial.close();
+          launch();
+        }
+        flightTutorial.addEventListener('close',()=>{if(!flightTutorial.open)pendingSoloFlight=null;});
+        document.getElementById('rs-tutorial-view').addEventListener('click',()=>{
+          const platform=defaultTutorialPlatform();
+          showFlightGuide(platform);
+          document.getElementById('rs-tutorial-'+platform).focus();
+        });
+        document.getElementById('rs-tutorial-skip').addEventListener('click',launchAfterTutorial);
+        document.getElementById('rs-tutorial-start').addEventListener('click',launchAfterTutorial);
+        document.getElementById('rs-tutorial-back').addEventListener('click',()=>flightTutorial.close());
+        for(const platform of ['windows','mobile']){
+          document.getElementById('rs-tutorial-'+platform).addEventListener('click',()=>showFlightGuide(platform));
+        }
+        document.getElementById('rs-tutorial-settings').addEventListener('click',()=>{
+          showFlightGuide(defaultTutorialPlatform());
+          flightTutorial.showModal();
+        });
+        document.getElementById('start-btn').addEventListener('click',()=>startSoloFlight(enterGameplay));
 
         document.getElementById('victory-restart').addEventListener('click',()=>{document.getElementById('victory-screen').classList.add('hidden');levelSelector.value='1';resetGame()});
         document.getElementById('restart-btn').addEventListener('click', enterGameplay);

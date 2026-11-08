@@ -75,7 +75,35 @@ const assert=require('node:assert/strict');
       const first=page.locator('#rs-premium-pilot-cards button').first();
       await first.click();
       await first.dblclick({delay:90});
-      await page.waitForTimeout(1000);
+      const tutorial=page.locator('#rs-flight-tutorial');
+      await tutorial.waitFor({state:'visible'});
+      assert.equal(await page.evaluate(()=>gameState),'START');
+      if(viewport.width<600){
+        await page.locator('#rs-tutorial-skip').click();
+      }else{
+        await page.locator('#rs-tutorial-view').click();
+        assert.equal(await page.locator('#rs-tutorial-windows').getAttribute('aria-pressed'),'true');
+        assert.equal(await page.locator('.rs-tutorial-command').count(),8);
+        assert.match(await page.locator('#rs-tutorial-commands').textContent(),/WASD.*Mouse esquerdo/);
+        await page.locator('#rs-tutorial-mobile').click();
+        assert.match(await page.locator('#rs-tutorial-commands').textContent(),/Joystick virtual.*TIRO/);
+        await page.locator('#rs-tutorial-start').click();
+      }
+      await page.waitForFunction(()=>gameState==='PLAYING');
+      assert.equal(await page.evaluate(()=>localStorage.getItem('riverstorm_flight_tutorial_v1')),'1');
+      assert.equal(await tutorial.isVisible(),false);
+      await page.keyboard.press('p');
+      await page.locator('#pause-settings-btn').click();
+      await page.locator('#rs-tutorial-settings').click();
+      await tutorial.waitFor({state:'visible'});
+      assert.equal(await page.locator('#rs-tutorial-start').isVisible(),false);
+      assert.equal(await page.locator('#rs-tutorial-'+(viewport.width<600?'mobile':'windows')).getAttribute('aria-pressed'),'true');
+      await page.keyboard.press('Escape');
+      await tutorial.waitFor({state:'hidden'});
+      assert.equal(await page.locator('#controller-settings').isVisible(),true);
+      assert.equal(await page.evaluate(()=>gameState),'PAUSED');
+      await page.locator('#pad-close').click();
+      await page.locator('#resume-btn').click();
       const state=await page.evaluate(()=>({game:typeof gameState==='undefined'?'UNKNOWN':gameState,overlay:document.getElementById('rs-premium-pilots')?.classList.contains('hidden'),error:document.getElementById('runtime-error')?.textContent||''}));
       console.log('Premium end-to-end',JSON.stringify({viewport,visible,state,errors}));
       assert.equal(state.game,'PLAYING','Duplo clique não entrou na campanha');

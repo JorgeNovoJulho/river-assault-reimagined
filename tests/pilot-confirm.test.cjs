@@ -12,7 +12,7 @@ function fixture(id,allowed=true,entrySucceeds=true){
   buttons:ids.map(()=>({classList:{add:c=>classes.add(c),remove:c=>classes.delete(c)}})),
   screen:{classList:{add:c=>hidden.push(c)},querySelector:()=>({textContent:''})},
   modeSelection:{classList:{add:c=>hidden.push(c)}},gameState:'START',
-  setTimeout:fn=>queue.push(fn),enterGameplay(){entries++;if(entrySucceeds)ctx.gameState='PLAYING';}};
+  setTimeout:fn=>queue.push(fn),startSoloFlight:launch=>launch(),enterGameplay(){entries++;if(entrySucceeds)ctx.gameState='PLAYING';}};
  vm.runInNewContext(code,ctx);return {ctx,queue,classes,hidden,select,entries:()=>entries};
 }
 test('seven unlocked pilot identities flash then enter the full campaign exactly once',()=>{
