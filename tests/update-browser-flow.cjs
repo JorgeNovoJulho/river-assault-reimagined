@@ -87,6 +87,44 @@ const url = 'http://127.0.0.1:4179/';
     await android.evaluate(()=>{reportAndroid({phase:'installing'});completeAndroid();});
     await android.waitForFunction(()=>window.reportAndroid===null);
     assert.equal(await android.locator('#rs-update-progress').getAttribute('value'),'100');
+    // Simula o transporte Android e executa o JavaScript que vem com o Capacitor.
+    const nativeAndroid = await browser.newPage({viewport:{width:390,height:844},isMobile:true,hasTouch:true});
+    await nativeAndroid.addInitScript(() => {
+      window.androidBridge = {
+        postMessage(message) {
+          const {callbackId, pluginId, methodName} = JSON.parse(message);
+          if (pluginId !== 'RiverUpdate') return;
+          const success = methodName === 'check' && !window.simulateOffline;
+          queueMicrotask(() => window.Capacitor.fromNative({
+            callbackId, pluginId, methodName, success, save:false,
+            data: {currentVersion:'0.2.8', version:'0.2.9'},
+            error: success ? undefined : {message:'Consulta indisponível'}
+          }));
+        }
+      };
+    });
+    await nativeAndroid.addInitScript({path:'node_modules/@capacitor/android/capacitor/src/main/assets/native-bridge.js'});
+    await nativeAndroid.goto(url);
+    await nativeAndroid.locator('#rs-update-dialog').waitFor({state:'visible'});
+    assert.equal(await nativeAndroid.locator('#rs-update-next').textContent(),'0.2.9');
+    await nativeAndroid.locator('#rs-update-close').tap();
+    await nativeAndroid.locator('#rs-update-announcement').tap();
+    await nativeAndroid.locator('#rs-update-close').tap();
+    await nativeAndroid.locator('#mode-settings').tap();
+    await nativeAndroid.evaluate(()=>{window.simulateOffline=true;});
+    await nativeAndroid.locator('#rs-update-open').tap();
+    await nativeAndroid.locator('#rs-update-android-download').waitFor({state:'visible'});
+    assert.equal(await nativeAndroid.locator('#rs-update-install').isDisabled(),true);
+    await nativeAndroid.evaluate(()=>{
+      window.simulateOffline=false;
+      const cap=window.Capacitor;
+      cap.Plugins={RiverUpdate:{check:()=>cap.nativePromise('RiverUpdate','check',{})}};
+      window.Capacitor={Plugins:cap.Plugins,fromNative:cap.fromNative};
+    });
+    await nativeAndroid.locator('#rs-update-retry').tap();
+    await nativeAndroid.waitForFunction(()=>!document.getElementById('rs-update-install').disabled);
+    assert.equal(await nativeAndroid.locator('#rs-update-android-download').isVisible(),false);
+
     const web = await browser.newPage();
     await web.goto(url);
     await web.locator('#mode-settings').click();

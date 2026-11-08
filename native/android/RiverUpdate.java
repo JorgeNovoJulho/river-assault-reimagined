@@ -46,6 +46,7 @@ public class RiverUpdate extends Plugin {
                   host.equals("objects.githubusercontent.com"))) throw new SecurityException("Servidor de atualização inválido");
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             connection.setInstanceFollowRedirects(false);
+            connection.setUseCaches(false);
             connection.setConnectTimeout(15000);
             connection.setReadTimeout(30000);
             int status = connection.getResponseCode();

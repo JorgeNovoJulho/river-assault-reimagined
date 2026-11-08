@@ -10,38 +10,46 @@ const current = document.getElementById('rs-update-current');
 const next = document.getElementById('rs-update-next');
 const webVersion = document.querySelector('meta[name="riverstorm-version"]').content;
 const invoke = window.__TAURI__?.core?.invoke;
-const capacitor = window.Capacitor;
-function androidUpdater(bridge) {
-  if (bridge?.getPlatform?.() !== 'android') return null;
+const fallback = document.getElementById('rs-update-android-download');
+const announcement = document.getElementById('rs-update-announcement');
+
+function isAndroidApp() {
+  const bridge = window.Capacitor;
+  return !!window.androidBridge ||
+    (typeof bridge?.getPlatform === 'function' && bridge.getPlatform() === 'android');
+}
+
+function androidUpdater() {
+  const bridge = window.Capacitor;
   const plugin = 'RiverUpdate';
-  if (typeof bridge.registerPlugin === 'function') return bridge.registerPlugin(plugin);
-  // O bridge injetado pelo Android também funciona sem o runtime web do Capacitor.
-  if (typeof bridge.nativePromise !== 'function' || typeof bridge.addListener !== 'function') return null;
+  const registered = bridge?.Plugins?.[plugin];
+  if (typeof registered?.check === 'function') return registered;
+  if (typeof bridge?.nativePromise !== 'function') return null;
   return {
-    installed: () => bridge.nativePromise(plugin, 'installed', {}),
     check: () => bridge.nativePromise(plugin, 'check', {}),
     install: options => bridge.nativePromise(plugin, 'install', options),
-    addListener: (event, callback) => bridge.addListener(plugin, event, callback)
+    addListener: (event, callback) => bridge.addListener?.(plugin, event, callback)
   };
 }
-const android = androidUpdater(capacitor);
-const native = invoke ? {
-  installed: () => window.__TAURI__.app.getVersion(),
+
+const windows = invoke ? {
   check: () => invoke('river_check_update'),
   install: (version, report) => {
     const onProgress = new window.__TAURI__.core.Channel();
     onProgress.onmessage = report;
     return invoke('river_install_update', { version, onProgress });
   }
-} : android ? {
-  installed: async () => (await android.installed()).currentVersion,
-  check: () => android.check(),
-  install: async (version, report) => {
-    const listener = await android.addListener('updateProgress', report);
-    try { return await android.install({ version }); }
-    finally { await listener.remove().catch(() => {}); }
-  }
 } : null;
+
+function boundedCheck(check) {
+  let timer;
+  return Promise.race([
+    Promise.resolve().then(check),
+    new Promise((_, reject) => {
+      timer = setTimeout(() => reject(new Error('Tempo de verificação esgotado')), 50000);
+    })
+  ]).finally(() => clearTimeout(timer));
+}
 
 let available = null;
 let busy = false;
@@ -71,22 +79,32 @@ function showProgress({ phase, received, total }) {
   }
 }
 
+function openDialog() {
+  if (dialog.open) return;
+  if (typeof dialog.showModal === 'function') dialog.showModal();
+  else dialog.setAttribute('open', '');
+}
+
 async function check(manual) {
-  if (manual && !dialog.open) dialog.showModal();
+  if (manual) openDialog();
   if (busy) return;
   busy = true;
   available = null;
+  announcement.hidden = true;
+  fallback.hidden = true;
   download.hidden = true;
   next.textContent = '—';
   install.disabled = true;
   status.textContent = 'Verificando atualizações…';
   try {
+    const androidApp = !windows && isAndroidApp();
+    const native = windows || (androidApp && androidUpdater());
+    if (!native && androidApp) throw new Error('RiverUpdate indisponível');
     if (!native) {
       status.textContent = 'Prévia web. O navegador carrega a versão publicada ao abrir o jogo.';
       return;
     }
-    setCurrent(await native.installed());
-    const result = await native.check();
+    const result = await boundedCheck(() => native.check());
     setCurrent(result.currentVersion);
     available = result.version || null;
     if (!available) {
@@ -95,20 +113,28 @@ async function check(manual) {
     }
     next.textContent = available;
     install.disabled = false;
-    indicator.textContent += ' · atualização disponível';
+    announcement.hidden = false;
     status.textContent = 'Confirme para baixar e instalar a nova versão.';
     const opening = document.getElementById('mode-selection');
     if (!manual && !dialog.open && opening.getClientRects().length &&
         !document.getElementById('start-screen').classList.contains('hidden') &&
-        document.getElementById('controller-settings').classList.contains('hidden')) dialog.showModal();
-  } catch {
-    status.textContent = 'Não foi possível verificar agora. Confira a conexão ou tente novamente.';
+        document.getElementById('controller-settings').classList.contains('hidden')) openDialog();
+  } catch (error) {
+    console.warn('Verificação de atualização indisponível.', error);
+    fallback.hidden = !!windows || !isAndroidApp();
+    status.textContent = fallback.hidden
+      ? 'Não foi possível verificar agora. Confira a conexão ou tente novamente.'
+      : 'O Android não conseguiu verificar a atualização. Tente novamente ou abra o download oficial.';
   } finally { busy = false; }
 }
 
 document.getElementById('rs-update-open').addEventListener('click', () => check(true));
+announcement.addEventListener('click', openDialog);
 retry.addEventListener('click', () => check(true));
-document.getElementById('rs-update-close').addEventListener('click', () => dialog.close());
+document.getElementById('rs-update-close').addEventListener('click', () => {
+  if (typeof dialog.close === 'function') dialog.close();
+  else dialog.removeAttribute('open');
+});
 install.addEventListener('click', async () => {
   if (busy || !available) return;
   busy = true;
@@ -117,7 +143,18 @@ install.addEventListener('click', async () => {
   showProgress({ phase: 'downloading' });
   try {
     if (typeof saveActiveProgress === 'function') saveActiveProgress();
-    const result = await native.install(available, showProgress);
+    let result;
+    if (windows) {
+      result = await windows.install(available, showProgress);
+    } else {
+      const android = androidUpdater();
+      const listener = await android.addListener?.('updateProgress', showProgress);
+      try { result = await android.install({ version: available }); }
+      finally {
+        try { await listener?.remove(); }
+        catch (error) { console.warn('Falha ao remover o monitor de download.', error); }
+      }
+    }
     if (result?.permissionRequired) download.hidden = true;
     else showProgress({ phase: 'installing' });
     status.textContent = result?.permissionRequired
@@ -127,10 +164,17 @@ install.addEventListener('click', async () => {
     download.hidden = true;
     status.textContent = 'Falha no download ou na validação. Verifique novamente antes de tentar.';
     available = null;
+    announcement.hidden = true;
+    fallback.hidden = !!windows || !isAndroidApp();
   } finally {
     busy = false;
     retry.disabled = false;
     install.disabled = !available;
   }
 });
-if (native) check(false);
+if (windows || isAndroidApp()) check(false);
+else if (document.readyState !== 'complete') {
+  window.addEventListener('load', () => {
+    if (isAndroidApp()) check(false);
+  }, { once: true });
+}

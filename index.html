@@ -175,6 +175,9 @@ background:url('./assets/ui/premium/menu/2b81e191-9306-4a6e-aabf-049f60939aa0.pn
 #mode-selection>h2,#mode-selection>p{display:none!important}
 #riverstorm-update-notice{position:absolute;bottom:8px;right:10px;padding:3px 7px;background:#061524e8;border-radius:4px;pointer-events:none}
 #rs-update-dialog{position:fixed;inset:0;box-sizing:border-box;width:min(calc(100% - 28px),470px);padding:18px;margin:auto;border:1px solid #49d7ed;border-radius:12px}
+#rs-update-dialog[open]{z-index:120000;max-height:calc(100vh - 24px);overflow:auto}
+#rs-update-announcement{position:absolute;top:8px;right:10px;z-index:4;min-height:44px;padding:6px 12px;border:1px solid #ffdc87;border-radius:8px;background:#102c47;color:#ffdc87;font:750 14px system-ui}
+#rs-update-android-download:not([hidden]){display:block;margin:8px 4px;color:#a9edff;text-decoration:underline}
 #rs-update-dialog::backdrop{background:#020711ce}
 #rs-update-dialog button,#rs-update-open{padding:8px 12px;margin:4px;border:1px solid #67d0ea;border-radius:6px;background:#102c47;color:#eef9ff}
 #rs-update-install:enabled{background:#ffd57d;color:#231504;font-weight:900}
@@ -633,6 +636,7 @@ display:flex!important;flex-direction:column!important;align-items:center!import
 <p>Salas LAN com código e senha, rankings e torneios eliminatórios. O serviço de rede precisa ser instalado e configurado no anfitrião.</p>
 <button id="mode-multi-back" type="button" style="padding:10px;border:1px solid #94baff;border-radius:8px;margin-top:6px">VOLTAR AOS MODOS</button>
 </div>
+<button id="rs-update-announcement" type="button" hidden>Nova atualização disponível</button>
 <div id="riverstorm-update-notice" role="status" style="font-size:11px;color:#b7d9fb;max-width:350px">Verificando informações da versão...</div>
 </div>
 <h1 id="start-headline" aria-label="RiverStorm"><span>RIVER</span><span>STORM</span></h1>
@@ -6052,6 +6056,7 @@ function updateTerrainEvent(){
   </div>
   <button id="rs-update-install" type="button" disabled>BAIXAR E INSTALAR</button>
   <button id="rs-update-retry" type="button">VERIFICAR NOVAMENTE</button>
+  <a id="rs-update-android-download" href="https://github.com/JorgeNovoJulho/river-assault-reimagined/releases/latest" hidden>ABRIR DOWNLOAD OFICIAL DO ANDROID</a>
   <button id="rs-update-close" type="button">VOLTAR</button>
 </dialog>
 <script type="module" src="./src/game/app-updates.js"></script>

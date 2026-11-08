@@ -7,7 +7,7 @@ test('atualizaÃ§Ã£o nativa mostra as duas versÃµes e exige confirmaÃ§Ã�
  assert.ok(html.includes('rs-update-current'));
  assert.ok(html.includes('rs-update-next'));
  assert.ok(updates.includes("install.addEventListener('click'"));
- assert.ok(updates.includes('native.install(available, showProgress)'));
+ assert.ok(updates.includes('windows.install(available, showProgress)'));
 });
 test('naves dos bosses usam pecas reconheciveis e tiro limitado',()=>{assert.ok(renderer.includes('function bossAccessories('));assert.ok(renderer.includes('bossAccessories(c,e,d)'));assert.ok(html.includes('enemyBullets.length<27'));assert.ok(html.includes('firingWindow'));});
 test('pacotes Windows e APK configurados',()=>{const tauri=JSON.parse(fs.readFileSync('src-tauri/tauri.conf.json','utf8'));assert.equal(tauri.bundle.targets[0],'nsis');assert.equal(tauri.app.windows[0].fullscreen,true);assert.ok(fs.existsSync('capacitor.config.ts'));assert.ok(workflow.includes('runs-on: windows-latest'));assert.ok(workflow.includes('assembleDebug'));});
