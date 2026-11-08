@@ -20,8 +20,7 @@ test('Missão 2 tem trio de texturas industriais reais; não aceita substituiç�
  for(const part of ['water','bank_left','bank_right'])assert.ok(fs.existsSync(prefix+'mission_02_industrial/'+part+'.png'));
  assert.match(env,/approved\/environment\/mission_/);
 });
-test('Missão 1 deve ser marcada como incompleta até receber os masters do Rio Verde',()=>{
+test('Missão 1 tem os três masters raster do Rio Verde',()=>{
  const folder=prefix+'mission_01_rio_verde/';
- const missing=['water','bank_left','bank_right'].filter(x=>!fs.existsSync(folder+x+'.png'));
- assert.deepEqual(missing,['water','bank_left','bank_right'],'Atualizar este teste quando os 3 masters oficiais forem incorporados');
+ for(const part of ['water','bank_left','bank_right'])assert.ok(fs.existsSync(folder+part+'.png'),part+' ausente');
 });

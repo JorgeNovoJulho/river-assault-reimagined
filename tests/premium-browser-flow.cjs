@@ -47,6 +47,58 @@ const assert=require('node:assert/strict');
       const aspect=await page.evaluate(()=>{const c=document.getElementById('gameCanvas'),r=c.getBoundingClientRect();return {backing:c.width/c.height,display:r.width/r.height,width:r.width,screen:innerWidth}});
       console.log('Canvas aspect diagnostic',JSON.stringify({viewport,aspect}));
       assert.ok(Math.abs(aspect.backing-aspect.display)<0.012,'Proporcao do backing store nao acompanha largura exibida');
+      for(const level of [1,2]){
+        await page.waitForFunction(sector=>{
+          const sprites=window.RiverPremium;
+          return window.RiverPremiumEnvironment.ready(sector)&&
+            sprites.get('terrain','TARGET',sector)&&sprites.get('terrain','ARMED_ISLAND',sector)&&
+            sprites.get('terrain','BRIDGE',sector)&&sprites.get('enemy','MEGAZORD',sector)&&
+            sprites.get('enemy',sector===1?'TUCANO':'CRANE',sector)&&sprites.get('pickup','GAS',sector);
+        },level);
+        const calls=await page.evaluate(level=>{
+          const previous={sector,enemies,islands,structures,fuelDepots};
+          const result=[];
+          const context=document.getElementById('gameCanvas').getContext('2d');
+          const drawImage=context.drawImage;
+          context.drawImage=function(image,...args){
+            result.push({path:image.getAttribute?.('src')||'',source:image.naturalWidth/image.naturalHeight,
+              destination:args.length===4?args[2]/args[3]:null});
+            return drawImage.call(this,image,...args);
+          };
+          try{
+            sector=level;
+            const x=VIRTUAL_WIDTH/2;
+            const biomeId=level===1?'TUCANO':'CRANE';
+            enemies=[
+              {type:'BIOME_ENEMY',biomeId,terrainObstacle:true,terrainName:level===1?'RAIZ':'CONTAINER',x:x-35,y:100,width:35,height:32,hp:7,maxHp:14},
+              {type:'BIOME_ENEMY',biomeId,x:x+35,y:170,width:34,height:34,hp:5,maxHp:5},
+              {type:'MEGAZORD',x,y:250,width:82,height:95,hp:150,maxHp:150}
+            ];
+            islands=[{x:x-65,y:300,width:56,height:68,shape:0}];
+            structures=[{type:'BRIDGE',x,y:355,width:180,height:22,opening:100,hp:18,maxHp:18}];
+            fuelDepots=[{x,y:405}];
+            render();
+            return result;
+          }finally{
+            ({sector,enemies,islands,structures,fuelDepots}=previous);
+            context.drawImage=drawImage;
+          }
+        },level);
+        const expected=level===1?['roots.png','island.png','01_tucano/idle_000.png']:
+          ['container.png','dock.png','02_crane/idle_000.png'];
+        for(const name of [...expected,'bridge.png','gas.png','megazord.png']){
+          assert.ok(calls.some(call=>call.path.endsWith(name)),'Sprite ausente no quadro: '+name);
+        }
+        assert.ok(!calls.some(call=>call.path.endsWith('.svg')),'SVG desenhado na missão '+level);
+        if(level===2){
+          for(const name of ['water.png','bank_left.png','bank_right.png']){
+            const tiles=calls.filter(call=>call.path.includes('mission_02_industrial/')&&call.path.endsWith(name));
+            assert.ok(tiles.length,'Textura industrial ausente: '+name);
+            assert.ok(tiles.every(tile=>Math.abs(tile.source-tile.destination)<1e-8),'Textura esticada: '+name);
+          }
+        }
+        console.log('Premium raster scene',JSON.stringify({viewport,level,sprites:expected}));
+      }
       await page.close();
     }
   }finally{await browser?.close();server.kill('SIGKILL');}

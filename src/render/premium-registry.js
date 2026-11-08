@@ -99,12 +99,35 @@ const ENEMY_DISPLAY={
  MECHA_SWORD:[70,72],MECHA_GUN:[70,70],TANK:[70,60],SHIP:[78,64],
  SUB:[78,70],TURRET:[55,55],WARSHIP:[110,78],BOMBER:[78,73],FLOATING_MINE:[45,45],ITEM_CAPSULE:[46,46],TUCANO:[54,44],CRANE:[70,64]
 };
+const EARLY_MISSION_ENEMY_BOX={
+ DRONE:[30,32],TUCANO:[46,44],HELI:[47,42],JET:[48,43],RECON_PLANE:[44,42],ZIGZAG:[44,42],
+ TANK:[36,34],TURRET:[33,34],SHIP:[54,46],SUB:[64,50],WARSHIP:[88,62],BOMBER:[65,48],
+ MECHA_GUN:[46,50],MECHA_SWORD:[46,50],FLOATING_MINE:[27,27],ITEM_CAPSULE:[26,32],CRANE:[55,48],MEGAZORD:[82,95]
+};
+const RIO_VERDE_ASSETS={
+ enemy:{HELI:'heli',SHIP:'ship',DRONE:'drone',BOMBER:'bomber',FLOATING_MINE:'mine',MEGAZORD:'megazord'},
+ terrain:{ARMED_ISLAND:'island',BRIDGE:'bridge',BRIDGE_DAMAGED:'bridge',DAM:'dam',TARGET:'roots'},
+ pickup:{BOMB:'bomb',SHIELD:'shield',FUEL:'gas',GAS:'gas',SOS:'sos',RESCUE:'sos',
+  SPECIAL:'special_weapon',WEAPON_ITEM:'special_weapon',DRONES:'wingman_drone',WINGMAN:'wingman_drone',
+  LIFE:'life',HP:'life',XP:'xp',COIN:'coin',MX:'multiplier_mx',MUL:'multiplier_mx',MULTIPLIER:'multiplier_mx',MULTI:'multiplier_mx',REPAIR:'life',CAPSULE:'special_weapon'}
+};
+const INDUSTRIAL_TERRAIN={ARMED_ISLAND:'dock',BRIDGE:'bridge',BRIDGE_DAMAGED:'bridge',DAM:'floodgate',TARGET:'container'};
 const files=new Map();
 for(const [group,items] of Object.entries(CATALOG))for(const [id,path] of Object.entries(items)){
  // Só arquivos existentes são habilitados por padrão. Nada de usar imagens erradas.
  const supported=(group==='player'&&id==='falcao')||(group==='fx'&&id==='explosion')||path.startsWith('approved/');
  files.set(group+':'+id,{path,loaded:false,supported,img:null,base:path.startsWith('approved/')?'./assets/sprites/premium/':BASE});
 }
+function registerMissionSprites(sector,folder,group,items){
+ for(const [id,name] of Object.entries(items)){
+  files.set(sector+':'+group+':'+id,{path:'approved/environment/'+folder+'/runtime/'+name+'.png',
+   loaded:false,supported:true,img:null,base:'./assets/sprites/premium/'});
+ }
+}
+for(const [group,items] of Object.entries(RIO_VERDE_ASSETS)){
+ registerMissionSprites(1,'mission_01_rio_verde',group,items);
+}
+registerMissionSprites(2,'mission_02_industrial','terrain',INDUSTRIAL_TERRAIN);
 for(const id of AIRCRAFT_IDS)for(const state of AIRCRAFT_STATES){
  files.set('aircraft:'+id+':'+state,{path:id+'_'+state+'.png',loaded:false,supported:true,img:null,base:AIRCRAFT_BASE});
 }
@@ -125,9 +148,13 @@ function register(group,id,path){
  if(typeof path!=='string'||!/^[-\w/]+\.png$/i.test(path))throw Error('Caminho PNG inválido');
  files.set(group+':'+id,{path,loaded:false,supported:true,img:null});
 }
-function get(group,id){
+function get(group,id,sector){
  if(group==='enemy')id=ENEMY_ALIASES[String(id||'').toUpperCase()]||String(id||'').toUpperCase();
- const entry=files.get(group+':'+id);
+ const key=group+':'+id;
+ const level=Number(sector);
+ const shared=level===2&&group!=='terrain'?1:level;
+ const mission=files.get(shared+':'+key);
+ const entry=mission?.supported?mission:files.get(key);
  if(!entry||!entry.supported)return null;
  if(!entry.img){
    const im=new Image();entry.img=im;
@@ -145,6 +172,15 @@ function displaySize(id,fallbackWidth=36,fallbackHeight=36){
  const canonical=ENEMY_ALIASES[String(id||'').toUpperCase()]||String(id||'').toUpperCase();
  return ENEMY_DISPLAY[canonical]||[Math.max(36,fallbackWidth),Math.max(36,fallbackHeight)];
 }
+function drawFitted(ctx,image,x,y,w,h){
+ const scale=Math.min(w/image.naturalWidth,h/image.naturalHeight);
+ const width=image.naturalWidth*scale,height=image.naturalHeight*scale;
+ ctx.drawImage(image,x-width/2,y-height/2,width,height);
+}
+function drawEarlyMissionEnemy(ctx,image,id,x,y){
+ const [w,h]=EARLY_MISSION_ENEMY_BOX[ENEMY_ALIASES[id]||id]||[42,42];
+ drawFitted(ctx,image,x,y,w,h);
+}
 function paint(ctx,group,id,x,y,w,h,rotation=0){
  const im=get(group,id);if(!im)return false;
  ctx.save();ctx.translate(x,y);ctx.rotate(rotation);
@@ -154,8 +190,13 @@ function status(){
  return Array.from(files,([key,value])=>({key,available:value.supported,loaded:value.loaded,path:value.path}));
 }
 function preload(){
- for(const [key,entry] of files){if(entry.supported&&!key.startsWith('aircraft:'))get(...key.split(':'));}
+ for(const [key,entry] of files){
+  if(!entry.supported||key.startsWith('aircraft:'))continue;
+  const parts=key.split(':');
+  if(parts.length===3)get(parts[1],parts[2],Number(parts[0]));
+  else get(...parts);
+ }
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',preload,{once:true});else preload();
-global.RiverPremium={register,get,declared,displaySize,aircraft,paint,status,catalog:CATALOG};
+global.RiverPremium={register,get,declared,displaySize,drawFitted,drawEarlyMissionEnemy,aircraft,paint,status,catalog:CATALOG};
 })(window);

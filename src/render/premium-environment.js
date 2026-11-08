@@ -45,11 +45,20 @@ function status(sector){
  return {ready:!!item,sector:Math.max(1,Math.min(20,Math.floor(Number(sector)||1))),mode:item?.mode||'original',
   images:Object.entries(item?.textures||paths(sector)).map(([key,path])=>({key,path,loaded:image(path).loaded,failed:image(path).failed}))};
 }
+function paintPortTile(c,image,w,h,tileH,anchor,dist){
+ const tileW=tileH*image.naturalWidth/image.naturalHeight;
+ const startX=((anchor%tileW)+tileW)%tileW-tileW;
+ const startY=((dist*.18)%tileH+tileH)%tileH-tileH;
+ for(let y=startY;y<h;y+=tileH){
+  for(let x=startX;x<w;x+=tileW)c.drawImage(image,x,y,tileW,tileH);
+ }
+}
 function paint(c,d,bankAt,riverPath){
  if(!d?.riverPoints||d.riverPoints.length<2)return false;
  preload(d.sector);
  const item=active(d.sector);if(!item)return false;
  const {w,h,riverPoints}=d;
+ const port=Number(d.sector)===2;
  const dist=Number(d.distance??d.scroll??d.scrollDistance??0)||0;
  const water=image(item.textures.water).img;
  const left=image(item.textures.left).img,right=image(item.textures.right).img;
@@ -58,7 +67,8 @@ function paint(c,d,bankAt,riverPath){
  // emendas e repetição curta sem interferir nas curvas do leito do rio.
  const scale=Math.max(w/water.naturalWidth,h*1.55/water.naturalHeight),tileH=water.naturalHeight*scale;
  const offset=((dist*.18)%tileH+tileH)%tileH;
- for(let y=offset-tileH;y<h;y+=tileH)c.drawImage(water,0,y,w,tileH);
+ if(port)paintPortTile(c,water,w,h,h*.52,(w-h*.52)/2,dist);
+ else for(let y=offset-tileH;y<h;y+=tileH)c.drawImage(water,0,y,w,tileH);
  c.restore();
  for(const [side,im] of [['left',left],['right',right]]){
   c.save();c.beginPath();
@@ -74,7 +84,8 @@ function paint(c,d,bankAt,riverPath){
   const th=Math.max(h*1.55,Math.round(w*.92*im.naturalHeight/im.naturalWidth));
   const tw=th*im.naturalWidth/im.naturalHeight;
   const start=((dist*.18)%th+th)%th;
-  for(let y=start-th;y<h;y+=th)c.drawImage(im,side==='left'?0:w-tw,y,tw,th);
+  if(port)paintPortTile(c,im,w,h,h*.58,w*(side==='left'?.24:.76),dist);
+  else for(let y=start-th;y<h;y+=th)c.drawImage(im,side==='left'?0:w-tw,y,tw,th);
   c.restore();
  }
  return true;
