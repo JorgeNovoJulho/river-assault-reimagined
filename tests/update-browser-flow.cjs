@@ -19,9 +19,11 @@ const url = 'http://127.0.0.1:4179/';
       window.releaseVersion = '0.2.0';
       window.__TAURI__ = {
         app:{getVersion:async ()=>'0.1.0'},
-        core:{invoke:async (name,params)=>{
-          window.updateCalls.push([name,params]);
-          return name==='river_check_update'?{currentVersion:'0.1.0',version:window.releaseVersion}:undefined;
+        core:{Channel:class {},invoke:async (name,params)=>{
+          window.updateCalls.push([name,params?.version]);
+          if(name==='river_check_update')return {currentVersion:'0.1.0',version:window.releaseVersion};
+          window.reportUpdate=params.onProgress.onmessage;
+          return new Promise(resolve=>{window.completeUpdate=resolve;});
         }}
       };
     });
@@ -34,7 +36,18 @@ const url = 'http://127.0.0.1:4179/';
     await windows.locator('#mode-settings').click();
     await windows.locator('#rs-update-open').click();
     await windows.locator('#rs-update-install').click();
-    assert.deepEqual(await windows.evaluate(()=>updateCalls.at(-1)),['river_install_update',{version:'0.2.0'}]);
+    await windows.waitForFunction(()=>typeof window.reportUpdate==='function');
+    assert.deepEqual(await windows.evaluate(()=>updateCalls.at(-1)),['river_install_update','0.2.0']);
+    assert.equal(await windows.locator('#rs-update-progress').getAttribute('value'),null);
+    await windows.evaluate(()=>reportUpdate({phase:'downloading',received:1048576,total:4194304}));
+    assert.equal(await windows.locator('#rs-update-progress').getAttribute('value'),'25');
+    assert.match(await windows.locator('#rs-update-progress-text').textContent(),/25%.*1 MB.*4 MB/);
+    assert.equal(await windows.locator('#rs-update-retry').isDisabled(),true);
+    await windows.evaluate(()=>reportUpdate({phase:'verifying'}));
+    assert.equal(await windows.locator('#rs-update-progress').getAttribute('value'),'100');
+    assert.match(await windows.locator('#rs-update-status').textContent(),/Verificando o instalador/);
+    await windows.evaluate(()=>completeUpdate());
+    await windows.waitForFunction(()=>!document.getElementById('rs-update-retry').disabled);
     await windows.evaluate(()=>{window.releaseVersion=null;});
     await windows.locator('#rs-update-retry').click();
     assert.equal(await windows.locator('#rs-update-install').isDisabled(),true);
@@ -48,7 +61,15 @@ const url = 'http://127.0.0.1:4179/';
           return {
             installed:async()=>({currentVersion:'0.1.5'}),
             check:async()=>({currentVersion:'0.1.5',version:'0.3.0'}),
-            install:async({version})=>{window.chosenVersion=version;return {permissionRequired:true};}
+            addListener:async (name,callback)=>{
+              window.reportAndroid=callback;
+              return {remove:async ()=>{window.reportAndroid=null;}};
+            },
+            install:async({version})=>{
+              window.chosenVersion=version;
+              if(!window.androidAllowed)return {permissionRequired:true};
+              return new Promise(resolve=>{window.completeAndroid=resolve;});
+            }
           };
         }
       };
@@ -59,6 +80,16 @@ const url = 'http://127.0.0.1:4179/';
     await android.locator('#rs-update-install').click();
     assert.equal(await android.evaluate(()=>chosenVersion),'0.3.0');
     await android.waitForFunction(()=>document.getElementById('rs-update-status').textContent.includes('Autorize'));
+    assert.equal(await android.locator('#rs-update-progress').isVisible(),false);
+    await android.evaluate(()=>{window.androidAllowed=true;});
+    await android.locator('#rs-update-install').click();
+    await android.waitForFunction(()=>typeof window.completeAndroid==='function');
+    await android.evaluate(()=>reportAndroid({phase:'downloading',received:2097152}));
+    assert.equal(await android.locator('#rs-update-progress').getAttribute('value'),null);
+    assert.match(await android.locator('#rs-update-progress-text').textContent(),/2 MB baixados/);
+    await android.evaluate(()=>{reportAndroid({phase:'installing'});completeAndroid();});
+    await android.waitForFunction(()=>window.reportAndroid===null);
+    assert.equal(await android.locator('#rs-update-progress').getAttribute('value'),'100');
     const web = await browser.newPage();
     await web.goto(url);
     await web.locator('#mode-settings').click();

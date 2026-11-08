@@ -5,6 +5,7 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
+import android.os.SystemClock;
 import android.provider.Settings;
 import androidx.core.content.FileProvider;
 import androidx.core.content.pm.PackageInfoCompat;
@@ -118,6 +119,12 @@ public class RiverUpdate extends Plugin {
         new Thread(() -> downloadAndOpen(call)).start();
     }
 
+    private void reportProgress(String phase, long received, long total) {
+        JSObject progress = new JSObject().put("phase", phase).put("received", received);
+        if (total > 0) progress.put("total", total);
+        notifyListeners("updateProgress", progress);
+    }
+
     @SuppressWarnings("deprecation")
     private void downloadAndOpen(PluginCall call) {
         File apk = null;
@@ -133,18 +140,27 @@ public class RiverUpdate extends Plugin {
             if (!directory.isDirectory() && !directory.mkdirs()) throw new java.io.IOException("Cache indisponível");
             apk = File.createTempFile("riverstorm-", ".apk", directory);
             HttpURLConnection connection = connect(RELEASES + "download/v" + version + "/riverstorm-android.apk");
+            long expected = connection.getContentLength();
+            reportProgress("downloading", 0, expected);
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
             try (InputStream in = connection.getInputStream(); FileOutputStream out = new FileOutputStream(apk)) {
                 byte[] buffer = new byte[65536];
                 long total = 0;
+                long lastReport = SystemClock.elapsedRealtime();
                 int n;
                 while ((n = in.read(buffer)) != -1) {
                     total += n;
                     if (total > MAX_APK) throw new java.io.IOException("APK excede o limite");
                     digest.update(buffer, 0, n);
                     out.write(buffer, 0, n);
+                    long now = SystemClock.elapsedRealtime();
+                    if (now - lastReport >= 200 || total == expected) {
+                        lastReport = now;
+                        reportProgress("downloading", total, expected);
+                    }
                 }
             } finally { connection.disconnect(); }
+            reportProgress("verifying", 0, 0);
             StringBuilder hash = new StringBuilder();
             for (byte value : digest.digest()) hash.append(String.format(Locale.ROOT, "%02x", value & 0xff));
             if (!hash.toString().equals(release.getString("sha256"))) throw new SecurityException("SHA-256 inválido");
@@ -162,6 +178,7 @@ public class RiverUpdate extends Plugin {
             File verified = apk;
             getActivity().runOnUiThread(() -> {
                 try {
+                    reportProgress("installing", 0, 0);
                     getActivity().startActivity(installer);
                     call.resolve();
                 } catch (Exception error) {
