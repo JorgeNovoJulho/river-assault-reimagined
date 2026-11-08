@@ -398,11 +398,15 @@ display:flex!important;flex-direction:column!important;align-items:center!import
 #rs-boss-debrief{position:absolute;inset:0;z-index:120;display:grid;place-items:center;padding:12px;pointer-events:none}
 #rs-boss-debrief[hidden]{display:none}
 #rs-boss-debrief .rs-awards-card{width:min(100%,490px)}
-#rs-trophy-room{box-sizing:border-box;position:fixed;inset:0;margin:auto;width:min(calc(100% - 24px),710px);max-height:calc(100dvh - 24px);overflow:auto;padding:clamp(10px,3vw,26px);border:1px solid #3cb8db;border-radius:15px}
-#rs-trophy-room::backdrop{background:#020711db}
+#rs-trophy-room,#rs-about-game{box-sizing:border-box;position:fixed;inset:0;margin:auto;width:min(calc(100% - 24px),710px);max-height:calc(100dvh - 24px);overflow:auto;padding:clamp(10px,3vw,26px);border:1px solid #3cb8db;border-radius:15px}
+#rs-about-game{width:min(calc(100% - 24px),470px)}
+#rs-about-game p{margin:12px 0;font-size:16px}
+#rs-about-game a{color:#a9edff;text-decoration:underline;overflow-wrap:anywhere}
+#rs-pilot-confirm:disabled{opacity:.65;cursor:not-allowed}
+#rs-trophy-room::backdrop,#rs-about-game::backdrop{background:#020711db}
 #rs-trophy-medals{grid-template-columns:repeat(3,minmax(0,1fr))}
 #rs-trophy-medals .rs-awards-medal{display:grid}
-#rs-trophy-room-open,#rs-trophy-room-close{padding:10px 16px;border:1px solid #ffd985;border-radius:8px;background:linear-gradient(#ffdd8c,#c88728);color:#271a08;font-weight:900}
+#rs-trophy-room-open,#rs-trophy-room-close,#rs-about-open,#rs-about-close{padding:10px 16px;border:1px solid #ffd985;border-radius:8px;background:linear-gradient(#ffdd8c,#c88728);color:#271a08;font-weight:900}
 #victory-screen:not(.hidden){display:flex}
 #mission-damage-report{width:min(100%,660px);flex:none}
 .rs-damage-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,165px),1fr));gap:5px;margin-top:10px;text-align:left}
@@ -561,6 +565,16 @@ display:flex!important;flex-direction:column!important;align-items:center!import
             <button id="graphics-preview-toggle" type="button" hidden>GRÁFICOS</button>
             <button id="rs-tutorial-settings" type="button">TUTORIAL DE VOO</button>
             <button id="rs-update-open" type="button">ATUALIZAÇÕES DO JOGO</button>
+            <button id="rs-about-open" type="button">SOBRE O JOGO</button>
+            <dialog id="rs-about-game" class="rs-awards-backdrop" aria-labelledby="rs-about-heading">
+              <section class="rs-awards-card">
+                <h2 id="rs-about-heading" class="rs-awards-heading">SOBRE O JOGO</h2>
+                <p>Desenvolvedor <strong>Jorge Salgado</strong></p>
+                <p>E-mail <a href="mailto:confere2024@gmail.com">confere2024@gmail.com</a></p>
+                <p>Nov. 2026</p>
+                <button id="rs-about-close" type="button">VOLTAR ÀS CONFIGURAÇÕES</button>
+              </section>
+            </dialog>
             <button id="rs-trophy-room-open" type="button">SALA DE TROFÉUS</button>
             <dialog id="rs-trophy-room" class="rs-awards-backdrop" aria-labelledby="rs-trophy-heading">
               <section class="rs-awards-card">
@@ -5245,7 +5259,10 @@ function updateTerrainEvent(){
                 ({fire:'TIRO',bomb:'BOMBA',pause:'PAUSA'})[name] + ': BOTÃO ' + physicalGamepad.settings[name];
         }
         function showControllerSettings(open) {
-            if(!open&&document.getElementById('rs-trophy-room').open)document.getElementById('rs-trophy-room').close();
+            if(!open){
+                if(trophyRoom.open)trophyRoom.close();
+                if(aboutGame.open)aboutGame.close();
+            }
             controllerMenuOpen = Boolean(open);pendingRemap=null;controllerMenuIndex=0;
             controllerDialog.classList.toggle('hidden',!open);
             controllerDialog.style.display=open?'block':'none';
@@ -5259,6 +5276,9 @@ function updateTerrainEvent(){
             }
         }
         const trophyRoom=document.getElementById('rs-trophy-room');
+        const aboutGame=document.getElementById('rs-about-game');
+        document.getElementById('rs-about-open').addEventListener('click',()=>aboutGame.showModal());
+        document.getElementById('rs-about-close').addEventListener('click',()=>aboutGame.close());
         function openTrophyRoom(){
           const trophies=campaignTrophies(),best=trophies.best;
           document.getElementById('rs-trophy-records').replaceChildren(
@@ -5335,7 +5355,7 @@ function updateTerrainEvent(){
         });
         window.addEventListener('keydown',e=>{
             if(!controllerMenuOpen)return;
-            if(e.code==='Escape'&&(document.getElementById('rs-update-dialog').open||flightTutorial.open))return;
+            if(e.code==='Escape'&&(document.getElementById('rs-update-dialog').open||flightTutorial.open||aboutGame.open))return;
             if(e.code==='Escape'){e.preventDefault();if(trophyRoom.open){trophyRoom.close();return;}if(pendingRemap){pendingRemap=null;mapHelp.textContent='Remapeamento cancelado.'}else showControllerSettings(false)}
         });
         window.addEventListener('gamepadconnected',()=>{lastControllerStatus='';});
@@ -5741,7 +5761,7 @@ function updateTerrainEvent(){
         const modeSelection=document.getElementById('mode-selection');
         const rsFeatureIds=['falcao','vespa','cometa','fenix','helicoptero','disco','titan'];
         const rsFeatureArts=['snabo_falcao','jhow_vespa','btata_cometa','napas_fenix','casper_aguia_vtol','roger_ufo_aurora','dudu_titan'];
-        const rsFeatureNames=['FALCÃO','VESPA','COMETA','FÊNIX','ÁGUIA VTOL','AURORA','TITAN'];
+        const rsFeatureNames=rsFeatureIds.map(id=>aircraftCatalog.PLANES[id].name);
         for(const [id,plane] of Object.entries(aircraftCatalog.PLANES))if(plane.premiumExtra){
             rsFeatureIds.push(id);rsFeatureNames.push(plane.name);
         }
@@ -5791,8 +5811,8 @@ function updateTerrainEvent(){
 
         document.getElementById('mode-single').addEventListener('click',()=>{
           // Seleção visual restaurada sem alterar o núcleo do hangar/campanha.
-          const ids=rsFeatureIds.filter(id=>!aircraftCatalog.PLANES[id].premiumExtra||unlocked.includes(id));
-          const roster=ids.join(',');
+          const ids=rsFeatureIds;
+          const roster=ids.map(id=>unlocked.includes(id)?id:'').join(',');
           let screen=document.getElementById('rs-premium-pilots');
           if(screen&&screen.dataset.roster!==roster){screen.remove();screen=null;}
           if(!screen){
@@ -5816,8 +5836,10 @@ function updateTerrainEvent(){
             let current=0;
             const highlight=(i)=>{
               current=i;
-              const previewSelect=document.getElementById('plane-select');
-              if(previewSelect){previewSelect.value=ids[i];previewSelect.dispatchEvent(new Event('change',{bubbles:true}));}
+              const unlockedPlane=unlocked.includes(ids[i]);
+              const confirmButton=detail.querySelector('#rs-pilot-confirm');
+              confirmButton.disabled=!unlockedPlane;
+              confirmButton.textContent=unlockedPlane?'CONFIRMAR PILOTO E CONTINUAR':'DESBLOQUEIE EM CONFIGURAÇÕES';
               const detailPhoto=screen.querySelector('#rs-pilot-detail-photo');
               const plane=aircraftCatalog.PLANES[ids[i]];
               detailPhoto.src=pilotArt(rsFeatureIds.indexOf(ids[i]));
@@ -5850,13 +5872,9 @@ function updateTerrainEvent(){
             };
             let confirming=false,lastCard=-1,lastCardClick=0;
             const confirm=()=>{
-              if(confirming)return;
+              if(confirming||!unlocked.includes(ids[current]))return;
               const select=document.getElementById('plane-select');
               if(select){select.value=ids[current];select.dispatchEvent(new Event('change',{bubbles:true}));}
-              if(!unlocked.includes(ids[current])){
-                screen.querySelector('#rs-pilot-detail-name').textContent=names[current]+' — DESBLOQUEIE NO HANGAR';
-                return;
-              }
               confirming=true;
               const card=buttons[current];
               if(!card){confirming=false;return;}
@@ -5891,7 +5909,7 @@ function updateTerrainEvent(){
               card.append(artwork);const t=document.createElement('strong');t.textContent=plane.pilotName||names[i];card.append(t);
               const shipName=document.createElement('small');shipName.textContent=names[i];card.append(shipName);
               if(!unlocked.includes(ids[i])){
-                const lock=document.createElement('small');lock.textContent=aircraftCatalog.PLANES[ids[i]].price+' PONTOS';card.append(lock);
+                const lock=document.createElement('small');lock.textContent='BLOQUEADA · '+plane.price+' PONTOS';card.append(lock);
               }
               cards.append(card);buttons.push(card);
               card.dataset.aircraft=ids[i];

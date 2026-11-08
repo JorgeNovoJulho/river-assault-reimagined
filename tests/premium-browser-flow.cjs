@@ -74,7 +74,17 @@ async function assertMobileOpening(page,viewport){
       await settings.waitFor({state:'visible'});
       assert.ok(await settings.evaluate(el=>el.contains(document.elementFromPoint(18,18))),
         'Configurações precisam ficar acima da abertura');
+      await page.locator('#rs-about-open').click();
+      const about=page.locator('#rs-about-game');
+      await about.waitFor({state:'visible'});
+      assert.match(await about.textContent(),/Jorge Salgado[\s\S]*Nov. 2026/);
+      assert.equal(await about.locator('a').getAttribute('href'),'mailto:confere2024@gmail.com');
+      await page.locator('#rs-about-close').click();
       const shop=page.locator('#settings-plane');
+      for(const id of ['fenix','helicoptero','disco','titan']){
+        await shop.selectOption(id);
+        assert.match(await shop.locator('option:checked').textContent(),/3000 pontos/);
+      }
       for(const id of ['pioneira','cruzada','valquiria','colosso']){
         await shop.selectOption(id);
         assert.match(await shop.locator('option:checked').textContent(),/10000 pontos/);
@@ -87,7 +97,12 @@ async function assertMobileOpening(page,viewport){
       await page.locator('#mode-single').click({timeout:12000});
       const selection=page.locator('#rs-premium-pilots');
       await selection.waitFor({state:'visible',timeout:10000});
-      assert.equal(await page.locator('#rs-premium-pilot-cards button').count(),8,'Sete aeronaves originais e a especial comprada');
+      assert.equal(await page.locator('#rs-premium-pilot-cards button').count(),11,'Sete aeronaves originais e quatro especiais');
+      const locked=page.locator('[data-aircraft=cruzada]');
+      await locked.dblclick({delay:90});
+      assert.match(await locked.textContent(),/BLOQUEADA · 10000 PONTOS/);
+      assert.equal(await page.locator('#rs-pilot-confirm').isDisabled(),true);
+      assert.equal(await page.evaluate(()=>gameState),'START');
       const isolation=await page.evaluate(()=>({old:getComputedStyle(document.getElementById('mode-selection')).display,selectionRect:document.getElementById('rs-premium-pilots').getBoundingClientRect().toJSON(),vw:innerWidth,vh:innerHeight}));
       assert.equal(isolation.old,'none','Tela anterior continua visivel na selecao');
       assert.ok(isolation.selectionRect.width>=isolation.vw-3&&isolation.selectionRect.height>=isolation.vh-3,'Selecao deve cobrir toda a viewport');
@@ -319,7 +334,7 @@ async function assertMobileOpening(page,viewport){
         button.querySelector('strong').textContent,button.querySelector('small').textContent
       ]));
       assert.deepEqual(regular,[['T. Snabo','FALCÃO'],['Ed Jhow','VESPA'],['B. Tata','COMETA'],['S. Napas','FÊNIX'],
-        ['G. Casper','ÁGUIA VTOL'],['R. Roger','AURORA'],['L. Dudu','TITAN']]);
+        ['G. Casper','ÁGUIA VTOL'],['R. Roger','UFO AURORA'],['L. Dudu','TITAN']]);
       const colors=await page.locator('.rs-pilot-track span').evaluateAll(bars=>bars.map(bar=>getComputedStyle(bar).backgroundImage));
       assert.equal(new Set(colors).size,4);
       assert.ok(colors.every(color=>color.includes('linear-gradient')));
@@ -333,7 +348,7 @@ async function assertMobileOpening(page,viewport){
       assert.ok(briefingArt.width>=1000);
       const nx=page.locator('[data-aircraft=pioneira]');
       assert.match(await nx.textContent(),/JON ARDENT.*PIONEIRA NX/);
-      assert.equal(await page.locator('[data-aircraft=cruzada]').count(),0);
+      assert.match(await page.locator('[data-aircraft=cruzada]').textContent(),/BLOQUEADA/);
       await nx.locator('img').first().evaluate(image=>image.decode());
       await nx.click();
       assert.match(await page.locator('.rs-pilot-default-weapon').textContent(),/Pulso de Fase NX/);
