@@ -13,7 +13,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - run: npm install --no-audit --no-fund
+      - run: npm ci --no-audit --no-fund
       - name: Bloquear cenarios procedurais por ausência de masters na Missão 01
         run: node scripts/check-mission01-raster.cjs
       - name: Testar campanha e 28 sprites das aeronaves
@@ -23,11 +23,14 @@ jobs:
       - name: Compilar pacote PC/Mobile Web
         run: npm run build
       - name: Instalar Chromium para teste real de navegação
-        run: |
-          npm install --no-save playwright
-          npx playwright install --with-deps chromium
+        run: npx playwright install --with-deps chromium
       - name: Testar Single Player e seleção em desktop e mobile
         run: node tests/premium-browser-flow.cjs
+      - name: Testar lobby, torneio e LAN sem internet
+        run: |
+          node tests/multiplayer-browser-flow.cjs
+          node tests/lan-browser-flow.cjs
+          node tests/update-browser-flow.cjs
       - name: Validar pacote entregue
         run: |
           test -s dist/index.html

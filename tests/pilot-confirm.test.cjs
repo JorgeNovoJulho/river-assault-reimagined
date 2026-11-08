@@ -9,7 +9,7 @@ function fixture(id,allowed=true,entrySucceeds=true){
  const select={value:'',dispatchEvent(){}};
  const ctx={ids,current:ids.indexOf(id),names:ids,unlocked:allowed?[id]:[],
   document:{getElementById:()=>select},Event:class{},localStorage:{setItem(){}},
-  cards:{children:ids.map(()=>({classList:{add:c=>classes.add(c),remove:c=>classes.delete(c)}}))},
+  buttons:ids.map(()=>({classList:{add:c=>classes.add(c),remove:c=>classes.delete(c)}})),
   screen:{classList:{add:c=>hidden.push(c)},querySelector:()=>({textContent:''})},
   modeSelection:{classList:{add:c=>hidden.push(c)}},gameState:'START',
   setTimeout:fn=>queue.push(fn),enterGameplay(){entries++;if(entrySucceeds)ctx.gameState='PLAYING';}};

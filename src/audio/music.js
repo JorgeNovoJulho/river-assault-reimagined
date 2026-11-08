@@ -45,14 +45,15 @@ class RiverMenuMusic {
  }
  sync(active,enabled,volume,gesture=false){
   this.active=!!active&&!!enabled;this.audio.volume=Math.max(0,Math.min(1,Number(volume)||0));
-  if(!this.active){this.audio.pause();return;}
+  const unlock=document.getElementById('menu-theme-play');
+  if(!this.active){this.audio.pause();if(unlock)unlock.hidden=true;return;}
   if(!this.audio.paused||this.pending||this.blocked&&!gesture)return;
   this.pending=true;this.blocked=false;
-  this.audio.play().then(()=>{if(!this.active)this.audio.pause();else this.status('♫ Lucidez — GALM NOVA feat. Fhenrir St.George');})
-   .catch(e=>{if(e.name==='NotAllowedError'){this.blocked=true;this.status('♫ Clique ou toque para ouvir Lucidez');}})
+  this.audio.play().then(()=>{if(!this.active)this.audio.pause();else {if(unlock)unlock.hidden=true;this.status('♫ Lucidez — GALM NOVA feat. Fhenrir St.George');}})
+   .catch(e=>{if(e.name==='NotAllowedError'){this.blocked=true;if(unlock)unlock.hidden=!this.active;this.status('♫ Clique ou toque para ouvir Lucidez');}})
    .finally(()=>{this.pending=false;});
  }
- stop(){this.active=false;this.audio.pause();}
+ stop(){this.sync(false,false,this.audio.volume);if(this.audio.readyState>0)this.audio.currentTime=0;}
 }
 root.RiverMenuMusic=RiverMenuMusic;
 })(window);

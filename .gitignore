@@ -11,3 +11,6 @@ src-tauri/target/
 *.jks
 *.p12
 *.pfx
+/android/
+/src-tauri/update.release.json
+/release-assets/

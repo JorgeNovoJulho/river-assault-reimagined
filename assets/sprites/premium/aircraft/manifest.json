@@ -40,5 +40,17 @@
     "disparo": "titan_disparo.png",
     "especial": "titan_especial.png",
     "boost": "titan_boost.png"
+  },
+  "pioneira": {
+    "normal": "pioneira_normal.png"
+  },
+  "cruzada": {
+    "normal": "cruzada_normal.png"
+  },
+  "valquiria": {
+    "normal": "valquiria_normal.png"
+  },
+  "colosso": {
+    "normal": "colosso_normal.png"
   }
 }

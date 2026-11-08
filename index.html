@@ -2,6 +2,7 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
+    <meta name="riverstorm-version" content="0.1.0">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>RiverStorm — Balanceamento de Chefes 0.8.5</title>
     <link rel="stylesheet" href="./src/styles/tailwind.css">
@@ -171,7 +172,13 @@ body{padding:0!important;min-height:100dvh!important;display:flex!important;flex
 #start-screen #rs-premium-pilots.hidden{display:none!important}
 #mode-selection{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;display:block!important;overflow:hidden!important;padding:0!important;
 background:url('./assets/ui/premium/menu/2b81e191-9306-4a6e-aabf-049f60939aa0.png') center/contain no-repeat!important}
-#mode-selection>h2,#mode-selection>p,#riverstorm-update-notice{display:none!important}
+#mode-selection>h2,#mode-selection>p{display:none!important}
+#riverstorm-update-notice{position:absolute;bottom:8px;right:10px;padding:3px 7px;background:#061524e8;border-radius:4px;pointer-events:none}
+#rs-update-dialog{position:fixed;inset:0;box-sizing:border-box;width:min(calc(100% - 28px),470px);padding:18px;margin:auto;border:1px solid #49d7ed;border-radius:12px}
+#rs-update-dialog::backdrop{background:#020711ce}
+#rs-update-dialog button,#rs-update-open{padding:8px 12px;margin:4px;border:1px solid #67d0ea;border-radius:6px;background:#102c47;color:#eef9ff}
+#rs-update-install:enabled{background:#ffd57d;color:#231504;font-weight:900}
+#rs-update-dialog button:disabled{opacity:.55}
 #mode-selection #mode-single,#mode-selection #mode-multi,#mode-selection #mode-settings{position:absolute!important;min-width:0!important;padding:0!important;margin:0!important;border:0!important;background:transparent!important;color:transparent!important;box-shadow:none!important;font-size:0!important;cursor:pointer!important;z-index:104!important;
 left:var(--rs-art-left,0px)!important;width:calc(var(--rs-art-width,100%) * .36)!important;height:calc(var(--rs-art-height,100%) * .106)!important}
 #mode-single{top:calc(var(--rs-art-top,0px) + var(--rs-art-height,100%) * .31)!important}
@@ -180,17 +187,18 @@ left:var(--rs-art-left,0px)!important;width:calc(var(--rs-art-width,100%) * .36)
 #mode-selection button:is(:hover,:focus-visible){outline:2px solid #70edff!important;background:#32c9ff17!important}
 #rs-menu-featured-pilot{position:absolute!important;left:calc(var(--rs-art-left,0px) + var(--rs-art-width,100%) * .735)!important;top:calc(var(--rs-art-top,0px) + var(--rs-art-height,100%) * .175)!important;
 width:calc(var(--rs-art-width,100%) * .19)!important;height:calc(var(--rs-art-height,100%) * .47)!important;
-display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;z-index:103!important;border:0!important;box-shadow:none!important;background:#061829!important;overflow:hidden!important;pointer-events:none!important}
+display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;z-index:103!important;border:0!important;box-shadow:none!important;background:#061829!important;overflow:hidden!important}
 #rs-menu-featured-photo{width:100%!important;height:76%!important;min-height:0!important;object-fit:contain!important}
 #rs-menu-featured-name,#rs-menu-featured-ship{font:800 clamp(10px,1vw,16px) system-ui!important;color:#e7faff!important;text-align:center!important}
-#controller-settings:not(.hidden){position:absolute!important;inset:0!important;z-index:250!important;visibility:visible!important}
+#controller-settings:not(.hidden){position:fixed!important;inset:0!important;z-index:11000!important;visibility:visible!important}
 #rs-premium-pilots{position:absolute!important;inset:0!important;z-index:110!important;background:#041225!important;overflow:auto!important;box-sizing:border-box!important;padding:clamp(8px,1.5vw,20px)!important}
 #rs-premium-pilots>div:has(#rs-premium-pilot-cards){grid-template-columns:minmax(0,1.8fr) minmax(220px,1fr)!important;gap:12px!important;width:100%!important;max-width:1500px!important}
 #rs-premium-pilot-cards{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:clamp(6px,1vw,16px)!important}
 #rs-premium-pilot-cards img{height:clamp(110px,20dvh,225px)!important;object-fit:contain!important}
 #rs-pilot-detail-photo{height:clamp(160px,37dvh,390px)!important;object-fit:contain!important}
 #rs-hud-action-bar{display:grid!important;grid-template-columns:minmax(110px,1.6fr) minmax(65px,.65fr) minmax(110px,1fr) minmax(130px,1fr)!important;align-items:center!important;gap:7px!important;width:100%!important;box-sizing:border-box!important;min-height:42px!important;padding:4px 7px!important;overflow:hidden!important}
-#rs-hud-action-status{overflow:hidden!important;text-overflow:ellipsis!important;white-space:nowrap!important}
+#rs-hud-action-status{display:grid;gap:2px;min-width:0}
+#hud-mission-damage{color:#fde68a;font-size:inherit}
 #rs-fusion-meter{width:100%!important;min-width:0!important}
 #rs-hud-action-bar #parry-btn,#rs-hud-action-bar #boss-skill-use{position:static!important;inset:auto!important;transform:none!important;animation:none!important;opacity:1!important;visibility:visible!important;min-width:0!important;width:100%!important;height:30px!important;min-height:30px!important;padding:4px!important;margin:0!important;font-size:10px!important}
 #game-container:not([data-game-active="true"]) #parry-btn{display:none!important}
@@ -227,28 +235,14 @@ display:flex!important;flex-direction:column!important;align-items:center!import
 #start-screen:not(.hidden)>#mode-selection #mode-single,#start-screen:not(.hidden)>#mode-selection #mode-multi,#start-screen:not(.hidden)>#mode-selection #mode-settings{z-index:220!important}
 @media(max-width:700px){#start-screen:not(.hidden)>#mode-selection{background-size:cover!important}}
 </style>
-<style id="rs-opening-mobile-hotspots">
-@media(max-width:700px){
-#start-screen:not(.hidden)>#mode-selection{background-position:center!important;background-size:cover!important}
-#start-screen:not(.hidden)>#mode-selection #mode-single,#start-screen:not(.hidden)>#mode-selection #mode-multi,#start-screen:not(.hidden)>#mode-selection #mode-settings{position:absolute!important;left:5vw!important;right:5vw!important;width:90vw!important;height:clamp(48px,8vh,74px)!important;min-height:48px!important;max-width:90vw!important;box-sizing:border-box!important;border:2px solid #f6ce54!important;border-radius:12px!important;background:#07172cde!important;color:#ffe8aa!important;font:900 clamp(14px,4.6vw,20px) system-ui!important;box-shadow:0 0 24px #000a!important;z-index:300!important;top:auto!important}
-#start-screen:not(.hidden)>#mode-selection #mode-single{bottom:27vh!important}
-#start-screen:not(.hidden)>#mode-selection #mode-multi{bottom:17vh!important}
-#start-screen:not(.hidden)>#mode-selection #mode-settings{bottom:7vh!important}
-#start-screen:not(.hidden)>#mode-selection #rs-menu-featured-pilot{display:none!important}
-}
-</style>
 <style id="rs-premium-composition-v10">
 /* Corrige composição sem tocar no gameplay. A arte completa não pode ser cortada. */
 #start-screen:not(.hidden)>#mode-selection:not(.hidden){background-size:contain!important;background-position:center center!important;background-color:#030d1c!important}
-#start-screen:not(.hidden)>#mode-selection #rs-menu-featured-pilot{left:calc(var(--rs-art-left,0px) + var(--rs-art-width,100%) * .744)!important;top:calc(var(--rs-art-top,0px) + var(--rs-art-height,100%) * .125)!important;width:calc(var(--rs-art-width,100%) * .18)!important;height:calc(var(--rs-art-height,100%) * .51)!important;background:#06182b!important;box-shadow:none!important;border:0!important;border-radius:3px!important;overflow:hidden!important}
-#start-screen:not(.hidden)>#mode-selection #rs-menu-featured-photo{position:absolute!important;inset:0!important;display:block!important;width:100%!important;height:100%!important;object-fit:cover!important;object-position:center 35%!important}
-#start-screen:not(.hidden)>#mode-selection #rs-menu-featured-name,#start-screen:not(.hidden)>#mode-selection #rs-menu-featured-ship{display:none!important}
 #start-screen:not(.hidden)>#rs-premium-pilots:not(.hidden){position:fixed!important;inset:0!important;width:100vw!important;height:100dvh!important;max-width:none!important;max-height:none!important;z-index:9999!important;overflow:auto!important;background:#041225!important;box-sizing:border-box!important}
 #start-screen:has(>#rs-premium-pilots:not(.hidden))>#mode-selection{display:none!important;visibility:hidden!important;pointer-events:none!important}
 #rs-premium-pilots>div:has(#rs-premium-pilot-cards){width:min(100%,1650px)!important;max-width:1650px!important;box-sizing:border-box!important;grid-template-columns:minmax(0,1.75fr) minmax(260px,1fr)!important;margin-inline:auto!important}
 @media(max-width:700px){
 #start-screen:not(.hidden)>#mode-selection:not(.hidden){background-size:contain!important}
-#start-screen:not(.hidden)>#mode-selection #rs-menu-featured-pilot{display:none!important}
 #rs-premium-pilots>div:has(#rs-premium-pilot-cards){grid-template-columns:1fr!important}
 }
 </style>
@@ -256,15 +250,160 @@ display:flex!important;flex-direction:column!important;align-items:center!import
 /* Canvas logico 400x600: proporcao preservada mesmo em monitor ultrawide. */
 #gameCanvas{display:block!important;width:100%!important;height:100%!important;object-fit:contain!important;object-position:center center!important;image-rendering:pixelated!important;filter:none!important}
 #game-container{background:#020a19!important}
-#start-screen:not(.hidden)>#mode-selection #rs-menu-featured-pilot{left:calc(var(--rs-art-left,0px) + var(--rs-art-width,100%) * .676)!important;top:calc(var(--rs-art-top,0px) + var(--rs-art-height,100%) * .09)!important;width:calc(var(--rs-art-width,100%) * .296)!important;height:calc(var(--rs-art-height,100%) * .66)!important;background:#06182b!important;border:0!important;box-shadow:none!important;overflow:hidden!important;border-radius:0!important}
-#start-screen:not(.hidden)>#mode-selection #rs-menu-featured-pilot::before{content:"";position:absolute;inset:0;z-index:1;background:#06182b!important}
-#start-screen:not(.hidden)>#mode-selection #rs-menu-featured-photo{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;object-fit:cover!important;object-position:center center!important;z-index:2!important;background:#06182b!important}
-@media(max-width:700px){#start-screen:not(.hidden)>#mode-selection #rs-menu-featured-pilot{display:none!important}}
+</style>
+<style id="rs-opening-artboard">
+#start-screen:not(.hidden)>#mode-selection .rs-mode-hotspot{
+ left:calc(var(--rs-art-left) + var(--rs-art-width) * .032)!important;
+ top:calc(var(--rs-art-top) + var(--rs-art-height) * var(--rs-row))!important;
+ width:calc(var(--rs-art-width) * .359)!important;
+ height:calc(var(--rs-art-height) * .111)!important;
+ max-width:none!important;min-height:0!important;
+}
+#mode-single{--rs-row:.323}
+#mode-multi{--rs-row:.438}
+#mode-settings{--rs-row:.550}
+#start-screen:not(.hidden)>#mode-selection #rs-menu-featured-pilot{
+ position:absolute!important;display:flex!important;flex-direction:column!important;
+ align-items:center!important;justify-content:center!important;gap:0!important;
+ left:calc(var(--rs-art-left) + var(--rs-art-width) * .664)!important;
+ top:calc(var(--rs-art-top) + var(--rs-art-height) * .151)!important;
+ width:calc(var(--rs-art-width) * .308)!important;
+ height:calc(var(--rs-art-height) * .551)!important;
+ border:0!important;border-radius:0!important;padding:0!important;margin:0!important;overflow:hidden!important;
+ background:#06182b!important;box-shadow:none!important;cursor:pointer;
+}
+#rs-menu-featured-pilot:disabled{cursor:default;opacity:1}
+#start-screen:not(.hidden)>#mode-selection #rs-menu-featured-photo{
+ display:block!important;width:100%!important;height:0!important;min-height:0!important;
+ flex:1 1 0;object-fit:contain!important;
+}
+#rs-menu-featured-ship-art{position:absolute;right:1%;bottom:12%;width:40%;height:46%;object-fit:contain;pointer-events:none}
+#rs-menu-featured-ship-art[hidden]{display:none!important}
+#rs-menu-featured-name{display:none}
+#start-screen:not(.hidden)>#mode-selection #rs-menu-featured-ship{
+ flex:none;max-width:100%;padding:2px 4px;background:#06182b;
+ font:800 clamp(7px,1.4vw,17px) system-ui!important;color:#e7faff!important;
+}
+#mode-selection .rs-mode-hotspot:focus-visible,#rs-menu-featured-pilot:focus-visible{
+ outline:2px solid #fff4bb!important;outline-offset:-3px;
+}
+</style>
+<style id="rs-premium-hangar-ui">
+body:has(#rs-premium-pilots:not(.hidden),#boss-skill-picker:not(.hidden)) #graphics-preview-toggle{display:none!important}
+#start-screen:not(.hidden)>#rs-premium-pilots:not(.hidden){
+ background:linear-gradient(135deg,#040e1b80,#07192c50 50%,#040d1cb8),url('./assets/ui/premium/pilots/briefing-bay.png') center/cover no-repeat!important;
+}
+.rs-pilot-metric{margin:7px 0;font:700 11px system-ui}
+.rs-pilot-metric-label{display:flex;justify-content:space-between;gap:6px}
+.rs-pilot-metric-label b{color:#d5eeff;text-align:right}
+.rs-pilot-track{display:block;height:8px;background:#183754;border-radius:5px;margin-top:3px;overflow:hidden}
+.rs-pilot-track span{display:block;height:100%;border-radius:inherit;background:var(--metric-fill)}
+.rs-pilot-metric[data-stat=speed]{--metric-fill:linear-gradient(90deg,#1d61fa,#43d6ff)}
+.rs-pilot-metric[data-stat=shield]{--metric-fill:linear-gradient(90deg,#14985d,#60f0a4)}
+.rs-pilot-metric[data-stat=range]{--metric-fill:linear-gradient(90deg,#d88513,#ffe47b)}
+.rs-pilot-metric[data-stat=fire]{--metric-fill:linear-gradient(90deg,#cf355c,#ff8e79)}
+.rs-pilot-default-weapon{margin:9px 0;padding:8px;background:#06172b;border:1px solid #286184;border-radius:6px;color:#d6edff;font:600 11px/1.4 system-ui}
+.rs-pilot-default-weapon strong{display:block;color:#ffdb83;font-size:13px}
+#rs-premium-pilots h2,#boss-skill-picker h2{
+ color:#ffdf8a!important;text-shadow:0 2px #814410,0 0 16px #eeb44b60;
+ letter-spacing:.10em;text-transform:uppercase;
+}
+#rs-premium-pilot-cards button,#rs-premium-pilot-detail,.rs-skill-shell,.rs-skill-card{
+ background:linear-gradient(150deg,#113553,#051629 67%)!important;
+ border:1px solid #37a9d7!important;box-shadow:inset 0 0 0 2px #0b2944,0 3px 12px #0008;
+}
+#rs-premium-pilot-cards button{min-width:0;display:grid;gap:5px;justify-items:center}
+#rs-premium-pilot-cards img{height:clamp(72px,16vh,155px)!important}
+#rs-premium-pilot-cards small,.rs-pilot-spec{color:#ffe4a0;font-weight:800}
+.rs-bonus-heading{grid-column:1/-1;color:#ffdf8a;text-align:left;border-bottom:1px solid #e4b75d66;padding:8px 2px;font-weight:900;letter-spacing:.08em}
+.rs-pilot-card-art,.rs-pilot-detail-art{position:relative;display:block;width:100%}
+#rs-premium-pilot-cards .rs-bonus-ship,.rs-pilot-detail-art .rs-bonus-ship{
+ position:absolute;right:0;bottom:0;width:40%;height:50%!important;object-fit:contain;
+ filter:drop-shadow(0 0 8px #38bdf888);pointer-events:none;
+}
+.rs-pilot-detail-art .rs-bonus-ship[hidden]{display:none!important}
+#rs-premium-pilot-cards button.rs-selected,.rs-skill-card[aria-pressed=true]{
+ border-color:#ffda77!important;box-shadow:inset 0 0 18px #ffbb4230,0 0 14px #ffbb4245;
+}
+#rs-pilot-confirm,#boss-skill-confirm{
+ background:linear-gradient(180deg,#ffe18e,#d38a1d)!important;color:#251404!important;
+ border:1px solid #ffecb3!important;box-shadow:0 0 12px #df9c3860;font-weight:900;
+}
+#boss-skill-picker{
+ background:linear-gradient(180deg,#040b1770,#040b17db),url('./assets/ui/premium/arsenal/hangar.webp') center/cover no-repeat!important;
+ font-family:system-ui,sans-serif;
+}
+#boss-skill-picker .rs-skill-shell{
+ width:min(100%,660px)!important;max-width:660px!important;max-height:100%;overflow:auto;
+ border-radius:14px;padding:clamp(12px,3vw,22px);
+ background:linear-gradient(150deg,#0d2639e8,#030b18f0)!important;
+ box-shadow:0 0 30px #03060e, inset 0 1px #72ddff70;
+ border-top:2px solid #e4af55!important;
+}
+#boss-skill-picker h2{
+ margin:0;color:#ffe7a5;font-size:clamp(16px,3vw,24px);font-weight:900;text-align:center;
+ letter-spacing:.12em;text-shadow:0 0 15px #ffb53370;
+}
+#boss-skill-picker #boss-skill-options{
+ grid-template-columns:repeat(auto-fit,minmax(min(100%,96px),1fr))!important;
+ max-height:49vh!important;gap:9px!important;padding:4px;
+}
+.rs-skill-card{display:grid;justify-items:center;gap:4px;padding:10px;color:#edf8ff;border-radius:9px}
+.rs-skill-card img{width:clamp(36px,7vh,58px);height:clamp(36px,7vh,58px);object-fit:contain;filter:drop-shadow(0 0 5px var(--skill-color,#7deaff))}
+#boss-skill-picker .rs-skill-card{
+ background:radial-gradient(ellipse at 50% 0%,#24455c,#071626 78%)!important;
+ border-top:2px solid var(--skill-color,#6bdcff)!important;
+ transition:box-shadow .15s,border-color .15s;
+}
+#boss-skill-picker .rs-skill-card:is(:hover,:focus-visible,[aria-pressed=true]){
+ box-shadow:inset 0 0 18px #ffc36738,0 0 10px #ffc36760;
+ outline:1px solid #ffd984;
+}
+.rs-skill-card small{color:#a9d2e8}
+@media(max-width:600px){
+ #boss-skill-picker #boss-skill-options{max-height:53vh!important;gap:7px!important}
+ #boss-skill-picker .rs-skill-card{padding:6px;gap:2px}
+ #boss-skill-picker .rs-skill-card img{width:42px;height:42px}
+ #boss-skill-picker .rs-skill-card b{font-size:11px}
+ #boss-skill-picker .rs-skill-card small{font-size:10px}
+}
 </style>
 <style id="rs-dynamic-viewport-v12">
 /* A area jogavel fica alinhada ao HUD; a resolucao logica acompanha a proporcao. */
 #game-container:not(:has(#start-screen:not(.hidden))){width:min(100%,920px)!important;max-width:920px!important;margin-inline:auto!important}
 #game-container:not(:has(#start-screen:not(.hidden))) #gameCanvas{width:100%!important;height:100%!important;object-fit:fill!important;filter:none!important;image-rendering:pixelated!important}
+</style>
+<style id="rs-awards-premium">
+.rs-awards-backdrop{
+ background:linear-gradient(145deg,#03101dd9,#030817f2),url('./assets/ui/premium/menu/2b81e191-9306-4a6e-aabf-049f60939aa0.png') center/cover no-repeat!important;
+ color:#eaf7ff;font-family:system-ui,sans-serif
+}
+.rs-awards-card{
+ width:min(100%,660px);margin-inline:auto;padding:clamp(12px,3vw,24px);box-sizing:border-box;
+ background:linear-gradient(150deg,#102b45ee,#050d20f5);border:1px solid #39c9ef;border-top:3px solid #ffd071;
+ border-radius:14px;box-shadow:0 8px 36px #000a;text-align:center
+}
+.rs-awards-heading{color:#ffe4a0;font-weight:900;letter-spacing:.09em;font-size:clamp(17px,3.2vw,26px)}
+.rs-awards-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,135px),1fr));gap:8px;margin:12px 0}
+.rs-awards-stat{padding:9px 7px;border:1px solid #2a5878;border-radius:8px;background:#07182bd9;color:#a9d8ed;font-size:12px;overflow-wrap:anywhere}
+.rs-awards-stat strong{display:block;color:#f0faff;font-size:clamp(13px,2.6vw,19px)}
+.rs-awards-medal{--medal:#ffcd62;--medal-shade:#9e6126;display:inline-grid;place-items:center;margin:4px auto 9px;
+ width:42px;height:42px;border:3px double #fff8;border-radius:50%;background:radial-gradient(circle at 35% 25%,#fff7,var(--medal) 40%,var(--medal-shade));box-shadow:0 0 12px var(--medal-shade);color:#20150d;font-size:23px}
+.rs-awards-medal[data-medal=silver]{--medal:#dcecf5;--medal-shade:#70859d}
+.rs-awards-medal[data-medal=bronze]{--medal:#eeb28b;--medal-shade:#8c452c}
+#rs-boss-debrief{position:absolute;inset:0;z-index:120;display:grid;place-items:center;padding:12px;pointer-events:none}
+#rs-boss-debrief[hidden]{display:none}
+#rs-boss-debrief .rs-awards-card{width:min(100%,490px)}
+#rs-trophy-room{box-sizing:border-box;position:fixed;inset:0;margin:auto;width:min(calc(100% - 24px),710px);max-height:calc(100dvh - 24px);overflow:auto;padding:clamp(10px,3vw,26px);border:1px solid #3cb8db;border-radius:15px}
+#rs-trophy-room::backdrop{background:#020711db}
+#rs-trophy-medals{grid-template-columns:repeat(3,minmax(0,1fr))}
+#rs-trophy-medals .rs-awards-medal{display:grid}
+#rs-trophy-room-open,#rs-trophy-room-close{padding:10px 16px;border:1px solid #ffd985;border-radius:8px;background:linear-gradient(#ffdd8c,#c88728);color:#271a08;font-weight:900}
+#victory-screen:not(.hidden){display:flex}
+#mission-damage-report{width:min(100%,660px);flex:none}
+.rs-damage-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,165px),1fr));gap:5px;margin-top:10px;text-align:left}
+.rs-damage-list div{padding:5px 7px;border:1px solid #254760;border-radius:5px;background:#07182b;color:#d4efff;font-size:11px}
+#victory-medal:not([hidden]){display:block}
 </style>
 </head>
 <body class="h-screen w-screen flex flex-col items-center justify-center p-2 sm:p-4">
@@ -274,8 +413,8 @@ display:flex!important;flex-direction:column!important;align-items:center!import
     <div id="game-container" class="relative rounded-lg overflow-hidden border-4 border-slate-700 bg-black max-w-xl w-full flex-1 max-h-[800px]">
         <canvas id="gameCanvas" class="w-full h-full block"></canvas>
 <div id="boss-skill-picker" class="hidden absolute inset-0 z-40 flex flex-col items-center justify-center p-3" style="background:rgba(2,9,23,.95);color:#e2e8f0" role="dialog" aria-modal="true" aria-label="Escolher habilidade de boss">
-  <div style="width:100%;max-width:420px;padding:17px;border:2px solid #38bdf8;border-radius:15px;background:linear-gradient(#102944,#061224);box-shadow:0 0 35px #38bdf844">
-   <h2 style="color:#fde68a;text-align:center;font-weight:900;font-size:19px">⚡ ARSENAL DOS CHEFES</h2>
+  <div class="rs-skill-shell">
+   <h2>ARSENAL DOS CHEFES</h2>
    <p id="boss-skill-advice" style="text-align:center;font-size:12px;margin:9px 0">Escolha um poder para esta batalha.</p>
    <div id="boss-skill-options" style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;max-height:45vh;overflow-y:auto"></div>
    <p id="boss-skill-selected" style="min-height:24px;text-align:center;color:#67e8f9;font-size:12px;margin:10px 0"></p>
@@ -289,6 +428,16 @@ display:flex!important;flex-direction:column!important;align-items:center!import
 
         <div id="controller-settings" class="hidden absolute inset-0 bg-slate-950/95 z-50 p-4 overflow-auto text-sm" role="dialog" aria-modal="true" aria-label="Configuração do controle">
             <h2 class="text-xl font-bold text-cyan-300 mb-2">CONFIGURAR CONTROLE</h2>
+            <button id="rs-update-open" type="button">ATUALIZAÇÕES DO JOGO</button>
+            <button id="rs-trophy-room-open" type="button">SALA DE TROFÉUS</button>
+            <dialog id="rs-trophy-room" class="rs-awards-backdrop" aria-labelledby="rs-trophy-heading">
+              <section class="rs-awards-card">
+                <h2 id="rs-trophy-heading" class="rs-awards-heading">SALA DE TROFÉUS</h2>
+                <div id="rs-trophy-records" class="rs-awards-grid"></div>
+                <div id="rs-trophy-medals" class="rs-awards-grid" aria-label="Medalhas da campanha"></div>
+                <button id="rs-trophy-room-close" type="button">VOLTAR ÀS CONFIGURAÇÕES</button>
+              </section>
+            </dialog>
             <button id="pilot-profile-open" type="button" style="background:#075985;color:white;font-weight:900;padding:12px;border:2px solid #67e8f9;border-radius:10px;width:100%;margin-bottom:12px">👤 PERFIL DO PILOTO</button>
             <section id="pilot-profile-panel" hidden style="display:none;max-width:460px;margin:8px auto;padding:14px;border-radius:14px;border:2px solid #38bdf8;background:#081b31;color:#e2e8f0;box-sizing:border-box">
               <h3 style="font-size:19px;font-weight:900;color:#facc15;margin-bottom:9px">IDENTIDADE DO PILOTO</h3>
@@ -328,6 +477,7 @@ display:flex!important;flex-direction:column!important;align-items:center!import
               <label for="settings-plane">Hangar — comprar aeronave com pontos</label>
               <select id="settings-plane" class="rounded-lg p-2 bg-slate-800 text-white"></select>
               <button id="settings-buy-plane" class="rounded-lg bg-emerald-700 p-3 font-bold">DESBLOQUEAR COM PONTOS</button>
+              <p id="settings-plane-specs" class="text-cyan-200" aria-live="polite"></p>
               <span id="settings-wallet" class="text-xs text-amber-300"></span>
             </div>
             <button id="pad-close" class="bg-green-700 p-3 rounded font-bold w-full">VOLTAR AO JOGO</button>
@@ -345,10 +495,10 @@ display:flex!important;flex-direction:column!important;align-items:center!import
             <div id="mode-selection" style="background-image:linear-gradient(#03132933,#071c3755),url(./assets/ui/premium/menu/2b81e191-9306-4a6e-aabf-049f60939aa0.png);background-position:center;background-size:cover;position:absolute;inset:0;z-index:95;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:22px;overflow:auto">
 <h2 style="font-size:clamp(24px,6vw,37px);font-weight:900;color:#7de8ff;letter-spacing:2px">RIVER STORM</h2>
 <p style="max-width:320px;font-size:12px;color:#bdd8ed">ESCOLHA O MODO DE JOGO</p>
-<button id="mode-single" type="button" style="width:min(94%,330px);padding:18px;background:#0d6557;border:2px solid #56f0c7;border-radius:12px;color:white;font-weight:900">✈ SINGLE PLAYER</button>
-<button id="mode-multi" type="button" style="width:min(94%,330px);padding:18px;background:#233d73;border:2px solid #94baff;border-radius:12px;color:white;font-weight:900">✦ MULTIPLAYER • ATÉ 8 PILOTOS</button>
-<button id="mode-settings" type="button" aria-label="Configurações">CONFIGURAÇÕES</button>
-<section id="rs-menu-featured-pilot" aria-label="Último piloto usado"><img id="rs-menu-featured-photo" alt="Piloto selecionado"><div id="rs-menu-featured-name"></div><div id="rs-menu-featured-ship"></div></section>
+<button class="rs-mode-hotspot" id="mode-single" type="button" style="width:min(94%,330px);padding:18px;background:#0d6557;border:2px solid #56f0c7;border-radius:12px;color:white;font-weight:900">✈ SINGLE PLAYER</button>
+<button class="rs-mode-hotspot" id="mode-multi" type="button" style="width:min(94%,330px);padding:18px;background:#233d73;border:2px solid #94baff;border-radius:12px;color:white;font-weight:900">✦ MULTIPLAYER • ATÉ 8 PILOTOS</button>
+<button class="rs-mode-hotspot" id="mode-settings" type="button" aria-label="Configurações">CONFIGURAÇÕES</button>
+<button id="rs-menu-featured-pilot" type="button" disabled aria-label="Último piloto usado"><img id="rs-menu-featured-photo" alt=""><img id="rs-menu-featured-ship-art" alt="" hidden><span id="rs-menu-featured-name"></span><span id="rs-menu-featured-ship"></span></button>
 <div id="mode-multi-info" class="hidden" style="width:min(96%,345px);padding:14px;background:#102134;border:1px solid #567caa;border-radius:12px;font-size:12px;line-height:1.6">
 <strong style="color:#a9e8ff">ESQUADRÃO DE ELITE</strong>
 <p>Salas LAN com código e senha, rankings e torneios eliminatórios. O serviço de rede precisa ser instalado e configurado no anfitrião.</p>
@@ -425,7 +575,7 @@ display:flex!important;flex-direction:column!important;align-items:center!import
             <button id="resume-btn" class="arcade-btn bg-cyan-600 hover:bg-cyan-500 text-white font-bold px-6 py-2 rounded-lg">CONTINUAR</button>
         </div>
 
-        <div id="victory-screen" class="hidden absolute inset-0 z-40 bg-slate-950/95 p-4 text-center overflow-y-auto flex-col items-center justify-start gap-3" style="background:radial-gradient(ellipse at top,#183f63 0%,#091b32 55%,#040d1d 100%)">
+        <div id="victory-screen" class="rs-awards-backdrop hidden absolute inset-0 z-40 bg-slate-950/95 p-4 text-center overflow-y-auto flex-col items-center justify-start gap-3" style="background:radial-gradient(ellipse at top,#183f63 0%,#091b32 55%,#040d1d 100%)">
 <h2 class="text-3xl font-black text-amber-300 tracking-wider">HONRA AO PILOTO • RIVER STORM</h2>
 <p id="victory-tribute" class="text-slate-100 max-w-xl leading-relaxed">Parabéns! Você concluiu as missões e salvou o planeta da invasão.</p>
 <div class="flex items-center gap-4 rounded-xl border border-amber-400/60 bg-slate-900/80 p-3">
@@ -434,10 +584,19 @@ display:flex!important;flex-direction:column!important;align-items:center!import
 <p id="rank-award" class="text-yellow-300 font-bold"></p>
 <p id="victory-aircraft" class="text-slate-200 text-sm max-w-xl"></p>
 <div class="rounded-lg border border-cyan-500/40 p-3 bg-slate-950/70 w-full max-w-xl"><h3 class="font-bold text-amber-300">RECORDE DO PILOTO • PLACAR LOCAL</h3><p id="victory-record" class="text-cyan-100"></p><p class="text-xs text-slate-400">Registro neste dispositivo; partidas em rede local serão desenvolvidas futuramente.</p></div>
+<div id="victory-medal" class="rs-awards-card" hidden></div>
+<section id="mission-damage-report" class="rs-awards-card" aria-label="Ranking de danos da campanha"></section>
 <p id="victory-wallet" class="text-amber-200"></p>
 <div id="victory-shop" class="flex flex-wrap gap-2 justify-center max-w-xl"></div>
 <p id="victory-shop-status" class="text-sm text-green-300"></p>
 <button id="victory-restart" class="bg-amber-500 text-black rounded-xl p-4 font-bold">INICIAR PRÓXIMA JORNADA</button></div>
+        <aside id="rs-boss-debrief" role="status" aria-live="polite" hidden>
+          <div class="rs-awards-card rs-awards-backdrop">
+            <h2 class="rs-awards-heading">CHEFE DERROTADO</h2>
+            <p id="rs-debrief-mission"></p>
+            <div id="rs-debrief-stats" class="rs-awards-grid"></div>
+          </div>
+        </aside>
         <div id="mission-banner" class="absolute top-9 left-2 px-2 py-1 bg-slate-900/65 text-amber-200 font-bold text-xs pointer-events-none"></div>
         <!-- Tela de Fim de Jogo (Game Over) -->
         <div id="game-over-screen" class="hidden absolute inset-0 bg-black/90 flex flex-col items-center justify-center p-6 text-center z-30">
@@ -691,13 +850,16 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
     <script src="./src/game/clock.js"></script>
     <script src="./src/game/pilot-progress.js"></script>
     <script src="./src/game/campaign.js"></script>
+    <script src="./src/game/mission-report.js"></script>
     <script src="./src/render/scene2d5.js"></script>
     <script src="./src/render/premium-registry.js"></script>
     <script src="./src/render/premium-environment.js"></script>
-    <audio id="menu-theme-audio" src="./music/menu-lucidez.opus" preload="auto" loop hidden aria-label="Lucidez — música da abertura"></audio>
+    <button id="menu-theme-play" type="button" hidden style="position:fixed;bottom:8px;left:8px;z-index:10000">♫ OUVIR LUCIDEZ</button>
+    <audio id="menu-theme-audio" src="./music/menu-lucidez.opus" preload="auto" autoplay loop hidden aria-label="Lucidez — música da abertura"></audio>
     <script src="./src/audio/music.js"></script>
     <script src="./src/audio/sfx-modern.js"></script>
     <script src="./src/audio/playlist.js"></script>
+    <script type="module" src="./src/net/peer-client.js"></script>
     <script src="./src/net/room-lobby.js"></script>
     <script>
         // --- SINTETIZADOR DE ÁUDIO CHIPTUNE RETRO (Web Audio API) ---
@@ -829,10 +991,57 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
 
         // Estado do Jogo
         const CHECKPOINT_KEY='riverstorm_mission_checkpoint_v1';
+        let roomRound=null;
+        const PENDING_MISSION_KEY='riverstorm_pending_mission_v1';
+        function readPendingMission(){
+            try{
+                const raw=localStorage.getItem(PENDING_MISSION_KEY);
+                const state=raw===null?null:JSON.parse(raw);
+                const legacy=state?.lastScore===undefined?readCheckpoint():null;
+                let mission=raw===null?legacy:state?.mission;
+                if(mission?.verifiedRun&&legacy?.selectedPlane===mission.selectedPlane&&
+                    legacy.sector>=mission.sector&&legacy.score>=mission.score)mission=legacy;
+                return {
+                    mission:mission&&Number.isInteger(mission.sector)&&mission.sector>=1&&mission.sector<=20&&
+                        mission.journey===journey&&unlocked.includes(mission.selectedPlane)?mission:null,
+                    lastPlane:state?.lastPlane||mission?.selectedPlane||localStorage.getItem('river_active_plane'),
+                    lastScore:Math.max(0,Number(state?.lastScore??mission?.score)||0),
+                    lastEarned:Math.max(0,Number(state?.lastEarned??mission?.earnedPoints)||0)
+                };
+            }catch(error){return {mission:null,lastPlane:null}}
+        }
+        function rememberPendingMission(completed=false,nextSector=sector){
+            const plane=player.aircraftType||selectedPlane;
+            const mission=completed?null:{sector:nextSector,selectedPlane:plane,journey,score,kills,lives,continues,earnedPoints,verifiedRun:campaignVerified,missionHits:[...missionHits]};
+            try{
+                localStorage.setItem(PENDING_MISSION_KEY,JSON.stringify({lastPlane:plane,mission,lastScore:score,lastEarned:earnedPoints}));
+                lastSavedScore=score;
+                return true;
+            }catch(error){console.warn('Não foi possível guardar a missão pendente',error);return false;}
+        }
+        function persistRunProgress(completed=false,nextSector=sector){
+            if(roomRound)return false;
+            const uncredited=Math.max(0,score-earnedPoints);
+            if(uncredited){
+                try{localStorage.setItem(earnedKey,String(bank+uncredited));}
+                catch(error){console.warn('Não foi possível guardar o saldo',error);return false;}
+                bank+=uncredited;
+                earnedPoints=score;
+                refreshWallet();
+            }
+            return rememberPendingMission(completed,nextSector);
+        }
+        function saveActiveProgress(){
+            if(!['PLAYING','PAUSED','BOSS_SELECT'].includes(gameState))return false;
+            const next=missionTransitionTicks>0&&sector<20?sector+1:sector;
+            const ok=persistRunProgress(false,next);
+            if(ok&&campaignVerified)writeCheckpoint(next);
+            return ok;
+        }
         function writeCheckpoint(nextSector){
             // Uma missão escolhida pelo menu não pode substituir o progresso legítimo.
             if(!campaignVerified||(nextSector!==sector&&nextSector!==sector+1))return false;
-            const checkpoint={version:2,sector:Math.max(1,Math.min(20,nextSector)),score,kills,lives:Math.max(1,lives),continues,selectedPlane,earnedPoints,journey,verifiedRun:true};
+            const checkpoint={version:2,sector:Math.max(1,Math.min(20,nextSector)),score,kills,lives:Math.max(1,lives),continues,selectedPlane:player.aircraftType||selectedPlane,earnedPoints,journey,verifiedRun:true,missionHits:[...missionHits]};
             try{localStorage.setItem(CHECKPOINT_KEY,JSON.stringify(checkpoint));updateContinueButton();return true}catch(err){console.warn('Checkpoint indisponível',err);return false}
         }
         function readCheckpoint(){try{const c=JSON.parse(localStorage.getItem(CHECKPOINT_KEY)||'null');return c&&c.version===2&&c.verifiedRun===true&&Number.isInteger(c.sector)&&c.sector>=1&&c.sector<=20&&c.journey===journey?c:null}catch(e){return null}}
@@ -843,6 +1052,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
         function savePilotProfile(){try{localStorage.setItem(PROFILE_KEY,JSON.stringify(pilotProfile))}catch(e){console.warn('Perfil sem espaço para salvar',e)}}
         function recordSequentialMission(){if(campaignVerified){pilotProfile.lastSequentialMission=sector;savePilotProfile()}}
         function trackPilotProgress(){
+          if(roomRound)return;
           pilotProfile.playSeconds+=1/60;
           pilotProfile.planeSeconds[selectedPlane]=(pilotProfile.planeSeconds[selectedPlane]||0)+1/60;
           const key=String(journey);
@@ -891,7 +1101,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
         let careerPoints=0;
         try{careerPoints=Math.max(0,Number(localStorage.getItem('riverstorm_career_points_v1'))||0)}catch(e){}
         let gameState = 'START'; // START, PAUSED, PLAYING, GAMEOVER
-        let score = 0;
+        let score = 0,lastSavedScore=0;
         let hiScore = localStorage.getItem('rr_hiscore_ptbr') || 0;
         document.getElementById('hi-score-text').innerText = String(hiScore).padStart(6, '0');
 
@@ -920,8 +1130,9 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
         const XP_CAP=xpAtLevel(100);
         pilotXP=Math.min(XP_CAP,pilotXP);
         pilotLevel=window.RiverPilotProgress.levelFor(pilotXP);
-        const pilotBonus=()=>window.RiverPilotProgress.bonus(pilotLevel);
+        const pilotBonus=()=>window.RiverPilotProgress.bonus(roomRound?0:pilotLevel);
         function grantEnemyXP(enemy){
+          if(roomRound)return;
           if(!enemy||enemy.xpGranted)return;
           enemy.xpGranted=true;
           const reward=enemy.type==='BOSS'?130+sector*8:Math.max(2,Math.round((enemy.score||100)*.035));
@@ -1030,13 +1241,27 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
             refreshWallet();document.getElementById('plane-status').textContent='Aeronave desbloqueada!';
         });
         const HANGAR_PILOTS={
-          falcao:['TEN. SNABO','△','#b91c1c','#d9a179'],vespa:['CAP. JHOW','V','#ca8a04','#b87955'],
-          cometa:['CAP. B.TATA','C','#2563eb','#e1ac82'],fenix:['MAJ. NAPAS','F','#be185d','#b77c66'],
-          helicoptero:['SGT. CASPER','A','#1d4ed8','#8d614e'],disco:['SGT. ROGER','D','#7c3aed','#dbab98'],
-          titan:['TEN. DUDU','T','#4d7c0f','#b98a63']
+          falcao:['△','#b91c1c','#d9a179'],vespa:['V','#ca8a04','#b87955'],
+          cometa:['C','#2563eb','#e1ac82'],fenix:['F','#be185d','#b77c66'],
+          helicoptero:['A','#1d4ed8','#8d614e'],disco:['D','#7c3aed','#dbab98'],
+          titan:['T','#4d7c0f','#b98a63']
         };
+        let journey=1;
+        const RANKS=['Soldado de Primeira Classe','Cabo','Terceiro-Sargento','Segundo-Sargento','Primeiro-Sargento','Suboficial','Aspirante a Oficial','Segundo-Tenente','Primeiro-Tenente','Capitão','Major','Tenente-Coronel','Coronel','Brigadeiro','Major-Brigadeiro','Tenente-Brigadeiro'];
+        try{journey=Math.min(RANKS.length,Math.max(1,Math.floor(Number(localStorage.getItem('river_journey_v1')||1)||1)))}catch(e){}
+        function aircraftMetrics(id){
+          const flight=aircraftCatalog.flightStats(id,journey);
+          const number=(value,digits)=>value.toLocaleString('pt-BR',{maximumFractionDigits:digits});
+          return [
+            ['speed','VELOCIDADE',flight.speed,10,number(flight.speed,1)+' u/quadro'],
+            ['shield','BLINDAGEM',flight.shield,300*(1+(journey-1)*.035),number(flight.shield,0)+' HP'],
+            ['range','AUTONOMIA',flight.autonomy,60/Math.max(.72,1-(journey-1)*.018),number(flight.autonomy,1)+' s'],
+            ['fire','DANO',flight.damage,32,number(flight.damage,2)+' por rajada']
+          ];
+        }
         function renderHangar(){
-          const key=planeSelect.value,conf=aircraftCatalog.PLANES[key],pilot=HANGAR_PILOTS[key],p=window.RiverVisuals;
+          const key=planeSelect.value,conf=aircraftCatalog.PLANES[key];
+          const pilot=[conf.pilotName,...(HANGAR_PILOTS[key]||['✦',conf.wing,'#9d725e'])];
           const planeCanvas=document.getElementById('hangar-plane'),pc=planeCanvas.getContext('2d');
           pc.clearRect(0,0,224,144);
           const grad=pc.createLinearGradient(0,0,224,144);grad.addColorStop(0,'#0c2036');grad.addColorStop(1,'#071124');
@@ -1064,8 +1289,10 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
           pilotDraw('pilot-portrait',false);pilotDraw('pilot-body',true);
           document.getElementById('hangar-name').textContent=conf.name;
           document.getElementById('pilot-name').textContent=pilot[0];
-          const metrics=[['speed',conf.speed,10,conf.speed.toFixed(1)],['shield',conf.shieldMultiplier||1,1.7,(conf.shieldMultiplier||1).toFixed(1)+'×'],['range',1/conf.fuel,26,(1/conf.fuel).toFixed(0)],['fire',conf.weapons.length,6,String(conf.weapons.length)+' tipos']];
-          for(const [id,value,max,label] of metrics){document.getElementById('hangar-'+id+'-bar').style.width=Math.min(100,Math.max(5,value/max*100))+'%';document.getElementById('hangar-'+id+'-label').textContent=label;}
+          for(const [id,,value,max,label] of aircraftMetrics(key)){
+            document.getElementById('hangar-'+id+'-bar').style.width=Math.min(100,value/max*100)+'%';
+            document.getElementById('hangar-'+id+'-label').textContent=label;
+          }
           document.getElementById('hangar-stats').textContent='VEL '+conf.speed+'  ·  CONSUMO '+(conf.fuel*100).toFixed(1)+'  ·  ARMA INICIAL '+aircraftCatalog.WEAPONS[conf.weapons[0]];
         }
         window.addEventListener('riverstorm-aircraft-ready',event=>{
@@ -1094,7 +1321,8 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
         let riverPoints = [];
         const segmentHeight = 10;
         let bossActive = false;
-        let missionTransitionTicks=0;
+        const bossDebriefDuration=180;
+        let missionTransitionTicks=0,lastBossAward=null,bossDebriefTimer;
         let bossDefeatedThisMission=false;
 
         // Entidades
@@ -1108,25 +1336,36 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
         let structures = [];
         let fuelSpawnAt = -99999;
         let bombsPickedThisMission = 0;
-        let rescueBoatsLastAt=-99999;
+        let rescueBoatsLastAt=null;
         let structureLastDistance=-99999;
         let islandLastDistance=-99999;
         let obstacleLastType='';
         let obstacleSequence=0;
         let lastEnemyDistance=-99999;
-        let journey=1;
-        const RANKS=['Soldado de Primeira Classe','Cabo','Terceiro-Sargento','Segundo-Sargento','Primeiro-Sargento','Suboficial','Aspirante a Oficial','Segundo-Tenente','Primeiro-Tenente','Capitão','Major','Tenente-Coronel','Coronel','Brigadeiro','Major-Brigadeiro','Tenente-Brigadeiro'];
-        try{journey=Math.min(RANKS.length,Math.max(1,Math.floor(Number(localStorage.getItem('river_journey_v1')||1)||1)))}catch(e){}
+
+        const reportRules=window.RiverMissionReport;
+        const campaignTrophies=()=>pilotProfile.trophies??=reportRules.trophies(null,journey-1);
+        pilotProfile.trophies=reportRules.trophies(pilotProfile.trophies,journey-1);
+        const formatReward=points=>points.toLocaleString('pt-BR')+' pts';
         const rankName=()=>RANKS[Math.min(journey-1,RANKS.length-1)];
-        const scoreMultiplier=()=>Math.pow(1.1,journey-1);
+        const scoreMultiplier=()=>roomRound?1:Math.pow(1.1,journey-1);
         function finishFullCampaign(){
+          if(gameState==='VICTORY')return;
+          persistRunProgress(true);
           const legitimate=campaignVerified&&sector===20;
+          const medal=legitimate?reportRules.campaignMedal(reportRules.summary(missionHits)):null;
 
           const completedJourney=journey,oldRank=rankName(),oldLevel=pilotLevel;
           const pointsBonus=legitimate?5000:0,xpBonus=legitimate?5000:0;
           if(legitimate){
             recordSequentialMission();
             score+=pointsBonus;earnedPoints+=pointsBonus;bank+=pointsBonus;
+            const trophies=campaignTrophies();
+            trophies.completed++;
+            if(medal){
+              trophies.medals[medal.id]++;
+              score+=medal.points;earnedPoints+=medal.points;bank+=medal.points;
+            }
             pilotXP=Math.min(XP_CAP,pilotXP+xpBonus);
             pilotLevel=window.RiverPilotProgress.levelFor(pilotXP);
             careerPoints+=score;
@@ -1138,10 +1377,19 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
           pilotProfile.bestByJourney[bestKey]=Math.max(pilotProfile.bestByJourney[bestKey]||0,score);
           pilotProfile.lastSequentialMission=legitimate?20:pilotProfile.lastSequentialMission;
           savePilotProfile();refreshWallet();
+          rememberPendingMission(true);
           campaignVerified=false;
           try{localStorage.removeItem(CHECKPOINT_KEY)}catch(err){}
           gameState='VICTORY';playlist.pause();
           showMissionReport();
+          const medalPanel=document.getElementById('victory-medal');
+          medalPanel.hidden=!medal;
+          medalPanel.replaceChildren();
+          if(medal){
+            const title=document.createElement('strong');
+            title.textContent='MEDALHA DE '+medal.name.toUpperCase()+' · +'+formatReward(medal.points);
+            medalPanel.append(medalIcon(medal),title);
+          }
           const atMax=journey===RANKS.length;
           const screen=document.getElementById('victory-screen');
           screen.querySelector('h2').textContent=legitimate?'PLANETA SALVO • MISSÃO CUMPRIDA!':'MISSÃO 20 CONCLUÍDA — TREINAMENTO';
@@ -1179,7 +1427,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
             });shop.appendChild(button);
           }
           document.getElementById('victory-restart').textContent=legitimate?(atMax?'INICIAR NOVA JORNADA • PATENTE MÁXIMA':'INICIAR JORNADA '+journey):'RECOMEÇAR CAMPANHA';
-          screen.classList.remove('hidden');refreshStartPilotIdentity();
+          screen.style.removeProperty('display');screen.classList.remove('hidden');screen.setAttribute('aria-hidden','false');refreshStartPilotIdentity();
         }
                 const awardEnemyPoints=points=>Math.round((points||100)*scoreMultiplier());
         let lives=3;
@@ -1310,11 +1558,21 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
             const leftBank = center - width / 2;
             const rightBank = center + width / 2;
 
+            const pickupLaneClear=(gap)=>[...powerups,...rescueBoats,...fuelDepots,...structures,...islands].every(o=>Math.abs(o.y-y)>gap);
+            const rescueDue=rescueBoatsLastAt===null?distance-missionStartDistance>=480:distance-rescueBoatsLastAt>=1360;
+            // Prioriza o resgate quando houver um corredor livre, sem depender do sorteio.
+            if(rescueDue&&rescueBoats.length<2&&pickupLaneClear(180)){
+                const x=center+(Math.random()-.5)*Math.max(0,width-80);
+                rescueBoats.push({x,y,soldiers:2+Math.floor(Math.random()*4),phase:Math.random()*6.28});
+                rescueBoatsLastAt=distance;
+            }
+
             // Microsequências desenhadas por área: ilhotas, recifes, ilhas longas e corredores.
             const level=campaign.at(sector);
             // Ilhas garantidas a intervalos regulares e posicionadas próximas a uma margem.
             const islandGap=720+(sector%3)*130;
             if(islands.length<3 && distance-islandLastDistance>=islandGap &&
+               !rescueBoats.some(o=>Math.abs(o.y-y)<180) &&
                !structures.some(o=>Math.abs(o.y-y)<110)){
                 const shape=(obstacleSequence+level.hazardSet)%5;
                 const islandWidth=Math.min(102,Math.max(54,width*.28));
@@ -1325,12 +1583,6 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
                 const offset=side===0?0:side*(width/2-safeWidth/2-10);
                 islands.push({x:center+offset,y,width:safeWidth,height:islandHeight,shape});
                 islandLastDistance=distance;obstacleLastType='ISLAND';obstacleSequence++;
-            }
-
-            const pickupLaneClear=(gap)=>[...powerups,...rescueBoats,...fuelDepots,...structures,...islands].every(o=>Math.abs(o.y-y)>gap);
-            // Botes civis com soldados: voar perto realiza resgate, sem disparar.
-            if (rescueBoats.length < 2 && distance-(rescueBoatsLastAt||-99999)>820 && pickupLaneClear(200) && Math.random() < .06) {
-                rescueBoats.push({x:leftBank+30+Math.random()*(width-60),y,soldiers:2+Math.floor(Math.random()*4),phase:Math.random()*6.28});rescueBoatsLastAt=distance;
             }
 
             // Pontos estratégicos de combustível; resgates e armas não são bloqueados.
@@ -1511,6 +1763,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
         const skillPicker=document.getElementById('boss-skill-picker');
         const skillUseButton=document.getElementById('boss-skill-use');
         function unlockBossSkill(key){
+          if(roomRound)return;
           if(!BOSS_SKILLS[key]||bossSkillUnlocked.includes(key))return;
           bossSkillUnlocked.push(key);
           try{localStorage.setItem('river_boss_skills_v1',JSON.stringify(bossSkillUnlocked))}catch(e){}
@@ -1522,36 +1775,94 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
           bossSkillPending=null;bossSkillEquipped=null;bossActive=false;enemyBullets=[];
           for(const e of enemies){if(e.type!=='BOSS')continue;e.dualTicks=0;e.gravityTicks=0;e.frozenTicks=0;e.stunnedTicks=0;e.statusTicks=0;e.swordCharge=0;e.slashWarn=0;}
         }
+        function awardStat(label,value){
+          const stat=document.createElement('div');stat.className='rs-awards-stat';
+          const number=document.createElement('strong');number.textContent=value;
+          stat.append(label,number);return stat;
+        }
+        function medalIcon(medal){
+          const icon=document.createElement('span');icon.className='rs-awards-medal';
+          icon.dataset.medal=medal.id;icon.setAttribute('aria-hidden','true');icon.textContent='★';
+          return icon;
+        }
+        function hideBossDebrief(){
+          clearTimeout(bossDebriefTimer);
+          document.getElementById('rs-boss-debrief').hidden=true;
+        }
+        function showBossDebrief(){
+          const {mission,hits,rank,points,bonus}=lastBossAward;
+          document.getElementById('rs-debrief-mission').textContent='MISSÃO '+mission+' · '+campaign.at(mission).name;
+          document.getElementById('rs-debrief-stats').replaceChildren(
+            awardStat(hits+' impactos recebidos','RANK '+rank),
+            awardStat('Pontos do chefe','+'+formatReward(points)),
+            awardStat('Bônus de desempenho',bonus?'+'+formatReward(bonus):'—')
+          );
+          document.getElementById('rs-boss-debrief').hidden=false;
+        }
+        function finishBossPresentation(e){
+          if(!roomRound)showBossDebrief();
+          if(sector===20){
+            finishFullCampaign();
+            bossDebriefTimer=setTimeout(hideBossDebrief,3000);
+          }else{
+            missionTransitionTicks=roomRound?180:180+bossDebriefDuration;
+            createFloatingText(e.x,e.y,'CHEFE DERROTADO!','#22c55e');
+          }
+        }
+        function creditBossDefeat(e){
+          if(bossDefeatedThisMission)return false;
+          bossDefeatedThisMission=true;
+          const points=awardEnemyPoints(e.score),hits=missionHits[sector-1]??0;
+          const rank=reportRules.grade(hits),bonus=roomRound?0:reportRules.bossBonus(rank);
+          lastBossAward={mission:sector,hits,rank,points,bonus};
+          score+=points+bonus;kills++;grantEnemyXP(e);
+          if(!roomRound){
+            reportRules.recordMission(campaignTrophies(),sector,hits);
+            savePilotProfile();
+          }
+          persistRunProgress(sector===20,Math.min(20,sector+1));
+          return true;
+        }
         function finishBossDefeatedBySkill(e){
-          if(bossDefeatedThisMission)return;
-          e.hp=0;bossDefeatedThisMission=true;clearBossArenaEffects();
+          if(!creditBossDefeat(e))return;
+          e.hp=0;clearBossArenaEffects();
           playlist.endBossTheme?.();
           unlockBossSkill(e.skillAffinity);bossSkillEquipped=null;skillUseButton.classList.add('hidden');
           addExplosion(e.x,e.y,'#ef4444',45);sound.playExplosion(true);
-          score+=awardEnemyPoints(e.score);kills++;grantEnemyXP(e);
           enemies=enemies.filter(enemy=>enemy!==e);
+          if(reportRoomMission())return;
           recordSequentialMission();
           if(sector<20)writeCheckpoint(sector+1);else try{localStorage.removeItem(CHECKPOINT_KEY)}catch(err){}
           bossTaunt={name:e.name,line:'MEUS SISTEMAS... DERROTADOS!',ticks:175};
           adaptAfterBoss();
-          if(sector===20){finishFullCampaign();}else{missionTransitionTicks=180;document.getElementById('mission-banner').textContent='PRÓXIMA MISSÃO: '+campaign.at(sector+1).name;createFloatingText(e.x,e.y,'CHEFE DERROTADO!','#22c55e')}
+          finishBossPresentation(e);
         }
         function openBossSkillPicker(){
           gameState='BOSS_SELECT';bossSkillPending=null;skillPicker.classList.remove('hidden');
+          skillPicker.style.display='flex';skillPicker.setAttribute('aria-hidden','false');
+          document.getElementById('boss-skill-selected').textContent='';
           const options=document.getElementById('boss-skill-options');
           options.replaceChildren();
           document.getElementById('boss-skill-confirm').disabled=true;
           const foe=BOSS_AFFINITIES[(sector-1)%BOSS_AFFINITIES.length];
           document.getElementById('boss-skill-advice').textContent='Boss de '+BOSS_SKILLS[foe].name+' · Selecione uma habilidade ou voe sem poder.';
+          function selectSkill(button,key,message){
+            for(const card of options.querySelectorAll('button'))card.setAttribute('aria-pressed',String(card===button));
+            bossSkillPending=key;
+            document.getElementById('boss-skill-selected').textContent=message;
+            document.getElementById('boss-skill-confirm').disabled=false;
+          }
           for(const key of bossSkillUnlocked){
             const info=BOSS_SKILLS[key],button=document.createElement('button');
-            button.type='button';button.style.cssText='background:#0b2036;border:2px solid '+info.color+';border-radius:9px;padding:12px 6px;color:white;text-align:center;cursor:pointer';
-            button.innerHTML='<strong style="font-size:25px;color:'+info.color+'">'+info.icon+'</strong><br><b>'+info.name+'</b><br><small>'+info.charges+' usos · '+Math.round(info.cooldown/60)+'s</small>';
-            button.addEventListener('click',()=>{bossSkillPending=key;document.getElementById('boss-skill-selected').textContent='Equipado: '+info.name+(info.strong===foe?' · FRAQUEZA DO BOSS!':'');document.getElementById('boss-skill-confirm').disabled=false;});
+            button.type='button';button.className='rs-skill-card';button.setAttribute('aria-pressed','false');
+            button.style.setProperty('--skill-color',info.color);
+            button.innerHTML='<img src="./assets/ui/premium/arsenal/'+key.toLowerCase()+'.png" alt="" width="58" height="58"><b>'+info.name+'</b><small>'+info.charges+' usos · '+Math.round(info.cooldown/60)+'s</small>';
+            button.addEventListener('click',()=>selectSkill(button,key,'Equipado: '+info.name+(info.strong===foe?' · FRAQUEZA DO BOSS!':'')));
             options.appendChild(button);
           }
           const none=document.createElement('button');none.textContent='✈ LUTAR SEM PODER';none.type='button';none.style.cssText='grid-column:1/-1;color:#cbd5e1;padding:8px;border:1px solid #64748b;border-radius:8px';
-          none.addEventListener('click',()=>{bossSkillPending='NONE';document.getElementById('boss-skill-selected').textContent='Sem poder nesta batalha';document.getElementById('boss-skill-confirm').disabled=false});options.appendChild(none);
+          none.className='rs-skill-card';none.setAttribute('aria-pressed','false');
+          none.addEventListener('click',()=>selectSkill(none,'NONE','Sem poder nesta batalha'));options.appendChild(none);
         }
         document.getElementById('boss-skill-confirm').addEventListener('click',()=>{
           if(gameState!=='BOSS_SELECT'||bossSkillPending===null)return;
@@ -1731,6 +2042,33 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
             createFloatingText(boss.x,boss.y-35,'REFLETIDO -3,5%','#facc15');
             if(boss.hp<=0)finishBossDefeatedBySkill(boss);}
         }
+        function bossBurstProfile(mission){
+            const progress=(Math.max(1,Math.min(20,mission))-1)/19;
+            return {cadence:71-Math.round(progress*19),speed:2.9+progress*1.35,gap:110-progress*32};
+        }
+        function fireBossBurst(e,profile,element){
+            const wave=e.burstIndex||0;
+            const safeCenter=Math.max(profile.gap,Math.min(VIRTUAL_WIDTH-profile.gap,player.x));
+            const targetY=Math.max(e.y+145,player.y);
+            const color=BOSS_SKILLS[element]?.color||'#f87171';
+            for(const lane of [-2,-1,1,2]){
+                if(enemyBullets.length>=27)break;
+                const side=Math.sign(lane);
+                const landingX=safeCenter+side*(profile.gap/2+(Math.abs(lane)-1)*56);
+                let x=e.x+lane*18,y=e.y+22,speed=profile.speed;
+                switch(wave){
+                    case 0: x=e.x+lane*9;break; // leque aberto
+                    case 1: x=landingX;break; // colunas paralelas
+                    case 2: x=e.x+lane*14;break; // onda serpenteante
+                    case 3: x=landingX+side*44;speed*=.9;break; // convergência
+                    case 4: y+=Math.abs(lane)*14;speed*=1+lane*.09;break; // escalonada
+                }
+                const dx=landingX-x,dy=targetY-y,distance=Math.hypot(dx,dy);
+                enemyBullets.push({x,y,vx:dx/distance*speed,vy:dy/distance*speed,
+                    waveStyle:wave,phase:lane*.5,element,color});
+            }
+            e.burstIndex=(wave+1)%5;
+        }
         function updateBossAttacks(e) {
             e.attackTimer++;
             e.shootTimer++;
@@ -1784,17 +2122,8 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
                 e.attackPattern = (e.attackPattern + 1) % 3;
             }
 
-            // Cada missão tem assinatura própria de projéteis, ciclos e velocidade.
-            // As primeiras quatro mantêm o legado como camada adicional.
             const missionId=Math.max(1,Math.min(20,sector));
             if(sarcasmLevel>0 && e.attackTimer%(940-sarcasmLevel*65)===0)showBossTaunt(e.name);
-            const patterns=[
-              [35,3,2.8,.5],[44,5,3,.75],[27,2,4,1.25],[53,7,2.4,.65],
-              [21,3,4.4,1.8],[58,6,3.4,.4],[18,2,4.8,2.1],[39,8,2.7,1.2],
-              [25,5,4.1,.7],[47,4,3.5,1.9],[29,3,5,.6],[62,9,2.3,1.5],
-              [33,6,3.1,1.1],[24,4,4.7,2.4],[52,5,2.9,.9],[19,7,3.7,1.7],
-              [42,6,4.3,.55],[31,8,3.2,1.35],[23,5,5.1,2.2],[55,10,3.8,1.6]
-            ];
             // Assinatura sonora de cada elemento dos disparos do chefe.
             if(e.shootTimer%120===0)try{
               const Audio=window.AudioContext||window.webkitAudioContext;
@@ -1807,24 +2136,13 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
               g.gain.setValueAtTime(.001,now);g.gain.linearRampToValueAtTime(.035,now+.02);g.gain.exponentialRampToValueAtTime(.001,now+.18);
               o.connect(g);g.connect(ac.destination);o.start(now);o.stop(now+.19);}}
               catch(error){}
-            const spec=patterns[missionId-1];
-            // Ritmo deliberado: rajada, pausa e abertura. Evita padrões colados e
-            // excesso de tiros que escondem o jogador.
-            const attackPhase=e.shootTimer%330;
-            const firingWindow=attackPhase>=46&&attackPhase<154&&e.swordDash<=0&&e.swordCharge<=0;
-            const safeGap=missionId%2===0?.44:.56;
+            const profile=bossBurstProfile(missionId);
+            // Duas rajadas por ciclo, com pausa para reposicionamento.
+            const attackPhase=e.shootTimer%(111+profile.cadence);
+            const firingWindow=attackPhase>=40&&attackPhase<=40+profile.cadence&&!(e.swordDash>0)&&!(e.swordCharge>0)&&!e.laserCharging&&!warning;
             const bossProjectileElement=e.skillAffinity||BOSS_AFFINITIES[(sector-1)%BOSS_AFFINITIES.length];
-            if(firingWindow&&e.shootTimer%Math.max(45,spec[0])===0 && enemyBullets.length<27){
-              const target=Math.atan2(player.y-e.y,player.x-e.x);
-              for(let n=0;n<Math.min(5,spec[1]);n++){
-                const normalized=(n-(Math.min(5,spec[1])-1)/2)/Math.max(1,Math.min(5,spec[1])-1);
-                if(Math.abs(normalized)<safeGap*.37)continue; // corredor central legível
-                const wave=Math.floor(e.shootTimer/(spec[0]*3))%4;
-                const spread=wave===0?spec[3]*1.3:wave===1?spec[3]*.5:wave===2?spec[3]*1.9:spec[3];
-                const angle=target+normalized*spread*2+(wave===2?Math.sin(e.attackTimer*.09+n)*.25:0);
-                const speed=spec[2]*(wave===1?1.18:wave===3?.85:1);
-                enemyBullets.push({x:e.x+Math.cos(angle)*22,y:e.y+12,vx:Math.cos(angle)*speed,vy:Math.max(.9,Math.sin(angle)*speed),waveStyle:wave,phase:n*.5,element:bossProjectileElement,color:BOSS_SKILLS[bossProjectileElement]?.color||'#f87171'});
-              }
+            if(firingWindow&&(attackPhase===40||attackPhase===40+profile.cadence)&&enemyBullets.length<27){
+              fireBossBurst(e,profile,bossProjectileElement);
             }
             // Investidas com espada: sinal luminoso antes do golpe e rastro de corte no avanço.
             if(BOSS_STRIKES[sector]&&e.attackTimer%420===315){
@@ -1839,40 +2157,9 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
               if(Math.hypot(player.x-e.x,player.y-e.y)<55 && !e.swordHit){if(!defendCharge(e))applyDamage(35,'INVESTIDA DO BOSS');e.swordHit=true;}
               if(e.swordDash<=0){e.swordHit=false;e.swordDash=0;e.swordTargetY=110;}
             }
-            if(missionId>4||!firingWindow||enemyBullets.length>=27)return; // Padrões legados somente nas janelas leves
-            const bossId = e.bossSubType;
-
-            // CHEFE 0: PONTE FORTIFICADA - HABILIDADE EMP / PARALISAR NAVE
-            if (bossId === 0) {
-                if (e.attackPattern === 0 && e.shootTimer % 35 === 0) {
-                    enemyBullets.push({ x: e.x - 30, y: e.y + 20, vx: 0, vy: 3.8, color: '#f59e0b' });
-                    enemyBullets.push({ x: e.x + 30, y: e.y + 20, vx: 0, vy: 3.8, color: '#f59e0b' });
-                } else if (e.attackPattern === 1 && e.shootTimer % 45 === 0) {
-                    [-0.8, -0.4, 0, 0.4, 0.8].forEach(vx => {
-                        enemyBullets.push({ x: e.x, y: e.y + 20, vx: vx * 2, vy: 3.2, color: '#ef4444' });
-                    });
-                } else if (e.attackPattern === 2 && e.shootTimer % 110 === 0) {
-                    // Padrão normal sem EMP: apenas projéteis telegrafados.
-                    [-1.2,0,1.2].forEach(vx=>enemyBullets.push({x:e.x,y:e.y+20,vx,vy:3.3,color:'#22d3ee'}));
-                }
-            }
-
-            // CHEFE 1: ENCOURAÇADO NAVAL - CONVOCAÇÃO DE HELICÓPTEROS
-            else if (bossId === 1) {
-                if (e.attackPattern === 0 && e.shootTimer % 30 === 0) {
-                    const angle = (e.shootTimer / 10);
-                    enemyBullets.push({ x: e.x, y: e.y + 15, vx: Math.cos(angle) * 3, vy: Math.sin(angle) * 3 + 1, color: '#dc2626' });
-                } else if (e.attackPattern === 1 && e.shootTimer % 50 === 0) {
-                    const angleToPlayer = Math.atan2(player.y - e.y, player.x - e.x);
-                    [-0.2, 0, 0.2].forEach(spread => {
-                        enemyBullets.push({
-                            x: e.x, y: e.y + 20,
-                            vx: Math.cos(angleToPlayer + spread) * 3.5,
-                            vy: Math.sin(angleToPlayer + spread) * 3.5,
-                            color: '#38bdf8'
-                        });
-                    });
-                } else if (e.attackPattern === 2 && e.shootTimer % 120 === 0) {
+            // Mantém as habilidades próprias dos primeiros chefes.
+            if(missionId>4)return;
+            if(e.bossSubType===1&&e.attackPattern===2&&e.shootTimer%120===0&&enemyBullets.length<27){
                     enemies.push({
                         type: 'HELI', x: e.x - 50, y: e.y + 10, width: 22, height: 22,
                         vx: -1.5, vy: 0.5, hp: 1, maxHp: 1, score: 100
@@ -1882,29 +2169,11 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
                         vx: 1.5, vy: 0.5, hp: 1, maxHp: 1, score: 100
                     });
                     createFloatingText(e.x, e.y, 'ESCOLTA ENVIADA!', '#38bdf8');
-                }
-            }
-
-            // CHEFE 2: BOMBARDEIRO STEALTH - CAMUFLAGEM E MÍSSEIS
-            else if (bossId === 2) {
+            }else if(e.bossSubType===2){
                 e.stealthTimer = (e.stealthTimer || 0) + 1;
                 e.isStealth = (e.stealthTimer % 180 > 90);
 
-                if (e.attackPattern === 0 && e.shootTimer % 20 === 0) {
-                    const offset = (e.shootTimer % 40 === 0) ? -25 : 25;
-                    enemyBullets.push({ x: e.x + offset, y: e.y + 25, vx: 0, vy: 5.5, color: '#a855f7' });
-                } else if (e.attackPattern === 1 && e.shootTimer % 40 === 0) {
-                    enemyBullets.push({ x: e.x - 30, y: e.y + 10, vx: (player.x - e.x) * 0.03, vy: 3.2, isMissile: true, color: '#ec4899' });
-                    enemyBullets.push({ x: e.x + 30, y: e.y + 10, vx: (player.x - e.x) * 0.03, vy: 3.2, isMissile: true, color: '#ec4899' });
-                } else if (e.attackPattern === 2 && e.shootTimer % 90 === 0) {
-                    for (let a = -1.2; a <= 1.2; a += 0.4) {
-                        enemyBullets.push({ x: e.x, y: e.y + 20, vx: a * 2, vy: 2.5 + Math.abs(a), color: '#c084fc' });
-                    }
-                }
-            }
-
-            // CHEFE 3+: FORTALEZA VOADORA - HABILIDADE MEGA LASER ORBITAL
-            else if (bossId === 3) {
+            }else if(e.bossSubType===3){
                 e.laserTimer++;
 
                 // Disparar o Mega Laser a cada 180 frames (~3s)
@@ -1924,19 +2193,6 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
                     e.laserCharging = false;
                 }
 
-                if (e.attackPattern === 0 && e.shootTimer % 20 === 0) {
-                    const side = (e.shootTimer % 40 === 0) ? -e.width / 2.5 : e.width / 2.5;
-                    enemyBullets.push({ x: e.x + side, y: e.y + 20, vx: (Math.random() - 0.5) * 1.5, vy: 4.2, color: '#f43f5e' });
-                } else if (e.attackPattern === 1 && e.shootTimer % 45 === 0) {
-                    for (let angle = 0; angle < Math.PI * 2; angle += Math.PI / 4) {
-                        enemyBullets.push({
-                            x: e.x, y: e.y,
-                            vx: Math.cos(angle) * 2.8,
-                            vy: Math.sin(angle) * 2.8 + 1,
-                            color: '#facc15'
-                        });
-                    }
-                }
             }
         }
 
@@ -1978,7 +2234,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
                 ctx.save();ctx.translate(p.x,p.y+Math.sin(missionTicks*.075+p.x)*2);
                 const premiumPickup=window.RiverPremium?.get('pickup',p.type==='WINGMAN'||p.type==='DRONE'?'DRONES':p.type,sector);
                 if(premiumPickup){
-                    if(Number(sector)<=2)window.RiverPremium.drawFitted(ctx,premiumPickup,0,0,34,38);
+                    if(Number(sector)<=20)window.RiverPremium.drawFitted(ctx,premiumPickup,0,0,34,38);
                     else ctx.drawImage(premiumPickup,-20,-24,40,48);
                     ctx.restore();continue;
                 }
@@ -1994,7 +2250,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
                     ctx.strokeText(st.label,0,0);ctx.fillText(st.label,0,0);
                     ctx.restore();continue;
                 }
-                if(Number(sector)<=2){ctx.restore();continue;}
+                if(Number(sector)<=20){ctx.restore();continue;}
                 // Halo e ripples do coletavel, sem dependencias de imagens externas.
                 ctx.fillStyle='rgba(0,8,25,.38)';ctx.beginPath();ctx.ellipse(2,15,24,8,0,0,7);ctx.fill();
                 ctx.strokeStyle=st.color;ctx.globalAlpha=.35;ctx.lineWidth=1.5;ctx.beginPath();ctx.ellipse(0,14,23,8,0,0,7);ctx.stroke();ctx.globalAlpha=1;
@@ -2061,6 +2317,12 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
         // Formas desenhadas em coordenadas locais de Canvas; partículas são apenas acabamento.
         function drawProjectileSprite(kind, color, frame){
           const k=String(kind||'SINGLE').toUpperCase(),c=color||'#69d9ff',t=frame*.11;
+          const raster=rasterShot(k,color);
+          if(raster.complete&&raster.naturalWidth){
+              window.RiverPremium.drawFitted(ctx,raster,0,0,16,28);
+              return;
+          }
+          if(Number(sector)<=20)return;
           ctx.save();ctx.lineJoin='round';ctx.lineCap='round';ctx.lineWidth=1.5;
           ctx.shadowBlur=qualitySelect.value==='eco'?0:9;ctx.shadowColor=c;ctx.strokeStyle=c;
           const hull=(pts,fill)=>{ctx.beginPath();pts.forEach(([x,y],i)=>i?ctx.lineTo(x,y):ctx.moveTo(x,y));ctx.closePath();ctx.fillStyle=fill;ctx.fill();ctx.stroke();};
@@ -2106,31 +2368,39 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
             ctx.fillStyle='#fff';ctx.fillRect(-1,-8,2,13);
           }ctx.restore();
         }
-        const projectileArt={blue:new Image(),red:new Image()};
-        projectileArt.blue.src='./assets/sprites/projectiles/plasma-blue.svg';
-        projectileArt.red.src='./assets/sprites/projectiles/plasma-red.svg';
+        const projectileArt={};
+        for(const name of ['blue','red','missile','violet']){
+            const image=new Image();
+            image.src='./assets/sprites/premium/approved/fx/runtime_shots/'+name+'.png';
+            projectileArt[name]=image;
+        }
+        function rasterShot(kind,color){
+            if(/MISSILE|ROCKET|TRACKER|GUIDED|MULTI/.test(kind))return projectileArt.missile;
+            if(/GRAVITY|SHADOW|PRISM|POISON/.test(kind))return projectileArt.violet;
+            return /FIRE|BLEED/.test(kind)||color&&/f[456]|e[f0]|ff[346]/i.test(color)?projectileArt.red:projectileArt.blue;
+        }
         function drawBullets() {
             bullets.forEach(b => {
                 if(b.weaponId&&b.weaponId!=='SINGLE'&&b.weaponId!=='CIRCLE')drawBulletTrail(b);
                 ctx.save();
                 ctx.translate(b.x, b.y);
                 // PNG por tipo de arma, sem modificar trajetória/dano do jogo base.
-                const premiumShot=window.RiverPremium?.get('projectile',b.weaponId||b.sprite||b.type||'SINGLE');
+                const premiumShot=window.RiverPremium?.get('projectile',b.sprite||b.weaponId||b.type||'SINGLE');
                 if(premiumShot&&b.type!=='REFLECTED'&&!b.reflected){
                     ctx.rotate(Math.atan2(b.vx||0,-(b.speed||7)));
-                    const sz=['MISSILE','TRACKER','ROCKET'].includes(b.weaponId)?18:12;
+                    const sz=['MISSILE','TRACKER','ROCKET'].includes(b.sprite||b.weaponId)?18:12;
                     ctx.drawImage(premiumShot,-sz/2,-sz,sz,sz*2);
                     ctx.restore();return;
                 }
-                const projectileImage=(b.reflected||b.type==='REFLECTED')?null:(b.color&&/f[456]|e[f0]|ff[346]/i.test(b.color)?projectileArt.red:projectileArt.blue);
-                if(projectileImage&&projectileImage.complete&&projectileImage.naturalWidth){ctx.rotate(Math.atan2(b.vx||0,-(b.speed||7)));ctx.drawImage(projectileImage,-5,-13,10,26);ctx.restore();return;}
+                const projectileImage=(b.reflected||b.type==='REFLECTED')?null:rasterShot(b.sprite||b.weaponId||b.type||'SINGLE',b.color);
+                if(projectileImage&&projectileImage.complete&&projectileImage.naturalWidth){ctx.rotate(Math.atan2(b.vx||0,-(b.speed||7)));window.RiverPremium.drawFitted(ctx,projectileImage,0,0,10,26);ctx.restore();return;}
 
                 // Render de sprite por arma, com silhueta e material identificáveis.
                 if(b.type!=='REFLECTED'){
                   ctx.save();ctx.rotate(Math.atan2(b.vx||0,-(b.speed||7)));
                   const isCircle=(b.weaponId==='CIRCLE'||b.type==='CIRCLE');
                   if(isCircle){ctx.scale(.48,.48);ctx.globalAlpha=.78;}
-                  drawProjectileSprite(b.weaponId||b.type||'SINGLE',b.color,missionTicks);ctx.restore();
+                  drawProjectileSprite(b.sprite||b.weaponId||b.type||'SINGLE',b.color,missionTicks);ctx.restore();
                   ctx.restore();return;
                 }
                 // Visual exclusivo e CONTIDO no projétil: sem feixes persistentes ou bloom acumulado.
@@ -2189,6 +2459,13 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
                   for(let n=0;n<4;n++){const angle=flash+n*Math.PI/2;ctx.strokeStyle=shades[n];ctx.lineWidth=2.5;ctx.shadowColor=shades[n];ctx.shadowBlur=qualitySelect.value==='eco'?0:10;ctx.beginPath();ctx.arc(0,0,7+n*2,angle,angle+Math.PI*.85);ctx.stroke();}
                   ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(0,0,2.5,0,Math.PI*2);ctx.fill();ctx.restore();
                 }
+                const enemyShot=eb.isMissile?projectileArt.missile:eb.element?rasterShot(eb.element,eb.color):projectileArt.red;
+                if(enemyShot.complete&&enemyShot.naturalWidth){
+                    ctx.rotate(Math.atan2(eb.vx||0,-(eb.vy||4)));
+                    window.RiverPremium.drawFitted(ctx,enemyShot,0,0,16,28);
+                    ctx.restore();return;
+                }
+                if(Number(sector)<=20){ctx.restore();return;}
                 // Detalhe de classe visual para projéteis elementais; mantém tipo e colisões.
                 if(eb.element&&qualitySelect.value!=='eco'){
                   ctx.save();
@@ -2334,7 +2611,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
                 if(rasterEnemy&&e.type!=='BOSS'&&e.type!=='MEGAZORD'){
                     const id=e.type==='BIOME_ENEMY'?(e.biomeId||'TUCANO'):e.type;
                     const [dw,dh]=window.RiverPremium?.displaySize?.(id,e.width||32,e.height||32)||[e.width||32,e.height||32];
-                    ctx.drawImage(rasterEnemy,-dw/2,-dh/2,dw,dh);
+                    window.RiverPremium.drawFitted(ctx,rasterEnemy,0,0,dw,dh);
                     ctx.restore();
                     return;
                 }
@@ -2765,7 +3042,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
             for(const p of structures){
                 ctx.save();ctx.translate(p.x,p.y);
                 const half=p.width/2,gate=Math.min(half-12,Math.max(28,(p.opening||100)/2));
-                const slabY=-p.height/2;
+                const wallHeight=p.height*3,slabY=-wallHeight/2;
                 const condition=(p.maxHp>0&&p.hp/p.maxHp<=.45)?'_DAMAGED':'';
                 const premiumTerrainImage=window.RiverPremium?.get('terrain',p.type+condition,sector)||window.RiverPremium?.get('terrain',p.type,sector);
                 if(!premiumTerrainImage&&(window.RiverPremium?.declared('terrain',p.type+condition)||window.RiverPremium?.declared('terrain',p.type))){ctx.restore();continue;}
@@ -2773,21 +3050,18 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
                 if(terrainImage&&terrainImage.complete&&terrainImage.naturalWidth){
                   // A travessia permanece aberta: renderizar apenas as duas faixas sólidas.
                   ctx.save();ctx.beginPath();
-                  ctx.rect(-half,slabY,half-gate,p.height);
-                  ctx.rect(gate,slabY,half-gate,p.height);
+                  ctx.rect(-half,slabY,half-gate,wallHeight);
+                  ctx.rect(gate,slabY,half-gate,wallHeight);
                   ctx.clip();
-                  if(Number(sector)<=2&&premiumTerrainImage){
-                    const span=half-gate;
-                    if(condition)ctx.filter='brightness(.68) saturate(.8)';
-                    drawStructureSpan(terrainImage,-half,slabY,span,p.height);
-                    ctx.save();ctx.scale(-1,1);
-                    drawStructureSpan(terrainImage,-half,slabY,span,p.height);
-                    ctx.restore();
-                  }else ctx.drawImage(terrainImage,-half,slabY,p.width,p.height);
+                  const span=half-gate;
+                  if(condition&&premiumTerrainImage)ctx.filter='brightness(.68) saturate(.8)';
+                  drawStructureSpan(terrainImage,-half,slabY,span,wallHeight);
+                  ctx.scale(-1,1);
+                  drawStructureSpan(terrainImage,-half,slabY,span,wallHeight);
                   ctx.restore();
-                  ctx.fillStyle='rgba(42,160,203,.20)';ctx.fillRect(-gate+2,slabY,2*gate-4,p.height);
+                  ctx.fillStyle='rgba(42,160,203,.20)';ctx.fillRect(-gate+2,slabY,2*gate-4,wallHeight);
                   ctx.strokeStyle='#a5f3fc';ctx.lineWidth=1.5;ctx.setLineDash([8,7]);
-                  ctx.beginPath();ctx.moveTo(0,slabY-15);ctx.lineTo(0,slabY+p.height+15);ctx.stroke();ctx.setLineDash([]);
+                  ctx.beginPath();ctx.moveTo(0,slabY-15);ctx.lineTo(0,slabY+wallHeight+15);ctx.stroke();ctx.setLineDash([]);
                   ctx.fillStyle='#e2f4ff';ctx.font='bold 10px monospace';ctx.textAlign='center';
                   ctx.fillText('PASSAGEM',0,slabY-13);
                   ctx.fillStyle='#fb7185';ctx.fillRect(-half,slabY-11,p.width*Math.max(0,p.hp/p.maxHp),3);
@@ -2795,18 +3069,18 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
                 }
                 ctx.shadowColor='rgba(1,12,27,.5)';ctx.shadowBlur=detailed?9:3;ctx.shadowOffsetY=4;
                 ctx.fillStyle=p.type==='DAM'?'#324859':'#3b4653';
-                ctx.fillRect(-half,slabY,half-gate,p.height);
-                ctx.fillRect(gate,slabY,half-gate,p.height);
+                ctx.fillRect(-half,slabY,half-gate,wallHeight);
+                ctx.fillRect(gate,slabY,half-gate,wallHeight);
                 ctx.shadowBlur=0;ctx.shadowOffsetY=0;
                 ctx.fillStyle=p.type==='DAM'?'#728a96':'#9caebd';
-                ctx.fillRect(-half,slabY+3,half-gate,p.height-6);
-                ctx.fillRect(gate,slabY+3,half-gate,p.height-6);
+                ctx.fillRect(-half,slabY+3,half-gate,wallHeight-6);
+                ctx.fillRect(gate,slabY+3,half-gate,wallHeight-6);
                 ctx.fillStyle='#d6e8ee';
-                ctx.fillRect(-gate-5,slabY-4,5,p.height+8);ctx.fillRect(gate,slabY-4,5,p.height+8);
+                ctx.fillRect(-gate-5,slabY-4,5,wallHeight+8);ctx.fillRect(gate,slabY-4,5,wallHeight+8);
                 // Água e marcas convergentes sinalizam claramente a passagem segura.
-                ctx.fillStyle='rgba(42,160,203,.37)';ctx.fillRect(-gate+2,slabY,gate*2-4,p.height);
+                ctx.fillStyle='rgba(42,160,203,.37)';ctx.fillRect(-gate+2,slabY,gate*2-4,wallHeight);
                 ctx.strokeStyle='#a5f3fc';ctx.lineWidth=2;ctx.setLineDash([8,7]);
-                ctx.beginPath();ctx.moveTo(0,slabY-17);ctx.lineTo(0,slabY+p.height+17);ctx.stroke();ctx.setLineDash([]);
+                ctx.beginPath();ctx.moveTo(0,slabY-17);ctx.lineTo(0,slabY+wallHeight+17);ctx.stroke();ctx.setLineDash([]);
                 if(p.type==='DAM'){
                     if(detailed){
                         ctx.fillStyle='rgba(218,247,255,.70)';
@@ -2815,8 +3089,8 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
                     ctx.fillStyle='#fbbf24';ctx.fillRect(-gate-11,slabY-9,7,7);ctx.fillRect(gate+4,slabY-9,7,7);
                 }else{
                     ctx.strokeStyle='#dde5ea';ctx.lineWidth=1.6;
-                    for(let x=-half+12;x<-gate-9;x+=21){ctx.beginPath();ctx.moveTo(x,slabY+4);ctx.lineTo(x+7,slabY+p.height-4);ctx.stroke()}
-                    for(let x=gate+12;x<half-10;x+=21){ctx.beginPath();ctx.moveTo(x,slabY+4);ctx.lineTo(x+7,slabY+p.height-4);ctx.stroke()}
+                    for(let x=-half+12;x<-gate-9;x+=21){ctx.beginPath();ctx.moveTo(x,slabY+4);ctx.lineTo(x+7,slabY+wallHeight-4);ctx.stroke()}
+                    for(let x=gate+12;x<half-10;x+=21){ctx.beginPath();ctx.moveTo(x,slabY+4);ctx.lineTo(x+7,slabY+wallHeight-4);ctx.stroke()}
                     ctx.fillStyle='#fbbf24';ctx.fillRect(-gate-12,-3,7,6);ctx.fillRect(gate+5,-3,7,6);
                 }
                 ctx.fillStyle='#1b3344';ctx.font='bold 10px monospace';ctx.textAlign='center';
@@ -2838,7 +3112,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
             launchSkillTrajectory('FIRE',sourceX,sourceY,tx,ty,'#67e8f9');
         }
         function drawWingmen(){
-            if(Number(sector)<=2){
+            if(Number(sector)<=20){
                 const sprite=window.RiverPremium?.get('pickup','DRONES',sector);
                 if(!sprite)return;
                 for(const w of wingmen){
@@ -2854,12 +3128,21 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
             }
             for(const w of wingmen){ctx.save();ctx.globalAlpha=w.ttl<=0?Math.max(0,1-(w.detach||0)/36):1;const position=wingPosition(w);ctx.translate(position.x+(w.detach||0)*2*w.side,position.y+(w.detach||0)*1.1);ctx.fillStyle='#18425e';ctx.strokeStyle='#67e8f9';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(0,-14);ctx.lineTo(-13,9);ctx.lineTo(0,3);ctx.lineTo(13,9);ctx.closePath();ctx.fill();ctx.stroke();ctx.fillStyle='#67e8f9';ctx.fillRect(-12,14,24*w.hp/w.maxHp,3);ctx.restore()}
         }
+        const SOS_SIZE={width:64,height:80,reachX:31};
+        function rescueBoatReached(boat){
+            const dx=(player.x-boat.x)/SOS_SIZE.reachX;
+            const dy=(player.y-boat.y)/(SOS_SIZE.height/2);
+            return dx*dx+dy*dy<1;
+        }
+        function enemyHullTouchesPlayer(enemy){
+            return Math.abs(player.x-enemy.x)<(player.width+enemy.width)/2.5&&
+                Math.abs(player.y-enemy.y)<(player.height+enemy.height)/2.5;
+        }
         function drawRescueBoats(){
             for(const b of rescueBoats){
                 const premiumSOS=window.RiverPremium?.get('pickup','SOS',sector);
                 if(premiumSOS){
-                    if(Number(sector)<=2)window.RiverPremium.drawFitted(ctx,premiumSOS,b.x,b.y,42,46);
-                    else ctx.drawImage(premiumSOS,b.x-25,b.y-30,50,55);
+                    window.RiverPremium.drawFitted(ctx,premiumSOS,b.x,b.y,SOS_SIZE.width,SOS_SIZE.height);
                     continue;
                 }
                 if(window.RiverPremium?.declared('pickup','SOS'))continue;
@@ -2879,7 +3162,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
             for(const f of fuelDepots){
                 const premiumGas=window.RiverPremium?.get('pickup','GAS',sector);
                 if(premiumGas){
-                    if(Number(sector)<=2)window.RiverPremium.drawFitted(ctx,premiumGas,f.x,f.y,38,44);
+                    if(Number(sector)<=20)window.RiverPremium.drawFitted(ctx,premiumGas,f.x,f.y,38,44);
                     else ctx.drawImage(premiumGas,f.x-22,f.y-24,44,48);
                     continue;
                 }
@@ -3150,6 +3433,11 @@ function updateTerrainEvent(){
 
         function update() {
             if (gameState !== 'PLAYING') return;
+            if(missionTransitionTicks>180){
+                missionTransitionTicks--;
+                if(missionTransitionTicks===180)hideBossDebrief();
+                return;
+            }
             if(player.damageBlinkFrames>0)player.damageBlinkFrames--;
             if(player.effectType!==player.lastAudibleEffect){
               player.lastAudibleEffect=player.effectType;
@@ -3190,7 +3478,7 @@ function updateTerrainEvent(){
             if(missionTransitionTicks>0){
                 missionTransitionTicks--;
                 if(missionTransitionTicks===0){
-                    sector=Math.min(20,sector+1);writeCheckpoint(sector);
+                    sector=Math.min(20,sector+1);missionHits[sector-1]??=0;writeCheckpoint(sector);if(!roomRound)rememberPendingMission();
                     player.bombs=3;document.getElementById('bomb-count-touch').textContent='(3)';bombsPickedThisMission=0;
                     bossDefeatedThisMission=false;
                     clearBossArenaEffects();
@@ -3202,7 +3490,7 @@ function updateTerrainEvent(){
                     bossTaunt=null;bossFinalDialogue=false;screenShake=0;secondaryTargetsDestroyed=0;
                     // Os projéteis da arena encerrada não podem atingir a missão seguinte.
                     bullets=bullets.filter(b=>b.type!=='REFLECTED'&&b.type!=='BANK_MISSILE');
-                    redAlertTriggered=false;redAlertTicks=0;missionTicks=0;missionStartDistance=distance;
+                    redAlertTriggered=false;redAlertTicks=0;missionTicks=0;missionStartDistance=distance;rescueBoatsLastAt=null;
                     playlist.endBossTheme?.();
                     enemies=enemies.filter(e=>e.type!=='BOSS'&&e.y<VIRTUAL_HEIGHT*.45);
                     enemyBullets=[];
@@ -3338,7 +3626,6 @@ function updateTerrainEvent(){
                     target.hp=0;score+=awardEnemyPoints(target.score||100);kills++;grantEnemyXP(target);enemies=enemies.filter(e=>e!==target);swordRushFrames=0;}}else swordRushFrames=0;if(swordRushFrames===0)swordRushTarget=null;}
             skillUseButton.textContent=bossActive?'⚡ PODER [C]':'⚔ INVESTIDA [C] '+(swordRushCooldown>0?Math.ceil(swordRushCooldown/60)+'s':'PRONTO');
             skillUseButton.classList.remove('hidden');
-            parryButton.textContent=parryTicks>0?'🛡 ESCUDO '+Math.max(1,Math.ceil(parryTicks/60))+'s':parryCooldown>0?'🛡 '+Math.ceil(parryCooldown/60)+'s':'🛡 PARRY [V]';
 
             // Armas especiais usam disparos disponíveis, não tempo em quadros.
 
@@ -3374,7 +3661,7 @@ function updateTerrainEvent(){
             // Botes resgatáveis: pontuação, partículas e contador de pilotos salvos.
             for(let i=rescueBoats.length-1;i>=0;i--){
                 const boat=rescueBoats[i];boat.y+=player.currentScrollSpeed;
-                if(Math.hypot(player.x-boat.x,player.y-boat.y)<31){
+                if(rescueBoatReached(boat)){
                     const earned=boat.soldiers*150;
                     rescuedSoldiers+=boat.soldiers;score+=earned;
                     try{window.RiverSFX?.collect()}catch(e){}
@@ -3412,7 +3699,7 @@ function updateTerrainEvent(){
                 if (b.type === 'MISSILE'||b.type==='REFLECTED') {
                     // Steering 2D: busca alvos vivos, limita curva e mantém velocidade estável.
                     // O movimento base acontece antes; ajustar a direção para o próximo quadro.
-                    let nearest=null,minDist=b.type==='REFLECTED'?480:320;
+                    let nearest=null,minDist=b.type==='REFLECTED'?480:(b.trackingRange||320);
                     for(const e of enemies){
                         if(e.hp<=0)continue;
                         const d=Math.hypot(e.x-b.x,e.y-b.y);
@@ -3430,6 +3717,7 @@ function updateTerrainEvent(){
                     }
                 }
 
+                if(aircraftCatalog.shotOutOfRange(b,previousX,previousY)){bullets.splice(index,1);continue;}
                 if(riverIslandBlocks(previousX,previousY,b.x,b.y)){
                     addExplosion(b.x,b.y,'#d5bb82',4);
                     bullets.splice(index,1);
@@ -3612,7 +3900,7 @@ function updateTerrainEvent(){
                     }
                 }
 
-                const enemyTouchesPlayer=Math.abs(player.x-e.x)<(player.width+e.width)/2.5&&Math.abs(player.y-e.y)<(player.height+e.height)/2.5;
+                const enemyTouchesPlayer=enemyHullTouchesPlayer(e);
                 const enemyTouchesShield=parryTicks>0&&Math.hypot(player.x-e.x,player.y-e.y)<Math.max(52,(e.width+e.height)*.35+35);
                 if(enemyTouchesShield&&e.hp>0){
                     if((e.shieldBounceCooldown||0)<=0){
@@ -3654,21 +3942,17 @@ function updateTerrainEvent(){
                             }else if(!e.noDrop && e.type!=='BOSS')spawnPowerupCheck(e.x,e.y);
                             addExplosion(e.x, e.y, '#ef4444', e.type === 'BOSS' ? 45 : 15);
                             sound.playExplosion(e.type === 'BOSS');
-                            score += awardEnemyPoints(e.score);
-                            kills++;grantEnemyXP(e);
+                            if(e.type!=='BOSS'){score+=awardEnemyPoints(e.score);kills++;grantEnemyXP(e);}
 
                             if (e.type === 'BOSS') {
-                                if(!bossDefeatedThisMission){
-                                    bossDefeatedThisMission=true;clearBossArenaEffects();
+                                if(creditBossDefeat(e)){
+                                    clearBossArenaEffects();
                                     unlockBossSkill(e.skillAffinity);bossSkillEquipped=null;skillUseButton.classList.add('hidden');
+                                    if(reportRoomMission()){enemies=enemies.filter(enemy=>enemy!==e);return;}
                                     recordSequentialMission();
                                     if(sector<20)writeCheckpoint(sector+1);else {try{localStorage.removeItem(CHECKPOINT_KEY)}catch(err){}}
                                     bossTaunt={name:e.name,line:['NÃO! MEUS SISTEMAS!','ISSO NÃO ACABOU, PILOTO!','IMPOSSÍVEL! VOCÊ VENCEU?!','RETIRADA! HA... HA...'][sector%4],ticks:175};
-                                    if(sector===20){finishFullCampaign();} else {
-                                        missionTransitionTicks=180;
-                                        document.getElementById('mission-banner').textContent='PRÓXIMA MISSÃO: '+campaign.at(sector+1).name;
-                                        createFloatingText(e.x,e.y,'CHEFE DERROTADO!','#22c55e');
-                                    }
+                                    finishBossPresentation(e);
                                 }
                             } else {
                                 createFloatingText(e.x, e.y, `+${e.score}`, '#facc15');
@@ -3775,7 +4059,8 @@ function updateTerrainEvent(){
         function drawHUD(){
             // HUD Premium: indicadores persistentes ficam fora da área jogável.
             const fusionLabel=fusionTicks>0?'FUSÃO ATIVA':fusionCooldown>0?'FUSÃO '+Math.ceil(fusionCooldown/60)+'s':'FUSÃO PRONTA';
-            const comboHits=missionHits[Math.max(0,Math.min(19,sector-1))];
+            const damageHits=missionHits[Math.max(0,Math.min(19,sector-1))]??0;
+            const set=(id,value)=>{const el=document.getElementById(id);if(el && el.textContent!==String(value))el.textContent=String(value)};
             const ensureActionBar=()=>{
               let bar=document.getElementById('rs-hud-action-bar');
               if(bar)return bar;
@@ -3783,7 +4068,10 @@ function updateTerrainEvent(){
               if(!hud)return null;
               bar=document.createElement('div');bar.id='rs-hud-action-bar';
               bar.style.cssText='display:grid;grid-template-columns:minmax(130px,1.5fr) 90px minmax(105px,1fr) minmax(130px,1.1fr);align-items:center;gap:8px;background:#051627;color:#b9f5ff;font:700 10px system-ui;padding:5px 8px;border:1px solid #177cac;border-radius:6px;width:100%;box-sizing:border-box';
-              const status=document.createElement('span');status.id='rs-hud-action-status';bar.append(status);
+              const status=document.createElement('div');status.id='rs-hud-action-status';
+              const fusion=document.createElement('span');fusion.id='hud-fusion-status';
+              const damage=document.createElement('span');damage.id='hud-mission-damage';
+              status.append(fusion,damage);bar.append(status);
               const meter=document.createElement('progress');meter.id='rs-fusion-meter';meter.max=360;meter.setAttribute('aria-label','Recarga da fusão');meter.style.cssText='width:70px;height:8px;accent-color:#42e8b4';bar.append(meter);
               // Mover os botões reais preserva os handlers de toque e teclado.
               // A mesma faixa funciona no desktop e no painel inferior mobile.
@@ -3796,29 +4084,34 @@ function updateTerrainEvent(){
             };
             const actionBar=ensureActionBar();
             if(actionBar){
-              const status=document.getElementById('rs-hud-action-status');
-              const nextActionStatus=fusionLabel+' · ACERTOS '+comboHits+' '+hitGrade(comboHits);if(status.textContent!==nextActionStatus)status.textContent=nextActionStatus;
+              const nextActionStatus='DANOS RECEBIDOS '+damageHits+' · RANK '+hitGrade(damageHits);
+              set('hud-mission-damage',nextActionStatus);
+              set('hud-fusion-status',fusionLabel);
               document.getElementById('rs-fusion-meter').value=fusionTicks>0?fusionTicks:Math.max(0,360-fusionCooldown);
-              parryButton.textContent=parryTicks>0?'ESCUDO '+Math.ceil(parryTicks/60)+'s':'PARRY [V] '+(parryCooldown>0?Math.ceil(parryCooldown/60)+'s':'PRONTO');
+              const parryLabel=parryTicks>0?'ESCUDO '+Math.ceil(parryTicks/60)+'s':parryCooldown>0?'PARRY [V] · RECARGA '+Math.ceil(parryCooldown/60)+'s':'PARRY [V] · PRONTO';
+              set('parry-btn',parryLabel);
             }
-            const set=(id,value)=>{const el=document.getElementById(id);if(el && el.textContent!==String(value))el.textContent=String(value)};
             set('hud-score',String(score).padStart(6,'0'));
             set('hud-pilot-level',pilotLevel+' / 100');
             set('hud-pilot-xp',pilotXP.toLocaleString('pt-BR')+' XP');
             set('hud-next-xp',pilotLevel===100?'MAX':(xpAtLevel(pilotLevel+1)-pilotXP).toLocaleString('pt-BR')+' p/ próximo');
             const xpMeter=document.getElementById('hud-xp-fill');if(xpMeter)xpMeter.style.width=(pilotLevel===100?100:(pilotXP-xpAtLevel(pilotLevel))/xpRequirement(pilotLevel)*100)+'%';
-            set('hud-weapon',player.weapon);
+            set('hud-weapon',aircraftCatalog.SIGNATURE_SHOTS[player.weapon]?.name||player.weapon);
             set('hud-shots',player.specialShots||0);
             set('hud-bombs',player.bombs+' / 5');
             set('hud-lives',lives);
             set('hud-fuel',Math.max(0,Math.ceil(player.fuel))+'%');
             set('hud-shield',Math.max(0,Math.ceil(player.shield)));
             set('hud-rescues',rescuedSoldiers);
-            set('hud-plane',aircraftCatalog.PLANES[player.aircraftType||selectedPlane].name);
+            const planeId=player.aircraftType||selectedPlane;
+            const plane=aircraftCatalog.PLANES[planeId];
+            set('hud-plane',plane.name);
             set('mission-hud',campaign.at(sector).name.toUpperCase());
             set('sector-hud','SETOR '+sector);
             set('hud-rank','J'+journey+' '+rankName().slice(0,16));
-            set('hud-pilot-name',(pilotProfile.nickname||'PILOTO').slice(0,24));
+            const pilotName=plane.pilotName;
+            set('hud-pilot-name',pilotName);
+            document.getElementById('hud-pilot-name').title=pilotName;
             const env=window.RiverStormEnvironment;
             set('hud-environment',env&&env.sector===sector?'◷ '+env.period+' · '+env.weather:'◷ DIA · CÉU LIMPO');
             updateCriticalShieldWarning();
@@ -3861,21 +4154,28 @@ function updateTerrainEvent(){
           rsShieldAlertWasLow=low;
         }
 
-        let missionHits=Array(20).fill(0),adaptiveThreat=1,bossStartTick=0;
-        const hitGrade=n=>n===0?'SS':n<=2?'S':n<=4?'A':n<=7?'B':n<=11?'C':n<=16?'D':'E';
+        let missionHits=window.RiverMissionReport.restore(null,1),adaptiveThreat=1,bossStartTick=0;
+        const hitGrade=window.RiverMissionReport.grade;
         function adaptAfterBoss(){
           const count=missionHits[Math.max(0,Math.min(19,sector-1))],quick=missionTicks-bossStartTick<900;
           adaptiveThreat=Math.max(.75,Math.min(1.3,adaptiveThreat+(count<=2?(quick?.1:.06):count>9?-.1:count>5?-.05:0)));
         }
         function showMissionReport(){
-          const root=document.getElementById('victory-screen');if(!root)return;
-          let panel=document.getElementById('mission-damage-report');
-          if(!panel){panel=document.createElement('div');panel.id='mission-damage-report';panel.style.cssText='max-height:220px;overflow:auto;background:#071a2b;color:#d9f5ff;border:1px solid #38bdf8;border-radius:10px;padding:10px;font:12px system-ui;margin:9px auto;width:min(96%,430px)';root.append(panel);}
-          const points={SS:100,S:92,A:82,B:70,C:55,D:35,E:10};
-          const avg=missionHits.reduce((sum,n)=>sum+points[hitGrade(n)],0)/20;
-          const rank=avg>=99?'SS':avg>=90?'S':avg>=80?'A':avg>=68?'B':avg>=52?'C':avg>=30?'D':'E';
-          panel.replaceChildren();const heading=document.createElement('strong');heading.textContent='DANOS POR MISSÃO — CLASSIFICAÇÃO FINAL '+rank;panel.append(heading);
-          missionHits.forEach((hits,i)=>{const line=document.createElement('div');line.textContent='Missão '+String(i+1).padStart(2,'0')+' — '+hits+' acertos — '+hitGrade(hits);panel.append(line);});
+          const panel=document.getElementById('mission-damage-report');
+          const {recorded,rank,average}=reportRules.summary(missionHits);
+          const label=recorded===20?'NOTA FINAL '+rank:'NOTA PARCIAL '+(rank||'—')+' · '+recorded+' DE 20 REGISTRADAS';
+          const heading=document.createElement('h3');
+          heading.className='rs-awards-heading';
+          heading.textContent='RANKING DE DANOS · '+label;
+          const mean=document.createElement('p');
+          mean.textContent=average===null?'Média indisponível':'Média das missões registradas: '+average.toLocaleString('pt-BR',{maximumFractionDigits:2})+' / 100';
+          const list=document.createElement('div');list.className='rs-damage-list';
+          missionHits.forEach((hits,i)=>{
+            const line=document.createElement('div');
+            line.textContent='Missão '+String(i+1).padStart(2,'0')+' — '+(hits===null?'sem registro':hits+' impactos recebidos — '+hitGrade(hits));
+            list.append(line);
+          });
+          panel.replaceChildren(heading,mean,list);
         }
         function applyDamage(amount, reason) {
             if (player.invulnerable > 0 || parryTicks>0 || rollFrames>0) return;
@@ -3883,7 +4183,7 @@ function updateTerrainEvent(){
 
             const suppressedBoss=enemies.some(e=>e.type==='BOSS'&&e.hp>0&&e.gravityTicks>0);
             player.shield -= Math.round(amount*(suppressedBoss?.25:1)*(bossActive||reason.includes('BOSS')?1.15:.7)*pilotBonus().resistance);
-            missionHits[Math.max(0,Math.min(19,sector-1))]++;
+            if(!bossDefeatedThisMission)missionHits[Math.max(0,Math.min(19,sector-1))]++;
             player.damageBlinkFrames=16;
             player.invulnerable = 40;
 
@@ -3896,11 +4196,50 @@ function updateTerrainEvent(){
             if (player.shield <= 0) loseLife(reason);
         }
 
-        function enterGameplay() {
+        function returnToRoom(){
+            if(!roomRound)return;
+            roomRound=null;
+            gameState='START';
+            playlist.pause();soundtrack.stop();syncMenuMusic(true);
+            delete document.getElementById('game-container').dataset.gameActive;
+            for(const id of ['pause-screen','boss-skill-picker','boss-special-hud','game-over-screen']){
+                document.getElementById(id).classList.add('hidden');
+            }
+            skillPicker.style.display='none';
+            const screen=document.getElementById('start-screen');
+            screen.classList.remove('hidden');screen.style.display='';
+            screen.setAttribute('aria-hidden','false');
+            document.getElementById('mode-selection').classList.remove('hidden');
+            document.getElementById('mode-multi-info').classList.remove('hidden');
+            document.getElementById('mode-single').classList.add('hidden');
+            document.getElementById('mode-multi').classList.add('hidden');
+            syncFeaturedPilot();updateContinueButton();
+        }
+        function reportRoomMission(failed=false){
+            if(!roomRound)return false;
+            const {round,end,previousScore}=roomRound;
+            roomRound.previousScore=score;
+            const ended=failed||sector===end;
+            window.RiverRoom.report({round,mission:sector,points:Math.max(0,score-previousScore),hits:missionHits[sector-1]??0,failed});
+            if(ended)returnToRoom();
+            return ended;
+        }
+        window.RiverRoomGame={
+            start({round,start,end}){
+                if(roomRound||gameState!=='START')return false;
+                roomRound={round,end,previousScore:0};
+                levelSelector.value=String(start);
+                enterGameplay();
+                if(gameState!=='PLAYING'){roomRound=null;return false;}
+                return true;
+            },
+            stop:returnToRoom
+        };
+        function enterGameplay(checkpoint) {
             selectedPlane=planeSelect.value;
             if(!unlocked.includes(selectedPlane)){document.getElementById('plane-status').textContent='Desbloqueie esta aeronave antes de iniciar';return}
             // A entrada no jogo não pode depender de permissão de áudio ou do MP3.
-            try { resetGame(); } catch (error) { showGameError(error); console.error('START:',error); return; }
+            try { resetGame(checkpoint); } catch (error) { showGameError(error); console.error('START:',error); return; }
             for (const id of ['start-screen','pause-screen','game-over-screen','victory-screen']) {
                 const overlay=document.getElementById(id);
                 overlay.classList.add('hidden');
@@ -3914,9 +4253,12 @@ function updateTerrainEvent(){
             try { render(); } catch(error){showGameError(error);console.error('FIRST FRAME:',error)}
             try { sound.init(); } catch(error){console.warn('Áudio indisponível',error)}
         }
-        function resetGame() {
-            score = 0;
-            earnedPoints=0;
+        function resetGame(checkpoint) {
+            const startSector=Math.max(1,Math.min(20,Number(levelSelector.value)||1));
+            const previous=roomRound||startSector===1&&!checkpoint?.sector?null:readPendingMission();
+            score=previous?.lastScore||0;
+            earnedPoints=previous?.lastEarned||0;
+            if(!roomRound&&!previous)try{localStorage.removeItem(CHECKPOINT_KEY)}catch(error){}
             distance = 0;
             missionStartDistance = 0;
             missionTicks = 0;
@@ -3927,21 +4269,26 @@ function updateTerrainEvent(){
             bossTaunt = null;
             bossFinalDialogue=false;
             missionTransitionTicks=0;
+            hideBossDebrief();lastBossAward=null;
             bossDefeatedThisMission=false;
             redAlertTicks=0;
             redAlertTriggered=false;
             wingmen=[];fusionTicks=0;fusionCooldown=0;fusionBossUsed=false;
-            missionHits=Array(20).fill(0);adaptiveThreat=1;bossStartTick=0;
+            const savedHits=checkpoint?.sector===startSector
+                ?checkpoint.missionHits??(previous?.mission?.sector===startSector?previous.mission.missionHits:null)
+                :null;
+            missionHits=window.RiverMissionReport.restore(savedHits,startSector);adaptiveThreat=1;bossStartTick=0;
             bossDropPhase=0;
             previousPlayerPosition=null;
             hazardWaveCooldown=0;
             bombFlash = 0;
-            sector = Math.max(1,Math.min(20,Number(levelSelector.value)||1));
-            campaignVerified=sector===1;
-            if(campaignVerified){pilotProfile.lastSequentialMission=0;savePilotProfile()}
+            sector = startSector;
+            campaignVerified=!roomRound&&(checkpoint?.sector===sector?checkpoint.verifiedRun===true:sector===1);
+            if(campaignVerified){pilotProfile.lastSequentialMission=checkpoint?.sector===sector?sector-1:0;savePilotProfile()}
             kills = 0;
             rescuedSoldiers = 0;
             fuelSpawnAt = -99999;
+            rescueBoatsLastAt=null;
             bombsPickedThisMission = 0;
             structureLastDistance=-99999;
             islandLastDistance=-99999;
@@ -3949,7 +4296,7 @@ function updateTerrainEvent(){
             obstacleSequence=0;
             lastEnemyDistance=-99999;
             lives=3;
-            continues=10;
+            continues=roomRound?0:10;
             bossActive = false;
             parryTicks=0;parryCooldown=0;parryHeld=false;parryHeldTicks=0;parryPrecisionTicks=0;swordRushCooldown=0;swordRushTarget=null;swordRushFrames=0;skillTrajectories=[];
             bossSkillEquipped=null;bossSkillCharge=0;bossSkillCooldown=0;bossSkillEffect=null;
@@ -3964,14 +4311,15 @@ function updateTerrainEvent(){
             const config = aircraftCatalog.PLANES[selectedPlane];
             player.aircraftType=selectedPlane;
             player.aircraftVisual=selectedPlane;
-            try{localStorage.setItem('river_active_plane',selectedPlane)}catch(error){}
-            player.speed = config.speed;
+            if(!roomRound)try{localStorage.setItem('river_active_plane',selectedPlane)}catch(error){}
+            const flight=aircraftCatalog.flightStats(selectedPlane,journey);
+            player.speed = flight.speed;
             player.baseScrollSpeed = config.scroll * 0.85; // 15% menos rolagem, sem alterar duração da missão
             player.currentScrollSpeed = player.baseScrollSpeed;
-            player.fuelDepletionRate = config.fuel*.8*Math.max(.72,1-(journey-1)*.018);
+            player.fuelDepletionRate = flight.fuelRate;
             player.weapon = config.weapons[0];
             player.weaponTimer = 0;
-            player.maxShield=Math.round(150*(config.shieldMultiplier||1)*(1+(journey-1)*.035));
+            player.maxShield=flight.shield;
             player.shield=player.maxShield;
             player.specialShots = 0;
             player.invulnerable = 0;
@@ -3993,6 +4341,13 @@ function updateTerrainEvent(){
             document.getElementById('game-over-screen').classList.add('hidden');
             document.getElementById('pause-screen').classList.add('hidden');
 
+            if(checkpoint?.sector===sector){
+                score=Math.max(0,Number(checkpoint.score)||0);kills=Math.max(0,Number(checkpoint.kills)||0);
+                lives=Math.max(1,Number(checkpoint.lives)||3);continues=Math.max(0,Number(checkpoint.continues)||0);
+                earnedPoints=Math.max(0,Number(checkpoint.earnedPoints)||0);
+            }
+            if(!roomRound)try{localStorage.setItem('riverstorm:lastSelectedShip',selectedPlane)}catch(error){}
+            persistRunProgress();
             document.getElementById('mission-banner').textContent=campaign.at(sector).name;
             gameState = 'PLAYING';
             simulationClock.reset();
@@ -4024,12 +4379,12 @@ function updateTerrainEvent(){
                 if(player.specialShots<=0)player.weapon=baseWeapon;
                 else if(--player.specialShots===0){
                     // Disparo número 100 ainda utiliza a arma especial.
-                    try{window.RiverSFX?.weapon(player.weapon)}catch(e){}
+                    try{window.RiverSFX?.weapon(aircraftCatalog.SIGNATURE_SHOTS[player.weapon]?.sprite||player.weapon)}catch(e){}
                     if(player.weapon==='BANK_MISSILE')fireBankMissiles();else aircraftCatalog.shoot(player.weapon,player,bullets);
                     fireWingmen();player.weapon=baseWeapon;return;
                 }
             }
-            try{window.RiverSFX?.weapon(player.weapon)}catch(e){}
+            try{window.RiverSFX?.weapon(aircraftCatalog.SIGNATURE_SHOTS[player.weapon]?.sprite||player.weapon)}catch(e){}
             if(player.effectType==='ICE'&&player.effectTimer>0&&missionTicks%2!==0)return;
             const previousCount=bullets.length;
             if(player.weapon==='BANK_MISSILE')fireBankMissiles();else aircraftCatalog.shoot(player.weapon,player,bullets);
@@ -4380,9 +4735,10 @@ function updateTerrainEvent(){
             
         }
         function gameOver(reason) {
+            if(roomRound){reportRoomMission(true);return;}
             gameState = 'GAMEOVER';
             playlist.pause();soundtrack.stop();
-            if(score>earnedPoints){bank+=score-earnedPoints;earnedPoints=score;try{localStorage.setItem(earnedKey,String(bank))}catch(e){}refreshWallet()}
+            persistRunProgress();
             if (score > hiScore) {
                 hiScore = score;
                 localStorage.setItem('rr_hiscore_ptbr', hiScore);
@@ -4465,7 +4821,7 @@ function updateTerrainEvent(){
             });
             // Sprites de alvos destrutíveis em três estados; formas variam por bioma.
             for(const target of enemies){
-              if(Number(sector)<=2||!target.terrainObstacle||target.hp<=0||target.y< -30||target.y>VIRTUAL_HEIGHT+30)continue;
+              if(Number(sector)<=20||!target.terrainObstacle||target.hp<=0||target.y< -30||target.y>VIRTUAL_HEIGHT+30)continue;
               const stage=Math.max(1,Math.ceil(3*target.hp/Math.max(1,target.maxHp)));
               ctx.save();ctx.translate(target.x,target.y);
               const color=stage===3?'#38bdf8':stage===2?'#fbbf24':'#f87171';
@@ -4506,7 +4862,7 @@ function updateTerrainEvent(){
             drawBossCompactMeters();
             for(const e of enemies){if(e.type==='MECHA_SWORD'&&(e.slashArc>0||e.slashWarn>0)){ctx.save();ctx.strokeStyle=e.slashWarn>0?'#fde68a':'#f0abfc';ctx.lineWidth=4;ctx.shadowColor='#e879f9';ctx.shadowBlur=15;ctx.beginPath();ctx.arc(e.x,e.y,e.slashWarn>0?25:34,-Math.PI*.8,Math.PI*.42);ctx.stroke();ctx.restore();if(e.slashArc>0)e.slashArc--;}}
             for(const e of enemies){if(e.type==='BOSS'&&e.swordTrail?.ticks>0){const t=e.swordTrail;t.ticks--;ctx.save();ctx.strokeStyle=t.kind==='blade'?'#f8fafc':t.kind==='impact'?'#fb923c':'#67e8f9';ctx.shadowColor=t.kind==='blade'?'#f472b6':t.kind==='impact'?'#ef4444':'#22d3ee';ctx.shadowBlur=25;ctx.lineWidth=7;ctx.beginPath();ctx.moveTo(t.x1-20,t.y1-18);ctx.quadraticCurveTo((t.x1+t.x2)/2+22,(t.y1+t.y2)/2-27,t.x2+23,t.y2+23);ctx.stroke();ctx.strokeStyle=t.kind==='blade'?'#fb7185':t.kind==='impact'?'#fde68a':'#a5f3fc';ctx.lineWidth=3;ctx.stroke();ctx.restore();}}
-            for(const e of enemies){if(e.type!=='BOSS'||e.dualTicks<=0)continue;ctx.save();ctx.globalAlpha=.23+.1*Math.sin(missionTicks*.15);ctx.strokeStyle=e.dualElement==='PRISM'?'#fef08a':'#a78bfa';ctx.lineWidth=5;ctx.beginPath();ctx.ellipse(e.x,e.y,e.width*.6,e.height*.6,missionTicks*.02,0,Math.PI*2);ctx.stroke();ctx.restore();}
+            for(const e of enemies){if(e.type!=='BOSS'||!(e.dualTicks>0))continue;ctx.save();ctx.globalAlpha=.23+.1*Math.sin(missionTicks*.15);ctx.strokeStyle=e.dualElement==='PRISM'?'#fef08a':'#a78bfa';ctx.lineWidth=5;ctx.beginPath();ctx.ellipse(e.x,e.y,e.width*.6,e.height*.6,missionTicks*.02,0,Math.PI*2);ctx.stroke();ctx.restore();}
             if(parryTicks>0){
                 // Campo de plasma: membrana translúcida, filamentos energizados e descarga do parry.
                 ctx.save();ctx.translate(player.x,player.y);
@@ -4555,7 +4911,7 @@ function updateTerrainEvent(){
             for(const e of enemies){if(e.type==='BOSS'&&e.warningTicks>0){ctx.save();ctx.strokeStyle='#facc15';ctx.lineWidth=4;ctx.globalAlpha=.5+Math.sin(missionTicks*.4)*.5;ctx.lineCap='round';ctx.beginPath();ctx.arc(e.x,e.y,Math.min(e.width*.45,e.height*.65)+8,Math.PI*1.15,Math.PI*1.85);ctx.stroke();ctx.restore();}}
             for(const e of enemies){if(e.type==='BOSS'&&e.stunnedTicks>0){ctx.save();ctx.globalAlpha=.28+.19*Math.sin(missionTicks*.2);ctx.fillStyle='#a855f7';ctx.beginPath();ctx.ellipse(e.x,e.y,e.width*.57,e.height*.58,0,0,Math.PI*2);ctx.fill();ctx.restore();}}
             if(player.disabledTimer>0&&player.effectType==='EMP'){ctx.save();ctx.globalAlpha=.3+.2*Math.sin(missionTicks*.2);ctx.fillStyle='#a855f7';ctx.beginPath();ctx.ellipse(player.x,player.y,23,28,0,0,Math.PI*2);ctx.fill();ctx.restore();}
-            for(const e of enemies){if(e.type!=='BOSS'||e.statusTicks<=0)continue;ctx.save();ctx.globalAlpha=.34;ctx.fillStyle=e.statusKind==='POISON'?'#4ade80':'#fb233a';ctx.beginPath();ctx.ellipse(e.x,e.y,e.width*.55,e.height*.56,0,0,Math.PI*2);ctx.fill();ctx.restore();}
+            for(const e of enemies){if(e.type!=='BOSS'||!(e.statusTicks>0))continue;ctx.save();ctx.globalAlpha=.34;ctx.fillStyle=e.statusKind==='POISON'?'#4ade80':'#fb233a';ctx.beginPath();ctx.ellipse(e.x,e.y,e.width*.55,e.height*.56,0,0,Math.PI*2);ctx.fill();ctx.restore();}
             drawFuelDepots();
             drawStructures();
             drawBombs();drawBombAftershock();
@@ -4563,7 +4919,13 @@ function updateTerrainEvent(){
             // Torres acopladas: cascos detalhados desaparecem ao serem destruídos.
             for(const boss of enemies){if(boss.type!=='BOSS'||boss.hp<=0||Number(boss.bossId||sector)<=2)continue;
               for(const side of [-1,1]){if((side<0?boss.turretLeftHp:boss.turretRightHp)<=0)continue;
-                ctx.save();ctx.translate(boss.x+side*boss.width*.37,boss.y+boss.height*.15);
+                const turretX=boss.x+side*boss.width*.37,turretY=boss.y+boss.height*.15;
+                if(Number(boss.bossId||sector)<=20){
+                  const sprite=window.RiverPremium?.get('enemy','TURRET',sector);
+                  if(sprite)window.RiverPremium.drawFitted(ctx,sprite,turretX,turretY,24,22);
+                  continue;
+                }
+                ctx.save();ctx.translate(turretX,turretY);
                 ctx.fillStyle='#26374a';ctx.strokeStyle='#e3c17a';ctx.lineWidth=1.5;
                 ctx.beginPath();ctx.moveTo(-14,-7);ctx.lineTo(-7,-12);ctx.lineTo(9,-12);ctx.lineTo(14,-4);ctx.lineTo(12,9);ctx.lineTo(-13,9);ctx.closePath();ctx.fill();ctx.stroke();
                 ctx.fillStyle='#788998';ctx.fillRect(-4,3,8,16);
@@ -4595,7 +4957,7 @@ function updateTerrainEvent(){
             drawHUD();
             drawActiveAircraftLabel();
             drawBossTaunt();
-            if(missionTransitionTicks>0){
+            if(missionTransitionTicks>0&&missionTransitionTicks<=180){
                 ctx.save();ctx.fillStyle='rgba(3,16,30,.85)';ctx.fillRect(12,VIRTUAL_HEIGHT*.38,VIRTUAL_WIDTH-24,100);
                 ctx.strokeStyle='#facc15';ctx.lineWidth=3;ctx.strokeRect(12,VIRTUAL_HEIGHT*.38,VIRTUAL_WIDTH-24,100);
                 ctx.fillStyle='#fef08a';ctx.textAlign='center';ctx.font='bold 15px system-ui';
@@ -4679,6 +5041,7 @@ function updateTerrainEvent(){
                 ({fire:'TIRO',bomb:'BOMBA',pause:'PAUSA'})[name] + ': BOTÃO ' + physicalGamepad.settings[name];
         }
         function showControllerSettings(open) {
+            if(!open&&document.getElementById('rs-trophy-room').open)document.getElementById('rs-trophy-room').close();
             controllerMenuOpen = Boolean(open);pendingRemap=null;controllerMenuIndex=0;
             controllerDialog.classList.toggle('hidden',!open);
             controllerDialog.style.display=open?'block':'none';
@@ -4691,6 +5054,23 @@ function updateTerrainEvent(){
                 // Não roubar foco/rolagem dos controles de toque.
             }
         }
+        const trophyRoom=document.getElementById('rs-trophy-room');
+        function openTrophyRoom(){
+          const trophies=campaignTrophies(),best=trophies.best;
+          document.getElementById('rs-trophy-records').replaceChildren(
+            awardStat('Campanhas de 20 missões concluídas',String(trophies.completed)),
+            awardStat('Patente atual',rankName()),
+            awardStat('Promoções até a última',String(RANKS.length-journey)),
+            awardStat('Melhor nota de danos',best?reportRules.grade(best.hits)+' · Missão '+best.mission+' — '+campaign.at(best.mission).name:'Sem registro')
+          );
+          document.getElementById('rs-trophy-medals').replaceChildren(...Object.values(reportRules.medals).map(medal=>{
+            const card=awardStat('Medalhas de '+medal.name,String(trophies.medals[medal.id]));
+            card.prepend(medalIcon(medal));return card;
+          }));
+          trophyRoom.showModal();
+        }
+        document.getElementById('rs-trophy-room-open').addEventListener('click',openTrophyRoom);
+        document.getElementById('rs-trophy-room-close').addEventListener('click',()=>trophyRoom.close());
         const profilePanel=document.getElementById('pilot-profile-panel');
         document.getElementById('pilot-profile-open').addEventListener('click',()=>{renderPilotProfile();profilePanel.hidden=false;profilePanel.style.display='block';profilePanel.scrollIntoView({block:'start',behavior:'smooth'})});
         document.getElementById('pilot-profile-close').addEventListener('click',()=>{profilePanel.hidden=true;profilePanel.style.display='none';controllerDialog.scrollTop=0});
@@ -4751,7 +5131,8 @@ function updateTerrainEvent(){
         });
         window.addEventListener('keydown',e=>{
             if(!controllerMenuOpen)return;
-            if(e.code==='Escape'){e.preventDefault();if(pendingRemap){pendingRemap=null;mapHelp.textContent='Remapeamento cancelado.'}else showControllerSettings(false)}
+            if(e.code==='Escape'&&document.getElementById('rs-update-dialog').open)return;
+            if(e.code==='Escape'){e.preventDefault();if(trophyRoom.open){trophyRoom.close();return;}if(pendingRemap){pendingRemap=null;mapHelp.textContent='Remapeamento cancelado.'}else showControllerSettings(false)}
         });
         window.addEventListener('gamepadconnected',()=>{lastControllerStatus='';});
         window.addEventListener('gamepaddisconnected',()=>{lastControllerStatus='';});
@@ -4820,6 +5201,14 @@ function updateTerrainEvent(){
         for(const [key,plane] of Object.entries(aircraftCatalog.PLANES)){
             const opt=document.createElement('option');opt.value=key;opt.textContent=plane.name+(plane.price?' — '+plane.price+' pontos':' — grátis');settingsPlane.appendChild(opt);
         }
+        function showShopSpecs(){
+            const plane=aircraftCatalog.PLANES[settingsPlane.value];
+            document.getElementById('settings-plane-specs').textContent=plane?
+                'Blindagem '+(plane.shieldMultiplier||1).toFixed(2)+'× · Dano '+(plane.damageMultiplier||1).toFixed(2)+
+                '× · Bônus de arma especial '+(plane.powerMultiplier||1).toFixed(2)+'× · Tiro padrão: '+aircraftCatalog.WEAPONS[plane.weapons[0]]:'';
+        }
+        settingsPlane.addEventListener('change',showShopSpecs);
+        showShopSpecs();
         document.getElementById('settings-buy-plane').addEventListener('click',()=>{
             planeSelect.value=settingsPlane.value;refreshPlaneChoice();
             document.getElementById('buy-plane').click();
@@ -4830,7 +5219,12 @@ function updateTerrainEvent(){
         const soundtrack=new window.RiverMusic();
         soundtrack.volume=userPrefs.music/100*.16;
         const menuMusic=new window.RiverMenuMusic();
-        function syncMenuMusic(gesture=false){menuMusic.sync(gameState==='START'&&playlist.audio.paused,playlist.enabled,userPrefs.music/100,gesture);}
+        function syncMenuMusic(gesture=false){
+            if(gameState==='START'&&!playlist.audio.paused)playlist.pause();
+            menuMusic.sync(gameState==='START',playlist.enabled,userPrefs.music/100,gesture);
+        }
+        document.getElementById('menu-theme-play').addEventListener('click',()=>syncMenuMusic(true));
+        window.addEventListener('pageshow',()=>syncMenuMusic());
         document.addEventListener('pointerdown',()=>syncMenuMusic(true),{capture:true});
         document.addEventListener('keydown',()=>syncMenuMusic(true),{capture:true});
         setInterval(syncMenuMusic,250);
@@ -4914,7 +5308,8 @@ function updateTerrainEvent(){
                 requestAnimationFrame(gameLoop);return;
             }
             previousMenuDirection=false;previousMenuConfirm=false;
-            if (gamepadState.justPause) {
+            const inRoomLobby=gameState==='START'&&!document.getElementById('mode-multi-info').classList.contains('hidden');
+            if (gamepadState.justPause&&!inRoomLobby) {
                 if (gameState === 'START' || gameState === 'GAMEOVER') { sound.init(); resetGame(); }
                 else togglePause();
             }
@@ -4927,6 +5322,7 @@ function updateTerrainEvent(){
             }
             if(gameState === "PLAYING") simulationClock.advance(timestamp, update);
             else simulationClock.reset();
+            if(score!==lastSavedScore&&gameState==='PLAYING')persistRunProgress(false,missionTransitionTicks>0?Math.min(20,sector+1):sector);
             // A simulação mantém 60 passos/s; o desenho se adapta ao desempenho real.
             const quality=localStorage.getItem('river_quality')||'eco';
             const renderInterval=quality==='eco'&&gameLoop.slowDevice?1000/30:1000/60;
@@ -4976,7 +5372,8 @@ function updateTerrainEvent(){
         const resolutionSelect=document.getElementById('resolution-select');
         try{const stored=localStorage.getItem('riverstorm_resolution_v1');if(['auto','1080p','4k'].includes(stored))resolutionSelect.value=stored;}catch(error){}
         resolutionSelect.addEventListener('change',()=>{try{localStorage.setItem('riverstorm_resolution_v1',resolutionSelect.value);}catch(error){}resizeCanvas();});
-                window.addEventListener('resize', resizeCanvas);
+        window.addEventListener('resize', resizeCanvas);
+        new ResizeObserver(resizeCanvas).observe(canvas);
         resizeCanvas();
 
         // --- MOUSE: mover para pilotar, botão esquerdo atira, direito lança bomba.
@@ -5084,33 +5481,48 @@ function updateTerrainEvent(){
         document.getElementById('save-mission-btn').addEventListener('click',()=>{document.getElementById('save-confirm-modal').classList.remove('hidden');document.getElementById('save-confirm-modal').style.display='flex';});
         document.getElementById('cancel-save-btn').addEventListener('click',()=>{document.getElementById('save-confirm-modal').classList.add('hidden');document.getElementById('save-confirm-modal').style.display='none';});
         document.getElementById('confirm-save-btn').addEventListener('click',()=>{document.getElementById('save-confirm-modal').classList.add('hidden');document.getElementById('save-confirm-modal').style.display='none';
-            const ok=writeCheckpoint(missionTransitionTicks>0?Math.min(20,sector+1):sector);
+            if(roomRound){document.getElementById('save-mission-status').textContent='O desafio da sala tem placar separado.';return;}
+            const ok=saveActiveProgress();
             document.getElementById('save-mission-status').textContent=ok?'MISSÃO SALVA! Volte pelo menu principal.':'Não foi possível salvar neste navegador.';
         });
         document.getElementById('pause-exit-btn').addEventListener('click',()=>{
-            if(!writeCheckpoint(missionTransitionTicks>0?Math.min(20,sector+1):sector))return;
-            gameState='START';playlist.pause();soundtrack.stop();
+            if(roomRound){reportRoomMission(true);return;}
+            saveActiveProgress();hideBossDebrief();
+            gameState='START';playlist.pause();soundtrack.stop();syncMenuMusic(true);
+            delete document.getElementById('game-container').dataset.gameActive;
             document.getElementById('pause-screen').classList.add('hidden');
             document.getElementById('start-screen').classList.remove('hidden');
             document.getElementById('start-screen').style.display='';
+            document.getElementById('start-screen').setAttribute('aria-hidden','false');
+            modeSelection.classList.remove('hidden');
+            syncFeaturedPilot();
             updateContinueButton();
         });
+        window.addEventListener('pagehide',saveActiveProgress);
+        document.addEventListener('visibilitychange',()=>{if(document.hidden)saveActiveProgress();});
         const continueMissionBtn=document.createElement('button');
         continueMissionBtn.id='continue-mission-btn';continueMissionBtn.className='arcade-btn bg-emerald-600 text-white font-black px-8 py-3 rounded-lg mb-2 hidden';
         document.getElementById('start-btn').parentNode.insertBefore(continueMissionBtn,document.getElementById('start-btn'));
-        continueMissionBtn.addEventListener('click',()=>{
-            const c=readCheckpoint();if(!c)return;
-            levelSelector.value=String(c.sector);
-            selectedPlane=planeSelect.value;refreshPlaneChoice(); // escolha atual vence checkpoint
-            enterGameplay();
-            if(gameState!=='PLAYING')return;
-            score=Math.max(0,Number(c.score)||0);kills=Math.max(0,Number(c.kills)||0);lives=Math.max(1,Number(c.lives)||3);
-            continues=Math.max(0,Number(c.continues)||0);earnedPoints=Math.max(0,Number(c.earnedPoints)||0);campaignVerified=Boolean(c.verifiedRun&&c.journey===journey);if(campaignVerified){pilotProfile.lastSequentialMission=Math.max(0,c.sector-1);savePilotProfile()}
-        });
+        function resumeMission(checkpoint){
+            if(!checkpoint||!unlocked.includes(checkpoint.selectedPlane))return;
+            levelSelector.value=String(checkpoint.sector);
+            planeSelect.value=checkpoint.selectedPlane;
+            refreshPlaneChoice();
+            enterGameplay(checkpoint);
+        }
+        continueMissionBtn.addEventListener('click',()=>resumeMission(readCheckpoint()));
         updateContinueButton();
         document.getElementById('pause-settings-btn').addEventListener('click',()=>showControllerSettings(true));
         function togglePause() {
-            if (gameState === 'PLAYING') {gameState='PAUSED'; playlist.pause();soundtrack.stop(); document.getElementById('pause-screen').classList.remove('hidden');}
+            if (gameState === 'PLAYING') {
+                gameState='PAUSED';playlist.pause();soundtrack.stop();
+                document.getElementById('save-mission-btn').hidden=Boolean(roomRound);
+                document.getElementById('pause-exit-btn').textContent=roomRound?'DESISTIR DA RODADA':'SALVAR E SAIR AO MENU';
+                const pauseScreen=document.getElementById('pause-screen');
+                pauseScreen.style.removeProperty('display');
+                pauseScreen.classList.remove('hidden');
+                pauseScreen.setAttribute('aria-hidden','false');
+            }
             else if (gameState === 'PAUSED') {gameState='PLAYING'; playlist.resume(); document.getElementById('pause-screen').classList.add('hidden');}
         }
         document.getElementById('btn-pause-touch').addEventListener('pointerdown', event => {event.preventDefault();togglePause();});
@@ -5131,14 +5543,30 @@ function updateTerrainEvent(){
         const rsFeatureIds=['falcao','vespa','cometa','fenix','helicoptero','disco','titan'];
         const rsFeatureArts=['snabo_falcao','jhow_vespa','btata_cometa','napas_fenix','casper_aguia_vtol','roger_ufo_aurora','dudu_titan'];
         const rsFeatureNames=['FALCÃO','VESPA','COMETA','FÊNIX','ÁGUIA VTOL','AURORA','TITAN'];
-        function syncFeaturedPilot(){
-          let id='falcao';
-          try{id=localStorage.getItem('riverstorm:lastSelectedShip')||localStorage.getItem('river_active_plane')||'falcao';}catch(_){}
-          const ix=Math.max(0,rsFeatureIds.indexOf(id));
-          document.getElementById('rs-menu-featured-photo').src='./assets/ui/premium/pilots/'+rsFeatureArts[ix]+'.png';
-          document.getElementById('rs-menu-featured-name').textContent=rsFeatureNames[ix];
-          document.getElementById('rs-menu-featured-ship').textContent='NAVE: '+rsFeatureNames[ix];
+        for(const [id,plane] of Object.entries(aircraftCatalog.PLANES))if(plane.premiumExtra){
+            rsFeatureIds.push(id);rsFeatureNames.push(plane.name);
         }
+        function pilotArt(index){
+            const id=rsFeatureIds[index];
+            return aircraftCatalog.PLANES[id]?.premiumExtra?
+                './assets/ui/premium/pilots/'+id+'.png':'./assets/ui/premium/pilots/'+rsFeatureArts[index]+'.png';
+        }
+        const featuredPilot=document.getElementById('rs-menu-featured-pilot');
+        function syncFeaturedPilot(){
+          const {mission,lastPlane}=readPendingMission();
+          const ix=Math.max(0,rsFeatureIds.indexOf(mission?.selectedPlane||lastPlane));
+          const id=rsFeatureIds[ix],plane=aircraftCatalog.PLANES[id];
+          const name=plane.pilotName?plane.pilotName+' · '+rsFeatureNames[ix]:rsFeatureNames[ix];
+          document.getElementById('rs-menu-featured-photo').src=pilotArt(ix);
+          const ship=document.getElementById('rs-menu-featured-ship-art');
+          ship.hidden=!plane.premiumExtra;
+          if(plane.premiumExtra)ship.src='./assets/sprites/premium/aircraft/'+id+'_normal.png';
+          document.getElementById('rs-menu-featured-name').textContent=name;
+          document.getElementById('rs-menu-featured-ship').textContent=mission?'CONTINUAR MISSÃO '+mission.sector:name;
+          featuredPilot.disabled=!mission;
+          featuredPilot.setAttribute('aria-label',mission?'Continuar missão '+mission.sector+' com '+name:'Último piloto usado: '+name);
+        }
+        featuredPilot.addEventListener('click',()=>resumeMission(readPendingMission().mission));
         syncFeaturedPilot();
         // Adaptar hotspots ao retângulo efetivamente ocupado pela arte em contain.
         (function alignApprovedMenuArt(){
@@ -5159,48 +5587,66 @@ function updateTerrainEvent(){
         // Artboard independente: coordenadas dos hotspots seguem a imagem inteira.
         document.getElementById('mode-settings').addEventListener('click',()=>{
           showControllerSettings(true);
-          const dialog=document.getElementById('controller-settings');
-          if(dialog){dialog.style.zIndex='250';dialog.style.display='block';}
+
         });
 
         document.getElementById('mode-single').addEventListener('click',()=>{
           // Seleção visual restaurada sem alterar o núcleo do hangar/campanha.
+          const ids=rsFeatureIds.filter(id=>!aircraftCatalog.PLANES[id].premiumExtra||unlocked.includes(id));
+          const roster=ids.join(',');
           let screen=document.getElementById('rs-premium-pilots');
+          if(screen&&screen.dataset.roster!==roster){screen.remove();screen=null;}
           if(!screen){
             screen=document.createElement('section');screen.id='rs-premium-pilots';
             screen.setAttribute('aria-label','Seleção de pilotos RiverStorm');
             screen.style.cssText='position:absolute;inset:0;z-index:110;background:#041225;overflow:auto;padding:16px;box-sizing:border-box;color:#ebfaff;text-align:center';
             screen.innerHTML='<h2 style="font:900 clamp(26px,5vw,46px) system-ui;color:#6eeaff;margin:3px">SELEÇÃO DE PILOTOS</h2><p style="color:#fbd472;font-weight:bold">ESCOLHA SUA AERONAVE</p><div id="rs-premium-pilot-cards" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(138px,1fr));gap:12px;max-width:1050px;margin:16px auto"></div><button id="rs-premium-pilot-back" style="padding:12px 20px;border:1px solid #55cfff;background:#10253c;color:white;border-radius:8px">VOLTAR</button>';
             modeSelection.parentElement.appendChild(screen);
-            const ids=['falcao','vespa','cometa','fenix','helicoptero','disco','titan'];
-            const art=['snabo_falcao','jhow_vespa','btata_cometa','napas_fenix','casper_aguia_vtol','roger_ufo_aurora','dudu_titan'];
-            const names=['FALCÃO','VESPA','COMETA','FÊNIX','ÁGUIA VTOL','AURORA','TITAN'];
+            screen.dataset.roster=roster;
+            const names=ids.map(id=>rsFeatureNames[rsFeatureIds.indexOf(id)]);
+            const buttons=[];
             // Painel ampliado independente: as artes oficiais não são recortadas no card.
             screen.style.display='flex';screen.style.flexDirection='column';screen.style.alignItems='center';
             const layout=document.createElement('div');layout.style.cssText='display:grid;grid-template-columns:minmax(0,1fr) minmax(220px,34%);gap:12px;width:100%;max-width:1300px;align-items:start';
             const detail=document.createElement('aside');detail.id='rs-premium-pilot-detail';detail.style.cssText='border:2px solid #27c8fb;border-radius:12px;background:#021529ee;padding:10px;text-align:center;min-width:0';
-            detail.innerHTML='<strong style="color:#fcd56a">PILOTO EM DESTAQUE</strong><img id="rs-pilot-detail-photo" alt="Piloto e nave selecionados" style="width:100%;height:clamp(210px,40vh,420px);object-fit:contain;display:block"><h3 id="rs-pilot-detail-name" style="color:#70e8ff;margin:5px"></h3><div id="rs-pilot-detail-bars" style="text-align:left;color:#e8f9ff"></div><button id="rs-pilot-confirm" type="button" style="width:100%;padding:12px;background:#076653;border:2px solid #44e4b9;color:white;border-radius:8px;font-weight:bold">CONFIRMAR PILOTO E CONTINUAR</button>';
+            detail.innerHTML='<strong style="color:#fcd56a">PILOTO EM DESTAQUE</strong><div class="rs-pilot-detail-art"><img id="rs-pilot-detail-photo" alt="Piloto selecionado" style="width:100%;height:clamp(210px,40vh,420px);object-fit:contain;display:block"><img id="rs-pilot-detail-ship" class="rs-bonus-ship" alt="" hidden></div><h3 id="rs-pilot-detail-name" style="color:#70e8ff;margin:5px"></h3><div id="rs-pilot-detail-bars" style="text-align:left;color:#e8f9ff"></div><button id="rs-pilot-confirm" type="button" style="width:100%;padding:12px;background:#076653;border:2px solid #44e4b9;color:white;border-radius:8px;font-weight:bold">CONFIRMAR PILOTO E CONTINUAR</button>';
             const cards=screen.querySelector('#rs-premium-pilot-cards');
             cards.style.cssText='display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;width:100%;margin:0';
             cards.parentElement.insertBefore(layout,cards);layout.append(cards,detail);
             // Responsividade centralizada no CSS Premium; nenhum estilo antigo injetado.
             let current=0;
-            const stats=['VELOCIDADE','BLINDAGEM','AUTONOMIA','ARMAMENTO'];
             const highlight=(i)=>{
               current=i;
               const previewSelect=document.getElementById('plane-select');
               if(previewSelect){previewSelect.value=ids[i];previewSelect.dispatchEvent(new Event('change',{bubbles:true}));}
               const detailPhoto=screen.querySelector('#rs-pilot-detail-photo');
-              detailPhoto.src='./assets/ui/premium/pilots/'+art[i]+'.png';
-              screen.querySelector('#rs-pilot-detail-name').textContent=names[i];
+              const plane=aircraftCatalog.PLANES[ids[i]];
+              detailPhoto.src=pilotArt(rsFeatureIds.indexOf(ids[i]));
+              const detailShip=screen.querySelector('#rs-pilot-detail-ship');
+              detailShip.hidden=!plane.premiumExtra;
+              if(plane.premiumExtra)detailShip.src='./assets/sprites/premium/aircraft/'+ids[i]+'_normal.png';
+              screen.querySelector('#rs-pilot-detail-name').textContent=plane.pilotName?plane.pilotName+' · '+names[i]:names[i];
               const bars=screen.querySelector('#rs-pilot-detail-bars');bars.replaceChildren();
-              for(const [idx,label] of stats.entries()){
-                const wrap=document.createElement('div');wrap.style.cssText='margin:7px 0;font:700 11px system-ui';
-                wrap.textContent=label;
-                const track=document.createElement('div');track.style.cssText='height:8px;background:#183754;border-radius:5px;margin-top:3px';
-                const source=document.getElementById(['hangar-speed-bar','hangar-shield-bar','hangar-range-bar','hangar-fire-bar'][idx]);
-                const fill=document.createElement('div');fill.style.cssText='height:100%;background:#38d5ff;border-radius:5px;width:'+(source?.style.width||'0%');track.append(fill);wrap.append(track);bars.append(wrap);
+              for(const [id,label,value,max,display] of aircraftMetrics(ids[i])){
+                const wrap=document.createElement('div');wrap.className='rs-pilot-metric';wrap.dataset.stat=id;
+                const heading=document.createElement('span');heading.className='rs-pilot-metric-label';
+                const reading=document.createElement('b');reading.textContent=display;
+                heading.append(label,reading);
+                const track=document.createElement('span');track.className='rs-pilot-track';track.setAttribute('aria-hidden','true');
+                const fill=document.createElement('span');fill.style.width=Math.min(100,value/max*100)+'%';
+                track.append(fill);wrap.append(heading,track);bars.append(wrap);
               }
+              const weapon=plane.weapons[0],signature=aircraftCatalog.SIGNATURE_SHOTS[weapon];
+              const armament=document.createElement('div');armament.className='rs-pilot-default-weapon';
+              const weaponName=document.createElement('strong');weaponName.textContent=aircraftCatalog.WEAPONS[weapon];
+              armament.append('TIRO PADRÃO',weaponName);
+              if(signature)armament.append(signature.description+' Alcance: '+signature.range+' u.');
+              bars.append(armament);
+              const info=document.createElement('p');
+              info.className='rs-pilot-spec';
+              info.textContent='Armas especiais '+(plane.powerMultiplier||1).toFixed(2)+'×'+
+                (unlocked.includes(ids[i])?' · DISPONÍVEL':' · BLOQUEADA — '+plane.price+' PONTOS');
+              bars.append(info);
               cards.querySelectorAll('button').forEach((b,j)=>{b.classList.toggle('rs-selected',j===i);b.setAttribute('aria-pressed',String(j===i));});
             };
             let confirming=false,lastCard=-1,lastCardClick=0;
@@ -5213,8 +5659,7 @@ function updateTerrainEvent(){
                 return;
               }
               confirming=true;
-              try{localStorage.setItem('riverstorm:lastSelectedShip',ids[current]);localStorage.setItem('river_active_plane',ids[current]);}catch(e){}if(typeof syncFeaturedPilot==='function')syncFeaturedPilot();
-              const card=cards.children[current];
+              const card=buttons[current];
               if(!card){confirming=false;return;}
               card.classList.add('rs-pilot-confirming');
               setTimeout(()=>{
@@ -5226,15 +5671,33 @@ function updateTerrainEvent(){
               },420);
             };
             detail.querySelector('#rs-pilot-confirm').addEventListener('click',confirm);
+            let bonusHeadingAdded=false;
             for(let i=0;i<ids.length;i++){
+              const plane=aircraftCatalog.PLANES[ids[i]];
+              if(plane.premiumExtra&&!bonusHeadingAdded){
+                const heading=document.createElement('h3');
+                heading.className='rs-bonus-heading';heading.textContent='ESQUADRÃO ESPECIAL';
+                cards.append(heading);bonusHeadingAdded=true;
+              }
               const card=document.createElement('button');card.type='button';card.style.cssText='border:2px solid #20abdf;background:#051f34;padding:8px;border-radius:12px;color:white;cursor:pointer';
-              const pic=document.createElement('img');pic.src='./assets/ui/premium/pilots/'+art[i]+'.png';pic.alt='Piloto '+names[i];pic.style.cssText='width:100%;height:175px;object-fit:contain';
-              card.append(pic);const t=document.createElement('strong');t.textContent=names[i];card.append(t);cards.append(card);
+              const artwork=document.createElement('span');artwork.className='rs-pilot-card-art';
+              const pic=document.createElement('img');pic.src=pilotArt(rsFeatureIds.indexOf(ids[i]));pic.alt='';pic.style.cssText='width:100%;height:175px;object-fit:contain';
+              artwork.append(pic);
+              if(plane.premiumExtra){
+                const ship=document.createElement('img');ship.className='rs-bonus-ship';ship.alt='';
+                ship.src='./assets/sprites/premium/aircraft/'+ids[i]+'_normal.png';artwork.append(ship);
+              }
+              card.append(artwork);const t=document.createElement('strong');t.textContent=plane.pilotName||names[i];card.append(t);
+              const shipName=document.createElement('small');shipName.textContent=names[i];card.append(shipName);
+              if(!unlocked.includes(ids[i])){
+                const lock=document.createElement('small');lock.textContent=aircraftCatalog.PLANES[ids[i]].price+' PONTOS';card.append(lock);
+              }
+              cards.append(card);buttons.push(card);
               card.dataset.aircraft=ids[i];
-              card.setAttribute('aria-label','Selecionar '+names[i]);
+              card.setAttribute('aria-label','Selecionar '+(plane.pilotName?plane.pilotName+' · ':'')+names[i]);
               card.addEventListener('keydown',event=>{
                 const delta={ArrowRight:1,ArrowLeft:-1,ArrowDown:4,ArrowUp:-4}[event.key];
-                if(delta){event.preventDefault();const next=(i+delta+ids.length)%ids.length;highlight(next);cards.children[next].focus();}
+                if(delta){event.preventDefault();const next=(i+delta+ids.length)%ids.length;highlight(next);buttons[next].focus();}
                 if(event.key==='Enter'){event.preventDefault();highlight(i);confirm();}
               });
               card.addEventListener('click',(event)=>{
@@ -5261,22 +5724,6 @@ function updateTerrainEvent(){
           document.getElementById('mode-single').classList.remove('hidden');
           document.getElementById('mode-multi').classList.remove('hidden');
         });
-        // Somente detecção de release. Instaladores nunca são executados sem verificação.
-        async function checkReleaseVersion(){
-          const target=document.getElementById('riverstorm-update-notice');
-          try{
-            const response=await fetch('https://api.github.com/repos/JorgeNovoJulho/river-assault-reimagined/releases/latest',{headers:{Accept:'application/vnd.github+json'}});
-            if(!response.ok)throw new Error('Release não publicado');
-            const release=await response.json();
-            const name=String(release.tag_name||'');
-            target.textContent='Release disponível: '+name+' • atualização via pacote oficial assinado';
-            const url=release.html_url;
-            if(url&&/^https:\/\/github\.com\/JorgeNovoJulho\/river-assault-reimagined\/releases\//.test(url)){
-              const link=document.createElement('a');link.href=url;link.target='_blank';link.rel='noopener noreferrer';link.textContent='Consultar atualização';link.style='display:block;color:#67e8f9;text-decoration:underline;margin-top:5px';target.appendChild(link);
-            }
-          }catch(error){target.textContent='Versão local ativa. Atualizações: consulte os releases oficiais quando estiver online.';}
-        }
-        checkReleaseVersion();
         document.getElementById('start-btn').addEventListener('click', enterGameplay);
 
         document.getElementById('victory-restart').addEventListener('click',()=>{document.getElementById('victory-screen').classList.add('hidden');levelSelector.value='1';resetGame()});
@@ -5319,5 +5766,17 @@ function updateTerrainEvent(){
 </script>
     <!-- Comparador experimental: mantém toda a lógica original do jogo. -->
     
+<dialog id="rs-update-dialog" class="rs-awards-backdrop" aria-labelledby="rs-update-title">
+  <h2 id="rs-update-title" class="rs-awards-heading">ATUALIZAÇÃO DO JOGO</h2>
+  <div class="rs-awards-grid">
+    <div class="rs-awards-stat">Versão instalada<strong id="rs-update-current"></strong></div>
+    <div class="rs-awards-stat">Nova versão<strong id="rs-update-next">—</strong></div>
+  </div>
+  <p id="rs-update-status" role="status"></p>
+  <button id="rs-update-install" type="button" disabled>BAIXAR E INSTALAR</button>
+  <button id="rs-update-retry" type="button">VERIFICAR NOVAMENTE</button>
+  <button id="rs-update-close" type="button">VOLTAR</button>
+</dialog>
+<script type="module" src="./src/game/app-updates.js"></script>
 </body>
 </html>

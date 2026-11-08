@@ -5,11 +5,12 @@ const path=require('node:path');
 const root=path.resolve(__dirname,'..');
 const ids=['falcao','vespa','cometa','fenix','helicoptero','disco','titan'];
 const states=['normal','disparo','boost','especial'];
-test('28 PNGs oficiais disponíveis e correspondentes ao manifesto',()=>{
+const bonus=['pioneira','cruzada','valquiria','colosso'];
+test('32 PNGs oficiais disponíveis e correspondentes ao manifesto',()=>{
  const dir=path.join(root,'assets/sprites/premium/aircraft');
  const manifest=JSON.parse(fs.readFileSync(path.join(dir,'manifest.json'),'utf8'));
- assert.deepEqual(Object.keys(manifest).sort(),[...ids].sort());
- for(const id of ids)for(const state of states){
+ assert.deepEqual(Object.keys(manifest).sort(),[...ids,...bonus].sort());
+ for(const id of [...ids,...bonus])for(const state of (bonus.includes(id)?['normal']:states)){
   const name=id+'_'+state+'.png';
   assert.equal(manifest[id][state],name);
   const data=fs.readFileSync(path.join(dir,name));
@@ -24,7 +25,7 @@ test('campanha desenha sprite conforme aeronave, não apenas Falcão',()=>{
  assert.match(renderer,/root\.RiverPremium\?\.aircraft\(aircraft/);
  assert.doesNotMatch(renderer,/aircraft==='falcao'\?root\.RiverPremium/);
 });
-test('build inclui as 28 artes PNG oficiais',()=>{
+test('build inclui as 32 artes PNG oficiais',()=>{
  const vite=fs.readFileSync(path.join(root,'vite.config.js'),'utf8');
  assert.match(vite,/assets\/sprites\/premium\/aircraft/);
  assert.match(vite,/Sprite Arcade Premium obrigatório ausente/);

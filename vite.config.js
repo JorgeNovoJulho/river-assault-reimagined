@@ -12,12 +12,16 @@ if(createHash('sha256').update(menuBytes).digest('hex')!==menuManifest.sha256)th
 mkdirSync(resolve('public/music'),{recursive:true});
 writeFileSync(resolve('public/music/menu-lucidez.opus'),menuBytes);
 
+const appVersion=process.env.RIVER_APP_VERSION||JSON.parse(readFileSync('package.json','utf8')).version;
+if(!/^\d+\.\d+\.\d+$/.test(appVersion))throw new Error('Versão do aplicativo inválida');
+
 const legacyScripts = [
   'src/input/gamepad.js',
   'src/game/aircraft.js',
   'src/game/clock.js',
   'src/game/pilot-progress.js',
   'src/game/campaign.js',
+  'src/game/mission-report.js',
   'src/render/scene2d5.js',
   'src/render/premium-registry.js',
   'src/render/premium-environment.js',
@@ -45,6 +49,7 @@ function copyAndVersionRuntime() {
       }
       html = html.split('href="./src/styles/tailwind.css"')
         .join('href="./src/styles/tailwind.css?build='+buildId+'"');
+      html = html.replace(/(<meta name="riverstorm-version" content=")[^"]+/, (_match,prefix)=>prefix+appVersion);
       html = html.replace('</head>',
         '<meta name="riverstorm-build" content="'+buildId+'">\n</head>');
       for(const file of ['assets/sprites/terrain/water-detail.svg','assets/sprites/terrain/river-island-detail.svg','assets/sprites/terrain/bridge-steel-detail.svg','assets/sprites/fx/explosion-ring.svg','assets/sprites/player/riverstorm-fighter.svg','assets/sprites/terrain/river-bank-left.svg','assets/sprites/terrain/river-bank-right.svg','assets/sprites/projectiles/plasma-blue.svg','assets/sprites/projectiles/plasma-red.svg','assets/sprites/bosses/iron-wasp.svg','assets/sprites/bosses/abyss-manta.svg','assets/sprites/bosses/crimson-rotor.svg','assets/sprites/bosses/granite-dam.svg','assets/sprites/bosses/crimson-spider.svg','assets/sprites/bosses/frost-sentinel.svg','assets/sprites/bosses/storm-mantis.svg','assets/sprites/bosses/neon-leviathan.svg','assets/sprites/bosses/inferno-dredger.svg','assets/sprites/bosses/glacier-titan.svg','assets/sprites/bosses/solar-vulture.svg','assets/sprites/bosses/night-harvester.svg','assets/sprites/bosses/thunder-serpent.svg','assets/sprites/bosses/blizzard-hydra.svg','assets/sprites/bosses/desert-reaper.svg','assets/sprites/bosses/abyssal-jellyfish.svg','assets/sprites/bosses/forge-colossus.svg','assets/sprites/bosses/polar-scythe.svg','assets/sprites/bosses/phantom-fortress.svg','assets/sprites/bosses/omega-overlord.svg','assets/sprites/terrain/island-tropical.svg','assets/sprites/terrain/island-rock.svg','assets/sprites/terrain/bridge-industrial.svg','assets/sprites/terrain/dam-concrete.svg','assets/sprites/terrain/bridge-damaged.svg','assets/sprites/terrain/dam-damaged.svg','assets/sprites/terrain/island-scorched.svg','assets/sprites/enemies/mecha-gun.svg','assets/sprites/enemies/mecha-sword.svg','assets/sprites/enemies/helicopter.svg','assets/sprites/enemies/submarine.svg','assets/sprites/enemies/tank.svg','assets/sprites/enemies/turret.svg','assets/sprites/enemies/ship.svg','assets/sprites/enemies/jet.svg','assets/sprites/enemies/zigzag.svg']){
@@ -129,9 +134,10 @@ function copyAndVersionRuntime() {
       const aircraftManifest=JSON.parse(readFileSync(resolve(aircraftRoot,'manifest.json'),'utf8'));
       const aircraftIds=['falcao','vespa','cometa','fenix','helicoptero','disco','titan'];
       const aircraftStates=['normal','disparo','boost','especial'];
-      for(const id of aircraftIds){
+      const bonusAircraftIds=['pioneira','cruzada','valquiria','colosso'];
+      for(const id of [...aircraftIds,...bonusAircraftIds]){
         if(!aircraftManifest[id])throw new Error('Aeronave ausente no manifesto: '+id);
-        for(const state of aircraftStates){
+        for(const state of (bonusAircraftIds.includes(id)?['normal']:aircraftStates)){
           const name=aircraftManifest[id][state];
           if(name!==id+'_'+state+'.png')throw new Error('Sprite incorreto no manifesto: '+id+'/'+state);
           const source=resolve(aircraftRoot,name),target=resolve('dist/assets/sprites/premium/aircraft',name);
@@ -143,7 +149,7 @@ function copyAndVersionRuntime() {
       copyFileSync(resolve(aircraftRoot,'manifest.json'),resolve('dist/assets/sprites/premium/aircraft/manifest.json'));
       writeFileSync(indexPath, html);
       writeFileSync(resolve('dist/build-info.json'), JSON.stringify({
-        build: buildId, release: '0.5.6', timestamp: new Date().toISOString()
+        build: buildId, release: appVersion, timestamp: new Date().toISOString()
       }, null, 2));
     }
   };

@@ -1,0 +1,136 @@
+name: Publicar atualização assinada do RiverStorm
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Tag estável existente, por exemplo v0.2.0
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: riverstorm-native-release
+  cancel-in-progress: false
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: refs/tags/${{ inputs.tag || github.ref_name }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - uses: dtolnay/rust-toolchain@stable
+      - run: npm ci
+      - run: npm test
+      - name: Compilar e assinar instalador
+        shell: pwsh
+        env:
+          RELEASE_TAG: ${{ inputs.tag || github.ref_name }}
+          RIVER_UPDATE_PUBLIC_KEY: ${{ vars.RIVER_UPDATE_PUBLIC_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+        run: |
+          node scripts/native-release.mjs windows $env:RELEASE_TAG
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          $env:RIVER_APP_VERSION = $env:RELEASE_TAG.Substring(1)
+          npx tauri icon assets/sprites/premium/aircraft/falcao_normal.png --fit contain
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          npx tauri build --bundles nsis --config src-tauri/update.release.json
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          $installers = @(Get-ChildItem src-tauri/target/release/bundle/nsis -Filter '*-setup.exe')
+          if ($installers.Count -ne 1) { throw 'Esperava um único instalador NSIS' }
+          New-Item -ItemType Directory -Force release-assets | Out-Null
+          Copy-Item -LiteralPath $installers[0].FullName -Destination release-assets/riverstorm-windows-x64.exe
+          Copy-Item -LiteralPath ($installers[0].FullName + '.sig') -Destination release-assets/riverstorm-windows-x64.exe.sig
+      - uses: actions/upload-artifact@v4
+        with:
+          name: signed-windows
+          path: release-assets/
+          if-no-files-found: error
+
+  android:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: refs/tags/${{ inputs.tag || github.ref_name }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: android-actions/setup-android@v3
+      - run: npm ci
+      - run: npm test
+      - name: Compilar APK
+        env:
+          RELEASE_TAG: ${{ inputs.tag || github.ref_name }}
+        run: |
+          export RIVER_APP_VERSION="${RELEASE_TAG#v}"
+          npm run build
+          npx cap add android
+          node scripts/native-release.mjs android "$RELEASE_TAG"
+          npx cap sync android
+          bash android/gradlew -p android assembleRelease
+      - name: Assinar e verificar APK
+        env:
+          RIVER_ANDROID_KEYSTORE: ${{ secrets.RIVER_ANDROID_KEYSTORE }}
+          RIVER_ANDROID_STORE_PASSWORD: ${{ secrets.RIVER_ANDROID_STORE_PASSWORD }}
+          RIVER_ANDROID_KEY_PASSWORD: ${{ secrets.RIVER_ANDROID_KEY_PASSWORD }}
+          RIVER_ANDROID_KEY_ALIAS: ${{ vars.RIVER_ANDROID_KEY_ALIAS }}
+        run: |
+          test -n "$RIVER_ANDROID_KEYSTORE" && test -n "$RIVER_ANDROID_KEY_ALIAS"
+          keystore=$(mktemp)
+          trap 'rm -f "$keystore"' EXIT
+          printf '%s' "$RIVER_ANDROID_KEYSTORE" | base64 --decode > "$keystore"
+          tools=$(find "$ANDROID_HOME/build-tools" -mindepth 1 -maxdepth 1 -type d | sort -V | tail -1)
+          mkdir -p release-assets
+          "$tools/zipalign" -p -f 4 android/app/build/outputs/apk/release/app-release-unsigned.apk "$RUNNER_TEMP/riverstorm-aligned.apk"
+          "$tools/apksigner" sign --ks "$keystore" --ks-key-alias "$RIVER_ANDROID_KEY_ALIAS" \
+            --ks-pass env:RIVER_ANDROID_STORE_PASSWORD --key-pass env:RIVER_ANDROID_KEY_PASSWORD \
+            --out release-assets/riverstorm-android.apk "$RUNNER_TEMP/riverstorm-aligned.apk"
+          "$tools/apksigner" verify release-assets/riverstorm-android.apk
+      - uses: actions/upload-artifact@v4
+        with:
+          name: signed-android
+          path: release-assets/
+          if-no-files-found: error
+
+  publish:
+    needs: [windows, android]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: refs/tags/${{ inputs.tag || github.ref_name }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: signed-*
+          path: release-assets
+          merge-multiple: true
+      - name: Montar e publicar release completa
+        env:
+          RELEASE_TAG: ${{ inputs.tag || github.ref_name }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          node scripts/native-release.mjs manifest "$RELEASE_TAG"
+          gh release create "$RELEASE_TAG" release-assets/* --verify-tag --draft --generate-notes
+          gh release edit "$RELEASE_TAG" --draft=false --latest

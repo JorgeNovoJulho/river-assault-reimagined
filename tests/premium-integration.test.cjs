@@ -5,10 +5,10 @@ const fs=require('node:fs');
 const path=require('node:path');
 const root=path.resolve(__dirname,'..');
 const read=p=>fs.readFileSync(path.join(root,p),'utf8');
-test('Boss 02 raster fica restrito ao setor 2 e tem fallback do boss original',()=>{
+test('Boss 02 raster fica restrito ao setor 2 e chefes restantes usam o catálogo PNG',()=>{
  const s=read('src/render/scene2d5.js');
  assert.match(s,/Number\(d\.sector\)===2&&premiumBoss02\.complete/);
- assert.match(s,/bossSpriteImages\[Number\(d\.sector\)-1\]/);
+ assert.match(s,/get\('terrain','BOSS',sector\)/);
  assert.match(s,/bossAccessories\(c,e,d\)/);
 });
 test('20 setores carregam assets conforme missao',()=>{

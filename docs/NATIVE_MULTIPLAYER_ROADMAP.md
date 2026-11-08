@@ -28,4 +28,23 @@
 - Android: telas pequenas, recorte/notch, barras de navegação, paisagem/retrato e toque duplo testados em aparelhos físicos, incluindo dispositivos de baixo desempenho.
 - Windows: instalador abre, menu de modo funciona e seleção de resolução efetivamente ajusta Canvas.
 - Atualizações: release assinado, verificação de assinatura, comparação semântica de versão, rollback e confirmação do usuário quando exigida.
-- LAN: host e oito convidados testados com perdas de sinal, dispositivos mistos e pontuação íntegra.
+- LAN: anfitrião e até sete convidados testados com perdas de sinal, dispositivos mistos e pontuação íntegra.
+
+## Prévia Web atual
+
+- Online: a abertura conecta ao PeerJS Cloud. O cliente é compilado no pacote local e dispensa CDN.
+- LAN: no computador anfitrião, rode `npm ci` e `npm run build`. Em PowerShell, configure
+  `$env:RIVER_LAN_BIND='0.0.0.0'` e rode `npm run lan`. Os convidados abrem
+  `http://IP-DO-ANFITRIAO:8080/?lan=1` na mesma rede e usam o código e a senha gerados no lobby.
+  Para HTTPS, forneça `RIVER_LAN_CERT` e `RIVER_LAN_KEY` com um certificado confiável pelos aparelhos.
+  Após instalar as dependências e compilar, a sinalização e as conexões LAN não precisam de internet.
+- O limite é de oito pilotos no total, incluindo o anfitrião. O anfitrião inicia cada rodada.
+  Cada rodada usa três missões, com as missões 19 e 20 na última rodada possível.
+  O pior resultado sai da disputa. Quem não conclui perde prioridade. Um único piloto restante vence.
+- O host valida autenticação, ordem das missões e limites dos valores. O navegador ainda calcula
+  o próprio resultado, portanto o placar serve para partidas entre pessoas de confiança.
+- A desconexão do canal tem janela de retorno de 25 segundos no mesmo navegador, enquanto a
+  instância do anfitrião estiver ativa. A rodada tem limite de 15 minutos.
+- Descoberta automática, hospedagem dentro dos instaladores Windows e Android, redes entre
+  aparelhos físicos e persistência do torneio após fechar o anfitrião ainda exigem homologação
+  ou implementação conforme o caso.

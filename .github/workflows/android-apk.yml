@@ -39,7 +39,7 @@ jobs:
       - name: Compilar conteúdo do jogo
         run: npm run build
       - name: Criar plataforma Android
-        run: npx cap add android
+        run: npm run android:add
       - name: Sincronizar conteúdo
         run: npx cap sync android
       - name: Dar permissão ao Gradle

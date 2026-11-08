@@ -525,15 +525,15 @@ function islands(c,items,t,sector){
  for(const p of items){
   // Evitar reciclar a ilha tropical da Missão 01 no porto industrial da Missão 02.
   // Mantém o relevo legível até existirem sprites industriais individuais aprovados.
-  const premiumIsland=(!industrial||Number(sector)===2)?window.RiverPremium?.get('terrain','ARMED_ISLAND',sector):null;
+  const premiumIsland=(!industrial||Number(sector)<=20)?window.RiverPremium?.get('terrain','ARMED_ISLAND',sector):null;
   if(premiumIsland){
-    if(Number(sector)<=2)window.RiverPremium.drawFitted(c,premiumIsland,p.x,p.y,p.width,p.height);
+    if(Number(sector)<=20)window.RiverPremium.drawFitted(c,premiumIsland,p.x,p.y,p.width,p.height);
     else c.drawImage(premiumIsland,p.x-p.width*.52,p.y-p.height*.52,p.width*1.04,p.height*1.04);
     continue;
   }
   // O catálogo declarou uma ilha raster aprovada: aguardar o preload em vez
   // de deixar o SVG legado aparecer por um quadro durante o carregamento.
-  if(Number(sector)===2||(!industrial&&window.RiverPremium?.declared('terrain','ARMED_ISLAND')))continue;
+  if(Number(sector)<=20||(!industrial&&window.RiverPremium?.declared('terrain','ARMED_ISLAND')))continue;
   const terrainSprite=(p.maxHp>0&&p.hp/p.maxHp<=.45)?islandSpriteImages[2]:islandSpriteImages[((p.shape||0)%2+2)%2];
   if(terrainSprite.complete&&terrainSprite.naturalWidth){
     c.save();c.drawImage(terrainSprite,p.x-p.width*.52,p.y-p.height*.52,p.width*1.04,p.height*1.04);c.restore();
@@ -1347,7 +1347,7 @@ function bossPresentation(c,d){
  for(const e of d.enemies||[]){
   // Boss 01 possui leitura, módulos e luzes no master raster aprovado.
   // Não acrescentar halo/anéis genéricos que poluem o casco.
-  if(e.type!=='BOSS'||e.hp<=0||Number(e.bossId||d.sector)<=2)continue;
+  if(e.type!=='BOSS'||e.hp<=0||Number(e.bossId||d.sector)<=20)continue;
   const radius=Math.max(32,(e.width||90)*.39),phase=(e.bossId||d.sector||1)%5;
   c.save();c.translate(e.x,e.y);
   const damaged=e.maxHp>0&&e.hp/e.maxHp<.4;
@@ -1424,27 +1424,36 @@ function bossAccessories(c,e,d){
 const premiumBoss02=new Image();
 premiumBoss02.src='./assets/sprites/premium/runtime/bosses/boss02_casco_sem_quadro.png';
 // Corpos V3 aprovados. A simulação continua responsável por módulos, vida e IA.
-const premiumBossV3=[null,new Image(),new Image()];
+const premiumBossV3=[null,...Array.from({length:8},()=>new Image())];
 const visualFallbackLogged=new Set();
 premiumBossV3[1].src='./assets/sprites/premium/approved/bosses/01_ponte_fortificada/body_full.png';
 premiumBossV3[2].src='./assets/sprites/premium/approved/bosses/02_encouracado_abissal/body_full.png';
-function drawPremiumBossV3(c,e,sector,viewportWidth){
- const image=premiumBossV3[Number(sector)];
+premiumBossV3[3].src='./assets/sprites/premium/approved/environment/mission_03_desert/runtime/boss.png';
+premiumBossV3[4].src='./assets/sprites/premium/approved/environment/mission_04_swamp/runtime/boss.png';
+premiumBossV3[5].src='./assets/sprites/premium/approved/environment/mission_05_islands/runtime/boss.png';
+premiumBossV3[6].src='./assets/sprites/premium/approved/environment/mission_06_arctic/runtime/boss.png';
+premiumBossV3[7].src='./assets/sprites/premium/approved/environment/mission_07_jungle/runtime/boss.png';
+premiumBossV3[8].src='./assets/sprites/premium/approved/environment/mission_08_city/runtime/boss.png';
+function drawBossHull(c,image,e,viewportWidth,viewportHeight){
+ const aspect=image.naturalWidth/image.naturalHeight;
+ const width=Math.min(viewportWidth*.88,viewportHeight*.50*aspect);
+ const height=width/aspect;
+ c.save();
+ c.imageSmoothingEnabled=true;
+ c.drawImage(image,e.x-width/2,Math.max(0,e.y-height/2),width,height);
+ c.restore();
+}
+function drawPremiumBossV3(c,e,sector,viewportWidth,viewportHeight){
+ const image=premiumBossV3[Number(sector)]||root.RiverPremium?.get('terrain','BOSS',sector);
  if(!image||!image.complete||!image.naturalWidth)return false;
- // A Ponte Fortificada domina a arena visualmente sem modificar sua hitbox.
- const size=Number(sector)===1?Math.min(Math.max(214,(e.width||90)*1.9),300):Number(sector)===2?Math.min(Math.max(210,(e.width||90)*1.8),280):Math.min(Math.max(132,(e.width||90)*1.55),260);
- const w=Number(sector)===2?Math.min(size,viewportWidth*.88):size;
- const h=w*image.naturalHeight/image.naturalWidth;
- c.save();c.imageSmoothingEnabled=true;c.drawImage(image,e.x-w*.5,e.y-h*.5,w,h);c.restore();
+ drawBossHull(c,image,e,viewportWidth,viewportHeight);
  return true;
 }
-const bossSpriteFiles=['iron-wasp.svg','abyss-manta.svg','crimson-rotor.svg','granite-dam.svg','crimson-spider.svg','frost-sentinel.svg','storm-mantis.svg','neon-leviathan.svg','inferno-dredger.svg','glacier-titan.svg','solar-vulture.svg','night-harvester.svg','thunder-serpent.svg','blizzard-hydra.svg','desert-reaper.svg','abyssal-jellyfish.svg','forge-colossus.svg','polar-scythe.svg','phantom-fortress.svg','omega-overlord.svg'];
-const bossSpriteImages=bossSpriteFiles.map(name=>{const im=new Image();im.src='./assets/sprites/bosses/'+name;return im;});
 function draw(c,d){
  const t=THEMES[((d.sector-1)%THEMES.length+THEMES.length)%THEMES.length];
  // Evitar pintura procedural sob o raster aprovado: PNGs podem ter alfa.
  // Para setores sem biblioteca raster completa, preservar o núcleo antigo.
- const early=Number(d.sector)<=2;
+ const early=Number(d.sector)<=20;
  if(early){c.fillStyle='#102c36';c.fillRect(0,0,d.w,d.h);}
  const premiumReady=early||Boolean(window.RiverPremiumEnvironment?.ready(d.sector));
  if(!premiumReady)landscape(c,d,t);
@@ -1471,22 +1480,21 @@ function draw(c,d){
      if(sprite){
        c.save();
        if(e.hp/e.maxHp<.67)c.filter=e.hp/e.maxHp<.34?'brightness(.62) saturate(.7)':'brightness(.82)';
-       root.RiverPremium.drawFitted(c,sprite,e.x,e.y,e.width+8,e.height+8);
+       root.RiverPremium.drawAtPlayerScale(c,sprite,e.x,e.y);
        c.restore();
      }
      continue;
    }
-   if(e.type==='BOSS'&&Number(d.sector)<=2&&drawPremiumBossV3(c,e,d.sector,d.w)){
+   if(e.type==='BOSS'&&early&&drawPremiumBossV3(c,e,d.sector,d.w,d.h)){
      // O master da Ponte já possui torres e canhões aprovados: nenhum módulo
      // vetorial legado deve ser desenhado sobre a composição raster.
      // Os corpos raster V3 dos Bosses 01/02 já incluem os módulos visuais.
      // Não sobrepor torres e halos procedurais ao corpo Premium.
    }else if(e.type==='BOSS'&&Number(d.sector)===2&&premiumBoss02.complete&&premiumBoss02.naturalWidth>0){
      // Imagem raster recortada, centrada na hitbox original; nao troca IA ou partes.
-     const bw=e.width||90,bh=e.height||90;
-     c.drawImage(premiumBoss02,e.x-bw/2,e.y-bh/2,bw,bh);
+     drawBossHull(c,premiumBoss02,e,d.w,d.h);
      // Boss 02 raster legado: evitar adereços antigos sobre a arte.
-   }else if(e.type==='BOSS'&&Number(d.sector)>2&&Number(d.sector)<=20&&bossSpriteImages[Number(d.sector)-1].complete&&bossSpriteImages[Number(d.sector)-1].naturalWidth){const sprite=bossSpriteImages[Number(d.sector)-1];c.drawImage(sprite,e.x-(e.width||90)*.5,e.y-(e.height||90)*.5,e.width||90,e.height||90);bossAccessories(c,e,d);}
+   }
    else {
      // Um único render por entidade: PNG Premium substitui (não sobrepõe)
      // a silhueta procedural; IA, animações de posição e hitboxes intocadas.
@@ -1499,7 +1507,7 @@ function draw(c,d){
        c.translate(e.x,e.y);
        c.imageSmoothingEnabled=true;
        if(early)root.RiverPremium.drawEarlyMissionEnemy(c,premium,premiumId,0,0);
-       else c.drawImage(premium,-displayW/2,-displayH/2,displayW,displayH);
+       else root.RiverPremium.drawFitted(c,premium,0,0,displayW,displayH);
        c.restore();
      }else if(hasDeclaredPremium){
        // Enquanto o PNG V3 pré-carregado termina, não substituí-lo por uma
@@ -1507,7 +1515,7 @@ function draw(c,d){
        continue;
      }else{
        // Diagnóstico apenas: registra uma lacuna real sem modificar combate.
-       if(Number(d.sector)<=2&&!visualFallbackLogged.has(d.sector+':'+e.type)){
+       if(early&&!visualFallbackLogged.has(d.sector+':'+e.type)){
          visualFallbackLogged.add(d.sector+':'+e.type);
          console.warn('[RiverStorm Premium] fallback visual na Missão '+d.sector+':',e.type);
        }

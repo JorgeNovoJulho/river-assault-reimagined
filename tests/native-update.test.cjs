@@ -1,0 +1,36 @@
+const assert = require('node:assert/strict');
+const { test } = require('node:test');
+const { spawnSync } = require('node:child_process');
+const fs = require('node:fs');
+const path = require('node:path');
+
+const script = path.resolve('scripts/native-release.mjs');
+test('release nativa gera manifestos coerentes e rejeita versões inválidas', t => {
+  const temp = fs.mkdtempSync(path.resolve('native-release-test-'));
+  t.after(() => fs.rmSync(temp, {recursive:true,force:true}));
+  const run = (mode, tag, env = process.env) => spawnSync(process.execPath, [script, mode, tag], {cwd:temp,env,encoding:'utf8'});
+  assert.notEqual(run('manifest','v2.1000.0').status,0);
+  assert.notEqual(run('manifest','v1.2.3-beta').status,0);
+  assert.notEqual(run('manifest','v0.0.0').status,0);
+  fs.mkdirSync(path.join(temp,'src-tauri'));
+  const config = run('windows','v1.2.3',{...process.env,RIVER_UPDATE_PUBLIC_KEY:'public-test',TAURI_SIGNING_PRIVATE_KEY:'test-only'});
+  assert.equal(config.status,0,config.stderr);
+  const windows = JSON.parse(fs.readFileSync(path.join(temp,'src-tauri/update.release.json')));
+  assert.equal(windows.version,'1.2.3');
+  assert.equal(windows.bundle.createUpdaterArtifacts,true);
+  assert.match(windows.plugins.updater.endpoints[0],/\/latest\/download\/latest\.json$/);
+  fs.mkdirSync(path.join(temp,'release-assets'));
+  const artifact = (name, text) => fs.writeFileSync(path.join(temp,'release-assets',name),text);
+  artifact('riverstorm-windows-x64.exe','NSIS');
+  artifact('riverstorm-windows-x64.exe.sig','signature');
+  artifact('riverstorm-android.apk','APK');
+  const result = run('manifest','v1.2.3');
+  assert.equal(result.status,0,result.stderr);
+  const android = JSON.parse(fs.readFileSync(path.join(temp,'release-assets/android-update.json')));
+  assert.equal(android.version,'1.2.3');
+  assert.equal(android.versionCode,1002003);
+  assert.match(android.sha256,/^[a-f0-9]{64}$/);
+  const manifest = JSON.parse(fs.readFileSync(path.join(temp,'release-assets/latest.json')));
+  assert.equal(manifest.platforms['windows-x86_64'].signature,'signature');
+  assert.match(manifest.platforms['windows-x86_64'].url,/\/download\/v1\.2\.3\/riverstorm-windows-x64\.exe$/);
+});

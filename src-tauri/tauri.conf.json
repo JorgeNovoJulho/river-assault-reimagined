@@ -22,13 +22,25 @@
     ],
     "security": {
       "csp": null
-    }
+    },
+    "withGlobalTauri": true
   },
   "bundle": {
     "active": true,
     "targets": [
       "nsis"
     ],
-    "shortDescription": "River Storm - arcade de combate aéreo"
+    "shortDescription": "River Storm - arcade de combate a\u00c3\u00a9reo",
+    "windows": {
+      "nsis": {
+        "headerImage": "../native/branding/header.bmp",
+        "sidebarImage": "../native/branding/sidebar.bmp",
+        "installerIcon": "icons/icon.ico",
+        "languages": [
+          "PortugueseBR",
+          "English"
+        ]
+      }
+    }
   }
 }

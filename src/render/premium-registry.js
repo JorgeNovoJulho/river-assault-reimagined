@@ -8,6 +8,8 @@ const BASE='./assets/sprites/premium/runtime/';
 const AIRCRAFT_BASE='./assets/sprites/premium/aircraft/';
 const AIRCRAFT_IDS=['falcao','vespa','cometa','fenix','helicoptero','disco','titan'];
 const AIRCRAFT_STATES=['normal','disparo','boost','especial'];
+const BONUS_AIRCRAFT=new Set(Object.entries(global.RiverAircraft?.PLANES||{})
+ .filter(([,plane])=>plane.premiumExtra).map(([id])=>id));
 const CATALOG={
  player:{falcao:'player/fighter_candidate.png'},
  fx:{explosion:'fx/explosion_atlas_4x3.png'},
@@ -99,10 +101,17 @@ const ENEMY_DISPLAY={
  MECHA_SWORD:[70,72],MECHA_GUN:[70,70],TANK:[70,60],SHIP:[78,64],
  SUB:[78,70],TURRET:[55,55],WARSHIP:[110,78],BOMBER:[78,73],FLOATING_MINE:[45,45],ITEM_CAPSULE:[46,46],TUCANO:[54,44],CRANE:[70,64]
 };
+const PLAYER_SIZE=[54,64];
+const ENEMY_SCALE={
+ DRONE:5,HELI:1.875,JET:2.5,RECON_PLANE:2.5,ZIGZAG:2.5,TURRET:1.5,SALAMANDER:1,FLOATING_MINE:1,ITEM_CAPSULE:1,
+ TANK:2,MECHA_GUN:2,MECHA_SWORD:2,
+ SHIP:2,SUB:2,WARSHIP:2,CORSAIR:2,WALRUS:2,DREDGER:2,NARWHAL:2
+};
+const UNIQUE_ENEMIES=new Set(Object.keys(CATALOG.enemy).filter(id=>CATALOG.enemy[id].includes('/exclusive/')));
 const EARLY_MISSION_ENEMY_BOX={
  DRONE:[30,32],TUCANO:[46,44],HELI:[47,42],JET:[48,43],RECON_PLANE:[44,42],ZIGZAG:[44,42],
  TANK:[36,34],TURRET:[33,34],SHIP:[54,46],SUB:[64,50],WARSHIP:[88,62],BOMBER:[65,48],
- MECHA_GUN:[46,50],MECHA_SWORD:[46,50],FLOATING_MINE:[27,27],ITEM_CAPSULE:[26,32],CRANE:[55,48],MEGAZORD:[82,95]
+ MECHA_GUN:[46,50],MECHA_SWORD:[46,50],FLOATING_MINE:[27,27],ITEM_CAPSULE:[26,32],CRANE:[55,48],SCORPION:[54,48],ALLIGATOR:[58,46],CORSAIR:[68,49],WALRUS:[70,53],MANTIS:[54,53],MOTOJET:[48,48],MEGAZORD:[82,95]
 };
 const RIO_VERDE_ASSETS={
  enemy:{HELI:'heli',SHIP:'ship',DRONE:'drone',BOMBER:'bomber',FLOATING_MINE:'mine',MEGAZORD:'megazord'},
@@ -120,7 +129,7 @@ for(const [group,items] of Object.entries(CATALOG))for(const [id,path] of Object
 }
 function registerMissionSprites(sector,folder,group,items){
  for(const [id,name] of Object.entries(items)){
-  files.set(sector+':'+group+':'+id,{path:'approved/environment/'+folder+'/runtime/'+name+'.png',
+  files.set(sector+':'+group+':'+id,{path:name.startsWith('approved/')?name:'approved/environment/'+folder+'/runtime/'+name+'.png',
    loaded:false,supported:true,img:null,base:'./assets/sprites/premium/'});
  }
 }
@@ -128,12 +137,38 @@ for(const [group,items] of Object.entries(RIO_VERDE_ASSETS)){
  registerMissionSprites(1,'mission_01_rio_verde',group,items);
 }
 registerMissionSprites(2,'mission_02_industrial','terrain',INDUSTRIAL_TERRAIN);
-for(const id of AIRCRAFT_IDS)for(const state of AIRCRAFT_STATES){
+const WILD_TERRAIN={ARMED_ISLAND:'island',BRIDGE:'bridge',BRIDGE_DAMAGED:'bridge',DAM:'floodgate',TARGET:'target'};
+registerMissionSprites(3,'mission_03_desert','terrain',WILD_TERRAIN);
+registerMissionSprites(4,'mission_04_swamp','terrain',WILD_TERRAIN);
+registerMissionSprites(5,'mission_05_islands','terrain',WILD_TERRAIN);
+registerMissionSprites(6,'mission_06_arctic','terrain',WILD_TERRAIN);
+registerMissionSprites(7,'mission_07_jungle','terrain',WILD_TERRAIN);
+registerMissionSprites(8,'mission_08_city','terrain',WILD_TERRAIN);
+const lateBiomes=['volcanic','alpine','valley','neon','delta','glacial','oasis','bioluminescent','shipyard','arctic','electric','final'];
+const lateTerrain=[
+ ['05_islands','05_islands','island'],['06_arctic','03_desert','target'],
+ ['03_desert','03_desert','bridge'],['08_city','08_city','target'],
+ ['04_swamp','04_swamp','target'],['06_arctic','06_arctic','target'],
+ ['03_desert','03_desert','target'],['07_jungle','04_swamp','target'],
+ ['02_industrial','02_industrial','dock'],['06_arctic','06_arctic','target'],
+ ['08_city','08_city','target'],['08_city','07_jungle','target']
+];
+const terrainAsset=(folder,name)=>'approved/environment/mission_'+folder+'/runtime/'+name+'.png';
+for(const [index,biome] of lateBiomes.entries()){
+ const sector=index+9;
+ const [structures,targetFolder,target]=lateTerrain[index];
+ const bridge=terrainAsset(structures,'bridge');
+ registerMissionSprites(sector,'mission_'+String(sector).padStart(2,'0')+'_'+biome,'terrain',{
+  ARMED_ISLAND:'island',BOSS:'boss',BRIDGE:bridge,BRIDGE_DAMAGED:bridge,
+  DAM:terrainAsset(structures,'floodgate'),TARGET:terrainAsset(targetFolder,target)
+ });
+}
+for(const id of [...AIRCRAFT_IDS,...BONUS_AIRCRAFT])for(const state of (BONUS_AIRCRAFT.has(id)?['normal']:AIRCRAFT_STATES)){
  files.set('aircraft:'+id+':'+state,{path:id+'_'+state+'.png',loaded:false,supported:true,img:null,base:AIRCRAFT_BASE});
 }
 function aircraft(id,state='normal'){
- if(!AIRCRAFT_IDS.includes(id))return null;
- const entry=files.get('aircraft:'+id+':'+(AIRCRAFT_STATES.includes(state)?state:'normal'));
+ if(!AIRCRAFT_IDS.includes(id)&&!BONUS_AIRCRAFT.has(id))return null;
+ const entry=files.get('aircraft:'+id+':'+(!BONUS_AIRCRAFT.has(id)&&AIRCRAFT_STATES.includes(state)?state:'normal'));
  if(!entry)return null;
  if(!entry.img){
   const im=new Image();entry.img=im;
@@ -152,7 +187,7 @@ function get(group,id,sector){
  if(group==='enemy')id=ENEMY_ALIASES[String(id||'').toUpperCase()]||String(id||'').toUpperCase();
  const key=group+':'+id;
  const level=Number(sector);
- const shared=level===2&&group!=='terrain'?1:level;
+ const shared=level>=2&&level<=20&&group!=='terrain'?1:level;
  const mission=files.get(shared+':'+key);
  const entry=mission?.supported?mission:files.get(key);
  if(!entry||!entry.supported)return null;
@@ -168,17 +203,24 @@ function declared(group,id){
  if(group==='enemy')id=ENEMY_ALIASES[String(id||'').toUpperCase()]||String(id||'').toUpperCase();
  const entry=files.get(group+':'+id);return Boolean(entry&&entry.supported);
 }
-function displaySize(id,fallbackWidth=36,fallbackHeight=36){
+function displaySize(id){
  const canonical=ENEMY_ALIASES[String(id||'').toUpperCase()]||String(id||'').toUpperCase();
- return ENEMY_DISPLAY[canonical]||[Math.max(36,fallbackWidth),Math.max(36,fallbackHeight)];
+ if(UNIQUE_ENEMIES.has(canonical))return PLAYER_SIZE;
+ const scale=ENEMY_SCALE[canonical];
+ if(scale!==undefined)return PLAYER_SIZE.map(size=>size*scale);
+ const box=ENEMY_DISPLAY[canonical]||EARLY_MISSION_ENEMY_BOX[canonical]||PLAYER_SIZE;
+ return box.map((size,index)=>Math.max(size,PLAYER_SIZE[index]));
 }
 function drawFitted(ctx,image,x,y,w,h){
  const scale=Math.min(w/image.naturalWidth,h/image.naturalHeight);
  const width=image.naturalWidth*scale,height=image.naturalHeight*scale;
  ctx.drawImage(image,x-width/2,y-height/2,width,height);
 }
+function drawAtPlayerScale(ctx,image,x,y){
+ drawFitted(ctx,image,x,y,...PLAYER_SIZE);
+}
 function drawEarlyMissionEnemy(ctx,image,id,x,y){
- const [w,h]=EARLY_MISSION_ENEMY_BOX[ENEMY_ALIASES[id]||id]||[42,42];
+ const [w,h]=displaySize(id);
  drawFitted(ctx,image,x,y,w,h);
 }
 function paint(ctx,group,id,x,y,w,h,rotation=0){
@@ -198,5 +240,5 @@ function preload(){
  }
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',preload,{once:true});else preload();
-global.RiverPremium={register,get,declared,displaySize,drawFitted,drawEarlyMissionEnemy,aircraft,paint,status,catalog:CATALOG};
+global.RiverPremium={register,get,declared,displaySize,drawFitted,drawAtPlayerScale,drawEarlyMissionEnemy,aircraft,paint,status,catalog:CATALOG};
 })(window);

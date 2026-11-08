@@ -73,7 +73,7 @@ test('recompensas, mechas e transição estão no jogo',()=>{
  assert.match(html,/type==='MECHA_SWORD'/);
  assert.match(html,/type==='MECHA_GUN'/);
  assert.match(html,/e\.attackTimer%850===0/);
- assert.match(html,/missionTransitionTicks=180/);
+ assert.match(html,/missionTransitionTicks=roomRound\?180:180\+bossDebriefDuration/);
 });
 
 test('progressão NG+ exige campanha legítima e limita patente',()=>{

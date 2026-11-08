@@ -58,7 +58,7 @@ test('fusao intercepta tiros inimigos na faixa',()=>{
  assert.match(game,/enemyBullets\.splice\(i,1\)/);
 });
 test('acertos, notas e adaptacao persistem por campanha',()=>{
- assert.match(game,/missionHits=Array\(20\)\.fill\(0\)/);
+ assert.match(game,/missionHits=window\.RiverMissionReport\.restore\(savedHits,startSector\)/);
  assert.match(game,/const hitGrade=/);
  assert.match(game,/function adaptAfterBoss\(/);
  assert.match(game,/function showMissionReport\(/);
@@ -71,13 +71,10 @@ test('gravidade termina e restitui movimento independente',()=>{
  assert.match(game,/e\.gravityTicks===0/);
  assert.match(game,/player\.effectType==='GRAVITY'&&player\.effectTimer>0/);
 });
-test('sprite assets existem e build os distribui',()=>{
- const vite=fs.readFileSync('vite.config.js','utf8');
- for(const p of ['assets/sprites/projectiles/plasma-blue.svg','assets/sprites/projectiles/plasma-red.svg','assets/sprites/bosses/iron-wasp.svg']){
-  assert.ok(fs.existsSync(p),p);
-  assert.ok(vite.includes(p),p);
- }
- assert.match(game,/projectileArt\.blue\.src/);
+test('projéteis Premium têm quatro PNGs distribuídos pelo build',()=>{
+ const base='assets/sprites/premium/approved/fx/runtime_shots/';
+ for(const name of ['blue','red','missile','violet'])assert.ok(fs.existsSync(base+name+'.png'),name);
+ assert.ok(game.includes(base));
 });
 test('piscar vermelho em cima do sprite do piloto',()=>{
  assert.match(game,/damageBlinkFrames=16/);
@@ -118,31 +115,20 @@ test('boss low-health and special warning use arcs, never rectangle outlines',()
  assert.match(game,/ctx\.arc\(e\.x,e\.y,Math\.min\(34,e\.width\*\.28\)/);
 });
 
-test('bosses 1 a 3 usam sprites diferentes e distribuidos na build',()=>{
- const renderer=fs.readFileSync('src/render/scene2d5.js','utf8');
- const vite=fs.readFileSync('vite.config.js','utf8');
- for(const file of ['iron-wasp.svg','abyss-manta.svg','crimson-rotor.svg']){
-  const p='assets/sprites/bosses/'+file;
-  assert.ok(fs.existsSync(p),p);
-  assert.ok(vite.includes(p),p);
-  assert.ok(renderer.includes(file),file);
- }
- assert.match(renderer,/Number\(d\.sector\)<=20/);
-});
-
-test('sprites de chefes 4 a 6 integrados',()=>{
- const renderer=fs.readFileSync('src/render/scene2d5.js','utf8');
- const vite=fs.readFileSync('vite.config.js','utf8');
- for(const file of ['granite-dam.svg','crimson-spider.svg','frost-sentinel.svg']){
-  const p='assets/sprites/bosses/'+file;
-  assert.ok(fs.existsSync(p),p);assert.ok(renderer.includes(file));assert.ok(vite.includes(p));
- }
- assert.ok(renderer.includes('Number(d.sector)<=20'));
-});
-
-test('chefes 7 a 12 possuem sprites integrados',()=>{const render=fs.readFileSync('src/render/scene2d5.js','utf8'),vite=fs.readFileSync('vite.config.js','utf8');for(const name of ['storm-mantis','neon-leviathan','inferno-dredger','glacier-titan','solar-vulture','night-harvester']){const p='assets/sprites/bosses/'+name+'.svg';assert.ok(fs.existsSync(p),p);assert.ok(render.includes(name+'.svg'));assert.ok(vite.includes(p));}assert.ok(render.includes('Number(d.sector)<=20'));});
-
-test('chefes 13 a 20: sprites integrados e inclusos em Vite',()=>{const render=fs.readFileSync('src/render/scene2d5.js','utf8'),vite=fs.readFileSync('vite.config.js','utf8');for(const name of ["thunder-serpent","blizzard-hydra","desert-reaper","abyssal-jellyfish","forge-colossus","polar-scythe","phantom-fortress","omega-overlord"]){const p='assets/sprites/bosses/'+name+'.svg';assert.ok(fs.existsSync(p),p);assert.ok(render.includes(name+'.svg'),name);assert.ok(vite.includes(p),p);}assert.ok(render.includes('Number(d.sector)<=20'));});
+const premiumRoot='assets/sprites/premium/approved/';
+const bossBiomes=['desert','swamp','islands','arctic','jungle','city','volcanic','alpine','valley','neon',
+ 'delta','glacial','oasis','bioluminescent','shipyard','arctic','electric','final'];
+for(const [first,last] of [[1,3],[4,6],[7,12],[13,20]]){
+ test('Chefes '+first+' a '+last+' têm cascos raster distintos',()=>{
+  for(let sector=first;sector<=last;sector++){
+   const folder='mission_'+String(sector).padStart(2,'0')+'_'+bossBiomes[sector-3];
+   const file=sector===1?'bosses/01_ponte_fortificada/body_full.png':sector===2?'bosses/02_encouracado_abissal/body_full.png':
+    'environment/'+folder+'/runtime/boss.png';
+   const data=fs.readFileSync(premiumRoot+file);
+   assert.equal(data.subarray(0,8).toString('hex'),'89504e470d0a1a0a',file);
+  }
+ });
+}
 
 test('ilhas e travessias renderizam sprites reais sem fechar o leito central',()=>{
  const render=fs.readFileSync('src/render/scene2d5.js','utf8');
@@ -154,8 +140,8 @@ test('ilhas e travessias renderizam sprites reais sem fechar o leito central',()
  }
  assert.match(render,/islandSpriteImages/);
  assert.match(game,/terrainStructureImages/);
- assert.match(game,/ctx\.rect\(-half,slabY,half-gate,p\.height\)/);
- assert.match(game,/ctx\.rect\(gate,slabY,half-gate,p\.height\)/);
+ assert.match(game,/ctx\.rect\(-half,slabY,half-gate,wallHeight\)/);
+ assert.match(game,/ctx\.rect\(gate,slabY,half-gate,wallHeight\)/);
 });
 
 test('damage states of bridges dams and islands use packaged sprites',()=>{

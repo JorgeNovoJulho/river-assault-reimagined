@@ -30,11 +30,11 @@ function approvedPaths(sector){
 }
 const fallback={water:'runtime/environment/water_calm.png',left:'runtime/environment/riverbank_left.png',right:'runtime/environment/riverbank_right.png'};
 function groupReady(paths){return Object.values(paths).every(path=>image(path).loaded);}
-function ready(sector){preload(sector);const n=Number(sector)||1;return groupReady(approvedPaths(sector))||(n>2&&(groupReady(paths(sector))||groupReady(fallback)));}
+function ready(sector){preload(sector);const n=Number(sector)||1;return groupReady(approvedPaths(sector))||(n>20&&(groupReady(paths(sector))||groupReady(fallback)));}
 function active(sector){
  const approved=approvedPaths(sector);
  if(groupReady(approved))return {mode:'approved',textures:approved};
- if(Number(sector)<=2)return null; // Sem fallback genérico em missões homologadas.
+ if(Number(sector)<=20)return null; // Sem fallback genérico em missões homologadas.
  const mission=paths(sector);
  if(groupReady(mission))return {mode:'biome',textures:mission};
  if(groupReady(fallback))return {mode:'fallback',textures:fallback};
@@ -43,9 +43,9 @@ function active(sector){
 function status(sector){
  const item=active(sector);
  return {ready:!!item,sector:Math.max(1,Math.min(20,Math.floor(Number(sector)||1))),mode:item?.mode||'original',
-  images:Object.entries(item?.textures||paths(sector)).map(([key,path])=>({key,path,loaded:image(path).loaded,failed:image(path).failed}))};
+  images:Object.entries(item?.textures||(Number(sector)<=20?approvedPaths(sector):paths(sector))).map(([key,path])=>({key,path,loaded:image(path).loaded,failed:image(path).failed}))};
 }
-function paintPortTile(c,image,w,h,tileH,anchor,dist){
+function paintRasterTile(c,image,w,h,tileH,anchor,dist){
  const tileW=tileH*image.naturalWidth/image.naturalHeight;
  const startX=((anchor%tileW)+tileW)%tileW-tileW;
  const startY=((dist*.18)%tileH+tileH)%tileH-tileH;
@@ -58,7 +58,7 @@ function paint(c,d,bankAt,riverPath){
  preload(d.sector);
  const item=active(d.sector);if(!item)return false;
  const {w,h,riverPoints}=d;
- const port=Number(d.sector)===2;
+ const proportional=Number(d.sector)>=2&&Number(d.sector)<=20;
  const dist=Number(d.distance??d.scroll??d.scrollDistance??0)||0;
  const water=image(item.textures.water).img;
  const left=image(item.textures.left).img,right=image(item.textures.right).img;
@@ -67,7 +67,7 @@ function paint(c,d,bankAt,riverPath){
  // emendas e repetição curta sem interferir nas curvas do leito do rio.
  const scale=Math.max(w/water.naturalWidth,h*1.55/water.naturalHeight),tileH=water.naturalHeight*scale;
  const offset=((dist*.18)%tileH+tileH)%tileH;
- if(port)paintPortTile(c,water,w,h,h*.52,(w-h*.52)/2,dist);
+ if(proportional)paintRasterTile(c,water,w,h,h*.52,(w-h*.52)/2,dist);
  else for(let y=offset-tileH;y<h;y+=tileH)c.drawImage(water,0,y,w,tileH);
  c.restore();
  for(const [side,im] of [['left',left],['right',right]]){
@@ -84,7 +84,7 @@ function paint(c,d,bankAt,riverPath){
   const th=Math.max(h*1.55,Math.round(w*.92*im.naturalHeight/im.naturalWidth));
   const tw=th*im.naturalWidth/im.naturalHeight;
   const start=((dist*.18)%th+th)%th;
-  if(port)paintPortTile(c,im,w,h,h*.58,w*(side==='left'?.24:.76),dist);
+  if(proportional)paintRasterTile(c,im,w,h,h*.58,w*(side==='left'?.24:.76),dist);
   else for(let y=start-th;y<h;y+=th)c.drawImage(im,side==='left'?0:w-tw,y,tw,th);
   c.restore();
  }
@@ -93,6 +93,7 @@ function paint(c,d,bankAt,riverPath){
 function preload(sector){
  const n=Math.max(1,Math.min(20,Math.floor(Number(sector)||1)));
  for(const p of Object.values(approvedPaths(n)))image(p);
+ if(n<=20)return;
  for(const p of Object.values(paths(n)))image(p);
  for(const p of Object.values(fallback))image(p);
 }

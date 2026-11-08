@@ -26,7 +26,7 @@ test('renderizador prioriza PNGs aprovados e reduz repetição curta no porto',(
 test('Boss 02 mantém corpo V3 sem acessórios vetoriais sobrepostos',()=>{
   const scene=fs.readFileSync(path.join(root,'src/render/scene2d5.js'),'utf8');
   const html=fs.readFileSync(path.join(root,'index.html'),'utf8');
-  assert.match(scene,/Number\(sector\)===2\?Math\.min\(Math\.max\(210,/);
-  assert.match(scene,/e\.type==='BOSS'&&Number\(d\.sector\)<=2&&drawPremiumBossV3/);
+  assert.match(scene,/drawBossHull\(c,image,e,viewportWidth,viewportHeight\)/);
+  assert.match(scene,/e\.type==='BOSS'&&early&&drawPremiumBossV3/);
   assert.match(html,/Number\(boss\.bossId\|\|sector\)<=2\)continue/);
 });
