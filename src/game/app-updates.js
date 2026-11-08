@@ -10,8 +10,21 @@ const current = document.getElementById('rs-update-current');
 const next = document.getElementById('rs-update-next');
 const webVersion = document.querySelector('meta[name="riverstorm-version"]').content;
 const invoke = window.__TAURI__?.core?.invoke;
-const android = window.Capacitor?.getPlatform() === 'android'
-  ? window.Capacitor.registerPlugin('RiverUpdate') : null;
+const capacitor = window.Capacitor;
+function androidUpdater(bridge) {
+  if (bridge?.getPlatform?.() !== 'android') return null;
+  const plugin = 'RiverUpdate';
+  if (typeof bridge.registerPlugin === 'function') return bridge.registerPlugin(plugin);
+  // O bridge injetado pelo Android também funciona sem o runtime web do Capacitor.
+  if (typeof bridge.nativePromise !== 'function' || typeof bridge.addListener !== 'function') return null;
+  return {
+    installed: () => bridge.nativePromise(plugin, 'installed', {}),
+    check: () => bridge.nativePromise(plugin, 'check', {}),
+    install: options => bridge.nativePromise(plugin, 'install', options),
+    addListener: (event, callback) => bridge.addListener(plugin, event, callback)
+  };
+}
+const android = androidUpdater(capacitor);
 const native = invoke ? {
   installed: () => window.__TAURI__.app.getVersion(),
   check: () => invoke('river_check_update'),

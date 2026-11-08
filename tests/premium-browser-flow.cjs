@@ -83,10 +83,11 @@ const assert=require('node:assert/strict');
       }else{
         await page.locator('#rs-tutorial-view').click();
         assert.equal(await page.locator('#rs-tutorial-windows').getAttribute('aria-pressed'),'true');
-        assert.equal(await page.locator('.rs-tutorial-command').count(),8);
-        assert.match(await page.locator('#rs-tutorial-commands').textContent(),/WASD.*Mouse esquerdo/);
+        assert.equal(await page.locator('.rs-tutorial-command svg').count(),8);
+        assert.ok(await page.locator('.rs-tutorial-command p').first().evaluate(node=>parseFloat(getComputedStyle(node).fontSize)>=16));
+        assert.match(await page.locator('#rs-tutorial-commands').textContent(),/W A S D.*Botão esquerdo do mouse/);
         await page.locator('#rs-tutorial-mobile').click();
-        assert.match(await page.locator('#rs-tutorial-commands').textContent(),/Joystick virtual.*TIRO/);
+        assert.match(await page.locator('#rs-tutorial-commands').textContent(),/Alavanca na tela.*TIRO/);
         await page.locator('#rs-tutorial-start').click();
       }
       await page.waitForFunction(()=>gameState==='PLAYING');
@@ -102,7 +103,14 @@ const assert=require('node:assert/strict');
       await tutorial.waitFor({state:'hidden'});
       assert.equal(await page.locator('#controller-settings').isVisible(),true);
       assert.equal(await page.evaluate(()=>gameState),'PAUSED');
+      const graphics=page.locator('#graphics-preview-toggle');
+      assert.equal(await graphics.isVisible(),true);
+      const graphicsBefore=await graphics.textContent();
+      await graphics.click();
+      assert.notEqual(await graphics.textContent(),graphicsBefore);
+      await graphics.click();
       await page.locator('#pad-close').click();
+      assert.equal(await graphics.isVisible(),false);
       await page.locator('#resume-btn').click();
       const state=await page.evaluate(()=>({game:typeof gameState==='undefined'?'UNKNOWN':gameState,overlay:document.getElementById('rs-premium-pilots')?.classList.contains('hidden'),error:document.getElementById('runtime-error')?.textContent||''}));
       console.log('Premium end-to-end',JSON.stringify({viewport,visible,state,errors}));
@@ -523,6 +531,39 @@ const assert=require('node:assert/strict');
       assert.equal(actualFlight.length,11);
       assert.ok(actualFlight.every(plane=>plane.flight&&plane.damage&&plane.range),JSON.stringify(actualFlight));
       assert.equal(actualFlight.find(plane=>plane.id==='valquiria').pilot,'Rick Storm');
+      await page.close();
+    }
+    for(const viewport of [{width:320,height:568},{width:568,height:320},{width:844,height:390},{width:768,height:1024},{width:1024,height:768}]){
+      const page=await browser.newPage({viewport,isMobile:true,hasTouch:true});
+      await page.goto('http://127.0.0.1:4173/',{waitUntil:'domcontentloaded'});
+      await page.locator('#mode-settings').click();
+      await page.locator('#rs-tutorial-settings').click();
+      const guide=page.locator('#rs-flight-tutorial');
+      assert.equal(await page.locator('#rs-tutorial-mobile').getAttribute('aria-pressed'),'true');
+      assert.ok(await guide.evaluate(el=>el.scrollWidth<=el.clientWidth+1),'Guia excede largura '+JSON.stringify(viewport));
+      assert.equal(await page.locator('.rs-tutorial-command svg').count(),8);
+      await page.locator('#rs-tutorial-back').click();
+      await page.locator('#pad-close').click();
+      await page.evaluate(()=>enterGameplay());
+      await page.locator('#rs-mobile-hud-toggle').click();
+      const layout=await page.evaluate(()=>{
+        const ids=['game-container','compact-hud','rs-bottom-actions','touch-controls'];
+        const rect=id=>document.getElementById(id).getBoundingClientRect().toJSON();
+        return {rects:ids.map(rect),width:innerWidth,height:innerHeight,
+          statsInHUD:['hud-fusion-status','rs-fusion-meter','hud-mission-damage'].every(id=>document.getElementById(id).closest('.rs-hud-grid')),
+          hudFits:document.getElementById('compact-hud').scrollWidth<=document.getElementById('compact-hud').clientWidth+1,
+          graphicsVisible:document.getElementById('graphics-preview-toggle').getClientRects().length};
+      });
+      assert.ok(layout.statsInHUD&&layout.hudFits&&!layout.graphicsVisible,JSON.stringify({viewport,layout}));
+      assert.ok(layout.rects.every(r=>r.x>=-1&&r.y>=-1&&r.right<=layout.width+1&&r.bottom<=layout.height+1&&r.width>0&&r.height>0),JSON.stringify({viewport,layout}));
+      const [arena,hud]=layout.rects;
+      if(viewport.width>viewport.height&&viewport.height<=560)assert.ok(arena.right<=hud.left+1);
+      else assert.ok(arena.bottom<=hud.top+1);
+      for(const id of ['#btn-fire','#btn-bomb','#btn-roll-left','#btn-roll-right','#btn-pause-touch']){
+        const bounds=await page.locator(id).boundingBox();
+        assert.ok(bounds&&bounds.width>=40&&bounds.height>=38,JSON.stringify({viewport,id,bounds}));
+      }
+      console.log('Mobile layout',JSON.stringify(viewport));
       await page.close();
     }
   }finally{await browser?.close();server.kill('SIGKILL');}

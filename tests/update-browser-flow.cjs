@@ -56,21 +56,18 @@ const url = 'http://127.0.0.1:4179/';
     await android.addInitScript(() => {
       window.Capacitor={
         getPlatform:()=> 'android',
-        registerPlugin:name=> {
-          if(name!=='RiverUpdate')return {};
-          return {
-            installed:async()=>({currentVersion:'0.1.5'}),
-            check:async()=>({currentVersion:'0.1.5',version:'0.3.0'}),
-            addListener:async (name,callback)=>{
-              window.reportAndroid=callback;
-              return {remove:async ()=>{window.reportAndroid=null;}};
-            },
-            install:async({version})=>{
-              window.chosenVersion=version;
-              if(!window.androidAllowed)return {permissionRequired:true};
-              return new Promise(resolve=>{window.completeAndroid=resolve;});
-            }
-          };
+        nativePromise:async (name,method,options)=>{
+          if(name!=='RiverUpdate')throw Error('Plugin incorreto');
+          if(method==='installed')return {currentVersion:'0.1.5'};
+          if(method==='check')return {currentVersion:'0.1.5',version:'0.3.0'};
+          window.chosenVersion=options.version;
+          if(!window.androidAllowed)return {permissionRequired:true};
+          return new Promise(resolve=>{window.completeAndroid=resolve;});
+        },
+        addListener:(plugin,event,callback)=>{
+          if(plugin!=='RiverUpdate'||event!=='updateProgress')throw Error('Evento incorreto');
+          window.reportAndroid=callback;
+          return {remove:async ()=>{window.reportAndroid=null;}};
         }
       };
     });

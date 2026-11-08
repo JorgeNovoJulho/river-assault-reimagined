@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="riverstorm-version" content="0.1.0">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>RiverStorm — Balanceamento de Chefes 0.8.5</title>
     <link rel="stylesheet" href="./src/styles/tailwind.css">
     <!-- Fallback mínimo para execução estática sem compilação Tailwind. -->
@@ -199,10 +199,9 @@ display:flex!important;flex-direction:column!important;align-items:center!import
 #rs-premium-pilot-cards{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:clamp(6px,1vw,16px)!important}
 #rs-premium-pilot-cards img{height:clamp(110px,20dvh,225px)!important;object-fit:contain!important}
 #rs-pilot-detail-photo{height:clamp(160px,37dvh,390px)!important;object-fit:contain!important}
-#rs-hud-action-bar{display:grid!important;grid-template-columns:minmax(110px,1.6fr) minmax(65px,.65fr) minmax(110px,1fr) minmax(130px,1fr)!important;align-items:center!important;gap:7px!important;width:100%!important;box-sizing:border-box!important;min-height:42px!important;padding:4px 7px!important;overflow:hidden!important}
-#rs-hud-action-status{display:grid;gap:2px;min-width:0}
+#rs-hud-action-bar{display:grid!important;background:#051627;border:1px solid #177cac;border-radius:6px;grid-template-columns:repeat(2,minmax(0,1fr))!important;align-items:center!important;gap:7px!important;width:100%!important;box-sizing:border-box!important;min-height:42px!important;padding:4px 7px!important;overflow:hidden!important}
 #hud-mission-damage{color:#fde68a;font-size:inherit}
-#rs-fusion-meter{width:100%!important;min-width:0!important}
+#rs-fusion-meter{width:100%;min-width:0;height:8px;accent-color:#42e8b4}
 #rs-hud-action-bar #parry-btn,#rs-hud-action-bar #boss-skill-use{position:static!important;inset:auto!important;transform:none!important;animation:none!important;opacity:1!important;visibility:visible!important;min-width:0!important;width:100%!important;height:30px!important;min-height:30px!important;padding:4px!important;margin:0!important;font-size:10px!important}
 #game-container:not([data-game-active="true"]) #parry-btn{display:none!important}
 @media(max-width:750px){#rs-premium-pilots>div:has(#rs-premium-pilot-cards){grid-template-columns:1fr!important}#rs-premium-pilot-cards{grid-template-columns:repeat(2,minmax(0,1fr))!important}#rs-hud-action-bar{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
@@ -292,7 +291,6 @@ display:flex!important;flex-direction:column!important;align-items:center!import
 }
 </style>
 <style id="rs-premium-hangar-ui">
-body:has(#rs-premium-pilots:not(.hidden),#boss-skill-picker:not(.hidden)) #graphics-preview-toggle{display:none!important}
 #start-screen:not(.hidden)>#rs-premium-pilots:not(.hidden){
  background:linear-gradient(135deg,#040e1b80,#07192c50 50%,#040d1cb8),url('./assets/ui/premium/pilots/briefing-bay.png') center/cover no-repeat!important;
 }
@@ -410,26 +408,57 @@ body:has(#rs-premium-pilots:not(.hidden),#boss-skill-picker:not(.hidden)) #graph
 </style>
 <style id="rs-flight-tutorial-style">
 #rs-flight-tutorial{
- position:fixed;inset:0;box-sizing:border-box;width:min(calc(100% - 20px),780px);max-height:calc(100dvh - 20px);margin:auto;
+ position:fixed;inset:0;box-sizing:border-box;width:min(calc(100% - 24px - env(safe-area-inset-left) - env(safe-area-inset-right)),1000px);max-height:calc(100dvh - 20px - env(safe-area-inset-top) - env(safe-area-inset-bottom));margin:auto;
  padding:0;border:1px solid #47cde7;border-radius:15px;overflow:auto;color:#e9f7ff;
  background:linear-gradient(#061425db,#050d1a 60%),url('./assets/ui/premium/pilots/briefing-bay.png') center top/cover;
- font:14px/1.5 system-ui,sans-serif;
+ font:clamp(16px,1.8vw,19px)/1.55 system-ui,sans-serif;
 }
 #rs-flight-tutorial::backdrop{background:#020914df}
 .rs-tutorial-wrap{padding:clamp(14px,3vw,28px)}
-.rs-tutorial-kicker{color:#79e1f5;letter-spacing:.14em;font-size:11px;font-weight:800}
-#rs-tutorial-heading{font-size:clamp(21px,5vw,34px);font-weight:950;color:#ffdc8d;margin:3px 0 8px}
+.rs-tutorial-kicker{color:#79e1f5;letter-spacing:.12em;font-size:14px;font-weight:800}
+#rs-tutorial-heading{font-size:clamp(26px,5vw,42px);font-weight:950;color:#ffdc8d;margin:3px 0 8px}
 .rs-tutorial-actions{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0 0}
-#rs-flight-tutorial button,#rs-tutorial-settings{min-height:44px;padding:8px 13px;border:1px solid #4584a6;border-radius:8px;background:#113047;color:#e7f8ff;font-weight:800}
+#rs-flight-tutorial button,#rs-tutorial-settings,#graphics-preview-toggle{min-height:44px;padding:8px 13px;border:1px solid #4584a6;border-radius:8px;background:#113047;color:#e7f8ff;font-weight:800}
 #rs-flight-tutorial .rs-tutorial-primary,#rs-flight-tutorial button[aria-pressed=true]{background:#ffcf71;color:#251608;border-color:#ffe2aa}
 #rs-flight-tutorial button:focus-visible{outline:3px solid #88efff;outline-offset:2px}
-.rs-tutorial-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:13px}
-.rs-tutorial-command{background:#0b2032e8;border:1px solid #294e68;border-radius:8px;padding:10px;min-width:0}
-.rs-tutorial-command h3{font-weight:850;color:#9de8ff;margin-bottom:6px}
-.rs-tutorial-command kbd{display:inline-block;background:#1e4059;border:1px solid #527795;border-bottom-width:2px;border-radius:4px;padding:1px 5px;margin:0 4px 5px 0;color:#fff;font:700 11px system-ui}
-.rs-tutorial-command p,.rs-tutorial-note{font-size:12px;color:#c5e0ee}
+.rs-tutorial-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:16px}
+.rs-tutorial-command{background:#0b2032e8;border:1px solid #294e68;border-radius:10px;padding:14px;min-width:0}
+.rs-tutorial-command h3{display:flex;align-items:center;gap:10px;font-size:clamp(19px,2vw,23px);font-weight:850;color:#b7f2ff;margin:0 0 9px}
+.rs-tutorial-command svg{flex:none;width:38px;height:38px;padding:6px;background:#103c52;color:#ffcf71;border:1px solid #357092;border-radius:9px}
+.rs-tutorial-command p{margin-top:6px}
+.rs-tutorial-command kbd{display:inline-block;background:#1e4059;border:1px solid #527795;border-bottom-width:2px;border-radius:4px;padding:1px 5px;margin:0 4px 5px 0;color:#fff;font:750 15px/1.45 system-ui}
+.rs-tutorial-command p,.rs-tutorial-note{font-size:clamp(16px,1.6vw,18px);color:#def1fc}
+.rs-tutorial-footer{position:sticky;bottom:0;background:#081624;padding:7px 0}
 .rs-tutorial-note{margin-top:12px;padding:10px;border-left:3px solid #d5a251;background:#132331}
-@media(max-width:480px){.rs-tutorial-grid{grid-template-columns:1fr}}
+@media(max-width:640px){.rs-tutorial-grid{grid-template-columns:1fr}}
+</style>
+<style id="rs-mobile-fit">
+@media (pointer:coarse), (max-width:700px){
+ #compact-hud{font-size:clamp(11px,2.2vw,14px)!important;max-height:34dvh;overflow-y:auto!important}
+ #compact-hud .rs-hud-footer{flex-wrap:wrap;gap:4px 8px;font-size:inherit!important}
+ #rs-bottom-actions button{min-height:26px;font-size:11px!important}
+ #compact-hud .rs-hud-footer span{max-width:100%}
+ #rs-hud-action-bar #parry-btn,#rs-hud-action-bar #boss-skill-use{height:auto!important;min-height:40px!important;font-size:clamp(11px,2.5vw,13px)!important;line-height:1.15;white-space:normal;overflow-wrap:anywhere}
+ #touch-controls .action-cluster{grid-template-columns:repeat(3,minmax(0,1fr))!important;max-width:none}
+ #virtual-joystick{width:clamp(62px,24vw,96px)!important;min-width:0!important}
+ .joystick-base{width:min(100%,88px)!important}
+ #touch-controls button{letter-spacing:0;font-size:clamp(10px,2.7vw,13px)!important}
+ #boss-special-hud>div:first-child{flex-wrap:wrap;overflow-wrap:anywhere}
+}
+@media (pointer:coarse) and (orientation:landscape) and (max-height:560px){
+ body:has(#game-container[data-game-active=true]){
+  display:grid!important;grid-template-columns:minmax(0,1fr) minmax(235px,38vw);
+  grid-template-rows:auto auto minmax(0,1fr) auto auto;align-items:stretch!important;gap:3px!important
+ }
+ #game-container[data-game-active=true]{grid-area:1/1/6/2;min-height:0!important;height:100%;max-width:none!important;margin:0!important}
+ #boss-special-hud{grid-area:1/2}
+ #boss-dialogue-strip{grid-area:2/2}
+ #compact-hud{grid-area:3/2;min-height:0;max-height:none;align-self:stretch}
+ #rs-bottom-actions{grid-area:4/2}
+ #touch-controls{grid-area:5/2;height:96px!important;min-height:96px!important}
+ #virtual-joystick{width:clamp(64px,11vw,88px)!important}
+ #boss-dialogue-strip:not(.hidden){max-height:48px;overflow:auto}
+}
 </style>
 </head>
 <body class="h-screen w-screen flex flex-col items-center justify-center p-2 sm:p-4">
@@ -454,6 +483,7 @@ body:has(#rs-premium-pilots:not(.hidden),#boss-skill-picker:not(.hidden)) #graph
 
         <div id="controller-settings" class="hidden absolute inset-0 bg-slate-950/95 z-50 p-4 overflow-auto text-sm" role="dialog" aria-modal="true" aria-label="Configuração do controle">
             <h2 class="text-xl font-bold text-cyan-300 mb-2">CONFIGURAR CONTROLE</h2>
+            <button id="graphics-preview-toggle" type="button" hidden>GRÁFICOS</button>
             <button id="rs-tutorial-settings" type="button">TUTORIAL DE VOO</button>
             <button id="rs-update-open" type="button">ATUALIZAÇÕES DO JOGO</button>
             <button id="rs-trophy-room-open" type="button">SALA DE TROFÉUS</button>
@@ -657,6 +687,8 @@ body:has(#rs-premium-pilots:not(.hidden),#boss-skill-picker:not(.hidden)) #graph
         <div class="rs-hud-cell"><span class="rs-label">⛽ GAS <b id="hud-fuel">100%</b></span><div class="rs-meter"><span id="hud-fuel-fill" style="background:#22c55e;width:100%"></span></div></div>
         <div class="rs-hud-cell" id="hud-shield-cell"><span class="rs-label">🛡 ESCUDO <b id="hud-shield">150</b></span><div class="rs-meter"><span id="hud-shield-fill" style="background:#38bdf8;width:100%"></span></div></div>
         <div class="rs-hud-cell"><span class="rs-label">♟ RESGATES <b id="hud-rescues">0</b></span><span class="rs-label">✈ <b id="hud-plane">FALCÃO</b></span></div>
+        <div class="rs-hud-cell" id="hud-fusion-cell"><span id="hud-fusion-status"></span><progress id="rs-fusion-meter" max="360" aria-label="Recarga da fusão"></progress></div>
+        <div class="rs-hud-cell"><span id="hud-mission-damage"></span></div>
       </div>
       <div id="pilot-progress" style="padding:4px 10px;background:#07172b;display:flex;align-items:center;gap:8px;flex-wrap:wrap;color:#e2e8f0;font:900 11px monospace"><span>⭐ NÍVEL <b id="hud-pilot-level" style="color:#facc15">0 / 100</b></span><span id="hud-pilot-xp">0 XP</span><span id="hud-next-xp" style="color:#67e8f9">100 p/ próximo</span><div style="flex:1;min-width:65px;height:7px;background:#1e293b;border-radius:6px;overflow:hidden"><div id="hud-xp-fill" style="height:100%;width:0%;background:linear-gradient(90deg,#0891b2,#facc15)"></div></div></div>
       <div class="rs-hud-footer"><span id="hud-version" style="color:#38bdf8;font-size:8px">HUD 0.7.6</span><span id="mission-hud">SELVA DA AURORA</span><b id="sector-hud">SETOR 1</b><span id="hud-environment" title="Período do dia e clima">☀ DIA · CÉU LIMPO</span><span id="hud-pilot-name" title="Piloto">PILOTO</span><span id="hud-rank">J1 SOLDADO</span></div>
@@ -675,7 +707,7 @@ body:has(#rs-premium-pilots:not(.hidden),#boss-skill-picker:not(.hidden)) #graph
       #boss-special-hud:not(.hidden){display:block!important;position:relative!important;inset:auto!important;transform:none!important;margin:0 auto 4px!important;max-width:920px!important;box-sizing:border-box;flex:none!important}
       #mission-banner{display:none!important}
       #compact-hud{box-sizing:border-box;width:100%;max-width:920px;flex:0 0 auto;background:linear-gradient(#0b2842,#071326);border:2px solid #3d8faf;border-radius:7px;padding:4px 6px;color:#e4f7ff;box-shadow:inset 0 0 0 1px #163a5c;font:700 clamp(9px,1.15vw,12px) monospace}
-      .rs-hud-grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:3px}
+      .rs-hud-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:3px}
       .rs-hud-cell{min-width:0;display:flex;flex-direction:column;justify-content:space-evenly;padding:3px 5px;background:#09192e;border:1px solid #28567e;border-radius:4px;min-height:38px}
       .rs-label{display:flex;justify-content:space-between;gap:4px;white-space:nowrap;overflow:hidden;font-size:inherit}
       .rs-label b{color:#7dd3fc;text-overflow:ellipsis;overflow:hidden}
@@ -761,7 +793,7 @@ body>div:first-of-type button{min-height:32px;font-size:11px;white-space:nowrap}
 
 /* Menu compacto e rolável: botão Iniciar sempre alcançável em telas pequenas. */
 #start-screen { padding:8px 12px 14px!important;row-gap:4px!important;overflow-y:auto!important;overflow-x:hidden!important;scrollbar-width:thin;align-items:center;justify-content:flex-start!important;min-height:0; }
-#start-screen>h1 { font-size:clamp(21px,5vw,34px)!important;margin:2px 0!important;line-height:1.1!important; }
+#start-screen>h1 { font-size:clamp(26px,5vw,42px)!important;margin:2px 0!important;line-height:1.1!important; }
 #start-screen>p { margin:1px 0!important;line-height:1.2!important; }
 #start-screen>details { padding:5px 9px!important;margin:2px 0!important; }
 #start-screen select,#start-screen input { min-height:32px!important; }
@@ -891,9 +923,9 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
       </div>
       <div id="rs-tutorial-commands" class="rs-tutorial-grid" aria-live="polite"></div>
       <p id="rs-tutorial-platform-note" class="rs-tutorial-note"></p>
-      <p class="rs-tutorial-note"><strong>Durante a missão.</strong> Sobrevoe postos de combustível e botes SOS para abastecer ou resgatar. Observe o escudo e as recargas no painel. Antes de enfrentar um chefe, o Arsenal permite equipar um poder disponível ou lutar sem poder.</p>
+      <p class="rs-tutorial-note"><strong>Durante a missão.</strong> Sobrevoe postos de combustível e botes SOS para abastecer ou resgatar. Observe o escudo e as recargas no painel. Antes de enfrentar um chefe, escolha um poder na tela do Arsenal ou siga sem poder.</p>
     </section>
-    <div class="rs-tutorial-actions">
+    <div class="rs-tutorial-actions rs-tutorial-footer">
       <button id="rs-tutorial-back" type="button">VOLTAR</button>
       <button id="rs-tutorial-start" class="rs-tutorial-primary" type="button" hidden>INICIAR MISSÃO 1</button>
     </div>
@@ -4121,12 +4153,6 @@ function updateTerrainEvent(){
               const hud=document.getElementById('compact-hud');
               if(!hud)return null;
               bar=document.createElement('div');bar.id='rs-hud-action-bar';
-              bar.style.cssText='display:grid;grid-template-columns:minmax(130px,1.5fr) 90px minmax(105px,1fr) minmax(130px,1.1fr);align-items:center;gap:8px;background:#051627;color:#b9f5ff;font:700 10px system-ui;padding:5px 8px;border:1px solid #177cac;border-radius:6px;width:100%;box-sizing:border-box';
-              const status=document.createElement('div');status.id='rs-hud-action-status';
-              const fusion=document.createElement('span');fusion.id='hud-fusion-status';
-              const damage=document.createElement('span');damage.id='hud-mission-damage';
-              status.append(fusion,damage);bar.append(status);
-              const meter=document.createElement('progress');meter.id='rs-fusion-meter';meter.max=360;meter.setAttribute('aria-label','Recarga da fusão');meter.style.cssText='width:70px;height:8px;accent-color:#42e8b4';bar.append(meter);
               // Mover os botões reais preserva os handlers de toque e teclado.
               // A mesma faixa funciona no desktop e no painel inferior mobile.
               for(const id of ['parry-btn','boss-skill-use']){
@@ -4134,7 +4160,7 @@ function updateTerrainEvent(){
                 for(const [key,value] of Object.entries({position:'static',inset:'auto',transform:'none','font-size':'10px',padding:'4px 7px','min-height':'30px',opacity:'1'}))button.style.setProperty(key,value,'important');
                 bar.append(button);
               }
-              hud.appendChild(bar);bar.dataset.rsMounted='true';return bar;
+              hud.insertBefore(bar,hud.querySelector('.rs-hud-grid'));bar.dataset.rsMounted='true';return bar;
             };
             const actionBar=ensureActionBar();
             if(actionBar){
@@ -5780,14 +5806,14 @@ function updateTerrainEvent(){
         let tutorialSeen=false,pendingSoloFlight=null;
         try{tutorialSeen=localStorage.getItem(tutorialKey)==='1';}catch(error){}
         const flightCommands=[
-          ['Pilotar',['WASD','Setas','Mover mouse'],['Joystick virtual'],'Mova a nave em quatro direções. Com teclado ou joystick, subir acelera a rolagem e descer reduz o avanço.'],
-          ['Disparar',['Espaço','Z','Mouse esquerdo'],['TIRO'],'Mantenha pressionado para disparar continuamente. Armas coletadas têm munição própria. Quando ela acaba, a nave volta ao tiro padrão.'],
-          ['Lançar bomba',['X','F','Shift esquerdo','Mouse direito'],['BOMBA'],'A bomba avança e explode em área. Cada lançamento consome uma unidade do estoque mostrado no botão.'],
-          ['Esquivar',['Q ←','E →'],['↶ ESQUIVA','ESQUIVA ↷'],'Role para o lado escolhido para escapar de colisões e rebater projéteis. Aguarde a breve recarga antes de rolar de novo.'],
-          ['Defender e refletir',['V'],['PARRY','ESCUDO'],'Ative o escudo refletor. Com o escudo ativo, aperte novamente perto do impacto para tentar uma defesa precisa. O botão mostra quando a defesa recarregou.'],
-          ['Investida e poder',['C'],['INVESTIDA','PODER'],'Fora da luta contra chefes, investe contra o inimigo mais próximo. Na luta, usa o poder equipado no Arsenal se houver cargas e a recarga tiver terminado.'],
-          ['Fundir com as auxiliares',['Segure tiro + bomba'],['Segure TIRO + toque BOMBA'],'Com uma nave auxiliar ativa e a fusão pronta, mantenha o tiro pressionado e acione a bomba para ativar a fusão. O painel indica quando ela está disponível.'],
-          ['Pausar e continuar',['P','Esc'],['PAUSA'],'Abra o menu para continuar a missão, ajustar controles ou salvar e sair na campanha solo.']
+          ['Mover a nave','M12 2v20M2 12h20M9 5l3-3 3 3M9 19l3 3 3-3M5 9l-3 3 3 3M19 9l3 3-3 3',['W A S D','Setas','Mover o mouse'],['Alavanca na tela'],'Mova a nave para cima, para baixo ou para os lados. Com as teclas ou a alavanca, subir faz o cenário passar mais rápido. Descer diminui o ritmo.'],
+          ['Atirar','M12 2v4m0 12v4M2 12h4m12 0h4M12 7a5 5 0 1 0 0 10a5 5 0 1 0 0-10',['Espaço','Z','Botão esquerdo do mouse'],['TIRO'],'Segure para continuar atirando. Quando os tiros da arma coletada acabam, a nave volta a usar sua arma inicial.'],
+          ['Lançar bomba','M14 8l3-4 3 1m-5 4a7 7 0 1 1-5-2m9-4 1-2m1 4 2-1',['X','F','Shift esquerdo','Botão direito do mouse'],['BOMBA'],'A bomba explode e atinge vários inimigos próximos. O número no botão mostra quantas bombas ainda restam.'],
+          ['Desviar rápido','M3 16c2-7 6-11 15-11m-4-3 4 3-3 4M21 8c-2 7-6 11-15 11m4 3-4-3 3-4',['Q para a esquerda','E para a direita'],['↶ ESQUIVA','ESQUIVA ↷'],'A nave rola para o lado escolhido e se protege por um instante. Use quando um tiro ou inimigo estiver perto. Espere um pouco antes de usar novamente.'],
+          ['Ligar o escudo','M12 2l8 4v5c0 5-4 9-8 11-4-2-8-6-8-11V6zM8 12l3 3 5-6',['V'],['PARRY / ESCUDO'],'O escudo protege e devolve tiros. Com ele ligado, aperte de novo bem na hora do impacto para tentar uma defesa precisa.'],
+          ['Avançar ou usar poder','M13 2 4 14h7l-1 8 10-13h-8z',['C'],['INVESTIDA / PODER'],'Em voo normal, a nave avança contra o inimigo mais próximo. Contra um chefe, o mesmo comando usa o poder que você escolheu antes da luta. Veja no painel se ainda tem usos e se o poder está pronto.'],
+          ['Juntar forças','M4 6l4 4m8 0 4-4M6 5H3v3m15-3h3v3M12 9l4 8-4-2-4 2zm0 9v3',['Segure tiro e aperte bomba'],['Segure TIRO e toque BOMBA'],'Se você tiver uma nave de apoio e o painel mostrar FUSÃO PRONTA, segure o tiro e acione a bomba para juntar as naves por alguns segundos.'],
+          ['Pausar o jogo','M8 5h3v14H8zm5 0h3v14h-3z',['P','Esc'],['PAUSA'],'Pare a partida para respirar ou ajustar os controles. Na campanha solo, você também pode salvar e voltar ao menu.']
         ];
         function showFlightGuide(platform){
           document.getElementById('rs-tutorial-heading').textContent='Manual de voo';
@@ -5798,9 +5824,15 @@ function updateTerrainEvent(){
           for(const name of ['windows','mobile']){
             document.getElementById('rs-tutorial-'+name).setAttribute('aria-pressed',String(name===platform));
           }
-          const cards=flightCommands.map(([title,windows,touch,description])=>{
+          const cards=flightCommands.map(([title,icon,windows,touch,description])=>{
             const card=document.createElement('article');card.className='rs-tutorial-command';
-            const heading=document.createElement('h3');heading.textContent=title;card.append(heading);
+            const heading=document.createElement('h3');
+            const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');
+            svg.setAttribute('viewBox','0 0 24 24');svg.setAttribute('aria-hidden','true');
+            const shape=document.createElementNS(svg.namespaceURI,'path');
+            shape.setAttribute('d',icon);shape.setAttribute('fill','none');shape.setAttribute('stroke','currentColor');
+            shape.setAttribute('stroke-width','1.7');shape.setAttribute('stroke-linejoin','round');shape.setAttribute('stroke-linecap','round');
+            svg.append(shape);heading.append(svg,title);card.append(heading);
             for(const command of mobile?touch:windows){
               const key=document.createElement('kbd');key.textContent=command;card.append(key);
             }
@@ -5809,7 +5841,7 @@ function updateTerrainEvent(){
           });
           document.getElementById('rs-tutorial-commands').replaceChildren(...cards);
           document.getElementById('rs-tutorial-platform-note').textContent=mobile
-            ?'Use o polegar esquerdo no joystick e o direito nos botões. Parry e Poder ficam no painel acima dos botões de toque.'
+            ?'Use o polegar esquerdo na alavanca e o direito nos botões. Escudo e Poder ficam no painel do jogo, acima dos botões de toque.'
             :'Controle USB ou Bluetooth, no padrão Xbox: analógico esquerdo ou direcional para pilotar, A para tiro, B para bomba, Menu para pausa, LB para Parry, LT e RT para esquiva, e X para investida ou poder. Tiro, bomba e pausa podem ser remapeados nas Configurações.';
         }
         const defaultTutorialPlatform=()=>matchMedia('(pointer:coarse)').matches?'mobile':'windows';
@@ -5873,14 +5905,12 @@ function updateTerrainEvent(){
 
     (function(){
       function installPreviewControl(){
-        if(!window.RiverGraphicsPreview||document.getElementById('graphics-preview-toggle'))return;
-        const button=document.createElement('button');
-        button.id='graphics-preview-toggle';
-        button.type='button';
-        button.style.cssText='position:fixed;top:12px;right:12px;z-index:9999;background:#0b2638;color:#d6f7ff;border:1px solid #55cde5;border-radius:10px;padding:9px 12px;font:600 12px system-ui;box-shadow:0 2px 12px #0008;cursor:pointer';
+        if(!window.RiverGraphicsPreview)return;
+        const button=document.getElementById('graphics-preview-toggle');
+        button.hidden=false;
         const update=()=>button.textContent='GRÁFICOS: '+(window.RiverGraphicsPreview.mode()==='enhanced'?'NOVOS':'ORIGINAIS')+' · alternar';
         button.addEventListener('click',()=>{const next=window.RiverGraphicsPreview.mode()==='enhanced'?'classic':'enhanced';window.RiverGraphicsPreview.setMode(next);update()});
-        update();document.body.appendChild(button);
+        update();
       }
       if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',installPreviewControl);
       else installPreviewControl();
