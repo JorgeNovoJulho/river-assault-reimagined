@@ -174,7 +174,10 @@ body{padding:0!important;min-height:100dvh!important;display:flex!important;flex
 background:url('./assets/ui/premium/menu/2b81e191-9306-4a6e-aabf-049f60939aa0.png') center/contain no-repeat!important}
 #mode-selection>h2,#mode-selection>p{display:none!important}
 #riverstorm-update-notice{position:absolute;bottom:8px;right:10px;padding:3px 7px;background:#061524e8;border-radius:4px;pointer-events:none}
-#rs-update-dialog{position:fixed;inset:0;box-sizing:border-box;width:min(calc(100% - 28px),470px);padding:18px;margin:auto;border:1px solid #49d7ed;border-radius:12px}
+#rs-update-dialog{position:fixed;inset:0;box-sizing:border-box;width:min(calc(100% - 28px),470px);padding:18px;margin:auto;
+ border:1px solid #e29287;border-radius:12px;
+ background:radial-gradient(ellipse at top left,#8b302de0,transparent 68%),linear-gradient(145deg,#512026f5,#220e17fc)!important;
+ box-shadow:0 18px 48px #000b,0 0 24px #b83f393b}
 #rs-update-dialog[open]{z-index:120000;max-height:calc(100vh - 24px);overflow:auto}
 #rs-update-announcement{position:absolute;top:8px;right:10px;z-index:4;min-height:44px;padding:6px 12px;border:1px solid #ffdc87;border-radius:8px;background:#102c47;color:#ffdc87;font:750 14px system-ui}
 #rs-update-android-download:not([hidden]){display:block;margin:8px 4px;color:#a9edff;text-decoration:underline}
