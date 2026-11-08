@@ -460,6 +460,12 @@ display:flex!important;flex-direction:column!important;align-items:center!import
  #boss-dialogue-strip:not(.hidden){max-height:48px;overflow:auto}
 }
 </style>
+<style>
+ #rs-close-window{position:fixed;top:10px;right:10px;z-index:11000;min-height:44px;padding:0 14px;
+  border:1px solid #ff9d9d;border-radius:8px;background:#401a25;color:#fff;font:700 14px system-ui;cursor:pointer}
+ #rs-close-window:hover{background:#692535}
+ #rs-close-window:focus-visible{outline:2px solid #fff;outline-offset:3px}
+</style>
 <style id="rs-mobile-opening">
 @media (pointer:coarse){
  html:not(.rs-native-windows) #start-screen:not(.hidden)>#mode-selection:not(.hidden){
@@ -1006,6 +1012,7 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
     <script src="./src/render/scene2d5.js"></script>
     <script src="./src/render/premium-registry.js"></script>
     <script src="./src/render/premium-environment.js"></script>
+    <button id="rs-close-window" type="button" hidden>× Fechar jogo</button>
     <button id="menu-theme-play" type="button" hidden style="position:fixed;bottom:8px;left:8px;z-index:10000">♫ OUVIR LUCIDEZ</button>
     <audio id="menu-theme-audio" src="./music/menu-lucidez.opus" preload="auto" autoplay loop hidden aria-label="Lucidez — música da abertura"></audio>
     <script src="./src/audio/music.js"></script>
@@ -1015,6 +1022,52 @@ body:has(#start-screen:not(.hidden)) #rs-bottom-actions{visibility:hidden!import
     <script src="./src/net/room-lobby.js"></script>
     <script>
         if(window.__TAURI__)document.documentElement.classList.add("rs-native-windows");
+        {
+            const nativeWindow=window.__TAURI__?.window?.getCurrentWindow();
+            if(nativeWindow){
+                const closeWindow=document.getElementById('rs-close-window');
+                let fullscreen=true;
+                let leavingFullscreen=false;
+                let handledEscape=false;
+                let fullscreenRequest=0;
+                closeWindow.hidden=false;
+
+                async function syncFullscreen(){
+                    if(leavingFullscreen)return;
+                    const request=++fullscreenRequest;
+                    try{
+                        const active=await nativeWindow.isFullscreen();
+                        if(request!==fullscreenRequest)return;
+                        fullscreen=active;
+                        closeWindow.hidden=!active;
+                    }catch(error){console.warn('Não foi possível verificar a tela cheia.',error)}
+                }
+
+                closeWindow.addEventListener('click',async ()=>{
+                    try{await nativeWindow.close()}
+                    catch(error){console.warn('Não foi possível fechar o jogo.',error)}
+                });
+                window.addEventListener('resize',syncFullscreen);
+                window.addEventListener('keydown',async event=>{
+                    if(event.code!=='Escape')return;
+                    if(!event.repeat)handledEscape=fullscreen||leavingFullscreen;
+                    if(!handledEscape)return;
+                    event.preventDefault();
+                    event.stopImmediatePropagation();
+                    if(event.repeat||leavingFullscreen)return;
+
+                    leavingFullscreen=true;
+                    fullscreenRequest++;
+                    try{
+                        await nativeWindow.setFullscreen(false);
+                        fullscreen=false;
+                        closeWindow.hidden=true;
+                    }catch(error){console.warn('Não foi possível sair da tela cheia.',error)}
+                    finally{leavingFullscreen=false}
+                },true);
+                syncFullscreen();
+            }
+        }
         // --- SINTETIZADOR DE ÁUDIO CHIPTUNE RETRO (Web Audio API) ---
         class SoundEngine {
             constructor() {

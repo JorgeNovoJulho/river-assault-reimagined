@@ -5,6 +5,8 @@
     "main"
   ],
   "permissions": [
-    "core:default"
+    "core:default",
+    "core:window:allow-close",
+    "core:window:allow-set-fullscreen"
   ]
 }
