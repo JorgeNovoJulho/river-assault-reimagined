@@ -90,9 +90,14 @@ async function assertMobileOpening(page,viewport){
         assert.match(await shop.locator('option:checked').textContent(),/10000 pontos/);
         assert.match(await page.locator('#settings-plane-specs').textContent(),/Blindagem.*Dano.*Bônus/);
       }
+      assert.equal(await page.evaluate(()=>journey),1);
+      await shop.selectOption('disco');
+      await page.locator('#settings-buy-plane').click();
+      assert.match(await page.locator('#settings-wallet').textContent(),/37000 pontos/);
+      assert.ok(await page.evaluate(()=>JSON.parse(localStorage.getItem('river_aircraft_unlocked_v1')).includes('disco')));
       await shop.selectOption('pioneira');
       await page.locator('#settings-buy-plane').click();
-      assert.match(await page.locator('#settings-wallet').textContent(),/30000 pontos/);
+      assert.match(await page.locator('#settings-wallet').textContent(),/27000 pontos/);
       await page.locator('#pad-close').click();
       await page.locator('#mode-single').click({timeout:12000});
       const selection=page.locator('#rs-premium-pilots');

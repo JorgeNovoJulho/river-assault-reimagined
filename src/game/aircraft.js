@@ -7,7 +7,7 @@ const PLANES={
  cometa:{name:'COMETA',pilotName:'B. Tata',speed:8.2,scroll:4.6,fuel:0.082,color:'#38bdf8',wing:'#2563eb',weapons:['RAPID','DIAGONAL','TRIDENT','BEAM','PRECISION']},
  fenix:{name:'FÊNIX',pilotName:'S. Napas',speed:7.4,scroll:4.1,fuel:0.065,color:'#f472b6',wing:'#be185d',price:3000,weapons:['HYBRID','CIRCLE','TRACKER','TRIDENT','MISSILE']},
  helicoptero:{name:'ÁGUIA VTOL',pilotName:'G. Casper',speed:6.6,scroll:3.5,fuel:0.052,color:'#60a5fa',wing:'#1e40af',price:3000,weapons:['HYBRID','SPREAD','TRACKER','MULTI','LASER']},
- disco:{name:'UFO AURORA',pilotName:'R. Roger',speed:7.2,scroll:3.8,fuel:0.048,color:'#c4b5fd',wing:'#7c3aed',price:3000,requiredJourney:6,shieldMultiplier:1.5,weapons:['PULSE','CIRCLE','BEAM','TRACKER','MULTI']},
+ disco:{name:'UFO AURORA',pilotName:'R. Roger',speed:7.2,scroll:3.8,fuel:0.048,color:'#c4b5fd',wing:'#7c3aed',price:3000,shieldMultiplier:1.5,weapons:['PULSE','CIRCLE','BEAM','TRACKER','MULTI']},
  titan:{name:'TITAN',pilotName:'L. Dudu',speed:5.8,scroll:3.1,fuel:0.043,color:'#a3e635',wing:'#4d7c0f',price:3000,weapons:['MULTI','TRACKER','BEAM','CIRCLE','ROCKET']},
  pioneira:{name:'PIONEIRA NX',pilotName:'CAP. JON ARDENT',speed:6.8,scroll:3.6,fuel:.038,color:'#7dd3fc',wing:'#94a3b8',price:10000,premiumExtra:true,shieldMultiplier:1.85,damageMultiplier:1.38,powerMultiplier:1.2,weapons:['NX_PHASE','LASER','TRACKER','BEAM','MULTI']},
  cruzada:{name:'CRUZADA X',pilotName:'LUC SKYWARD',speed:8.5,scroll:4.4,fuel:.041,color:'#f87171',wing:'#e2e8f0',price:10000,premiumExtra:true,shieldMultiplier:1.62,damageMultiplier:1.55,powerMultiplier:1.15,weapons:['X_FALCON','PRECISION','MISSILE','BEAM','ROCKET']},
